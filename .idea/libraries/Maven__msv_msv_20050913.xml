@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: msv:msv:20050913">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/msv/msv/20050913/msv-20050913.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/msv/msv/20050913/msv-20050913-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/msv/msv/20050913/msv-20050913-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
