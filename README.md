@@ -1,5 +1,7 @@
-# `PDV`: an integrative proteomics data viewer
+# PDV: an integrative proteomics data viewer
 PDV is a JAVA tool for proteomics data visualization.
+
+![alt text](https://github.com/wenbostar/PDV/blob/master/resources/PDV_main_panel.png)
 
 ## Usage
 
