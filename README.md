@@ -1,4 +1,6 @@
 # PDV: an integrative proteomics data viewer
+
+[![Join the chat at https://gitter.im/PDV-public/Lobby](https://badges.gitter.im/PDV-public/Lobby.svg)](https://gitter.im/PDV-public/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 PDV is a JAVA tool for proteomics data visualization.
 
 ![alt text](https://github.com/wenbostar/PDV/blob/master/resources/PDV_main_panel.png)
