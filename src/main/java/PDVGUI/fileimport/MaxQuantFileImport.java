@@ -968,6 +968,9 @@ public class MaxQuantFileImport {
                                         }
                                         utilitiesModificationName = fileName.split(" \\(")[0].replace(">","&gt;") + " of " + sequence.charAt(site - 1);
                                         utilitiesModifications.add(new ModificationMatch(utilitiesModificationName, true, site));
+                                        if (!allModifications.contains(utilitiesModificationName)) {
+                                            allModifications.add(utilitiesModificationName);
+                                        }
                                     }
                                 }
                             }
@@ -1003,12 +1006,18 @@ public class MaxQuantFileImport {
                                 } else {
                                     utilitiesModificationName = aAToModification.get("N-term") + " of " + "N-term";
                                 }
+                                if (!allModifications.contains(utilitiesModificationName)) {
+                                    allModifications.add(utilitiesModificationName);
+                                }
                                 utilitiesModifications.add(new ModificationMatch(utilitiesModificationName, true, 1));
                             } else if (eachModificationPart == splitAABy[splitAABy.length - 1] && !eachModificationPart.contains("_")) {
                                 if (aAToModification.get("C-term") == null){
                                     utilitiesModificationName = aAToModification.get("Protein C-term") + " of " + "protein C-term";
                                 } else {
                                     utilitiesModificationName = aAToModification.get("C-term") + " of " + "C-term";
+                                }
+                                if (!allModifications.contains(utilitiesModificationName)) {
+                                    allModifications.add(utilitiesModificationName);
                                 }
                                 utilitiesModifications.add(new ModificationMatch(utilitiesModificationName, true, sequence.length()));
                             }
@@ -1114,6 +1123,8 @@ public class MaxQuantFileImport {
 
         pdvMainClass.loadingJButton.setIcon(new ImageIcon(getClass().getResource("/icons/done.png")));
         pdvMainClass.loadingJButton.setText("Import done");
+        pdvMainClass.searchButton.setToolTipText("Find items");
+        pdvMainClass.searchItemTextField.setToolTipText("Find items");
     }
 
     /**

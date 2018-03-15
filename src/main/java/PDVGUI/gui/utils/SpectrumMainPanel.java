@@ -151,7 +151,7 @@ public class SpectrumMainPanel extends JPanel {
      */
     private String selectedPsmKey = "";
     /**
-     * Synthetic peptide spectral file map
+     * Synthetic peptide spectra file map
      */
     private HashMap<String, File> checkSpectrumFileMaps = new HashMap<>();
     /**
@@ -568,7 +568,7 @@ public class SpectrumMainPanel extends JPanel {
 
         exportSpectrumMenu.setText("Figure");
 
-        exportSpectrumGraphicsJMenuItem.setText("Spectral");
+        exportSpectrumGraphicsJMenuItem.setText("Spectra");
         exportSpectrumGraphicsJMenuItem.addActionListener(this::exportSpectrumGraphicsJMenuItemActionPerformed);
         exportSpectrumMenu.add(exportSpectrumGraphicsJMenuItem);
 
@@ -919,6 +919,11 @@ public class SpectrumMainPanel extends JPanel {
      * @param evt Mouse click event
      */
     private void exportSpectrumGraphicsJMenuItemActionPerformed(ActionEvent evt) {
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         if(mirrorSelected){
             exportMirrorSpectrumAsFigure();
         } else if(peptideCheckSelected){

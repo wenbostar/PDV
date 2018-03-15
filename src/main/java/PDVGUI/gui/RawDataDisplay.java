@@ -444,7 +444,7 @@ public class RawDataDisplay extends JFrame {
             tree.setOpaque(true);
             tree.setBackground(Color.white);
             tree.getSelectionModel().setSelectionMode(
-                    TreeSelectionModel.CONTIGUOUS_TREE_SELECTION);
+                    TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
 
             tree.addTreeSelectionListener(this::valueChanged);
 
@@ -484,9 +484,14 @@ public class RawDataDisplay extends JFrame {
 
         nameToKeyToRtAndInt = new HashMap<>();
 
-        for (TreePath treePath : tree.getSelectionPaths()){
+        if (tree.getSelectionPaths() != null){
+            for (TreePath treePath : tree.getSelectionPaths()){
 
-            selectedNodeList.add(treePath.getLastPathComponent().toString().split("\\(")[0]);
+                selectedNodeList.add(treePath.getLastPathComponent().toString().split("\\(")[0]);
+            }
+        } else {
+            tree.removeSelectionInterval(tree.getLeadSelectionRow(), tree.getLeadSelectionRow());
+            valueChanged(event);
         }
 
         if (selectedNodeList.size() == 1){

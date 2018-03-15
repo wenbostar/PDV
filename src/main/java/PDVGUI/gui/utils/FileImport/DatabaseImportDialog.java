@@ -705,25 +705,21 @@ public class DatabaseImportDialog extends JDialog {
      */
     private void importIdentificationFiles() {
 
-        try {
-            if(idFile.getName().toLowerCase().endsWith(".mzid")) {
+        if(idFile.getName().toLowerCase().endsWith(".mzid")) {
 
-                pdvMainClass.importMzID(spectrumsFileFactory, idFile, mzIdentMLType, spectrumFileType);
-                idFile = null;
+            pdvMainClass.importMzID(spectrumsFileFactory, idFile, mzIdentMLType, spectrumFileType);
+            idFile = null;
 
-            }else if(idFile.getName().toLowerCase().endsWith("xml")){
-                pdvMainClass.importFilePep(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType);
-                idFile = null;
-            } else if(idFile.getName().toLowerCase().endsWith(".txt")){
-                pdvMainClass.importTextResults(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType);
-                idFile = null;
-            } else {
-                JOptionPane.showMessageDialog(pdvMainClass, JOptionEditorPane.getJOptionEditorPane(
-                        "No support ID file format, please check your file."),
-                        "File Error", JOptionPane.ERROR_MESSAGE);
-            }
-        } catch (IOException | ClassNotFoundException | SQLException e) {
-            e.printStackTrace();
+        }else if(idFile.getName().toLowerCase().endsWith("xml")){
+            pdvMainClass.importFilePep(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType);
+            idFile = null;
+        } else if(idFile.getName().toLowerCase().endsWith(".txt")){
+            pdvMainClass.importTextResults(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType);
+            idFile = null;
+        } else {
+            JOptionPane.showMessageDialog(pdvMainClass, JOptionEditorPane.getJOptionEditorPane(
+                    "No support ID file format, please check your file."),
+                    "File Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 

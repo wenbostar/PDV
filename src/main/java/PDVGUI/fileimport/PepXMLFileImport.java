@@ -243,6 +243,7 @@ public class PepXMLFileImport {
             Double rt = 0.0;
             String scanNum = null;
             String spectrumTitle = "";
+            Integer index = null;
 
             modMassToMassDif = new HashMap<>();
             termModMassToTerm = new HashMap<>();
@@ -503,7 +504,7 @@ public class PepXMLFileImport {
 
                 if (tagNum == XmlPullParser.START_TAG && tagName.equals("spectrum_query")) {
 
-                    Integer index = null;
+                    index = null;
                     String spectrumId = null;
                     String spectrumNativeID = null;
 
@@ -534,7 +535,7 @@ public class PepXMLFileImport {
                     if (spectrumNativeID != null) {
                         spectrumTitle = spectrumNativeID;
                     } else {
-                        spectrumTitle = index + "";
+                        spectrumTitle = scanNum + "";
                     }
 
                     Integer spectrumIndex = Integer.valueOf(scanNum);
@@ -548,7 +549,7 @@ public class PepXMLFileImport {
                     SpectrumMatch spectrumMatch = new SpectrumMatch(Spectrum.getSpectrumKey(spectrumFileName, spectrumTitle));
                     spectrumMatch.setSpectrumNumber(spectrumIndex);
 
-                    spectrumIndexList.add(String.valueOf(spectrumIndex));
+                    spectrumIndexList.add(String.valueOf(index));
 
                     currentMatch = spectrumMatch;
 
@@ -666,7 +667,7 @@ public class PepXMLFileImport {
 
                         PeptideAssumption peptideAssumption = currentMatch.getBestPeptideAssumption();
 
-                        preparedStatement.setInt(1, currentMatch.getSpectrumNumber());
+                        preparedStatement.setInt(1, index);
                         preparedStatement.setDouble(2, peptideAssumption.getTheoreticMass() / currentCharge);
                         preparedStatement.setString(3, spectrumTitle);
                         preparedStatement.setString(4, peptideAssumption.getPeptide().getSequence());
@@ -675,8 +676,8 @@ public class PepXMLFileImport {
 
                         for (String name : scoreMap.keySet()) {
                             if (scoreName.contains(name)) {
-                                Integer index = scoreName.indexOf(name) + 7;
-                                preparedStatement.setDouble(index, scoreMap.get(name));
+                                Integer indexInScore = scoreName.indexOf(name) + 7;
+                                preparedStatement.setDouble(indexInScore, scoreMap.get(name));
                             }
 
                         }
@@ -738,6 +739,8 @@ public class PepXMLFileImport {
 
             pdvMainClass.loadingJButton.setIcon(new ImageIcon(getClass().getResource("/icons/done.png")));
             pdvMainClass.loadingJButton.setText("Import done");
+            pdvMainClass.searchButton.setToolTipText("Find items");
+            pdvMainClass.searchItemTextField.setToolTipText("Find items");
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(

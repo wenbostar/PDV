@@ -264,7 +264,7 @@ public class TextFileImport {
 
                 peptide = new Peptide(sequence, utilitiesModifications);
 
-                peptideAssumption = new PeptideAssumption(peptide, 1, 0, new Charge(+1, peptideCharge), massError, "maxQuant");
+                peptideAssumption = new PeptideAssumption(peptide, 1, 0, new Charge(+1, peptideCharge), massError, "*");
                 peptideAssumption.setRawScore(score);
 
                 currentMatch.addHit(0, peptideAssumption, false);
@@ -358,6 +358,8 @@ public class TextFileImport {
 
         pdvMainClass.loadingJButton.setIcon(new ImageIcon(getClass().getResource("/icons/done.png")));
         pdvMainClass.loadingJButton.setText("Import done");
+        pdvMainClass.searchButton.setToolTipText("Find items");
+        pdvMainClass.searchItemTextField.setToolTipText("Find items");
     }
 
     /**

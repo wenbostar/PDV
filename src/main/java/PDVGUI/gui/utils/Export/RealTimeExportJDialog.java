@@ -442,6 +442,10 @@ public class RealTimeExportJDialog extends JDialog {
                                     spectrumIdentificationAssumption = spectrumLibDisplay.getSpectrumIdentificationAssumption();
                                 }
                                 updateSpectrum(eachKey, mSnSpectrum, spectrumIdentificationAssumption);
+
+                                if (allSelections.indexOf(eachKey) == 0){
+                                    Thread.sleep(200);
+                                }
                                 Thread.sleep(100);
 
                                 String outputPathName = outputPath + "/" + FilePattern.matcher(mSnSpectrum.getSpectrumTitle()).replaceAll("") + imageType.getExtension();
@@ -496,7 +500,7 @@ public class RealTimeExportJDialog extends JDialog {
 
                     double lowerMzZoomRange = 0;
                     double upperMzZoomRange = lastMzMaximum;
-                    if (spectrumPanel != null && spectrumPanel.getXAxisZoomRangeLowerValue() != 0 && !newMax) { // @TODO: sometimes the range is reset when is should not be...
+                    if (spectrumPanel != null && spectrumPanel.getXAxisZoomRangeLowerValue() != 0 && !newMax) {
                         lowerMzZoomRange = spectrumPanel.getXAxisZoomRangeLowerValue();
                         upperMzZoomRange = spectrumPanel.getXAxisZoomRangeUpperValue();
                     }
@@ -506,6 +510,9 @@ public class RealTimeExportJDialog extends JDialog {
                             mSnSpectrum.getMzValuesAsArray(), mSnSpectrum.getIntensityValuesNormalizedAsArray(),
                             precursor.getMz(), spectrumIdentificationAssumption.getIdentificationCharge().toString(),
                             "", 40, false, false, false, 2, false);
+
+                    spectrumPanel.setFont(new Font("Arial", Font.PLAIN, 13));
+
                     spectrumPanel.setBounds(0, 0, resizeJPanelWidth, resizeJPanelHeight - 90);
                     spectrumPanel.setKnownMassDeltas(deltaMassMap);
                     spectrumPanel.setDeltaMassWindow(annotationSettings.getFragmentIonAccuracy());

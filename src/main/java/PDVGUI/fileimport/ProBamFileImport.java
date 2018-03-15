@@ -69,9 +69,9 @@ public class ProBamFileImport {
      */
     private ArrayList<String> allModifications = new ArrayList<>();
     /**
-     * Tag to show if parsing success or not
+     * Spectrum file type
      */
-    private Boolean parseFaild = false;
+    private String spectrumFileType;
 
     /**
      * Constructor
@@ -83,12 +83,12 @@ public class ProBamFileImport {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public ProBamFileImport(PDVMainClass pdvMainClass, File proBAMFile, String spectrumFileName, SpectrumFactory spectrumFactory, ProgressDialogX progressDialog) throws SQLException, ClassNotFoundException {
+    public ProBamFileImport(PDVMainClass pdvMainClass, File proBAMFile, String spectrumFileName, String spectrumFileType, SpectrumFactory spectrumFactory, ProgressDialogX progressDialog) throws SQLException, ClassNotFoundException {
         this.pdvMainClass = pdvMainClass;
         this.proBAMFile = proBAMFile;
         this.spectrumFactory = spectrumFactory;
         this.progressDialog = progressDialog;
-
+        this.spectrumFileType = spectrumFileType;
         this.spectrumFileName = spectrumFileName;
 
         scoreName.add("Score");
@@ -137,7 +137,7 @@ public class ProBamFileImport {
      * @throws IOException
      * @throws MzMLUnmarshallerException
      */
-    private void parseProBAM() throws SQLException, IOException, MzMLUnmarshallerException {
+    private void parseProBAM() throws SQLException, IOException {
 
         Connection connection = sqLiteConnection.getConnection();
 
@@ -180,11 +180,18 @@ public class ProBamFileImport {
             }
         }
 
+        String fileName = "";
+        int dot = spectrumFileName.lastIndexOf('.');
+        if ((dot >-1) && (dot < (spectrumFileName.length()))) {
+            fileName = spectrumFileName.substring(0, dot);
+        }
+
         SamReader samFileReader;
 
         final SamReaderFactory srf = htsjdk.samtools.SamReaderFactory.makeDefault().validationStringency(htsjdk.samtools.ValidationStringency.LENIENT);
 
         samFileReader = srf.open(SamInputResource.of(proBAMFile));
+        String version = samFileReader.getFileHeader().getVersion();
 
         SAMRecordIterator iter = samFileReader.iterator();
         ArrayList<ModificationMatch> modificationMatches;
@@ -195,257 +202,570 @@ public class ProBamFileImport {
         int countRound = 0;
         int countAll = 0;
 
-        while(iter.hasNext()) {
+        if (version.equals("1.0")) {
 
-            Integer spectrumIndex = null;
-            Peptide peptide = null;
-            Peptide referencePeptide = null;
+            HashMap<String, Double> locationToMass = new HashMap<>();
+            HashMap<String, HashMap<Double, String>> modificationMassMap = getModificationMass();
 
-            String peptideSequence;
-            int peptideCharge = 0;
-            String referenceSequence;
-            double score = 0.0;
-            double fdr = 0.0;
-            double massError = 0.0;
-            Double rt = 0.0;
-            String spectrumTitle;
-            String isAnnotated = "*";
-            String followingAA = "*";
-            String precedingAA = "*";
-            String enzyme = "*";
-            String peptideType = "*";
-            Integer gengMapNum = -1;
-            Double peptideInt = 0.0;
-            Integer peptideMapNum = -1;
-            Integer missedCNum = -1;
-            String uniqueType = "*";
-            String originalSeq = "*";
-            String enzymeInSearch = "*";
-            String URI = "*";
+            while (iter.hasNext()) {
 
-            SAMRecord rec = iter.next();
-            List<SAMRecord.SAMTagAndValue> list = rec.getAttributes();
+                Integer spectrumIndex = null;
+                Peptide peptide = null;
+                Peptide referencePeptide = null;
 
-            String spectrumName = rec.getReadName();
+                String peptideSequence;
+                int peptideCharge = 0;
+                String referenceSequence;
+                double score = 0.0;
+                double fdr = 0.0;
+                double massError = 0.0;
+                String spectrumTitle;
+                String isAnnotated = "*";
+                String followingAA = "*";
+                String precedingAA = "*";
+                String enzyme = "*";
+                String peptideType = "*";
+                Integer gengMapNum = -1;
+                Double peptideInt = 0.0;
+                Integer peptideMapNum = -1;
+                Integer missedCNum = -1;
+                String uniqueType = "*";
+                String originalSeq = "*";
+                String enzymeInSearch = "*";
+                String URI = "*";
 
-            try {
+                SAMRecord rec = iter.next();
+                List<SAMRecord.SAMTagAndValue> list = rec.getAttributes();
 
-                if (spectrumName.contains("index")) {
+                String spectrumName = rec.getReadName();
 
-                    spectrumIndex = Integer.valueOf(spectrumName.split(":")[1].split("=")[1]);
-
-                } else if (spectrumName.contains(spectrumFileName)) {
-
-                    int dot = spectrumName.lastIndexOf('.');
-                    if ((dot > -1) && (dot < (spectrumName.length()))) {
-                        spectrumIndex = Integer.valueOf(spectrumName.substring(dot + 1));
-                    }
-
-                } else {
-                    JOptionPane.showMessageDialog(pdvMainClass, "Failed to pares proBAM file", "File Error", JOptionPane.WARNING_MESSAGE);
-                    progressDialog.setRunFinished();
-                    parseFaild = true;
-                    break;
-                }
-            } catch (Exception e){
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(pdvMainClass, "Failed to pares proBAM file\n" , "File Error", JOptionPane.WARNING_MESSAGE);
-                progressDialog.setRunFinished();
-                parseFaild = true;
-                break;
-            }
-
-            SpectrumMatch currentMatch = new SpectrumMatch(Spectrum.getSpectrumKey(spectrumFileName, String.valueOf(spectrumIndex)));
-
-            try {
-                spectrumTitle = spectrumFactory.getSpectrumTitle(spectrumFileName, spectrumIndex + 1);
-            }catch (Exception e){
-                progressDialog.setRunFinished();
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(
-                        null, "The spectrum title cannot match it in proBAM",
-                        "Error Matching", JOptionPane.ERROR_MESSAGE);
-                break;
-            }
-
-            rt = ((MSnSpectrum)spectrumFactory.getSpectrum(spectrumFileName, spectrumTitle)).getPrecursor().getRtInMinutes();
-
-            currentMatch.setSpectrumNumber(spectrumIndex);
-
-            for (SAMRecord.SAMTagAndValue samTagAndValue: list) {
-
-                if (samTagAndValue.tag.equals("XP") && !samTagAndValue.value.equals("*")) {
-                    modificationMatches = new ArrayList<>();
-                    peptideSequence = (String) samTagAndValue.value;
-                    for(String location: locationToModificationName.keySet()){
-                        if(location.equals("0")){
-                            String modificationName = locationToModificationName.get(location) + " of N-term";
-                            if (!allModifications.contains(modificationName)){
-                                allModifications.add(modificationName);
-                            }
-                            modificationMatches.add(new ModificationMatch(modificationName, true, Integer.parseInt(location)));
-                        } else if(location.equals(String.valueOf(peptideSequence.length()+1))){
-                            String modificationName = locationToModificationName.get(location) + " of C-term";
-                            if (!allModifications.contains(modificationName)){
-                                allModifications.add(modificationName);
-                            }
-                            modificationMatches.add(new ModificationMatch(modificationName, true, Integer.parseInt(location)-1));
-                        } else {
-                            String aA = peptideSequence.split("")[Integer.parseInt(location)-1];
-                            String modificationName = locationToModificationName.get(location) + " of " + aA;
-                            if (!allModifications.contains(modificationName)){
-                                allModifications.add(modificationName);
-                            }
-                            modificationMatches.add(new ModificationMatch(modificationName, true, Integer.parseInt(location)));
-                        }
-                    }
-                    peptide = new Peptide(peptideSequence, modificationMatches);
-                    locationToModificationName = new HashMap<>();
-                } else if (samTagAndValue.tag.equals("XC") && !samTagAndValue.value.equals("*")) {
-                    peptideCharge = (int) samTagAndValue.value;
-                } else if (samTagAndValue.tag.equals("XR") && !samTagAndValue.value.equals("*")){
-                    referenceSequence = (String) samTagAndValue.value;
-                    referencePeptide = new Peptide(referenceSequence, null);
-                } else if (samTagAndValue.tag.equals("XS") && !samTagAndValue.value.equals("*")){
-                    BigDecimal bigDecimal = new BigDecimal(Float.toString((Float) samTagAndValue.value));
-                    score = bigDecimal.doubleValue();
-                } else if (samTagAndValue.tag.equals("XB") && !samTagAndValue.value.equals("*")){
-                    massError = (double) (float) samTagAndValue.value;
-                } else if (samTagAndValue.tag.equals("XQ") && !samTagAndValue.value.equals("*")){
-                    BigDecimal bigDecimal = new BigDecimal(Float.toString((Float) samTagAndValue.value));
-                    fdr = bigDecimal.doubleValue();
-                } else if (samTagAndValue.tag.equals("XM") && !samTagAndValue.value.equals("*")){
-                    locationToModificationName = new HashMap<>();
-                    String modificationAccessionList = (String) samTagAndValue.value;
-                    String[] allModifications = modificationAccessionList.split(";");
-                    for (String eachModification: allModifications){
-                        String[] locationAndName = eachModification.split("-");
-                        String modificationName = accessionToModification.get(locationAndName[1]);
-                        locationToModificationName.put(locationAndName[0], modificationName);
-                    }
-                } else if (samTagAndValue.tag.equals("XA") && !samTagAndValue.value.equals("*")){
-                    if (samTagAndValue.value.equals("0")){
-                        isAnnotated = "yes";
-                    } else if (samTagAndValue.value.equals("1")){
-                        isAnnotated = "partially unknown";
-                    } else if (samTagAndValue.value.equals("2")){
-                        isAnnotated = "totally unknown";
-                    }
-                } else if (samTagAndValue.tag.equals("YA") && !samTagAndValue.value.equals("*")){
-                    followingAA = "" + samTagAndValue.value;
-                } else if (samTagAndValue.tag.equals("YB") && !samTagAndValue.value.equals("*")){
-                    precedingAA = "" + samTagAndValue.value;
-                } else if (samTagAndValue.tag.equals("XE") && !samTagAndValue.value.equals("*")){
-                    enzyme = getEnzyme(""+samTagAndValue.value);
-                } else if (samTagAndValue.tag.equals("XG") && !samTagAndValue.value.equals("*")){
-                    peptideType = getPeptideType(""+samTagAndValue.value);
-                } else if (samTagAndValue.tag.equals("NH") && !samTagAndValue.value.equals("*")){
-                    gengMapNum = (Integer) samTagAndValue.value;
-                } else if (samTagAndValue.tag.equals("XI") && !samTagAndValue.value.equals("*")){
-                    peptideInt = (double) (float) samTagAndValue.value;
-                } else if (samTagAndValue.tag.equals("XL") && !samTagAndValue.value.equals("*")){
-                    peptideMapNum = (Integer) samTagAndValue.value;
-                } else if (samTagAndValue.tag.equals("XN") && !samTagAndValue.value.equals("*")){
-                    missedCNum = (Integer) samTagAndValue.value;
-                } else if (samTagAndValue.tag.equals("XO") && !samTagAndValue.value.equals("*")){
-                    uniqueType = "" + samTagAndValue.value;
-                } else if (samTagAndValue.tag.equals("XP") && !samTagAndValue.value.equals("*")){
-                    originalSeq = "" + samTagAndValue.value;
-                } else if (samTagAndValue.tag.equals("XT") && !samTagAndValue.value.equals("*")){
-                    enzymeInSearch = getEnzymeInSear("" + samTagAndValue.value);
-                } else if (samTagAndValue.tag.equals("XU") && !samTagAndValue.value.equals("*")){
-                    URI = "" + samTagAndValue.value;
-                }
-            }
-
-            if(peptide != null){
-
-                spectrumList.add(String.valueOf(countAll));
-
-                if (count == 0){
-                    preparedStatement = connection.prepareStatement(addDataIntoTable);
-                }
-
-                PeptideAssumption peptideAssumption = new PeptideAssumption(peptide, 1, 1, new Charge(1, peptideCharge), massError, null);
-
-                if(referencePeptide != null){
-                    PeptideAssumption peptideAssumptionR = new PeptideAssumption(referencePeptide, 2, 1, new Charge(1, peptideCharge), 0, null);
-
-                    currentMatch.addHit(1, peptideAssumptionR, false);
-                }
-
-                peptideAssumption.setRawScore(fdr);
-
-                currentMatch.addHit(1, peptideAssumption, false);
-
-                currentMatch.setBestPeptideAssumption(peptideAssumption);
-
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 try {
-                    ObjectOutputStream oos = new ObjectOutputStream(bos);
-                    try {
-                        oos.writeObject(currentMatch);
-                    } finally {
-                        oos.close();
-                    }
-                } finally {
-                    bos.close();
-                }
 
-                preparedStatement.setInt(1, countAll);
-                preparedStatement.setDouble(2, peptideAssumption.getTheoreticMass()/peptideCharge);
-                preparedStatement.setString(3, spectrumTitle);
-                preparedStatement.setString(4, peptide.getSequence());
-                preparedStatement.setDouble(5, Math.abs(massError));
-                preparedStatement.setBytes(6, bos.toByteArray());
-                preparedStatement.setDouble(7, score);
-                preparedStatement.setDouble(8, fdr);
-                preparedStatement.setString(9, isAnnotated);
-                preparedStatement.setString(10, followingAA);
-                preparedStatement.setString(11, precedingAA);
-                preparedStatement.setString(12, enzyme);
-                preparedStatement.setString(13, peptideType);
-                preparedStatement.setInt(14, gengMapNum);
-                preparedStatement.setDouble(15, peptideInt);
-                preparedStatement.setInt(16, peptideMapNum);
-                preparedStatement.setInt(17, missedCNum);
-                preparedStatement.setString(18, uniqueType);
-                preparedStatement.setString(19, originalSeq);
-                preparedStatement.setString(20, enzymeInSearch);
-                preparedStatement.setString(21, URI);
+                    if (spectrumName.contains("index")) {
 
-                preparedStatement.addBatch();
+                        if (spectrumName.contains(":")) {
+                            spectrumIndex = Integer.valueOf(spectrumName.split(":")[1].split("=")[1]);
+                        } else {
+                            spectrumIndex = Integer.valueOf(spectrumName.split("=")[1]);
+                        }
 
-                count ++;
-                countAll ++;
+                    } else if (spectrumName.contains(fileName)) {
 
-                if(count == 1000){
-
-                    int[] counts = preparedStatement.executeBatch();
-                    connection.commit();
-                    preparedStatement.close();
-
-                    pdvMainClass.allSpectrumIndex.add(spectrumList);
-
-                    count = 0;
-
-                    if(countRound == 0){
-                        System.out.println("The count round is "+countRound);
-
-                        pdvMainClass.displayResult();
-                        pdvMainClass.pageNumJTextField.setText(1 + "/" + 1);
-                        progressDialog.setRunFinished();
-
-                        countRound ++;
+                        int dot1 = spectrumName.lastIndexOf('.');
+                        if ((dot1 > -1) && (dot1 < (spectrumName.length()))) {
+                            spectrumIndex = Integer.valueOf(spectrumName.substring(dot1 + 1));
+                        }
 
                     } else {
-                        pdvMainClass.pageNumJTextField.setText(String.valueOf(pdvMainClass.selectedPageNum) + "/" + String.valueOf(pdvMainClass.allSpectrumIndex.size()));
-                        countRound ++;
+                        JOptionPane.showMessageDialog(pdvMainClass, "Failed to pares proBAM file", "File Error", JOptionPane.WARNING_MESSAGE);
+                        progressDialog.setRunFinished();
+                        break;
                     }
-                    pdvMainClass.buttonCheck();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(pdvMainClass, "Failed to pares proBAM file\n", "File Error", JOptionPane.WARNING_MESSAGE);
+                    progressDialog.setRunFinished();
+                    break;
+                }
 
-                    spectrumList = new ArrayList<>();
 
+                SpectrumMatch currentMatch = new SpectrumMatch(Spectrum.getSpectrumKey(spectrumFileName, String.valueOf(spectrumIndex)));
+
+                if (spectrumFileType.equals("mgf")) {
+                    try {
+                        spectrumTitle = spectrumFactory.getSpectrumTitle(spectrumFileName, spectrumIndex + 1);
+                    } catch (Exception e) {
+                        progressDialog.setRunFinished();
+                        e.printStackTrace();
+                        JOptionPane.showMessageDialog(
+                                null, "The spectrum title cannot match it in proBAM",
+                                "Error Matching", JOptionPane.ERROR_MESSAGE);
+                        break;
+                    }
+                } else {
+                    spectrumTitle = String.valueOf(spectrumIndex);
+                }
+
+                currentMatch.setSpectrumNumber(spectrumIndex);
+
+                for (SAMRecord.SAMTagAndValue samTagAndValue : list) {
+                    String modificationName = null;
+
+                    if (samTagAndValue.tag.equals("XP") && !samTagAndValue.value.equals("*")) {
+                        modificationMatches = new ArrayList<>();
+                        peptideSequence = (String) samTagAndValue.value;
+                        for (String location : locationToMass.keySet()) {
+                            if (location.equals("0") || location.equals("-2147483648")) {
+                                String aA = peptideSequence.split("")[0];
+                                Double modificationMass = locationToMass.get(location);
+
+                                for (Double mass : modificationMassMap.get(aA).keySet()) {
+                                    if (Math.abs(mass - modificationMass) < 0.005) {//Mass error may cause problem
+                                        modificationName = modificationMassMap.get(aA).get(mass);
+                                    }
+                                }
+
+                                if (modificationName == null) {
+                                    for (Double mass : modificationMassMap.get("N-terminus").keySet()) {
+                                        if (Math.abs(mass - modificationMass) < 0.005) {//Mass error may cause problem
+                                            modificationName = modificationMassMap.get("N-terminus").get(mass);
+                                        }
+                                    }
+                                }
+
+                                if (!allModifications.contains(modificationName)) {
+                                    allModifications.add(modificationName);
+                                }
+
+                                modificationMatches.add(new ModificationMatch(modificationName, true, 1));
+                                modificationName = null;
+                            } else if (location.equals(String.valueOf(peptideSequence.length() + 1))) {
+                                String aA = peptideSequence.split("")[peptideSequence.length() - 1];
+                                Double modificationMass = locationToMass.get(location);
+
+                                for (Double mass : modificationMassMap.get(aA).keySet()) {
+                                    if (Math.abs(mass - modificationMass) < 0.005) {//Mass error may cause problem
+                                        modificationName = modificationMassMap.get(aA).get(mass);
+                                    }
+                                }
+
+                                if (modificationName == null) {
+                                    for (Double mass : modificationMassMap.get("C-terminus").keySet()) {
+                                        if (Math.abs(mass - modificationMass) < 0.005) {//Mass error may cause problem
+                                            modificationName = modificationMassMap.get("C-terminus").get(mass);
+                                        }
+                                    }
+                                }
+
+                                if (!allModifications.contains(modificationName)) {
+                                    allModifications.add(modificationName);
+                                }
+
+                                modificationMatches.add(new ModificationMatch(modificationName, true, Integer.parseInt(location)));
+                                modificationName = null;
+                            } else {
+                                String aA = peptideSequence.split("")[Integer.parseInt(location)];
+                                Double modificationMass = locationToMass.get(location);
+                                for (Double mass : modificationMassMap.get(aA).keySet()) {
+                                    if (Math.abs(mass - modificationMass) < 0.005) {//Mass error may cause problem
+                                        modificationName = modificationMassMap.get(aA).get(mass);
+                                    }
+                                }
+
+                                if (!allModifications.contains(modificationName)) {
+                                    allModifications.add(modificationName);
+                                }
+
+                                modificationMatches.add(new ModificationMatch(modificationName, true, Integer.parseInt(location) + 1));
+                                modificationName = null;
+                            }
+                        }
+                        peptide = new Peptide(peptideSequence, modificationMatches);
+                        locationToMass = new HashMap<>();
+
+                    } else if (samTagAndValue.tag.equals("XA") && !samTagAndValue.value.equals("*")) {
+                        if (samTagAndValue.value.equals("0")) {
+                            isAnnotated = "yes";
+                        } else if (samTagAndValue.value.equals("1")) {
+                            isAnnotated = "partially unknown";
+                        } else if (samTagAndValue.value.equals("2")) {
+                            isAnnotated = "totally unknown";
+                        }
+                    } else if (samTagAndValue.tag.equals("YA") && !samTagAndValue.value.equals("*")) {
+                        followingAA = "" + samTagAndValue.value;
+                    } else if (samTagAndValue.tag.equals("YB") && !samTagAndValue.value.equals("*")) {
+                        precedingAA = "" + samTagAndValue.value;
+                    } else if (samTagAndValue.tag.equals("XE") && !samTagAndValue.value.equals("*")) {
+                        enzyme = getEnzyme("" + samTagAndValue.value);
+                    } else if (samTagAndValue.tag.equals("XG") && !samTagAndValue.value.equals("*")) {
+                        peptideType = getPeptideType("" + samTagAndValue.value);
+                    } else if (samTagAndValue.tag.equals("NH") && !samTagAndValue.value.equals("*")) {
+                        gengMapNum = (Integer) samTagAndValue.value;
+                    } else if (samTagAndValue.tag.equals("XI") && !samTagAndValue.value.equals("*")) {
+                        peptideInt = (double) (float) samTagAndValue.value;
+                    } else if (samTagAndValue.tag.equals("XL") && !samTagAndValue.value.equals("*")) {
+                        peptideMapNum = (Integer) samTagAndValue.value;
+                    } else if (samTagAndValue.tag.equals("XN") && !samTagAndValue.value.equals("*")) {
+                        missedCNum = (Integer) samTagAndValue.value;
+                    } else if (samTagAndValue.tag.equals("XO") && !samTagAndValue.value.equals("*")) {
+                        uniqueType = "" + samTagAndValue.value;
+                    } else if (samTagAndValue.tag.equals("XP") && !samTagAndValue.value.equals("*")) {
+                        originalSeq = "" + samTagAndValue.value;
+                    } else if (samTagAndValue.tag.equals("XT") && !samTagAndValue.value.equals("*")) {
+                        enzymeInSearch = getEnzymeInSear("" + samTagAndValue.value);
+                    } else if (samTagAndValue.tag.equals("XU") && !samTagAndValue.value.equals("*")) {
+                        URI = "" + samTagAndValue.value;
+                    } else if (samTagAndValue.tag.equals("XM") && !samTagAndValue.value.equals("*") && !samTagAndValue.value.equals("-")) {
+                        String modificationAccessionList = (String) samTagAndValue.value;
+                        String[] allModifications = modificationAccessionList.split(",");
+                        for (String eachModification : allModifications) {
+                            String[] locationAndName = eachModification.split("@");
+                            locationToMass.put(locationAndName[1], Double.valueOf(locationAndName[0]));
+
+                        }
+                    } else if (samTagAndValue.tag.equals("XC") && !samTagAndValue.value.equals("*")) {
+                        peptideCharge = (int) samTagAndValue.value;
+                    } else if (samTagAndValue.tag.equals("XR") && !samTagAndValue.value.equals("*")) {
+                        referenceSequence = (String) samTagAndValue.value;
+                        referencePeptide = new Peptide(referenceSequence, null);
+                    } else if (samTagAndValue.tag.equals("XS") && !samTagAndValue.value.equals("*")) {
+                        BigDecimal bigDecimal = new BigDecimal(Float.toString((Float) samTagAndValue.value));
+                        score = bigDecimal.doubleValue();
+                    } else if (samTagAndValue.tag.equals("XB") && !samTagAndValue.value.equals("*")) {
+                        massError = (double) (float) samTagAndValue.value;
+                    } else if (samTagAndValue.tag.equals("XQ") && !samTagAndValue.value.equals("*")) {
+                        BigDecimal bigDecimal = new BigDecimal(Float.toString((Float) samTagAndValue.value));
+                        fdr = bigDecimal.doubleValue();
+                    }
+                }
+
+                if (peptide != null) {
+
+                    spectrumList.add(String.valueOf(countAll));
+
+                    if (count == 0) {
+                        preparedStatement = connection.prepareStatement(addDataIntoTable);
+                    }
+
+                    PeptideAssumption peptideAssumption = new PeptideAssumption(peptide, 1, 1, new Charge(1, peptideCharge), massError, null);
+
+                    if (referencePeptide != null) {
+                        PeptideAssumption peptideAssumptionR = new PeptideAssumption(referencePeptide, 2, 1, new Charge(1, peptideCharge), 0, null);
+
+                        currentMatch.addHit(1, peptideAssumptionR, false);
+                    }
+
+                    peptideAssumption.setRawScore(fdr);
+
+                    currentMatch.addHit(1, peptideAssumption, false);
+
+                    currentMatch.setBestPeptideAssumption(peptideAssumption);
+
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    try {
+                        ObjectOutputStream oos = new ObjectOutputStream(bos);
+                        try {
+                            oos.writeObject(currentMatch);
+                        } finally {
+                            oos.close();
+                        }
+                    } finally {
+                        bos.close();
+                    }
+
+                    preparedStatement.setInt(1, countAll);
+                    preparedStatement.setDouble(2, peptideAssumption.getTheoreticMass() / peptideCharge);
+                    preparedStatement.setString(3, spectrumTitle);
+                    preparedStatement.setString(4, peptide.getSequence());
+                    preparedStatement.setDouble(5, Math.abs(massError));
+                    preparedStatement.setBytes(6, bos.toByteArray());
+                    preparedStatement.setDouble(7, score);
+                    preparedStatement.setDouble(8, fdr);
+                    preparedStatement.setString(9, isAnnotated);
+                    preparedStatement.setString(10, followingAA);
+                    preparedStatement.setString(11, precedingAA);
+                    preparedStatement.setString(12, enzyme);
+                    preparedStatement.setString(13, peptideType);
+                    preparedStatement.setInt(14, gengMapNum);
+                    preparedStatement.setDouble(15, peptideInt);
+                    preparedStatement.setInt(16, peptideMapNum);
+                    preparedStatement.setInt(17, missedCNum);
+                    preparedStatement.setString(18, uniqueType);
+                    preparedStatement.setString(19, originalSeq);
+                    preparedStatement.setString(20, enzymeInSearch);
+                    preparedStatement.setString(21, URI);
+
+                    preparedStatement.addBatch();
+
+                    count++;
+                    countAll++;
+
+                    if (count == 1000) {
+
+                        int[] counts = preparedStatement.executeBatch();
+                        connection.commit();
+                        preparedStatement.close();
+
+                        pdvMainClass.allSpectrumIndex.add(spectrumList);
+
+                        count = 0;
+
+                        if (countRound == 0) {
+                            System.out.println("The count round is " + countRound);
+
+                            pdvMainClass.displayResult();
+                            pdvMainClass.pageNumJTextField.setText(1 + "/" + 1);
+                            progressDialog.setRunFinished();
+
+                            countRound++;
+
+                        } else {
+                            pdvMainClass.pageNumJTextField.setText(String.valueOf(pdvMainClass.selectedPageNum) + "/" + String.valueOf(pdvMainClass.allSpectrumIndex.size()));
+                            countRound++;
+                        }
+                        pdvMainClass.buttonCheck();
+
+                        spectrumList = new ArrayList<>();
+
+                    }
+                }
+            }
+        } else {
+            while (iter.hasNext()) {
+
+                Integer spectrumIndex = null;
+                Peptide peptide = null;
+                Peptide referencePeptide = null;
+
+                String peptideSequence;
+                int peptideCharge = 0;
+                String referenceSequence;
+                double score = 0.0;
+                double fdr = 0.0;
+                double massError = 0.0;
+                String spectrumTitle;
+                String isAnnotated = "*";
+                String followingAA = "*";
+                String precedingAA = "*";
+                String enzyme = "*";
+                String peptideType = "*";
+                Integer gengMapNum = -1;
+                Double peptideInt = 0.0;
+                Integer peptideMapNum = -1;
+                Integer missedCNum = -1;
+                String uniqueType = "*";
+                String originalSeq = "*";
+                String enzymeInSearch = "*";
+                String URI = "*";
+
+                SAMRecord rec = iter.next();
+                List<SAMRecord.SAMTagAndValue> list = rec.getAttributes();
+
+                String spectrumName = rec.getReadName();
+
+                try {
+
+                    if (spectrumName.contains("index")) {
+
+                        if (spectrumName.contains(":")) {
+                            spectrumIndex = Integer.valueOf(spectrumName.split(":")[1].split("=")[1]);
+                        } else {
+                            spectrumIndex = Integer.valueOf(spectrumName.split("=")[1]);
+                        }
+
+                    } else if (spectrumName.contains(fileName)) {
+
+                        int dot1 = spectrumName.lastIndexOf('.');
+                        if ((dot1 > -1) && (dot1 < (spectrumName.length()))) {
+                            spectrumIndex = Integer.valueOf(spectrumName.substring(dot1 + 1));
+                        }
+
+                    } else {
+                        JOptionPane.showMessageDialog(pdvMainClass, "Failed to pares proBAM file", "File Error", JOptionPane.WARNING_MESSAGE);
+                        progressDialog.setRunFinished();
+                        break;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(pdvMainClass, "Failed to pares proBAM file\n", "File Error", JOptionPane.WARNING_MESSAGE);
+                    progressDialog.setRunFinished();
+                    break;
+                }
+
+                SpectrumMatch currentMatch = new SpectrumMatch(Spectrum.getSpectrumKey(spectrumFileName, String.valueOf(spectrumIndex)));
+
+                if (spectrumFileType.equals("mgf")) {
+                    try {
+                        spectrumTitle = spectrumFactory.getSpectrumTitle(spectrumFileName, spectrumIndex + 1);
+                    } catch (Exception e) {
+                        progressDialog.setRunFinished();
+                        e.printStackTrace();
+                        JOptionPane.showMessageDialog(
+                                null, "The spectrum title cannot match it in proBAM",
+                                "Error Matching", JOptionPane.ERROR_MESSAGE);
+                        break;
+                    }
+                } else {
+                    spectrumTitle = String.valueOf(spectrumIndex);
+                }
+
+                currentMatch.setSpectrumNumber(spectrumIndex);
+
+                for (SAMRecord.SAMTagAndValue samTagAndValue : list) {
+
+                    if (samTagAndValue.tag.equals("XP") && !samTagAndValue.value.equals("*")) {
+                        modificationMatches = new ArrayList<>();
+                        peptideSequence = ((String) samTagAndValue.value).replaceAll("[^a-z^A-Z]", "");
+                        for (String location : locationToModificationName.keySet()) {
+                            if (location.equals("0")) {
+                                String modificationName = locationToModificationName.get(location) + " of N-term";
+                                if (!allModifications.contains(modificationName)) {
+                                    allModifications.add(modificationName);
+                                }
+                                modificationMatches.add(new ModificationMatch(modificationName, true, Integer.parseInt(location)));
+                            } else if (location.equals(String.valueOf(peptideSequence.length() + 1))) {
+                                String modificationName = locationToModificationName.get(location) + " of C-term";
+                                if (!allModifications.contains(modificationName)) {
+                                    allModifications.add(modificationName);
+                                }
+                                modificationMatches.add(new ModificationMatch(modificationName, true, Integer.parseInt(location) - 1));
+                            } else {
+                                String aA = peptideSequence.split("")[Integer.parseInt(location) - 1];
+                                String modificationName = locationToModificationName.get(location) + " of " + aA;
+                                if (!allModifications.contains(modificationName)) {
+                                    allModifications.add(modificationName);
+                                }
+                                modificationMatches.add(new ModificationMatch(modificationName, true, Integer.parseInt(location)));
+                            }
+                        }
+                        peptide = new Peptide(peptideSequence, modificationMatches);
+                        locationToModificationName = new HashMap<>();
+                    } else if (samTagAndValue.tag.equals("XC") && !samTagAndValue.value.equals("*")) {
+                        peptideCharge = (int) samTagAndValue.value;
+                    } else if (samTagAndValue.tag.equals("XR") && !samTagAndValue.value.equals("*")) {
+                        referenceSequence = (String) samTagAndValue.value;
+                        referencePeptide = new Peptide(referenceSequence, null);
+                    } else if (samTagAndValue.tag.equals("XS") && !samTagAndValue.value.equals("*")) {
+                        BigDecimal bigDecimal = new BigDecimal(Float.toString((Float) samTagAndValue.value));
+                        score = bigDecimal.doubleValue();
+                    } else if (samTagAndValue.tag.equals("XB") && !samTagAndValue.value.equals("*")) {
+                        massError = (double) (float) samTagAndValue.value;
+                    } else if (samTagAndValue.tag.equals("XQ") && !samTagAndValue.value.equals("*")) {
+                        BigDecimal bigDecimal = new BigDecimal(Float.toString((Float) samTagAndValue.value));
+                        fdr = bigDecimal.doubleValue();
+                    } else if (samTagAndValue.tag.equals("XM") && !samTagAndValue.value.equals("*")) {
+                        locationToModificationName = new HashMap<>();
+                        String modificationAccessionList = (String) samTagAndValue.value;
+                        String[] allModifications = modificationAccessionList.split(";");
+                        for (String eachModification : allModifications) {
+                            String[] locationAndName = eachModification.split("-");
+                            String modificationName = accessionToModification.get(locationAndName[1]);
+                            locationToModificationName.put(locationAndName[0], modificationName);
+                        }
+                    } else if (samTagAndValue.tag.equals("XA") && !samTagAndValue.value.equals("*")) {
+                        if (samTagAndValue.value.equals("0")) {
+                            isAnnotated = "yes";
+                        } else if (samTagAndValue.value.equals("1")) {
+                            isAnnotated = "partially unknown";
+                        } else if (samTagAndValue.value.equals("2")) {
+                            isAnnotated = "totally unknown";
+                        }
+                    } else if (samTagAndValue.tag.equals("YA") && !samTagAndValue.value.equals("*")) {
+                        followingAA = "" + samTagAndValue.value;
+                    } else if (samTagAndValue.tag.equals("YB") && !samTagAndValue.value.equals("*")) {
+                        precedingAA = "" + samTagAndValue.value;
+                    } else if (samTagAndValue.tag.equals("XE") && !samTagAndValue.value.equals("*")) {
+                        enzyme = getEnzyme("" + samTagAndValue.value);
+                    } else if (samTagAndValue.tag.equals("XG") && !samTagAndValue.value.equals("*")) {
+                        peptideType = getPeptideType("" + samTagAndValue.value);
+                    } else if (samTagAndValue.tag.equals("NH") && !samTagAndValue.value.equals("*")) {
+                        gengMapNum = (Integer) samTagAndValue.value;
+                    } else if (samTagAndValue.tag.equals("XI") && !samTagAndValue.value.equals("*")) {
+                        peptideInt = (double) (float) samTagAndValue.value;
+                    } else if (samTagAndValue.tag.equals("XL") && !samTagAndValue.value.equals("*")) {
+                        peptideMapNum = (Integer) samTagAndValue.value;
+                    } else if (samTagAndValue.tag.equals("XN") && !samTagAndValue.value.equals("*")) {
+                        missedCNum = (Integer) samTagAndValue.value;
+                    } else if (samTagAndValue.tag.equals("XO") && !samTagAndValue.value.equals("*")) {
+                        uniqueType = "" + samTagAndValue.value;
+                    } else if (samTagAndValue.tag.equals("XP") && !samTagAndValue.value.equals("*")) {
+                        originalSeq = "" + samTagAndValue.value;
+                    } else if (samTagAndValue.tag.equals("XT") && !samTagAndValue.value.equals("*")) {
+                        enzymeInSearch = getEnzymeInSear("" + samTagAndValue.value);
+                    } else if (samTagAndValue.tag.equals("XU") && !samTagAndValue.value.equals("*")) {
+                        URI = "" + samTagAndValue.value;
+                    }
+                }
+
+                if (peptide != null) {
+
+                    spectrumList.add(String.valueOf(countAll));
+
+                    if (count == 0) {
+                        preparedStatement = connection.prepareStatement(addDataIntoTable);
+                    }
+
+                    PeptideAssumption peptideAssumption = new PeptideAssumption(peptide, 1, 1, new Charge(1, peptideCharge), massError, null);
+
+                    if (referencePeptide != null) {
+                        PeptideAssumption peptideAssumptionR = new PeptideAssumption(referencePeptide, 2, 1, new Charge(1, peptideCharge), 0, null);
+
+                        currentMatch.addHit(1, peptideAssumptionR, false);
+                    }
+
+                    peptideAssumption.setRawScore(fdr);
+
+                    currentMatch.addHit(1, peptideAssumption, false);
+
+                    currentMatch.setBestPeptideAssumption(peptideAssumption);
+
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    try {
+                        ObjectOutputStream oos = new ObjectOutputStream(bos);
+                        try {
+                            oos.writeObject(currentMatch);
+                        } finally {
+                            oos.close();
+                        }
+                    } finally {
+                        bos.close();
+                    }
+
+                    preparedStatement.setInt(1, countAll);
+                    preparedStatement.setDouble(2, peptideAssumption.getTheoreticMass() / peptideCharge);
+                    preparedStatement.setString(3, spectrumTitle);
+                    preparedStatement.setString(4, peptide.getSequence());
+                    preparedStatement.setDouble(5, Math.abs(massError));
+                    preparedStatement.setBytes(6, bos.toByteArray());
+                    preparedStatement.setDouble(7, score);
+                    preparedStatement.setDouble(8, fdr);
+                    preparedStatement.setString(9, isAnnotated);
+                    preparedStatement.setString(10, followingAA);
+                    preparedStatement.setString(11, precedingAA);
+                    preparedStatement.setString(12, enzyme);
+                    preparedStatement.setString(13, peptideType);
+                    preparedStatement.setInt(14, gengMapNum);
+                    preparedStatement.setDouble(15, peptideInt);
+                    preparedStatement.setInt(16, peptideMapNum);
+                    preparedStatement.setInt(17, missedCNum);
+                    preparedStatement.setString(18, uniqueType);
+                    preparedStatement.setString(19, originalSeq);
+                    preparedStatement.setString(20, enzymeInSearch);
+                    preparedStatement.setString(21, URI);
+
+                    preparedStatement.addBatch();
+
+                    count++;
+                    countAll++;
+
+                    if (count == 1000) {
+
+                        int[] counts = preparedStatement.executeBatch();
+                        connection.commit();
+                        preparedStatement.close();
+
+                        pdvMainClass.allSpectrumIndex.add(spectrumList);
+
+                        count = 0;
+
+                        if (countRound == 0) {
+                            System.out.println("The count round is " + countRound);
+
+                            pdvMainClass.displayResult();
+                            pdvMainClass.pageNumJTextField.setText(1 + "/" + 1);
+                            progressDialog.setRunFinished();
+
+                            countRound++;
+
+                        } else {
+                            pdvMainClass.pageNumJTextField.setText(String.valueOf(pdvMainClass.selectedPageNum) + "/" + String.valueOf(pdvMainClass.allSpectrumIndex.size()));
+                            countRound++;
+                        }
+                        pdvMainClass.buttonCheck();
+
+                        spectrumList = new ArrayList<>();
+
+                    }
                 }
             }
         }
@@ -472,6 +792,8 @@ public class ProBamFileImport {
         }
         pdvMainClass.loadingJButton.setIcon(new ImageIcon(getClass().getResource("/icons/done.png")));
         pdvMainClass.loadingJButton.setText("Import done");
+        pdvMainClass.searchButton.setToolTipText("Find items");
+        pdvMainClass.searchItemTextField.setToolTipText("Find items");
     }
 
     /**
@@ -573,6 +895,30 @@ public class ProBamFileImport {
             default:
                 return "*";
         }
+    }
+
+    /**
+     * Get Modification mass map
+     * @return HashMap
+     */
+    private HashMap<String,HashMap<Double, String >> getModificationMass(){
+
+        PTMFactory ptmFactory = PTMFactory.getInstance();
+
+        HashMap<String,HashMap<Double, String > > modificationMass = new HashMap<>();
+        ArrayList<String> orderedModifications = ptmFactory.getPTMs();
+        for (String  modificationName : orderedModifications){
+            String[] modificationNameSplit = String.valueOf(ptmFactory.getPTM(modificationName)).split(" ");
+            String aminoAcidName  = modificationNameSplit[modificationNameSplit.length-1];
+            if(modificationMass.containsKey(aminoAcidName)){
+                modificationMass.get(aminoAcidName).put(ptmFactory.getPTM(modificationName).getMass(), modificationName);
+            }else {
+                HashMap<Double, String> singleModi = new HashMap<>();
+                singleModi.put(ptmFactory.getPTM(modificationName).getMass(), modificationName);
+                modificationMass.put(aminoAcidName, singleModi);
+            }
+        }
+        return modificationMass;
     }
 
     /**

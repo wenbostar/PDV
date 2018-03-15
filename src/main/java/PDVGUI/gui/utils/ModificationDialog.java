@@ -98,7 +98,7 @@ public class ModificationDialog extends JDialog {
      * @param event Item event
      */
     private void aAModificationComBoxdMouseClicked(ItemEvent event) {
-        selectedModification = String.valueOf(aAModificationComBox.getSelectedItem());
+        selectedModification = String.valueOf(aAModificationComBox.getSelectedItem()).replace(">","&gt;");
         formWindowClosing(null);
     }
 

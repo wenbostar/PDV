@@ -731,7 +731,7 @@ public class ProBamImportDialog extends JDialog{
 
                             progressDialog.setRunFinished();
 
-                            pdvMainClass.importProBedFile(proGenomicsFile, spectrumFile, spectrumFileType, spectrumsFileFactory, mzIdentMLType);
+                            pdvMainClass.importProBedFile(proGenomicsFile, spectrumFileType, spectrumsFileFactory, mzIdentMLType);
 
                             mzIDFile = null;
 

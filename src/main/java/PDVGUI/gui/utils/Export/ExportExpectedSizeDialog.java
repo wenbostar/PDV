@@ -502,7 +502,6 @@ public class ExportExpectedSizeDialog extends JDialog {
                     public void run() {
 
                         try {
-                            Thread.sleep(100);
 
                             Export.exportPic(jLayeredPane, jLayeredPane.getBounds(), imageFile, finalImageType1);
 
@@ -532,7 +531,6 @@ public class ExportExpectedSizeDialog extends JDialog {
                 public void run() {
 
                     try {
-                        Thread.sleep(100);
 
                         Export.exportPic(jLayeredPane, jLayeredPane.getBounds(), imageFile, finalImageType2);
 

@@ -339,6 +339,9 @@ public class DeNovoFileImport {
             }
             pdvMainClass.loadingJButton.setIcon(new ImageIcon(getClass().getResource("/icons/done.png")));
             pdvMainClass.loadingJButton.setText("Import done");
+            pdvMainClass.searchButton.setToolTipText("Find items");
+            pdvMainClass.searchItemTextField.setToolTipText("Find items");
+
         }
     }
 

@@ -264,6 +264,7 @@ public class PrideXMLDisplay extends JFrame {
         psmJTable.setRowHeight(20);
         psmJTable.setFont(new Font("Arial", Font.PLAIN, 10));
         psmJTable.getTableHeader().setFont(new Font("Dialog", 0, 12));
+        psmJTable.setAutoCreateRowSorter(true);
 
         spectrumJTable = new JTable() {
 
@@ -300,6 +301,7 @@ public class PrideXMLDisplay extends JFrame {
         spectrumJTable.setRowHeight(20);
         spectrumJTable.setFont(new Font("Arial", Font.PLAIN, 10));
         spectrumJTable.getTableHeader().setFont(new Font("Dialog", 0, 12));
+        spectrumJTable.setAutoCreateRowSorter(true);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("PDV - PrideXML Display");
@@ -606,16 +608,9 @@ public class PrideXMLDisplay extends JFrame {
         } else {
             motif=UIManager.getSystemLookAndFeelClassName();
         }
-
         try {
             UIManager.setLookAndFeel(motif);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (UnsupportedLookAndFeelException e) {
+        } catch (ClassNotFoundException | InstantiationException | UnsupportedLookAndFeelException | IllegalAccessException e) {
             e.printStackTrace();
         }
         SwingUtilities.updateComponentTreeUI(this);
@@ -1019,12 +1014,21 @@ public class PrideXMLDisplay extends JFrame {
                 DefaultMutableTreeNode prideFileRoot = new DefaultMutableTreeNode(eachTtitle + "( "+identificationList.size()+" )");
                 treeModel.insertNodeInto(prideFileRoot, root, root.getChildCount());
 
+                ArrayList<String> proteinAccessionList = new ArrayList<>();
+
                 for(String identification : identificationList){
 
                     Identification identificationValue = prideXmlReaderInList.getIdentById(identification);
 
-                    DefaultMutableTreeNode proteinNode = new DefaultMutableTreeNode(identificationValue.getAccession() +"( "+ identificationValue.getPeptideItem().size()+" )");
+                    proteinAccessionList.add(identificationValue.getAccession() +"( "+ identificationValue.getPeptideItem().size()+" )");
+
                     accessionToId.put(identificationValue.getAccession(), identification);
+                }
+
+                Collections.sort(proteinAccessionList);
+
+                for (String proteinName : proteinAccessionList){
+                    DefaultMutableTreeNode proteinNode = new DefaultMutableTreeNode(proteinName);
 
                     treeModel.insertNodeInto(proteinNode, prideFileRoot, prideFileRoot.getChildCount());
                 }
@@ -1570,7 +1574,11 @@ public class PrideXMLDisplay extends JFrame {
                     }
                     if (column == 6){
                         List<String> comments = spectrum.getSpectrumDesc().getComments();
-                        return comments.get(0);
+                        if (comments.size() != 0){
+                            return comments.get(0);
+                        } else {
+                            return "";
+                        }
                     }
 
                     for(int index = 0; index < additionalPara.size(); index++){
@@ -1606,6 +1614,7 @@ public class PrideXMLDisplay extends JFrame {
 
             return String.class;
         }
+
     }
 
     /**
@@ -1732,7 +1741,12 @@ public class PrideXMLDisplay extends JFrame {
                         return sum;
                     }
                     if (column == 8){
-                        return spectrumDesc.getComments().get(0);
+                        List<String> comments = spectrum.getSpectrumDesc().getComments();
+                        if (comments.size() != 0){
+                            return comments.get(0);
+                        } else {
+                            return "";
+                        }
                     }
 
                 } else {

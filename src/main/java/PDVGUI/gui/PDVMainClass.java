@@ -1,5 +1,6 @@
 package PDVGUI.gui;
 
+import PDVCLI.PDVCLIMainClass;
 import PDVGUI.fileimport.*;
 import PDVGUI.DB.SQLiteConnection;
 import PDVGUI.gui.utils.*;
@@ -24,6 +25,7 @@ import com.compomics.util.gui.JOptionEditorPane;
 import com.compomics.util.gui.filehandling.TempFilesManager;
 import com.compomics.util.gui.waiting.waitinghandlers.ProgressDialogX;
 import com.compomics.util.preferences.*;
+import org.apache.commons.cli.ParseException;
 import umich.ms.datatypes.scan.IScan;
 import umich.ms.datatypes.scancollection.impl.ScanCollectionDefault;
 import umich.ms.datatypes.spectrum.ISpectrum;
@@ -53,6 +55,7 @@ public class PDVMainClass extends JFrame {
     public JButton loadingJButton;
     public JButton settingColorJButton;
     public JTextField pageNumJTextField;
+    public JTextField searchItemTextField;
     private JButton upSortJButton;
     private JButton downSortJButton;
     private JButton nextJButton;
@@ -63,7 +66,6 @@ public class PDVMainClass extends JFrame {
     private JPanel spectrumShowJPanel;
     private JPanel backgroundPanel;
     private JPanel detailsJPanel;
-    private JTextField searchItemTextField;
     private JTextField pageSelectNumJTextField;
     private JTextField checkSpectrumJTextField;
     private JTextField fragmentIonAccuracyTxt;
@@ -98,6 +100,10 @@ public class PDVMainClass extends JFrame {
      * Current page psm key to selected
      */
     private HashMap<String, Boolean> spectrumKeyToSelected = new HashMap<>();
+    /**
+     * Whole page selections
+     */
+    private ArrayList<Integer> pageToSelected = new ArrayList<>();
     /**
      * All selections
      */
@@ -142,14 +148,6 @@ public class PDVMainClass extends JFrame {
      * Database absolute path
      */
     private String databasePath;
-    /**
-     * original and Variant peptide map list
-     */
-    private HashMap<String, String> variantPeptideMap = new HashMap<>();
-    /**
-     * Original peptide sequence
-     */
-    private String currentPeptideSequence;
     /**
      * Objective to save mzXML and mzml file
      */
@@ -233,16 +231,26 @@ public class PDVMainClass extends JFrame {
      */
     public static void main(String[] args) {
 
-        LookAndFeel lookAndFeel = UIManager.getLookAndFeel();
-        UIDefaults defaults = lookAndFeel.getDefaults();
-        defaults.put("ScrollBar.minimumThumbSize", new Dimension(30, 30));
+        if (args.length == 0){
+            LookAndFeel lookAndFeel = UIManager.getLookAndFeel();
+            UIDefaults defaults = lookAndFeel.getDefaults();
+            defaults.put("ScrollBar.minimumThumbSize", new Dimension(30, 30));
 
-        InputMap im = (InputMap) UIManager.get("TextField.focusInputMap");
-        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.META_DOWN_MASK), DefaultEditorKit.copyAction);
-        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_V, KeyEvent.META_DOWN_MASK), DefaultEditorKit.pasteAction);
-        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_X, KeyEvent.META_DOWN_MASK), DefaultEditorKit.cutAction);
+            InputMap im = (InputMap) UIManager.get("TextField.focusInputMap");
+            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.META_DOWN_MASK), DefaultEditorKit.copyAction);
+            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_V, KeyEvent.META_DOWN_MASK), DefaultEditorKit.pasteAction);
+            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_X, KeyEvent.META_DOWN_MASK), DefaultEditorKit.cutAction);
 
-        new PDVMainClass("New");
+            new PDVMainClass("New");
+        } else {
+            try {
+                new PDVCLIMainClass(args);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -401,7 +409,6 @@ public class PDVMainClass extends JFrame {
         JPopupMenu.Separator jSeparator2 = new JPopupMenu.Separator();
         JMenuItem homeJMenuItem = new JMenuItem();
         JMenuItem newJMenuItem = new JMenuItem();
-        JMenuItem variantCheckJMenuItem = new JMenuItem();
         JMenuItem columnSelectionJMenuItem = new JMenuItem();
         JMenuItem openDenovoJMenuItem = new JMenuItem();
         JMenuItem exportAllMenuItem = new JMenuItem();
@@ -596,12 +603,6 @@ public class PDVMainClass extends JFrame {
         columnSelectionJMenuItem.addActionListener(this::columnSelectionJMenuItemActionPerformed);
         viewMenu.add(columnSelectionJMenuItem);
 
-        variantCheckJMenuItem.setMnemonic('C');
-        variantCheckJMenuItem.setText("Variant Peptide Check");
-        variantCheckJMenuItem.addActionListener(this::variantCheckJMenuItemActionPerformed);
-
-        viewMenu.add(variantCheckJMenuItem);
-
         menuBar.add(viewMenu);
 
         searchJPanel.setOpaque(false);
@@ -787,19 +788,11 @@ public class PDVMainClass extends JFrame {
         spectrumJTable.setOpaque(false);
         spectrumJTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         spectrumJTable.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent evt){
-                spectrumJTableMouseClicked(evt);
-            }
             public void mouseExited(MouseEvent evt) {
                 spectrumJTableMouseExited(evt);
             }
             public void mouseReleased(MouseEvent evt) {
                 spectrumJTableMouseReleased(evt);
-            }
-        });
-        spectrumJTable.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
-            public void mouseMoved(java.awt.event.MouseEvent evt) {
-                //spectrumJTableMouseMoved(evt);
             }
         });
         spectrumJTable.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -1003,13 +996,7 @@ public class PDVMainClass extends JFrame {
 
         try {
             UIManager.setLookAndFeel(motif);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (UnsupportedLookAndFeelException e) {
+        } catch (ClassNotFoundException | InstantiationException | UnsupportedLookAndFeelException | IllegalAccessException e) {
             e.printStackTrace();
         }
         SwingUtilities.updateComponentTreeUI(this);
@@ -1261,7 +1248,7 @@ public class PDVMainClass extends JFrame {
         }, "ProgressDialog").start();
         new Thread("DisplayThread") {
             @Override
-            public void run() {
+            public void run(){
 
                 PepXMLFileImport pepXMLFileImport;
 
@@ -1285,13 +1272,7 @@ public class PDVMainClass extends JFrame {
 
                     sortColumnJCombox.setModel(new DefaultComboBoxModel(orderName.toArray()));
 
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                } catch (XmlPullParserException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
+                } catch (SQLException | ClassNotFoundException | IOException | XmlPullParserException e) {
                     e.printStackTrace();
                 }
             }
@@ -1368,9 +1349,7 @@ public class PDVMainClass extends JFrame {
 
                     sortColumnJCombox.setModel(new DefaultComboBoxModel(orderName.toArray()));
 
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                } catch (ClassNotFoundException e) {
+                } catch (SQLException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
             }
@@ -1382,28 +1361,29 @@ public class PDVMainClass extends JFrame {
      * @param spectrumFile Spectrum file
      * @param spectrumsFileFactory Spectrum factory
      * @param textFile Text Id file
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws IOException
      */
-    public void importTextResults(File spectrumFile, Object spectrumsFileFactory, File textFile, String spectrumFileType) throws SQLException, ClassNotFoundException, IOException {
+    public void importTextResults(File spectrumFile, Object spectrumsFileFactory, File textFile, String spectrumFileType) {
 
         this.isNewSoft = true;
 
         this.spectrumsFileFactory = spectrumsFileFactory;
         this.spectrumFileType = spectrumFileType;
 
-        if (spectrumFileType.equals("mzml")){
+        switch (spectrumFileType) {
+            case "mzml":
 
-            scans = (ScanCollectionDefault) spectrumsFileFactory;
+                scans = (ScanCollectionDefault) spectrumsFileFactory;
+                break;
 
-        }else if(spectrumFileType.equals("mgf")){
+            case "mgf":
 
-            spectrumFactory = (SpectrumFactory) spectrumsFileFactory;
+                spectrumFactory = (SpectrumFactory) spectrumsFileFactory;
+                break;
 
-        } else if (spectrumFileType.equals("mzxml")){
-            scans = (ScanCollectionDefault) spectrumsFileFactory;
+            case "mzxml":
 
+                scans = (ScanCollectionDefault) spectrumsFileFactory;
+                break;
         }
 
         databasePath = textFile.getAbsolutePath()+".db";
@@ -1447,11 +1427,7 @@ public class PDVMainClass extends JFrame {
 
                     sortColumnJCombox.setModel(new DefaultComboBoxModel(orderName.toArray()));
 
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
+                } catch (SQLException | ClassNotFoundException | IOException e) {
                     e.printStackTrace();
                 }
             }
@@ -1504,15 +1480,16 @@ public class PDVMainClass extends JFrame {
 
                     ArrayList<String> orderName = new ArrayList<>();
                     orderName.add("PSMIndex");
+                    orderName.add("predicted_position_score");
+                    scoreName = new ArrayList<>();
+                    scoreName.add("predicted_position_score");
                     setUpTableHeaderToolTips();
 
                     buttonCheck();
 
                     sortColumnJCombox.setModel(new DefaultComboBoxModel(orderName.toArray()));
 
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                } catch (ClassNotFoundException e) {
+                } catch (SQLException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
             }
@@ -1570,9 +1547,7 @@ public class PDVMainClass extends JFrame {
 
                     sortColumnJCombox.setModel(new DefaultComboBoxModel(orderName.toArray()));
 
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                } catch (ClassNotFoundException e) {
+                } catch (SQLException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
             }
@@ -1583,9 +1558,6 @@ public class PDVMainClass extends JFrame {
      * Import MaxQuant results
      * @param maxQuantResultPath MaxQUANT results path
      * @param existMGF Boolean
-     * @throws IOException
-     * @throws ClassNotFoundException
-     * @throws SQLException
      */
     public void importMaxQuantResults(String maxQuantResultPath, Boolean existMGF) {
 
@@ -1650,11 +1622,7 @@ public class PDVMainClass extends JFrame {
 
                     sortColumnJCombox.setModel(new DefaultComboBoxModel(orderName.toArray()));
 
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                } catch (ClassNotFoundException e) {
+                } catch (IOException | SQLException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
             }
@@ -1708,7 +1676,7 @@ public class PDVMainClass extends JFrame {
                 ProBamFileImport proBamFileImport;
 
                 try {
-                    proBamFileImport = new ProBamFileImport(PDVMainClass.this, proBAMFile, spectrumFile.getName(), spectrumFactory, progressDialog);
+                    proBamFileImport = new ProBamFileImport(PDVMainClass.this, proBAMFile, spectrumFileType, spectrumFile.getName(), spectrumFactory, progressDialog);
 
                     sqliteConnection = proBamFileImport.getSqLiteConnection();
                     allModifications = proBamFileImport.getAllModifications();
@@ -1738,9 +1706,7 @@ public class PDVMainClass extends JFrame {
 
                     sortColumnJCombox.setModel(new DefaultComboBoxModel(orderName.toArray()));
 
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                } catch (ClassNotFoundException e) {
+                } catch (SQLException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
             }
@@ -1750,11 +1716,10 @@ public class PDVMainClass extends JFrame {
     /**
      * Import proBAM file
      * @param proBedFile proBed file
-     * @param spectrumFile Spectrum file
      * @param spectrumFileType  Spectrum file type
      * @param spectrumsFileFactory Object saving spectrum
      */
-    public void importProBedFile(File proBedFile, File spectrumFile, String spectrumFileType, Object spectrumsFileFactory, MzIdentMLType mzIdentMLType){
+    public void importProBedFile(File proBedFile, String spectrumFileType, Object spectrumsFileFactory, MzIdentMLType mzIdentMLType){
 
         this.spectrumsFileFactory = spectrumsFileFactory;
         this.spectrumFileType = spectrumFileType;
@@ -1823,9 +1788,7 @@ public class PDVMainClass extends JFrame {
 
                     sortColumnJCombox.setModel(new DefaultComboBoxModel(orderName.toArray()));
 
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                } catch (ClassNotFoundException e) {
+                } catch (SQLException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
             }
@@ -1952,7 +1915,6 @@ public class PDVMainClass extends JFrame {
 
                 msAndTableJSplitPane.revalidate();
                 msAndTableJSplitPane.repaint();
-
             }
         }
 
@@ -2098,8 +2060,6 @@ public class PDVMainClass extends JFrame {
         }
 
         selectedPageNum = 1;
-        variantPeptideMap.clear();
-        currentPeptideSequence = "";
         if(scans != null){
             scans.reset();
         }
@@ -2182,6 +2142,7 @@ public class PDVMainClass extends JFrame {
         if (value == JOptionPane.YES_OPTION) {
             closePDV();
         } else if (value == JOptionPane.NO_OPTION) {
+            //Nothing
         }
     }
 
@@ -2205,7 +2166,7 @@ public class PDVMainClass extends JFrame {
         new Thread(() -> {
             try {
                 progressDialog.setVisible(true);
-            } catch (IndexOutOfBoundsException e) {
+            } catch (IndexOutOfBoundsException ignored) {
             }
         }, "ProgressDialog").start();
 
@@ -2358,6 +2319,12 @@ public class PDVMainClass extends JFrame {
                         selectedPageNum = Integer.parseInt(pageSelectNumJTextField.getText());
                         pageNumJTextField.setText(String.valueOf(selectedPageNum) + "/" + String.valueOf(allSpectrumIndex.size()));
 
+                        if (pageToSelected.contains(selectedPageNum)){
+                            allSelectedJCheckBox.setSelected(true);
+                        } else {
+                            allSelectedJCheckBox.setSelected(false);
+                        }
+
                         buttonCheck();
                         updateTable();
 
@@ -2382,6 +2349,12 @@ public class PDVMainClass extends JFrame {
         pageNumJTextField.setText(String.valueOf(selectedPageNum) + "/" + String.valueOf(allSpectrumIndex.size()));
         buttonCheck();
 
+        if (pageToSelected.contains(selectedPageNum)){
+            allSelectedJCheckBox.setSelected(true);
+        } else {
+            allSelectedJCheckBox.setSelected(false);
+        }
+
         updateTable();
 
         spectrumJTable.requestFocus();
@@ -2398,40 +2371,16 @@ public class PDVMainClass extends JFrame {
         pageNumJTextField.setText(String.valueOf(selectedPageNum) + "/" + String.valueOf(allSpectrumIndex.size()));
         buttonCheck();
 
+        if (pageToSelected.contains(selectedPageNum)){
+            allSelectedJCheckBox.setSelected(true);
+        } else {
+            allSelectedJCheckBox.setSelected(false);
+        }
+
         updateTable();
 
         spectrumJTable.requestFocus();
         spectrumJTable.setRowSelectionInterval(0, 0);
-    }
-
-    /**
-     * Show the variant popup menu
-     * @param evt Mouse click event
-     */
-    private void spectrumJTableMouseClicked(MouseEvent evt) {
-        if (evt.getButton() == MouseEvent.BUTTON3 && spectrumJTable.getRowCount() > 0) {
-
-            final MouseEvent event = evt;
-            JPopupMenu popupMenu = new JPopupMenu();
-            JMenuItem menuItem = new JMenuItem("Variant Peptide Check");
-            menuItem.addActionListener(evt1 -> {
-                VariantPeptideDialog variantPeptideDialog = new VariantPeptideDialog(PDVMainClass.this, currentPeptideSequence, variantPeptideMap, selectedPsmKey);
-                variantPeptideMap = variantPeptideDialog.getVariantPeptideMap();
-            });
-            popupMenu.add(menuItem);
-            popupMenu.show(spectrumJTable, evt.getX(), evt.getY());
-        }
-    }
-
-    /**
-     * Show the variant popup menu
-     */
-    private void checkVariantPeptide() {
-        if (spectrumJTable.getRowCount() > 0) {
-
-            VariantPeptideDialog variantPeptideDialog = new VariantPeptideDialog(PDVMainClass.this, currentPeptideSequence, variantPeptideMap, selectedPsmKey);
-            variantPeptideMap = variantPeptideDialog.getVariantPeptideMap();
-        }
     }
 
     /**
@@ -2473,7 +2422,7 @@ public class PDVMainClass extends JFrame {
                     Boolean isSelected = spectrumKeyToSelected.get(selectedPsmKey);
                     if(isSelected){
                         spectrumKeyToSelected.put(selectedPsmKey, false);
-                        allSelections.remove(selectedPsmKey);
+                        allSelections = remove(allSelections, selectedPsmKey);
                     } else {
                         allSelections.add(selectedPsmKey);
                         spectrumKeyToSelected.put(selectedPsmKey, true);
@@ -2520,13 +2469,22 @@ public class PDVMainClass extends JFrame {
      * @param evt Mouse click event
      */
     private void allSelectedJCheckBoxMouseClicked(MouseEvent evt) {
-        for(String spectrumKey: selectPageSpectrumIndex){
-            if(allSelectedJCheckBox.isSelected()){
+        if (allSelectedJCheckBox.isSelected()) {
+            for (String spectrumKey : selectPageSpectrumIndex) {
                 spectrumKeyToSelected.put(spectrumKey, true);
-                allSelections.add(spectrumKey);
-            } else {
+                if (!allSelections.contains(spectrumKey)){
+                    allSelections.add(spectrumKey);
+                }
+
+                pageToSelected.add(selectedPageNum);
+            }
+        } else {
+
+            for (String spectrumKey : selectPageSpectrumIndex) {
                 spectrumKeyToSelected.put(spectrumKey, false);
-                allSelections.remove(spectrumKey);
+                allSelections = remove(allSelections, spectrumKey);
+
+                pageToSelected = remove(pageToSelected, selectedPageNum);
             }
         }
         spectrumJTable.revalidate();
@@ -2699,14 +2657,6 @@ public class PDVMainClass extends JFrame {
     }
 
     /**
-     * Variant peptide check
-     * @param evt Mouse click event
-     */
-    private void variantCheckJMenuItemActionPerformed(ActionEvent evt){
-        checkVariantPeptide();
-    }
-
-    /**
      * Select which columns need display
      * @param evt Mouse click event
      */
@@ -2780,8 +2730,7 @@ public class PDVMainClass extends JFrame {
                 peakMap.put(mzs[i], peak);
             }
 
-            MSnSpectrum mSnSpectrum = new MSnSpectrum(2, precursor, spectrumKey, peakMap, spectrumFileName);
-            return mSnSpectrum;
+            return new MSnSpectrum(2, precursor, spectrumKey, peakMap, spectrumFileName);
 
         } else if (spectrumFileType.equals("mzxml")){
             int scanKey = spectrumMatch.getSpectrumNumber();
@@ -2804,9 +2753,7 @@ public class PDVMainClass extends JFrame {
                 peakMap.put(mzs[i], peak);
             }
 
-            MSnSpectrum mSnSpectrum = new MSnSpectrum(2, precursor, spectrumKey, peakMap, spectrumFileName);
-
-            return mSnSpectrum;
+            return new MSnSpectrum(2, precursor, spectrumKey, peakMap, spectrumFileName);
 
         } else{
             return null;
@@ -2853,17 +2800,15 @@ public class PDVMainClass extends JFrame {
      */
     private void updateSpectrum(MSnSpectrum mSnSpectrum, SpectrumMatch spectrumMatch) {
 
-        String modSequence = "";
+        String modSequence;
         SpectrumIdentificationAssumption spectrumIdentificationAssumption;
 
         if (spectrumMatch.getBestPeptideAssumption() != null) {
             spectrumIdentificationAssumption = spectrumMatch.getBestPeptideAssumption();
-            currentPeptideSequence = spectrumMatch.getBestPeptideAssumption().getPeptide().getSequence();
             modSequence = spectrumMatch.getBestPeptideAssumption().getPeptide().getTaggedModifiedSequence(searchParameters.getPtmSettings(), false, false, false, false);
 
         } else if (spectrumMatch.getBestTagAssumption() != null) {
             spectrumIdentificationAssumption = spectrumMatch.getBestTagAssumption();
-            currentPeptideSequence = spectrumMatch.getBestTagAssumption().getTag().asSequence();
             modSequence = spectrumMatch.getBestTagAssumption().getTag().getTaggedModifiedSequence(searchParameters.getPtmSettings(), false, false, true, false);
         } else {
             throw new IllegalArgumentException("No best assumption found for spectrum " + ".");
@@ -2885,7 +2830,7 @@ public class PDVMainClass extends JFrame {
      * CatchException
      * @param e Exception
      */
-    public void catchException(Exception e) {
+    private void catchException(Exception e) {
         exceptionHandler.catchException(e);
     }
 
@@ -2921,7 +2866,7 @@ public class PDVMainClass extends JFrame {
     /**
      * load userPreference
      */
-    public void loadUserPreferences() {
+    private void loadUserPreferences() {
         try {
             utilitiesUserPreferences = UtilitiesUserPreferences.loadUserPreferences();
             lastSelectedFolder = new LastSelectedFolder("user.home");
@@ -3013,9 +2958,8 @@ public class PDVMainClass extends JFrame {
                     peakMap.put(mzs[i], peak);
                 }
 
-                MSnSpectrum mSnSpectrum = new MSnSpectrum(2, precursor, spectrumKey, peakMap, spectrumFileName);
+                return new MSnSpectrum(2, precursor, spectrumKey, peakMap, spectrumFileName);
 
-                return mSnSpectrum;
             } else if (spectrumFileType.equals("mzxml")){
                 int scanKey = selectedMatch.getSpectrumNumber();
 
@@ -3036,12 +2980,9 @@ public class PDVMainClass extends JFrame {
                     peakMap.put(mzs[i], peak);
                 }
 
-                MSnSpectrum mSnSpectrum = new MSnSpectrum(2, precursor, spectrumKey, peakMap, spectrumFileName);
+                return new MSnSpectrum(2, precursor, spectrumKey, peakMap, spectrumFileName);
 
-                return mSnSpectrum;
-
-            }
-            else {
+            } else {
                 return null;
             }
 
@@ -3088,7 +3029,6 @@ public class PDVMainClass extends JFrame {
      * Export selected spectrum reports
      */
     private void exportSelectedReport(){
-        Object[] allParameters = spectrumMainPanel.getParameters();
 
         ExportReportsJDialog exportReportsJDialog;
         
@@ -3133,5 +3073,29 @@ public class PDVMainClass extends JFrame {
      */
     public SearchParameters getSearchParameters(){
         return searchParameters;
+    }
+
+    /**
+     * Remove target in list
+     * @param list ArrayList<Integer>
+     * @param target Integer
+     * @return ArrayList<Integer>
+     */
+    private ArrayList<Integer> remove(ArrayList<Integer> list, Integer target){
+        list.removeIf(item -> item.equals(target));
+
+        return list;
+    }
+
+    /**
+     * Remove target in list
+     * @param list ArrayList<String>
+     * @param target String
+     * @return ArrayList<String>
+     */
+    private ArrayList<String> remove(ArrayList<String> list, String target){
+        list.removeIf(item -> item.equals(target));
+
+        return list;
     }
 }
