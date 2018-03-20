@@ -1,5 +1,6 @@
 package PDVGUI.gui.utils;
 
+import PDVGUI.gui.utils.Export.ExportExpectedSizeDialog;
 import com.compomics.util.gui.spectrum.SequenceFragmentationPanel;
 import com.compomics.util.gui.spectrum.SpectrumPanel;
 
@@ -48,6 +49,11 @@ public class SetAction {
     private volatile int myY2 = 0;
 
     /**
+     * ExportExpectedSizeDialog
+     */
+    private ExportExpectedSizeDialog exportExpectedSizeDialog;
+
+    /**
      * Constructor
      * @param parent Spectrum main panel
      * @param jLayeredPane JLayer panel in spectrum main panel
@@ -77,7 +83,14 @@ public class SetAction {
 
                 if (e.getButton() == MouseEvent.BUTTON3 && parent != null) {
 
-                    parent.updateSpectrum();
+                    if (exportExpectedSizeDialog != null){
+
+                        exportExpectedSizeDialog.dispose();
+                        parent.updateSpectrum();
+                        parent.updateExportJDialog();
+                    } else {
+                        parent.updateSpectrum();
+                    }
                 }
             }
 
@@ -144,7 +157,9 @@ public class SetAction {
             @Override
             public void mouseMoved(MouseEvent e) {
                 if(spectrumMainPanel != null){
-                    spectrumJPanel.setBounds(0,0,spectrumMainPanel.getWidth(), spectrumMainPanel.getHeight()-25);
+                    if (secondarySpectrumPlotsJPanel != null){
+                        spectrumJPanel.setBounds(0,75, spectrumMainPanel.getWidth(), spectrumMainPanel.getHeight()-85);
+                    }
                 } else {
                     spectrumJPanel.setBounds(0,0,width, height);
                 }
@@ -287,6 +302,16 @@ public class SetAction {
     }
 
     /**
+     * Set ExportExpectedSizeDialog
+     * @param exportDialog
+     */
+    public void setExportDialog(ExportExpectedSizeDialog exportDialog){
+
+        this.exportExpectedSizeDialog = exportDialog;
+
+    }
+
+    /**
      * Constructor
      * @param jLayeredPane JLayer panel
      * @param secondarySpectrumPlotsJPanel Secondary spectrum plot panel
@@ -376,9 +401,7 @@ public class SetAction {
             @Override
             public void mouseMoved(MouseEvent e) {
 
-                spectrumJPanel.setBounds(0,0,width, height);
-
-
+                spectrumJPanel.setBounds(0,75, width, height - 85);
 
                 if(secondarySpectrumPlotsJPanel != null) {
                     jLayeredPane.setPosition(secondarySpectrumPlotsJPanel, 0);

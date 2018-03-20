@@ -762,6 +762,8 @@ public class PrideXMLDisplay extends JFrame {
                                         .addComponent(onlySpectrumMainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 );
 
+                spectrumJTableMouseReleased(null);
+
                 tabelAndChartJSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
                         evt13 -> onlySpectrumMainPanel.updateSpectrum(currentSpectrum));
 
@@ -919,6 +921,9 @@ public class PrideXMLDisplay extends JFrame {
             selectedPSMKey = String.valueOf(row);
 
             onlySpectrumMainPanel.updateSpectrum(currentSpectrum);
+
+            spectrumShowJPanel.revalidate();
+            spectrumShowJPanel.repaint();
 
         }
         this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
@@ -1217,7 +1222,7 @@ public class PrideXMLDisplay extends JFrame {
 
             currentMz.add(mz);
 
-            peptideAssumption = new PeptideAssumption(peptide, 1, 0, new Charge(+1, charge+1), 0.0, "");
+            peptideAssumption = new PeptideAssumption(peptide, 1, 0, new Charge(+1, charge), 0.0, "");
 
             spectrumMatch.setBestPeptideAssumption(peptideAssumption);
 

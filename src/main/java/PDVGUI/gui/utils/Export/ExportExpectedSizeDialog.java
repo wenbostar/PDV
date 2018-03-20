@@ -105,9 +105,8 @@ public class ExportExpectedSizeDialog extends JDialog {
 
         setupGUI();
 
-        setLocationRelativeTo(spectrumMainPanel);
+        setLocationRelativeTo(spectrumMainPanel.parentFrame);
 
-        setVisible(true);
     }
 
     /**
@@ -152,7 +151,7 @@ public class ExportExpectedSizeDialog extends JDialog {
             }
         });
 
-        setResizable(true);
+        setResizable(false);
 
         mainJPanel.setBackground(Color.white);
 
@@ -264,7 +263,9 @@ public class ExportExpectedSizeDialog extends JDialog {
         viewerJPanel.setBackground(Color.white);
         viewerJPanel.setOpaque(false);
 
-        jLayeredPane.setPreferredSize(spectrumJPanel.getSize());
+        jLayeredPane.setPreferredSize(spectrumMainPanel.getSize());
+        jLayeredPane.setBackground(Color.white);
+        jLayeredPane.setOpaque(true);
 
         resizeJPanel.add(jLayeredPane);
 
@@ -314,11 +315,11 @@ public class ExportExpectedSizeDialog extends JDialog {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(mainJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(mainJPanel, GroupLayout.DEFAULT_SIZE, (int) (spectrumMainPanel.parentFrame.getWidth() * 0.8), Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(mainJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(mainJPanel, GroupLayout.DEFAULT_SIZE, (int) (spectrumMainPanel.parentFrame.getHeight() * 0.8), Short.MAX_VALUE)
         );
 
         pack();
@@ -364,8 +365,8 @@ public class ExportExpectedSizeDialog extends JDialog {
         String unitName = (String) unitJCombox.getSelectedItem();
 
         if(!picHeightJText.getText().equals("") && !picWidthJText.getText().equals("")){
-            Integer height = (int) (Integer.valueOf(picHeightJText.getText()));
-            Integer width = (int) (Integer.valueOf(picWidthJText.getText()));
+            Integer height = (Integer.valueOf(picHeightJText.getText()));
+            Integer width = (Integer.valueOf(picWidthJText.getText()));
 
             FormLayout layout = new FormLayout(width+unitName, height+unitName);
 
@@ -381,9 +382,7 @@ public class ExportExpectedSizeDialog extends JDialog {
 
             } else {
 
-                spectrumJPanel.setBounds(0,0, resizeJPanelWidth, resizeJPanelHeight);
-
-                ((Graphics2D)spectrumJPanel.getGraphics()).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+                spectrumJPanel.setBounds(0,75, resizeJPanelWidth, resizeJPanelHeight - 85);
 
                 if(mirrorSequenceFragmentationPanel != null){
                     mirrorSequenceFragmentationPanel.setBounds(40, resizeJPanelHeight -40,(peptideSize+4)*20,100);
@@ -391,8 +390,6 @@ public class ExportExpectedSizeDialog extends JDialog {
 
                 jLayeredPane.setBounds(0,0, resizeJPanelWidth, resizeJPanelHeight);
                 jLayeredPane.setPreferredSize(new Dimension(resizeJPanelWidth, resizeJPanelHeight));
-
-                ((Graphics2D) secondarySpectrumPlotsJPanel.getGraphics()).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
                 viewerJPanel.revalidate();
                 viewerJPanel.repaint();

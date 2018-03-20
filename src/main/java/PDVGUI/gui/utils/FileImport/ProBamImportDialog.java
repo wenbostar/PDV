@@ -169,7 +169,7 @@ public class ProBamImportDialog extends JDialog{
         mainJPanel = new JPanel();
         JPanel annotationSettingJPanel = new JPanel();
         JPanel fileTypSelectionPanel = new JPanel();
-        JLabel fileTypeJLabel = new JLabel("File types");
+        JLabel fileTypeJLabel = new JLabel("File type");
 
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("PDV - ProBam File Display");
@@ -326,7 +326,7 @@ public class ProBamImportDialog extends JDialog{
                                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        titledBorder = BorderFactory.createTitledBorder("Types selection" + " \t ");
+        titledBorder = BorderFactory.createTitledBorder("Type selection" + " \t ");
         titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
 
         fileTypSelectionPanel.setBorder(titledBorder);

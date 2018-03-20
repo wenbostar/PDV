@@ -55,7 +55,7 @@ public class PrideXMLImportDialog {
         JFileChooser fileChooser = new JFileChooser(lastSelectedFolder);
         fileChooser.setDialogTitle("Select PRIDE XML File(s)");
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        fileChooser.setMultiSelectionEnabled(true);
+        fileChooser.setMultiSelectionEnabled(false);
 
         FileFilter filter = new FileFilter() {
             @Override

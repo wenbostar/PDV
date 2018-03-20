@@ -212,6 +212,18 @@ public class SpectrumMainPanel extends JPanel {
      * Intensity details
      */
     public String matchedToAllPeakInt;
+    /**
+     * Spectrum setAction
+     */
+    private SetAction spectrumSetAction;
+    /**
+     * Check spectrum mirror spectrum setAction
+     */
+    private SetAction mirrorSetAction;
+    /**
+     * Check peptide mirror spectrum setAction
+     */
+    private SetAction checkSetAction;
 
     /**
      * Constructor
@@ -934,10 +946,28 @@ public class SpectrumMainPanel extends JPanel {
     }
 
     /**
+     * Update the export exacted size dialog
+     */
+    public void updateExportJDialog(){
+        if(mirrorSelected){
+            exportMirrorSpectrumAsFigure();
+        } else if(peptideCheckSelected){
+            exportCheckSpectrumAsFigure();
+        } else {
+            exportSpectrumAsFigure();
+        }
+    }
+
+    /**
      * Export normal spectrum
      */
     private void exportSpectrumAsFigure() {
+
         ExportExpectedSizeDialog exportExpectedSizeDialog = new ExportExpectedSizeDialog(this, spectrumJLayeredPane, sequenceFragmentationPanel, null, spectrumPanel, currentPeptideSequence.length(), currentSpectrum.getSpectrumTitle(), false);
+
+        spectrumSetAction.setExportDialog(exportExpectedSizeDialog);
+
+        exportExpectedSizeDialog.setVisible(true);
 
         lastSelectedFolder.setLastSelectedFolder(exportExpectedSizeDialog.getLastFolder());
     }
@@ -946,7 +976,12 @@ public class SpectrumMainPanel extends JPanel {
      * Export mirror spectrum
      */
     private void exportMirrorSpectrumAsFigure() {
+
         ExportExpectedSizeDialog exportExpectedSizeDialog = new ExportExpectedSizeDialog(this, mirrorJLayeredPane, sequenceFragmentationPanelMirror, mirrorFragmentPanel, mirrorSpectrumPanel, currentPeptideSequence.length(), currentSpectrum.getSpectrumTitle(), false);
+
+        mirrorSetAction.setExportDialog(exportExpectedSizeDialog);
+
+        exportExpectedSizeDialog.setVisible(true);
 
         lastSelectedFolder.setLastSelectedFolder(exportExpectedSizeDialog.getLastFolder());
     }
@@ -955,7 +990,12 @@ public class SpectrumMainPanel extends JPanel {
      * Export check peptide spectrum
      */
     private void exportCheckSpectrumAsFigure() {
+
         ExportExpectedSizeDialog exportExpectedSizeDialog = new ExportExpectedSizeDialog(this, checkPeptideJLayeredPane, sequenceFragmentationPanelCheck, checkFragmentPanel, checkPeptideSpectrumPanel, currentPeptideSequence.length(), currentSpectrum.getSpectrumTitle(), true);
+
+        checkSetAction.setExportDialog(exportExpectedSizeDialog);
+
+        exportExpectedSizeDialog.setVisible(true);
 
         lastSelectedFolder.setLastSelectedFolder(exportExpectedSizeDialog.getLastFolder());
     }
@@ -1193,8 +1233,6 @@ public class SpectrumMainPanel extends JPanel {
                     spectrumJLayeredPane.add(spectrumPanel);
                     spectrumPanel.setBounds(0, 0, spectrumMainPanel.getWidth(), spectrumMainPanel.getHeight() - 25);
 
-                    new SetAction(this, spectrumJLayeredPane, null, null, spectrumPanel, 0, 0, spectrumMainPanel);
-
                     spectrumMainPanel.revalidate();
                     spectrumMainPanel.repaint();
 
@@ -1378,13 +1416,13 @@ public class SpectrumMainPanel extends JPanel {
                     sequenceFragmentationPanel.setBackground(Color.WHITE);
 
                     spectrumJLayeredPane.add(spectrumPanel);
-                    spectrumPanel.setBounds(0,0,spectrumMainPanel.getWidth(),spectrumMainPanel.getHeight()-25);
+                    spectrumPanel.setBounds(0, 75,spectrumMainPanel.getWidth(),spectrumMainPanel.getHeight()-85);
 
                     spectrumJLayeredPane.setLayer(sequenceFragmentationPanel, JLayeredPane.DRAG_LAYER);
                     spectrumJLayeredPane.add(sequenceFragmentationPanel);
                     zoomAction(sequenceFragmentationPanel, modSequence, false);
 
-                    new SetAction(this, spectrumJLayeredPane, sequenceFragmentationPanel, null, spectrumPanel, 0, 0, spectrumMainPanel);
+                    spectrumSetAction = new SetAction(this, spectrumJLayeredPane, sequenceFragmentationPanel, null, spectrumPanel, 0, 0, spectrumMainPanel);
 
                     mirrorSpectrumPanel = new SpectrumPanel(
                             currentSpectrum.getMzValuesAsArray(), intensitiesAsArray,
@@ -1470,13 +1508,13 @@ public class SpectrumMainPanel extends JPanel {
                     }
 
                     mirrorJLayeredPane.add(mirrorSpectrumPanel);
-                    mirrorSpectrumPanel.setBounds(0,0,spectrumMainPanel.getWidth(),spectrumMainPanel.getHeight()-25);
+                    mirrorSpectrumPanel.setBounds(0,75,spectrumMainPanel.getWidth(),spectrumMainPanel.getHeight()-85);
 
                     mirrorJLayeredPane.setLayer(sequenceFragmentationPanelMirror, JLayeredPane.DRAG_LAYER);
                     mirrorJLayeredPane.add(sequenceFragmentationPanelMirror);
                     zoomAction(sequenceFragmentationPanelMirror, modSequence, false);
 
-                    new SetAction(this, mirrorJLayeredPane, sequenceFragmentationPanelMirror, mirrorFragmentPanel, mirrorSpectrumPanel, 0, 0, spectrumMainPanel);
+                    mirrorSetAction = new SetAction(this, mirrorJLayeredPane, sequenceFragmentationPanelMirror, mirrorFragmentPanel, mirrorSpectrumPanel, 0, 0, spectrumMainPanel);
 
                     checkPeptideSpectrumPanel = new SpectrumPanel(
                             currentSpectrum.getMzValuesAsArray(), intensitiesAsArray,
@@ -1551,13 +1589,13 @@ public class SpectrumMainPanel extends JPanel {
                     }
 
                     checkPeptideJLayeredPane.add(checkPeptideSpectrumPanel);
-                    checkPeptideSpectrumPanel.setBounds(0,0,spectrumMainPanel.getWidth(),spectrumMainPanel.getHeight()-25);
+                    checkPeptideSpectrumPanel.setBounds(0,75,spectrumMainPanel.getWidth(),spectrumMainPanel.getHeight()-85);
 
                     checkPeptideJLayeredPane.setLayer(sequenceFragmentationPanelCheck, JLayeredPane.DRAG_LAYER);
                     checkPeptideJLayeredPane.add(sequenceFragmentationPanelCheck);
                     zoomAction(sequenceFragmentationPanelCheck, modSequence, false);
 
-                    new SetAction(this, checkPeptideJLayeredPane, sequenceFragmentationPanelCheck, checkFragmentPanel, checkPeptideSpectrumPanel, 0, 0, spectrumMainPanel);
+                    checkSetAction = new SetAction(this, checkPeptideJLayeredPane, sequenceFragmentationPanelCheck, checkFragmentPanel, checkPeptideSpectrumPanel, 0, 0, spectrumMainPanel);
 
                     ArrayList<ArrayList<IonMatch>> allAnnotations = new ArrayList<>();
                     allAnnotations.add(annotations);

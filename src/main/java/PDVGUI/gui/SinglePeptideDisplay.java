@@ -117,7 +117,7 @@ public class SinglePeptideDisplay extends JFrame {
             e.printStackTrace();
         }
 
-        annotationSettings.setIntensityLimit(0.0); // annotate all peaks by default
+        annotationSettings.setIntensityLimit(0.3);
         setUpGUI();
         setExtendedState(MAXIMIZED_BOTH);
         this.setVisible(true);
@@ -717,8 +717,8 @@ public class SinglePeptideDisplay extends JFrame {
         annotationSettings.setPreferencesFromSearchParameters(searchParameters);
 
         spectrumMainPanel.updateSearchParameters(searchParameters);
-
         spectrumMainPanel.setShowDetails(showDetailsJCheckBox.isSelected());
+        spectrumMainPanel.setAnnotationSettings(annotationSettings);
 
         Peptide peptide = new Peptide(peptideSequence, modificationMatches);
         peptideAssumption = new PeptideAssumption(peptide, 1, 1, new Charge(1,1), 0, null);
@@ -824,7 +824,7 @@ public class SinglePeptideDisplay extends JFrame {
     }
 
     /**
-     * Close psm viewer
+     * Close PDV
      */
     private void closePDV(){
         exceptionHandler.setIgnoreExceptions(true);
