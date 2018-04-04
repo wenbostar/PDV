@@ -133,11 +133,12 @@ public class SpectrumLibDisplay extends JFrame {
      * @param searchParameters Search parameters
      */
     public SpectrumLibDisplay(String spectrumLibFilePath, SearchParameters searchParameters, AnnotationSettings annotationSettings){
-        spectrumMainPanel = new SpectrumMainPanel(this);
 
         this.spectrumLibFilePath = spectrumLibFilePath;
         this.searchParameters = searchParameters;
         this.annotationSettings = annotationSettings;
+
+        spectrumMainPanel = new SpectrumMainPanel(this);
 
         initComponent();
 

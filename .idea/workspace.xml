@@ -2,28 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0b0cca48-ec31-481b-94db-b982afc0e540" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_chhh_javolution_core_java_msftbx_6_11_7.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_chhh_msftbx_1_3_1.xml" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_chhh_msftbx_1_8_2.xml" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_google_errorprone_error_prone_annotations_2_0_18.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_google_guava_guava_22_0_android.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_google_j2objc_j2objc_annotations_1_1.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__javax_xml_bind_jaxb_api_2_2_3.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__javax_xml_stream_stax_api_1_0_2.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_logging_log4j_log4j_api_2_5.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_logging_log4j_log4j_core_2_5.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_logging_log4j_log4j_slf4j_impl_2_5.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_biojava_biojava_ontology_4_2_7.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_codehaus_mojo_animal_sniffer_annotations_1_14.xml" afterPath="" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/PDV.iml" afterPath="$PROJECT_DIR$/PDV.iml" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" afterPath="$PROJECT_DIR$/pom.xml" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PrideXMLDisplay.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PrideXMLDisplay.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/SinglePeptideDisplay.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/SinglePeptideDisplay.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/ExportExpectedSizeDialog.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/ExportExpectedSizeDialog.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/PrideXMLImportDialog.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/PrideXMLImportDialog.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/ProBamImportDialog.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/ProBamImportDialog.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SetAction.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SetAction.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/SpectrumLibDisplay.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/SpectrumLibDisplay.java" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -39,8 +19,8 @@
       <file leaf-file-name="PDVMainClass.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="40365">
-              <caret line="2858" column="0" lean-forward="false" selection-start-line="2858" selection-start-column="0" selection-end-line="2858" selection-end-column="0" />
+            <state relative-caret-position="326">
+              <caret line="277" column="32" lean-forward="false" selection-start-line="277" selection-start-column="32" selection-end-line="277" selection-end-column="32" />
               <folding>
                 <element signature="e#30370#30371#0" expanded="true" />
                 <element signature="e#30432#30433#0" expanded="true" />
@@ -55,41 +35,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SinglePeptideDisplay.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/SinglePeptideDisplay.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-2254">
-              <caret line="119" column="50" lean-forward="false" selection-start-line="119" selection-start-column="50" selection-end-line="119" selection-end-column="50" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="pom.xml" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/pom.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="315">
-              <caret line="177" column="20" lean-forward="false" selection-start-line="177" selection-start-column="20" selection-end-line="177" selection-end-column="20" />
+            <state relative-caret-position="1572">
+              <caret line="257" column="21" lean-forward="false" selection-start-line="253" selection-start-column="8" selection-end-line="257" selection-end-column="21" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ProBamImportDialog.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/ProBamImportDialog.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-2745">
-              <caret line="328" column="61" lean-forward="false" selection-start-line="328" selection-start-column="61" selection-end-line="328" selection-end-column="61" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="SpectrumMainPanel.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="SpectrumMainPanel.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="825">
-              <caret line="1910" column="9" lean-forward="false" selection-start-line="1910" selection-start-column="9" selection-end-line="1910" selection-end-column="9" />
+            <state relative-caret-position="98">
+              <caret line="257" column="20" lean-forward="false" selection-start-line="257" selection-start-column="20" selection-end-line="257" selection-end-column="20" />
               <folding>
                 <element signature="e#12024#12025#0" expanded="true" />
                 <element signature="e#12070#12071#0" expanded="true" />
@@ -112,27 +72,51 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SetAction.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SetAction.java">
+      <file leaf-file-name="SinglePeptideDisplay.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/SinglePeptideDisplay.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="5415">
-              <caret line="411" column="0" lean-forward="false" selection-start-line="411" selection-start-column="0" selection-end-line="411" selection-end-column="0" />
-              <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="e#7344#7345#0" expanded="true" />
-                <element signature="e#7428#7429#0" expanded="true" />
-                <element signature="e#9422#9423#0" expanded="true" />
-                <element signature="e#9510#9511#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="371">
+              <caret line="132" column="43" lean-forward="false" selection-start-line="132" selection-start-column="43" selection-end-line="132" selection-end-column="43" />
+              <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="RealTimeExportJDialog.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/RealTimeExportJDialog.java">
+      <file leaf-file-name="SpectrumLibDisplay.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/SpectrumLibDisplay.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-382">
-              <caret line="535" column="20" lean-forward="false" selection-start-line="535" selection-start-column="20" selection-end-line="535" selection-end-column="20" />
+            <state relative-caret-position="-165">
+              <caret line="140" column="56" lean-forward="false" selection-start-line="140" selection-start-column="56" selection-end-line="140" selection-end-column="56" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="TextFileImport.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/TextFileImport.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="462">
+              <caret line="404" column="34" lean-forward="true" selection-start-line="404" selection-start-column="34" selection-end-line="404" selection-end-column="34" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="TextImport.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/PDVCLI/TextImport.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-1819">
+              <caret line="20" column="13" lean-forward="false" selection-start-line="20" selection-start-column="13" selection-end-line="20" selection-end-column="13" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AnnotationSettingsDialog.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/AnnotationSettingsDialog.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="465">
+              <caret line="139" column="50" lean-forward="false" selection-start-line="139" selection-start-column="50" selection-end-line="139" selection-end-column="50" />
               <folding />
             </state>
           </provider>
@@ -141,18 +125,18 @@
       <file leaf-file-name="PrideXMLDisplay.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/PrideXMLDisplay.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4848">
+            <state relative-caret-position="15">
               <caret line="597" column="81" lean-forward="false" selection-start-line="597" selection-start-column="81" selection-end-line="597" selection-end-column="81" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="MzMLInfoImport.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MzMLInfoImport.java">
+      <file leaf-file-name="MSOneImport.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MSOneImport.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="15">
-              <caret line="3" column="8" lean-forward="false" selection-start-line="3" selection-start-column="8" selection-end-line="3" selection-end-column="8" />
+            <state relative-caret-position="645">
+              <caret line="118" column="33" lean-forward="false" selection-start-line="118" selection-start-column="24" selection-end-line="118" selection-end-column="33" />
               <folding />
             </state>
           </provider>
@@ -162,8 +146,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>msOneJPanel</find>
-      <find>psmv</find>
       <find>PDVGUI</find>
       <find>toleranceUnit</find>
       <find>setLookAndFeel</find>
@@ -192,6 +174,8 @@
       <find>psm</find>
       <find>github</find>
       <find>annotationSettings</find>
+      <find>searchParameters</find>
+      <find>spectrumMainPanel</find>
     </findStrings>
     <replaceStrings>
       <replace>termModMassToTerm</replace>
@@ -233,7 +217,6 @@
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/utils/ExportReports.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/utils/ImportPTMsFromUnimod.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/utils/ProteoQCCMD.java" />
-        <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/SpectrumLibDisplay.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/ModificationDialog.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/RawDataDisplay.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/ExportExpectedSizeDialog.java" />
@@ -251,12 +234,13 @@
         <option value="$PROJECT_DIR$/src/main/java/PDVCLI/PDVCLIMainClass.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/DatabaseImportDialog.java" />
-        <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/SinglePeptideDisplay.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/ProBamImportDialog.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/PrideXMLImportDialog.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PrideXMLDisplay.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java" />
+        <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/SpectrumLibDisplay.java" />
       </list>
     </option>
   </component>
@@ -284,10 +268,9 @@
     </treeState>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="62" />
-    <option name="y" value="-8" />
-    <option name="width" value="1312" />
-    <option name="height" value="784" />
+    <option name="x" value="63" />
+    <option name="width" value="1310" />
+    <option name="height" value="772" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -358,6 +341,14 @@
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="462c0819:PsiDirectoryNode" />
               <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="PDVCLI" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="PDV" type="b2602c69:ProjectViewProjectNode" />
+              <item name="PDV" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
               <item name="PDVGUI" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -397,17 +388,6 @@
               <item name="PDVGUI" type="462c0819:PsiDirectoryNode" />
               <item name="gui" type="462c0819:PsiDirectoryNode" />
               <item name="utils" type="462c0819:PsiDirectoryNode" />
-              <item name="Export" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="PDV" type="b2602c69:ProjectViewProjectNode" />
-              <item name="PDV" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="PDVGUI" type="462c0819:PsiDirectoryNode" />
-              <item name="gui" type="462c0819:PsiDirectoryNode" />
-              <item name="utils" type="462c0819:PsiDirectoryNode" />
               <item name="FileImport" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -423,8 +403,8 @@
           <select />
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
       <pane id="AndroidView" />
+      <pane id="PackagesPane" />
       <pane id="Scratches" />
     </panes>
   </component>
@@ -435,6 +415,7 @@
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.34292036" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../ReferenceSoft/peptide-shaker-master" />
+    <property name="SearchEverywhereHistoryKey" value="slf4j&#9;PSI&#9;JAVA://javolution.osgi.internal.SLF4jLogServiceImpl" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -576,7 +557,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="54" y="-8" width="1874" height="1096" extended-state="6" />
+    <frame x="62" y="-8" width="1866" height="1096" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -586,25 +567,25 @@
       <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22822492" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22812846" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.37330553" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2523462" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.207828" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21096346" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="VcsContentAnnotationSettings">
@@ -637,30 +618,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/InfoPanel.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2416">
-          <caret line="14" column="13" lean-forward="false" selection-start-line="14" selection-start-column="13" selection-end-line="14" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/LineChart.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-46">
-          <caret line="16" column="23" lean-forward="false" selection-start-line="16" selection-start-column="23" selection-end-line="16" selection-end-column="23" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/CheckPeptideJDialog.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="232">
-          <caret line="315" column="16" lean-forward="false" selection-start-line="315" selection-start-column="16" selection-end-line="315" selection-end-column="16" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/OriginalInforDialog.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1456">
@@ -740,22 +697,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/SpectrumLibDisplay.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1470">
-          <caret line="127" column="49" lean-forward="false" selection-start-line="127" selection-start-column="49" selection-end-line="127" selection-end-column="49" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/ModificationDialog.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1350">
-          <caret line="100" column="105" lean-forward="false" selection-start-line="100" selection-start-column="105" selection-end-line="100" selection-end-column="105" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/RawDataDisplay.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="7065">
@@ -768,14 +709,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="262">
           <caret line="593" column="74" lean-forward="false" selection-start-line="593" selection-start-column="74" selection-end-line="593" selection-end-column="74" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/TextFileImport.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="254">
-          <caret line="361" column="70" lean-forward="false" selection-start-line="361" selection-start-column="70" selection-end-line="361" selection-end-column="70" />
           <folding />
         </state>
       </provider>
@@ -796,13 +729,6 @@
             <element signature="e#13449#13450#0" expanded="false" />
             <element signature="e#13488#13489#0" expanded="false" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVCLI/TextImport.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
@@ -922,14 +848,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="jar://$PROJECT_DIR$/lib/utilities-4.11.14.jar!/com/compomics/util/experiment/identification/spectrum_annotation/AnnotationSettings.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="252" column="16" lean-forward="false" selection-start-line="252" selection-start-column="16" selection-end-line="252" selection-end-column="16" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
+    <entry file="jar://$PROJECT_DIR$/lib/utilities-4.11.14.jar!/com/compomics/util/experiment/identification/spectrum_annotation/AnnotationSettings.class" />
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/DatabaseImportDialog.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2400">
@@ -946,66 +865,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/AnnotationSettingsDialog.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1777">
-          <caret line="533" column="68" lean-forward="false" selection-start-line="533" selection-start-column="8" selection-end-line="533" selection-end-column="68" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/SinglePeptideDisplay.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2254">
-          <caret line="119" column="50" lean-forward="false" selection-start-line="119" selection-start-column="50" selection-end-line="119" selection-end-column="50" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="40365">
-          <caret line="2858" column="0" lean-forward="false" selection-start-line="2858" selection-start-column="0" selection-end-line="2858" selection-end-column="0" />
-          <folding>
-            <element signature="e#30370#30371#0" expanded="true" />
-            <element signature="e#30432#30433#0" expanded="true" />
-            <element signature="e#30488#30489#0" expanded="true" />
-            <element signature="e#30552#30553#0" expanded="true" />
-            <element signature="e#89917#89918#0" expanded="true" />
-            <element signature="e#89982#89983#0" expanded="true" />
-            <element signature="e#104340#104341#0" expanded="true" />
-            <element signature="e#104390#104391#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/PrideXMLDisplay.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4848">
-          <caret line="597" column="81" lean-forward="false" selection-start-line="597" selection-start-column="81" selection-end-line="597" selection-end-column="81" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MzMLInfoImport.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="3" column="8" lean-forward="false" selection-start-line="3" selection-start-column="8" selection-end-line="3" selection-end-column="8" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="177" column="20" lean-forward="false" selection-start-line="177" selection-start-column="20" selection-end-line="177" selection-end-column="20" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/ProBamImportDialog.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2745">
+        <state relative-caret-position="4440">
           <caret line="328" column="61" lean-forward="false" selection-start-line="328" selection-start-column="61" selection-end-line="328" selection-end-column="61" />
           <folding />
         </state>
@@ -1013,14 +875,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SetAction.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5415">
+        <state relative-caret-position="6000">
           <caret line="411" column="0" lean-forward="false" selection-start-line="411" selection-start-column="0" selection-end-line="411" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#7344#7345#0" expanded="true" />
-            <element signature="e#7428#7429#0" expanded="true" />
-            <element signature="e#9422#9423#0" expanded="true" />
-            <element signature="e#9510#9511#0" expanded="true" />
+            <element signature="imports" expanded="false" />
+            <element signature="e#7344#7345#0" expanded="false" />
+            <element signature="e#7428#7429#0" expanded="false" />
+            <element signature="e#9422#9423#0" expanded="false" />
+            <element signature="e#9510#9511#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1035,16 +897,124 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/RealTimeExportJDialog.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-382">
+        <state relative-caret-position="7335">
           <caret line="535" column="20" lean-forward="false" selection-start-line="535" selection-start-column="20" selection-end-line="535" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/ModificationDialog.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="577">
+          <caret line="100" column="105" lean-forward="false" selection-start-line="100" selection-start-column="105" selection-end-line="100" selection-end-column="105" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/com/compomics/utilities/4.11.14/utilities-4.11.14-sources.jar!/com/compomics/util/gui/spectrum/IonLabelColorTableModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1043">
+          <caret line="38" column="11" lean-forward="false" selection-start-line="38" selection-start-column="11" selection-end-line="38" selection-end-column="11" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/AnnotationSettingsDialog.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="465">
+          <caret line="139" column="50" lean-forward="false" selection-start-line="139" selection-start-column="50" selection-end-line="139" selection-end-column="50" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/com/github/chhh/javolution-core-java-msftbx/6.11.7/javolution-core-java-msftbx-6.11.7.jar!/javolution/osgi/internal/SLF4jLogServiceImpl.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="7" column="0" lean-forward="false" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
+          <folding>
+            <marker date="1502787941988" expanded="false" signature="0:104" ph="/.../" />
+            <marker date="1502787941988" expanded="true" signature="148:315" ph="..." />
+            <marker date="1502787941988" expanded="true" signature="607:1262" ph="{...}" />
+            <marker date="1502787941988" expanded="false" signature="733:781" ph="run() → {" />
+            <marker date="1502787941988" expanded="false" signature="1187:1202" ph="}" />
+            <marker date="1502787941988" expanded="false" signature="1310:1321" ph=" { " />
+            <marker date="1502787941988" expanded="false" signature="1363:1369" ph=" }" />
+            <marker date="1502787941988" expanded="true" signature="1439:1805" ph="{...}" />
+            <marker date="1502787941988" expanded="false" signature="1874:1885" ph=" { " />
+            <marker date="1502787941988" expanded="false" signature="1927:1933" ph=" }" />
+            <marker date="1502787941988" expanded="true" signature="2024:2082" ph="{...}" />
+            <marker date="1502787941988" expanded="true" signature="2106:3013" ph="{...}" />
+            <marker date="1502787941988" expanded="true" signature="3072:3408" ph="{...}" />
+            <marker date="1502787941988" expanded="true" signature="3480:3884" ph="{...}" />
+            <marker date="1502787941988" expanded="true" signature="3920:4039" ph="{...}" />
+            <marker date="1502787941988" expanded="true" signature="4022:4033" ph="{}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1572">
+          <caret line="257" column="21" lean-forward="false" selection-start-line="253" selection-start-column="8" selection-end-line="257" selection-end-column="21" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MzMLInfoImport.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="17" column="13" lean-forward="false" selection-start-line="17" selection-start-column="13" selection-end-line="17" selection-end-column="13" />
+          <folding>
+            <element signature="imports" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/PrideXMLDisplay.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="597" column="81" lean-forward="false" selection-start-line="597" selection-start-column="81" selection-end-line="597" selection-end-column="81" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MSOneImport.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="645">
+          <caret line="118" column="33" lean-forward="false" selection-start-line="118" selection-start-column="24" selection-end-line="118" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="326">
+          <caret line="277" column="32" lean-forward="false" selection-start-line="277" selection-start-column="32" selection-end-line="277" selection-end-column="32" />
+          <folding>
+            <element signature="e#30370#30371#0" expanded="true" />
+            <element signature="e#30432#30433#0" expanded="true" />
+            <element signature="e#30488#30489#0" expanded="true" />
+            <element signature="e#30552#30553#0" expanded="true" />
+            <element signature="e#89917#89918#0" expanded="true" />
+            <element signature="e#89982#89983#0" expanded="true" />
+            <element signature="e#104340#104341#0" expanded="true" />
+            <element signature="e#104390#104391#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/SinglePeptideDisplay.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="371">
+          <caret line="132" column="43" lean-forward="false" selection-start-line="132" selection-start-column="43" selection-end-line="132" selection-end-column="43" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="825">
-          <caret line="1910" column="9" lean-forward="false" selection-start-line="1910" selection-start-column="9" selection-end-line="1910" selection-end-column="9" />
+        <state relative-caret-position="98">
+          <caret line="257" column="20" lean-forward="false" selection-start-line="257" selection-start-column="20" selection-end-line="257" selection-end-column="20" />
           <folding>
             <element signature="e#12024#12025#0" expanded="true" />
             <element signature="e#12070#12071#0" expanded="true" />
@@ -1063,6 +1033,30 @@
             <element signature="e#45259#45260#0" expanded="true" />
             <element signature="e#45328#45329#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/SpectrumLibDisplay.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-165">
+          <caret line="140" column="56" lean-forward="false" selection-start-line="140" selection-start-column="56" selection-end-line="140" selection-end-column="56" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVCLI/TextImport.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1819">
+          <caret line="20" column="13" lean-forward="false" selection-start-line="20" selection-start-column="13" selection-end-line="20" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/TextFileImport.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="462">
+          <caret line="404" column="34" lean-forward="true" selection-start-line="404" selection-start-column="34" selection-end-line="404" selection-end-column="34" />
+          <folding />
         </state>
       </provider>
     </entry>
