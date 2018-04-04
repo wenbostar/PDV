@@ -1676,7 +1676,7 @@ public class PDVMainClass extends JFrame {
                 ProBamFileImport proBamFileImport;
 
                 try {
-                    proBamFileImport = new ProBamFileImport(PDVMainClass.this, proBAMFile, spectrumFileType, spectrumFile.getName(), spectrumFactory, progressDialog);
+                    proBamFileImport = new ProBamFileImport(PDVMainClass.this, proBAMFile,  spectrumFile.getName(), spectrumFileType, spectrumFactory, progressDialog);
 
                     sqliteConnection = proBamFileImport.getSqLiteConnection();
                     allModifications = proBamFileImport.getAllModifications();

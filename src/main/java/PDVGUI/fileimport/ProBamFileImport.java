@@ -135,7 +135,6 @@ public class ProBamFileImport {
      * Parsing proBAM file
      * @throws SQLException
      * @throws IOException
-     * @throws MzMLUnmarshallerException
      */
     private void parseProBAM() throws SQLException, IOException {
 

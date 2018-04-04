@@ -314,7 +314,7 @@ public class PrideXMLDisplay extends JFrame {
         });
 
         mainJPanel.setBackground(new java.awt.Color(255, 255, 255));
-        mainJPanel.setOpaque(false);
+        mainJPanel.setOpaque(true);
         mainJPanel.setPreferredSize(new java.awt.Dimension(1260, 800));
 
         exitJMenuItem.setMnemonic('E');
@@ -367,7 +367,7 @@ public class PrideXMLDisplay extends JFrame {
         setButton.setToolTipText("Set New setting");
         setButton.addActionListener(this::setButtonActionPerform);
 
-        settingJPanel.setBackground(new Color(217, 248, 255));
+        //settingJPanel.setBackground(new Color(217, 248, 255));
         settingJPanel.setMinimumSize(new Dimension(20, 0));
         settingJPanel.setOpaque(false);
 
@@ -438,7 +438,6 @@ public class PrideXMLDisplay extends JFrame {
         psmJPanel.setBorder(titledBorder);
         psmJPanel.setOpaque(false);
 
-        psmJTable.setOpaque(true);
         psmJTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         psmJTable.addMouseListener(new MouseAdapter() {
 
@@ -455,9 +454,9 @@ public class PrideXMLDisplay extends JFrame {
             }
         });
 
-        psmsScrollPane.setViewportView(psmJTable);
-        psmsScrollPane.setOpaque(true);
         psmsScrollPane.setBackground(Color.white);
+        psmsScrollPane.setOpaque(true);
+        psmsScrollPane.setViewportView(psmJTable);
         psmJTable.getAccessibleContext().setAccessibleName("psmJTable");
 
         GroupLayout psmJPanelLayout = new GroupLayout(psmJPanel);
@@ -582,7 +581,7 @@ public class PrideXMLDisplay extends JFrame {
         mainJPanelLayout.setVerticalGroup(
                 mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(mainJPanelLayout.createSequentialGroup()
-                                .addComponent(settingJPanel, GroupLayout.DEFAULT_SIZE, 30, 30)
+                                .addComponent(settingJPanel, 30, 30, 30)
                                 .addComponent(backJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
