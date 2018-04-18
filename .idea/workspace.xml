@@ -3,9 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="0b0cca48-ec31-481b-94db-b982afc0e540" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/ProBamFileImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/ProBamFileImport.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PrideXMLDisplay.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PrideXMLDisplay.java" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/PDVCLI/MaxQuantImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVCLI/MaxQuantImport.java" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MaxQuantFileImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MaxQuantFileImport.java" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -21,7 +20,7 @@
       <file leaf-file-name="PDVMainClass.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="183">
+            <state relative-caret-position="24345">
               <caret line="1678" column="133" lean-forward="false" selection-start-line="1678" selection-start-column="133" selection-end-line="1678" selection-end-column="133" />
               <folding>
                 <element signature="e#30370#30371#0" expanded="true" />
@@ -37,49 +36,35 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ProBamFileImport.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="ProBamFileImport.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/ProBamFileImport.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="285">
+            <state relative-caret-position="15">
               <caret line="137" column="0" lean-forward="false" selection-start-line="137" selection-start-column="0" selection-end-line="137" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SpectrumMainPanel.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java">
+      <file leaf-file-name="MaxQuantFileImport.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MaxQuantFileImport.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="98">
-              <caret line="257" column="20" lean-forward="false" selection-start-line="257" selection-start-column="20" selection-end-line="257" selection-end-column="20" />
-              <folding>
-                <element signature="e#12024#12025#0" expanded="true" />
-                <element signature="e#12070#12071#0" expanded="true" />
-                <element signature="e#32402#32403#0" expanded="true" />
-                <element signature="e#32470#32471#0" expanded="true" />
-                <element signature="e#35267#35268#0" expanded="true" />
-                <element signature="e#35299#35300#0" expanded="true" />
-                <element signature="e#35473#35474#0" expanded="true" />
-                <element signature="e#35505#35506#0" expanded="true" />
-                <element signature="e#35685#35686#0" expanded="true" />
-                <element signature="e#35717#35718#0" expanded="true" />
-                <element signature="e#35897#35898#0" expanded="true" />
-                <element signature="e#35929#35930#0" expanded="true" />
-                <element signature="e#36367#36368#0" expanded="true" />
-                <element signature="e#36399#36400#0" expanded="true" />
-                <element signature="e#45259#45260#0" expanded="true" />
-                <element signature="e#45328#45329#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="412">
+              <caret line="816" column="17" lean-forward="false" selection-start-line="816" selection-start-column="17" selection-end-line="816" selection-end-column="17" />
+              <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SinglePeptideDisplay.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/SinglePeptideDisplay.java">
+      <file leaf-file-name="MaxQuantImport.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/PDVCLI/MaxQuantImport.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="371">
-              <caret line="132" column="43" lean-forward="false" selection-start-line="132" selection-start-column="43" selection-end-line="132" selection-end-column="43" />
-              <folding />
+            <state relative-caret-position="333">
+              <caret line="891" column="59" lean-forward="false" selection-start-line="891" selection-start-column="59" selection-end-line="891" selection-end-column="59" />
+              <folding>
+                <element signature="e#23908#23909#0" expanded="true" />
+                <element signature="e#24004#24005#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -87,7 +72,7 @@
       <file leaf-file-name="SpectrumLibDisplay.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/SpectrumLibDisplay.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-165">
+            <state relative-caret-position="1515">
               <caret line="140" column="56" lean-forward="false" selection-start-line="140" selection-start-column="56" selection-end-line="140" selection-end-column="56" />
               <folding />
             </state>
@@ -97,7 +82,7 @@
       <file leaf-file-name="TextFileImport.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/TextFileImport.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="462">
+            <state relative-caret-position="5790">
               <caret line="404" column="34" lean-forward="false" selection-start-line="404" selection-start-column="34" selection-end-line="404" selection-end-column="34" />
               <folding />
             </state>
@@ -107,7 +92,7 @@
       <file leaf-file-name="TextImport.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/PDVCLI/TextImport.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1819">
+            <state relative-caret-position="120">
               <caret line="20" column="13" lean-forward="false" selection-start-line="20" selection-start-column="13" selection-end-line="20" selection-end-column="13" />
               <folding />
             </state>
@@ -117,7 +102,7 @@
       <file leaf-file-name="PrideXMLDisplay.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/PrideXMLDisplay.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="948">
+            <state relative-caret-position="6585">
               <caret line="476" column="30" lean-forward="false" selection-start-line="476" selection-start-column="8" selection-end-line="476" selection-end-column="30" />
               <folding />
             </state>
@@ -127,7 +112,7 @@
       <file leaf-file-name="ProBAMImport.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/PDVCLI/ProBAMImport.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="585">
+            <state relative-caret-position="1845">
               <caret line="138" column="42" lean-forward="false" selection-start-line="138" selection-start-column="30" selection-end-line="138" selection-end-column="42" />
               <folding />
             </state>
@@ -137,7 +122,7 @@
       <file leaf-file-name="DatabaseTableModel.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TableModel/DatabaseTableModel.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="183">
+            <state relative-caret-position="2400">
               <caret line="176" column="43" lean-forward="false" selection-start-line="176" selection-start-column="27" selection-end-line="176" selection-end-column="43" />
               <folding />
             </state>
@@ -148,8 +133,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>PDVGUI</find>
-      <find>toleranceUnit</find>
       <find>setLookAndFeel</find>
       <find>viewer</find>
       <find>://</find>
@@ -178,6 +161,8 @@
       <find>annotationSettings</find>
       <find>searchParameters</find>
       <find>spectrumMainPanel</find>
+      <find>parametersFile</find>
+      <find>fixedModificationMap</find>
     </findStrings>
     <replaceStrings>
       <replace>termModMassToTerm</replace>
@@ -244,6 +229,7 @@
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TableModel/DatabaseTableModel.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/ProBamFileImport.java" />
+        <option value="$PROJECT_DIR$/src/main/java/PDVCLI/MaxQuantImport.java" />
       </list>
     </option>
   </component>
@@ -270,7 +256,7 @@
       <select />
     </treeState>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
+  <component name="ProjectFrameBounds" extendedState="7">
     <option name="x" value="63" />
     <option name="width" value="1310" />
     <option name="height" value="772" />
@@ -312,6 +298,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
+      <pane id="AndroidView" />
       <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
@@ -406,9 +394,7 @@
           <select />
         </subPane>
       </pane>
-      <pane id="AndroidView" />
       <pane id="PackagesPane" />
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -560,23 +546,21 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="62" y="-8" width="1866" height="1096" extended-state="6" />
-    <editor active="true" />
+    <frame x="63" y="-8" width="1865" height="1096" extended-state="7" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3295099" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22812846" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.37330553" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.22770083" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.55265903" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3295099" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21096346" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24542937" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -587,6 +571,7 @@
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="combo" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3295099" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
@@ -626,10 +611,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="149">
           <caret line="219" column="9" lean-forward="false" selection-start-line="219" selection-start-column="9" selection-end-line="219" selection-end-column="9" />
-          <folding>
-            <element signature="e#7157#7158#0" expanded="false" />
-            <element signature="e#7231#7232#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -637,7 +618,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1336">
           <caret line="14" column="12" lean-forward="false" selection-start-line="14" selection-start-column="12" selection-end-line="14" selection-end-column="12" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -645,7 +625,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="698">
           <caret line="248" column="5" lean-forward="false" selection-start-line="248" selection-start-column="5" selection-end-line="248" selection-end-column="5" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -653,10 +632,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="869">
           <caret line="1428" column="5" lean-forward="false" selection-start-line="1428" selection-start-column="5" selection-end-line="1428" selection-end-column="5" />
-          <folding>
-            <element signature="e#13116#13273#0" expanded="false" />
-            <element signature="e#13272#13273#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -664,7 +639,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="360">
           <caret line="340" column="13" lean-forward="false" selection-start-line="340" selection-start-column="13" selection-end-line="340" selection-end-column="13" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -672,7 +646,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="449">
           <caret line="161" column="21" lean-forward="false" selection-start-line="161" selection-start-column="21" selection-end-line="161" selection-end-column="21" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -680,7 +653,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="120">
           <caret line="12" column="0" lean-forward="false" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -688,7 +660,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="420">
           <caret line="34" column="5" lean-forward="false" selection-start-line="34" selection-start-column="5" selection-end-line="34" selection-end-column="5" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -696,7 +667,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="7065">
           <caret line="494" column="9" lean-forward="false" selection-start-line="494" selection-start-column="9" selection-end-line="494" selection-end-column="9" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -704,7 +674,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="262">
           <caret line="593" column="74" lean-forward="false" selection-start-line="593" selection-start-column="74" selection-end-line="593" selection-end-column="74" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -712,7 +681,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="262">
           <caret line="312" column="74" lean-forward="false" selection-start-line="312" selection-start-column="74" selection-end-line="312" selection-end-column="74" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -720,10 +688,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="299">
           <caret line="342" column="74" lean-forward="false" selection-start-line="342" selection-start-column="74" selection-end-line="342" selection-end-column="74" />
-          <folding>
-            <element signature="e#13449#13450#0" expanded="false" />
-            <element signature="e#13488#13489#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -734,26 +698,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVCLI/MaxQuantImport.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVCLI/PepXMLImport.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MaxQuantFileImport.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4508">
-          <caret line="1126" column="70" lean-forward="false" selection-start-line="1126" selection-start-column="70" selection-end-line="1126" selection-end-column="70" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -761,7 +709,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="480">
           <caret line="93" column="58" lean-forward="false" selection-start-line="93" selection-start-column="45" selection-end-line="93" selection-end-column="58" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -769,7 +716,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="262">
           <caret line="416" column="70" lean-forward="false" selection-start-line="416" selection-start-column="70" selection-end-line="416" selection-end-column="70" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -777,7 +723,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="10065">
           <caret line="715" column="0" lean-forward="false" selection-start-line="715" selection-start-column="0" selection-end-line="715" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -785,7 +730,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1725">
           <caret line="143" column="11" lean-forward="false" selection-start-line="143" selection-start-column="11" selection-end-line="143" selection-end-column="11" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -793,7 +737,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="120">
           <caret line="20" column="13" lean-forward="false" selection-start-line="20" selection-start-column="13" selection-end-line="20" selection-end-column="13" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -803,9 +746,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="193">
           <caret line="13" column="13" lean-forward="false" selection-start-line="13" selection-start-column="13" selection-end-line="13" selection-end-column="13" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -813,9 +753,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="327">
           <caret line="22" column="13" lean-forward="false" selection-start-line="22" selection-start-column="13" selection-end-line="22" selection-end-column="13" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -823,7 +760,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2040">
           <caret line="154" column="8" lean-forward="false" selection-start-line="154" selection-start-column="8" selection-end-line="154" selection-end-column="27" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -832,7 +768,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2400">
           <caret line="722" column="9" lean-forward="false" selection-start-line="722" selection-start-column="9" selection-end-line="722" selection-end-column="9" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -840,7 +775,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="435">
           <caret line="57" column="52" lean-forward="false" selection-start-line="57" selection-start-column="8" selection-end-line="57" selection-end-column="52" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -848,7 +782,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="4440">
           <caret line="328" column="61" lean-forward="false" selection-start-line="328" selection-start-column="61" selection-end-line="328" selection-end-column="61" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -856,13 +789,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="6000">
           <caret line="411" column="0" lean-forward="false" selection-start-line="411" selection-start-column="0" selection-end-line="411" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#7344#7345#0" expanded="false" />
-            <element signature="e#7428#7429#0" expanded="false" />
-            <element signature="e#9422#9423#0" expanded="false" />
-            <element signature="e#9510#9511#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -870,7 +796,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-4875">
           <caret line="19" column="13" lean-forward="false" selection-start-line="19" selection-start-column="13" selection-end-line="19" selection-end-column="13" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -878,7 +803,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="7335">
           <caret line="535" column="20" lean-forward="false" selection-start-line="535" selection-start-column="20" selection-end-line="535" selection-end-column="20" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -886,7 +810,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="577">
           <caret line="100" column="105" lean-forward="false" selection-start-line="100" selection-start-column="105" selection-end-line="100" selection-end-column="105" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -894,7 +817,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1043">
           <caret line="38" column="11" lean-forward="false" selection-start-line="38" selection-start-column="11" selection-end-line="38" selection-end-column="11" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -902,7 +824,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="465">
           <caret line="139" column="50" lean-forward="false" selection-start-line="139" selection-start-column="50" selection-end-line="139" selection-end-column="50" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -910,24 +831,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="60">
           <caret line="7" column="0" lean-forward="false" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
-          <folding>
-            <marker date="1502787941988" expanded="false" signature="0:104" ph="/.../" />
-            <marker date="1502787941988" expanded="true" signature="148:315" ph="..." />
-            <marker date="1502787941988" expanded="true" signature="607:1262" ph="{...}" />
-            <marker date="1502787941988" expanded="false" signature="733:781" ph="run() → {" />
-            <marker date="1502787941988" expanded="false" signature="1187:1202" ph="}" />
-            <marker date="1502787941988" expanded="false" signature="1310:1321" ph=" { " />
-            <marker date="1502787941988" expanded="false" signature="1363:1369" ph=" }" />
-            <marker date="1502787941988" expanded="true" signature="1439:1805" ph="{...}" />
-            <marker date="1502787941988" expanded="false" signature="1874:1885" ph=" { " />
-            <marker date="1502787941988" expanded="false" signature="1927:1933" ph=" }" />
-            <marker date="1502787941988" expanded="true" signature="2024:2082" ph="{...}" />
-            <marker date="1502787941988" expanded="true" signature="2106:3013" ph="{...}" />
-            <marker date="1502787941988" expanded="true" signature="3072:3408" ph="{...}" />
-            <marker date="1502787941988" expanded="true" signature="3480:3884" ph="{...}" />
-            <marker date="1502787941988" expanded="true" signature="3920:4039" ph="{...}" />
-            <marker date="1502787941988" expanded="true" signature="4022:4033" ph="{}" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -943,9 +846,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="15">
           <caret line="17" column="13" lean-forward="false" selection-start-line="17" selection-start-column="13" selection-end-line="17" selection-end-column="13" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -953,13 +853,12 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="645">
           <caret line="118" column="33" lean-forward="false" selection-start-line="118" selection-start-column="24" selection-end-line="118" selection-end-column="33" />
-          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/SinglePeptideDisplay.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="371">
+        <state relative-caret-position="1530">
           <caret line="132" column="43" lean-forward="false" selection-start-line="132" selection-start-column="43" selection-end-line="132" selection-end-column="43" />
           <folding />
         </state>
@@ -967,32 +866,32 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="98">
+        <state relative-caret-position="3300">
           <caret line="257" column="20" lean-forward="false" selection-start-line="257" selection-start-column="20" selection-end-line="257" selection-end-column="20" />
           <folding>
-            <element signature="e#12024#12025#0" expanded="true" />
-            <element signature="e#12070#12071#0" expanded="true" />
-            <element signature="e#32402#32403#0" expanded="true" />
-            <element signature="e#32470#32471#0" expanded="true" />
-            <element signature="e#35267#35268#0" expanded="true" />
-            <element signature="e#35299#35300#0" expanded="true" />
-            <element signature="e#35473#35474#0" expanded="true" />
-            <element signature="e#35505#35506#0" expanded="true" />
-            <element signature="e#35685#35686#0" expanded="true" />
-            <element signature="e#35717#35718#0" expanded="true" />
-            <element signature="e#35897#35898#0" expanded="true" />
-            <element signature="e#35929#35930#0" expanded="true" />
-            <element signature="e#36367#36368#0" expanded="true" />
-            <element signature="e#36399#36400#0" expanded="true" />
-            <element signature="e#45259#45260#0" expanded="true" />
-            <element signature="e#45328#45329#0" expanded="true" />
+            <element signature="e#12024#12025#0" expanded="false" />
+            <element signature="e#12070#12071#0" expanded="false" />
+            <element signature="e#32402#32403#0" expanded="false" />
+            <element signature="e#32470#32471#0" expanded="false" />
+            <element signature="e#35267#35268#0" expanded="false" />
+            <element signature="e#35299#35300#0" expanded="false" />
+            <element signature="e#35473#35474#0" expanded="false" />
+            <element signature="e#35505#35506#0" expanded="false" />
+            <element signature="e#35685#35686#0" expanded="false" />
+            <element signature="e#35717#35718#0" expanded="false" />
+            <element signature="e#35897#35898#0" expanded="false" />
+            <element signature="e#35929#35930#0" expanded="false" />
+            <element signature="e#36367#36368#0" expanded="false" />
+            <element signature="e#36399#36400#0" expanded="false" />
+            <element signature="e#45259#45260#0" expanded="false" />
+            <element signature="e#45328#45329#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/SpectrumLibDisplay.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-165">
+        <state relative-caret-position="1515">
           <caret line="140" column="56" lean-forward="false" selection-start-line="140" selection-start-column="56" selection-end-line="140" selection-end-column="56" />
           <folding />
         </state>
@@ -1000,7 +899,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVCLI/TextImport.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1819">
+        <state relative-caret-position="120">
           <caret line="20" column="13" lean-forward="false" selection-start-line="20" selection-start-column="13" selection-end-line="20" selection-end-column="13" />
           <folding />
         </state>
@@ -1008,7 +907,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/TextFileImport.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="462">
+        <state relative-caret-position="5790">
           <caret line="404" column="34" lean-forward="false" selection-start-line="404" selection-start-column="34" selection-end-line="404" selection-end-column="34" />
           <folding />
         </state>
@@ -1016,7 +915,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVCLI/ProBAMImport.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="585">
+        <state relative-caret-position="1845">
           <caret line="138" column="42" lean-forward="false" selection-start-line="138" selection-start-column="30" selection-end-line="138" selection-end-column="42" />
           <folding />
         </state>
@@ -1024,7 +923,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TableModel/DatabaseTableModel.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="183">
+        <state relative-caret-position="2400">
           <caret line="176" column="43" lean-forward="false" selection-start-line="176" selection-start-column="27" selection-end-line="176" selection-end-column="43" />
           <folding />
         </state>
@@ -1032,7 +931,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/PrideXMLDisplay.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="948">
+        <state relative-caret-position="6585">
           <caret line="476" column="30" lean-forward="false" selection-start-line="476" selection-start-column="8" selection-end-line="476" selection-end-column="30" />
           <folding />
         </state>
@@ -1040,7 +939,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="183">
+        <state relative-caret-position="24345">
           <caret line="1678" column="133" lean-forward="false" selection-start-line="1678" selection-start-column="133" selection-end-line="1678" selection-end-column="133" />
           <folding>
             <element signature="e#30370#30371#0" expanded="true" />
@@ -1057,9 +956,28 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/ProBamFileImport.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
+        <state relative-caret-position="15">
           <caret line="137" column="0" lean-forward="false" selection-start-line="137" selection-start-column="0" selection-end-line="137" selection-end-column="0" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MaxQuantFileImport.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="412">
+          <caret line="816" column="17" lean-forward="false" selection-start-line="816" selection-start-column="17" selection-end-line="816" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVCLI/MaxQuantImport.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="333">
+          <caret line="891" column="59" lean-forward="false" selection-start-line="891" selection-start-column="59" selection-end-line="891" selection-end-column="59" />
+          <folding>
+            <element signature="e#23908#23909#0" expanded="true" />
+            <element signature="e#24004#24005#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

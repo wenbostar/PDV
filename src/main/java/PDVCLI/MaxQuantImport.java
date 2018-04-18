@@ -63,6 +63,10 @@ public class MaxQuantImport {
      */
     private File msResultFile;
     /**
+     * Parameters File
+     */
+    private File parametersFile;
+    /**
      * Has mgf files or not
      */
     private Boolean hasMGF = false;
@@ -114,6 +118,10 @@ public class MaxQuantImport {
      * All spectrum matches
      */
     private HashMap<String, SpectrumMatch> allSpectrumMatches = new HashMap<>();
+    /**
+     * Fixed modification map
+     */
+    private HashMap<String, String> fixedModificationMap = new HashMap<>();
 
     /**
      * Constructor
@@ -128,6 +136,7 @@ public class MaxQuantImport {
         getAllSpectrumRT(hasMGF);
         getAllModificationSites();
         getModificationPeptides();
+        getOriginalInfor();
 
         if (!hasMGF){
             generateNewMGFFile();
@@ -167,7 +176,7 @@ public class MaxQuantImport {
                         } else if(eachFileInTxt.getName().equals("msmsScans.txt")){
                             scansDetailFile = eachFileInTxt;
                         } else if(eachFileInTxt.getName().equals("parameters.txt")){
-
+                            parametersFile = eachFileInTxt;
                         } else if (eachFileInTxt.getName().contains("Sites")){
                             modificationFiles.add(eachFileInTxt);
                         } else if (eachFileInTxt.getName().equals("modificationSpecificPeptides.txt")){
@@ -329,6 +338,39 @@ public class MaxQuantImport {
 
             fileNameToPositionList.put(eachModificationFile.getName().split("Sites")[0].replace("_", ">"), eachFile);
             fileNameToSeqList.put(eachModificationFile.getName().split("Sites")[0].replace("_", ">"), eachFileSeq);
+        }
+    }
+
+    /**
+     * Get parameters
+     */
+    public void getOriginalInfor(){
+
+        if(parametersFile != null){
+            try {
+                BufferedReader bufferedReader = new BufferedReader(new FileReader(parametersFile));
+
+                String line;
+                String[] values;
+
+                while ((line = bufferedReader.readLine()) != null) {
+                    values = line.split("\t");
+                    if(values.length == 2){
+
+                        if (values[0].equals("Fixed modifications")){
+                            for (String eachMod : values[1].split("; ")){
+                                String aa = eachMod.split(" \\(")[1].replace(")", "");
+                                fixedModificationMap.put(aa, eachMod.split(" \\(")[0]);
+
+                            }
+                        }
+
+                    }
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -839,6 +881,16 @@ public class MaxQuantImport {
                 } catch (Exception e){
                     System.err.println("Failed to parse modification.");
                     e.printStackTrace();
+                }
+
+                String[] sequenceArray = sequence.split("");
+                int length =  sequenceArray.length;
+                for (int index = 0; index < length; index ++){
+                    String aa = sequenceArray[index];
+                    if (fixedModificationMap.containsKey(aa)){
+                        utilitiesModificationName = fixedModificationMap.get(aa) + " of " + aa;
+                        utilitiesModifications.add(new ModificationMatch(utilitiesModificationName, true, index + 1));
+                    }
                 }
 
                 peptide = new Peptide(sequence, utilitiesModifications);

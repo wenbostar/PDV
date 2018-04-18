@@ -139,6 +139,10 @@ public class MaxQuantFileImport {
      * scan index column index
      */
     private int scanIndexIndex =0;
+    /**
+     * Fixed modification map
+     */
+    private HashMap<String, String> fixedModificationMap = new HashMap<>();
 
     /**
      * Constructor
@@ -748,6 +752,16 @@ public class MaxQuantFileImport {
                     values = line.split("\t");
                     if(values.length == 2){
                         parameterMap.put(values[0], values[1]);
+
+                        if (values[0].equals("Fixed modifications")){
+                            for (String eachMod : values[1].split("; ")){
+                                String aa = eachMod.split(" \\(")[1].replace(")", "");
+                                fixedModificationMap.put(aa, eachMod.split(" \\(")[0]);
+
+                                allModifications.add(eachMod.split(" \\(")[0] + " of " + aa);
+                            }
+                        }
+
                     } else {
                         parameterMap.put(values[0], "");
                     }
@@ -1028,6 +1042,16 @@ public class MaxQuantFileImport {
                     JOptionPane.showMessageDialog(
                             null, "Modification format not support.",
                             "Error Modification", JOptionPane.ERROR_MESSAGE);
+                }
+
+                String[] sequenceArray = sequence.split("");
+                int length =  sequenceArray.length;
+                for (int index = 0; index < length; index ++){
+                    String aa = sequenceArray[index];
+                    if (fixedModificationMap.containsKey(aa)){
+                        utilitiesModificationName = fixedModificationMap.get(aa) + " of " + aa;
+                        utilitiesModifications.add(new ModificationMatch(utilitiesModificationName, true, index + 1));
+                    }
                 }
 
                 peptide = new Peptide(sequence, utilitiesModifications);
