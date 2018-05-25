@@ -65,11 +65,11 @@ public class TextFileImport {
     /**
      * Score column index
      */
-    private Integer scoreIndex = 0;
+    private Integer scoreIndex = -1;
     /**
      * Exp mass column index
      */
-    private Integer expMassIndex = 0;
+    private Integer expMassIndex = -1;
     /**
      * Pep mass column index
      */
@@ -81,7 +81,7 @@ public class TextFileImport {
     /**
      * Mz column index
      */
-    private Integer mzIndex = 0;
+    private Integer mzIndex = -1;
     /**
      * ALl modification
      */
@@ -231,9 +231,20 @@ public class TextFileImport {
 
                 spectrumTitle = values[spectrumTitleIndex];
                 sequence = values[sequenceIndex];
-                massError = Double.valueOf(values[expMassIndex]) - Double.valueOf(values[pepMssIndex]);
+
+                if (expMassIndex == -1){
+                    massError = 0.0;
+                } else {
+                    massError = Double.valueOf(values[expMassIndex]) - Double.valueOf(values[pepMssIndex]);
+                }
+
+                if (scoreIndex == -1){
+                    score = -1.0;
+                } else {
+                    score = Double.valueOf(values[scoreIndex]);
+                }
+
                 modificationNames = values[modificationIndex];
-                score = Double.valueOf(values[scoreIndex]);
                 peptideCharge = Integer.valueOf(values[chargeIndex]);
 
                 if(!modificationNames.equals("-")){
@@ -284,10 +295,12 @@ public class TextFileImport {
                     bos.close();
                 }
 
-                if (mzIndex != 0){
+                if (mzIndex != -1){
                     mz = Double.valueOf(values[mzIndex]);
-                } else {
+                } else if (expMassIndex != -1){
                     mz = Double.valueOf(values[expMassIndex])/peptideCharge;
+                } else {
+                    mz = Double.valueOf(values[pepMssIndex])/peptideCharge;
                 }
 
                 preparedStatement.setInt(1, lineCount);
