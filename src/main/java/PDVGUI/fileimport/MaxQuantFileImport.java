@@ -657,7 +657,7 @@ public class MaxQuantFileImport {
     public void addAllSpectrumFiles(){
         SpectrumFactory spectrumFactory = SpectrumFactory.getInstance();
 
-        String parentDictory = maxQuantDirectory.getAbsolutePath() + "\\generatesMGF";
+        String parentDictory = maxQuantDirectory.getAbsolutePath() + "/generatesMGF";
         File mgfDirectory = new File(parentDictory);
 
         ProgressDialogX progressDialog = new ProgressDialogX(pdvMainClass,

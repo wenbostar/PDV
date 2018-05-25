@@ -1264,6 +1264,7 @@ public class PDVMainClass extends JFrame {
                     ArrayList<String> orderName = new ArrayList<>();
                     orderName.add("PSMIndex");
                     orderName.add("MZ");
+                    orderName.add("Sequence");
                     orderName.add("MassError");
                     orderName.addAll(scoreName);
                     setUpTableHeaderToolTips();
@@ -1341,6 +1342,7 @@ public class PDVMainClass extends JFrame {
                     ArrayList<String> orderName = new ArrayList<>();
                     orderName.add("PSMIndex");
                     orderName.add("MZ");
+                    orderName.add("Sequence");
                     orderName.add("MassError");
                     orderName.addAll(scoreName);
                     setUpTableHeaderToolTips();
@@ -1419,6 +1421,7 @@ public class PDVMainClass extends JFrame {
                     ArrayList<String> orderName = new ArrayList<>();
                     orderName.add("PSMIndex");
                     orderName.add("MZ");
+                    orderName.add("Sequence");
                     orderName.add("MassError");
                     orderName.addAll(scoreName);
                     setUpTableHeaderToolTips();
@@ -1480,6 +1483,7 @@ public class PDVMainClass extends JFrame {
 
                     ArrayList<String> orderName = new ArrayList<>();
                     orderName.add("PSMIndex");
+                    orderName.add("Sequence");
                     orderName.add("predicted_position_score");
                     scoreName = new ArrayList<>();
                     scoreName.add("predicted_position_score");
@@ -1541,6 +1545,7 @@ public class PDVMainClass extends JFrame {
 
                     ArrayList<String> orderName = new ArrayList<>();
                     orderName.add("PSMIndex");
+                    orderName.add("Sequence");
                     setUpTableHeaderToolTips();
 
                     buttonCheck();
@@ -1613,6 +1618,7 @@ public class PDVMainClass extends JFrame {
                     ArrayList<String> orderName = new ArrayList<>();
                     orderName.add("PSMIndex");
                     orderName.add("MZ");
+                    orderName.add("Sequence");
                     orderName.add("MassError");
                     orderName.add("Score");
                     scoreName.add("Score");
@@ -1686,6 +1692,7 @@ public class PDVMainClass extends JFrame {
                     ArrayList<String> orderName = new ArrayList<>();
                     orderName.add("PSMIndex");
                     orderName.add("MZ");
+                    orderName.add("Sequence");
                     orderName.add("MassError");
                     orderName.addAll(scoreName);
                     setUpTableHeaderToolTips();
@@ -1769,6 +1776,7 @@ public class PDVMainClass extends JFrame {
                     ArrayList<String> orderName = new ArrayList<>();
                     orderName.add("PSMIndex");
                     orderName.add("MZ");
+                    orderName.add("Sequence");
                     orderName.add("MassError");
                     orderName.addAll(scoreName);
                     setUpTableHeaderToolTips();

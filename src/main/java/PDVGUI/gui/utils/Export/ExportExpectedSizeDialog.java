@@ -384,9 +384,10 @@ public class ExportExpectedSizeDialog extends JDialog {
 
                 spectrumJPanel.setBounds(0,75, resizeJPanelWidth, resizeJPanelHeight - 85);
 
+                /*
                 if(mirrorSequenceFragmentationPanel != null){
                     mirrorSequenceFragmentationPanel.setBounds(40, resizeJPanelHeight -40,(peptideSize+4)*20,100);
-                }
+                }*/
 
                 jLayeredPane.setBounds(0,0, resizeJPanelWidth, resizeJPanelHeight);
                 jLayeredPane.setPreferredSize(new Dimension(resizeJPanelWidth, resizeJPanelHeight));

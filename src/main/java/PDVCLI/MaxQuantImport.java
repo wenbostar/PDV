@@ -649,7 +649,7 @@ public class MaxQuantImport {
     private void addAllSpectrumFiles(){
         spectrumFactory = SpectrumFactory.getInstance();
 
-        String parentDictory = maxQuantDirectory.getAbsolutePath() + "\\generatesMGF";
+        String parentDictory = maxQuantDirectory.getAbsolutePath() + "/generatesMGF";
         File mgfDirectory = new File(parentDictory);
 
         if (!mgfDirectory.exists()) {
