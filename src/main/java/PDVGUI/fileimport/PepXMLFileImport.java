@@ -275,7 +275,7 @@ public class PepXMLFileImport {
                 if (existNoMatchFile) {
                     progressDialog.setRunFinished();
                     JOptionPane.showMessageDialog(
-                            null, "The spectrum file cannot match it in mzIdentML.",
+                            null, "The spectrum file cannot match with the MS/MS file in pepXML.",
                             "Error Matching", JOptionPane.ERROR_MESSAGE);
                     progressDialog.setRunFinished();
                     System.err.println("No matching file");
