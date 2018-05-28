@@ -1,5 +1,6 @@
 package PDVCLI;
 
+import com.compomics.util.experiment.biology.PTMFactory;
 import com.compomics.util.experiment.biology.Peptide;
 import com.compomics.util.experiment.identification.matches.ModificationMatch;
 import com.compomics.util.experiment.identification.matches.SpectrumMatch;
@@ -56,6 +57,10 @@ public class TextImport {
      * Spectrum matches map saving in DB
      */
     private HashMap<String, SpectrumMatch> spectrumMatchesMap = new HashMap<>();
+    /**
+     * Modification mass map from unimod
+     */
+    private HashMap<String,HashMap<Double, String >> modificationMassMap;
 
     /**
      * Constructor
@@ -67,6 +72,7 @@ public class TextImport {
 
         this.textIdFile = textIdFile;
         this.spectrumFile = spectrumFile;
+        this.modificationMassMap = getModificationMass();
 
         getParameters();
 
@@ -91,8 +97,10 @@ public class TextImport {
         Integer peptideCharge;
         String rankString;
         Peptide peptide;
+        Double modificationMass;
 
         ArrayList<ModificationMatch> utilitiesModifications;
+        HashMap<Double, String> massModification;
         SpectrumMatch currentMatch;
         PeptideAssumption peptideAssumption;
 
@@ -116,6 +124,23 @@ public class TextImport {
                     for (String singleModification: modificationNames.split(";")){
                         singleModificationName = singleModification.split("@")[0];
                         modificationSite = Integer.valueOf(singleModification.split("@")[1].split("\\[")[0]);
+                        modificationMass = Double.valueOf(singleModification.split("@")[1].split("\\[")[1].replace("]", ""));
+
+                        if (modificationSite == 0){
+                            massModification = modificationMassMap.get("N-terminus"); //Todo Need add any term in it?
+                            modificationSite = 1;
+                        } else if (modificationSite == sequence.length() + 1){
+                            massModification = modificationMassMap.get("C-terminus");
+                            modificationSite = sequence.length();
+                        } else {
+                            massModification = modificationMassMap.get(sequence.charAt(modificationSite - 1) + "");
+                        }
+
+                        for (Double mass : massModification.keySet()) {
+                            if (Math.abs(mass - modificationMass) < 0.005) {//Mass error may cause problem
+                                singleModificationName = massModification.get(mass);
+                            }
+                        }
 
                         if (!allModifications.contains(singleModificationName)){
                             allModifications.add(singleModificationName);
@@ -199,5 +224,29 @@ public class TextImport {
     public HashMap<String, SpectrumMatch> getSpectrumMatchHashMap(){
 
         return spectrumMatchesMap;
+    }
+
+    /**
+     * Get Modification mass map
+     * @return HashMap
+     */
+    private HashMap<String, HashMap<Double, String>> getModificationMass() {
+
+        PTMFactory ptmFactory = PTMFactory.getInstance();
+
+        HashMap<String, HashMap<Double, String>> modificationMass = new HashMap<>();
+        ArrayList<String> orderedModifications = ptmFactory.getPTMs();
+        for (String modificationName : orderedModifications) {
+            String[] modificationNameSplit = String.valueOf(ptmFactory.getPTM(modificationName)).split(" ");
+            String aminoAcidName = modificationNameSplit[modificationNameSplit.length - 1];
+            if (modificationMass.containsKey(aminoAcidName)) {
+                modificationMass.get(aminoAcidName).put(ptmFactory.getPTM(modificationName).getMass(), modificationName);
+            } else {
+                HashMap<Double, String> singleModi = new HashMap<>();
+                singleModi.put(ptmFactory.getPTM(modificationName).getMass(), modificationName);
+                modificationMass.put(aminoAcidName, singleModi);
+            }
+        }
+        return modificationMass;
     }
 }

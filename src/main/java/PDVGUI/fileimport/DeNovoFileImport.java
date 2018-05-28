@@ -162,7 +162,7 @@ public class DeNovoFileImport {
                     massToName = modificationMassMap.get(residue);
 
                     for (Double eachMass : massToName.keySet()){
-                        if (Math.abs(eachMass - mass) < 0.0005){
+                        if (Math.abs(eachMass - mass) < 0.005){
                             if (!massToName.get(eachMass).contains("term")) {
                                 modificationName.add(massToName.get(eachMass));
                             }

@@ -534,7 +534,7 @@ public class DatabaseImportDialog extends JDialog {
 
             @Override
             public String getDescription() {
-                return "Mascot Generic Format (.mgf)";
+                return "Mascot Generic Format (.mgf), .mzML, .mzXML";
             }
         };
 
@@ -585,6 +585,7 @@ public class DatabaseImportDialog extends JDialog {
                 return myFile.getName().toLowerCase().endsWith(".mzid")
                         ||myFile.getName().toLowerCase().endsWith(".pepxml")
                         ||myFile.getName().toLowerCase().endsWith(".txt")
+                        ||myFile.getName().toLowerCase().endsWith(".xml")
                         || myFile.isDirectory();
             }
 

@@ -47,6 +47,10 @@ public class TextFileImport {
      */
     private HashMap<String, Integer> spectrumTitleToRank = new HashMap<>();
     /**
+     * Modification mass map from unimod
+     */
+    private HashMap<String,HashMap<Double, String >> modificationMassMap;
+    /**
      * Progress dialog
      */
     private ProgressDialogX progressDialog;
@@ -109,11 +113,12 @@ public class TextFileImport {
      * @throws ClassNotFoundException
      * @throws IOException
      */
-    public TextFileImport(PDVMainClass pdvMainClass, File textIdFile, File spectrumFile, ProgressDialogX progressDialog) throws SQLException, ClassNotFoundException, IOException {
+    public TextFileImport(PDVMainClass pdvMainClass, File textIdFile, File spectrumFile, HashMap<String,HashMap<Double, String >> modificationMass, ProgressDialogX progressDialog) throws SQLException, ClassNotFoundException, IOException {
 
         this.pdvMainClass = pdvMainClass;
         this.textIdFile = textIdFile;
         this.spectrumFile = spectrumFile;
+        this.modificationMassMap = modificationMass;
         this.progressDialog = progressDialog;
 
         String dbName = textIdFile.getParentFile().getAbsolutePath()+"/"+ textIdFile.getName()+".db";
@@ -200,6 +205,7 @@ public class TextFileImport {
         Double score;
         Double massError;
         Integer modificationSite;
+        Double modificationMass;
         Integer peptideCharge;
         Double mz;
         String rankString;
@@ -207,6 +213,7 @@ public class TextFileImport {
 
         ArrayList<String> spectrumList = new ArrayList<>();
         ArrayList<ModificationMatch> utilitiesModifications;
+        HashMap<Double, String> massModification;
         SpectrumMatch currentMatch;
         PeptideAssumption peptideAssumption;
 
@@ -245,12 +252,30 @@ public class TextFileImport {
                 }
 
                 modificationNames = values[modificationIndex];
+                score = Double.valueOf(values[scoreIndex]);
                 peptideCharge = Integer.valueOf(values[chargeIndex]);
 
                 if(!modificationNames.equals("-")){
                     for (String singleModification: modificationNames.split(";")){
                         singleModificationName = singleModification.split("@")[0];
                         modificationSite = Integer.valueOf(singleModification.split("@")[1].split("\\[")[0]);
+                        modificationMass = Double.valueOf(singleModification.split("@")[1].split("\\[")[1].replace("]", ""));
+
+                        if (modificationSite == 0){
+                            massModification = modificationMassMap.get("N-terminus"); //Todo Need add any term in it?
+                            modificationSite = 1;
+                        } else if (modificationSite == sequence.length() + 1){
+                            massModification = modificationMassMap.get("C-terminus");
+                            modificationSite = sequence.length();
+                        } else {
+                            massModification = modificationMassMap.get(sequence.charAt(modificationSite - 1) + "");
+                        }
+
+                        for (Double mass : massModification.keySet()) {
+                            if (Math.abs(mass - modificationMass) < 0.005) {//Mass error may cause problem
+                                singleModificationName = massModification.get(mass);
+                            }
+                        }
 
                         if (!allModifications.contains(singleModificationName)){
                             allModifications.add(singleModificationName);

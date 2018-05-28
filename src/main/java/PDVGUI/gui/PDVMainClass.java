@@ -314,11 +314,11 @@ public class PDVMainClass extends JFrame {
     public static String getJarFilePath(){
         String jarPath = (new PDVMainClass()).getClass().getResource("PDVMainClass.class").getPath().split("!")[0];
 
-        if (jarPath.lastIndexOf("/" + "PDV-1.0.0") != -1) {
+        if (jarPath.lastIndexOf("/" + "PDV-1.0.2") != -1) {
             if (jarPath.startsWith("file:")) {
-                jarPath = jarPath.substring("file:".length(), jarPath.lastIndexOf("/" + "PDV-1.0.0"));
+                jarPath = jarPath.substring("file:".length(), jarPath.lastIndexOf("/" + "PDV-1.0.2"));
             } else {
-                jarPath = jarPath.substring(0, jarPath.lastIndexOf("/" + "PDV-1.0.0"));
+                jarPath = jarPath.substring(0, jarPath.lastIndexOf("/" + "PDV-1.0.2"));
             }
 
             if (System.getProperty("os.name").lastIndexOf("Windows") != -1) {
@@ -1410,7 +1410,7 @@ public class PDVMainClass extends JFrame {
                 TextFileImport textFileImport;
 
                 try {
-                    textFileImport = new TextFileImport(PDVMainClass.this, textFile, spectrumFile, progressDialog);
+                    textFileImport = new TextFileImport(PDVMainClass.this, textFile, spectrumFile, getModificationMass(), progressDialog);
 
                     sqliteConnection = textFileImport.getSqLiteConnection();
                     allModifications = textFileImport.getAllModifications();
@@ -1849,7 +1849,7 @@ public class PDVMainClass extends JFrame {
                     }
                 }
                 System.err.println(System.getProperty("line.separator")  + new Date()
-                        + ": PDV 1.0.0.");
+                        + ": PDV 1.0.2.");
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(
                         null, "Failed to create the log file.",

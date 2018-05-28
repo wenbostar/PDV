@@ -247,8 +247,6 @@ public class PepXMLFileImport {
 
             modMassToMassDif = new HashMap<>();
             termModMassToTerm = new HashMap<>();
-            nTermFixedModificationMassesList = new ArrayList<>();
-            cTermFixedModificationMassesList = new ArrayList<>();
 
             while ((tagNum = xmlPullParser.next()) != XmlPullParser.END_DOCUMENT) {
 
@@ -272,15 +270,16 @@ public class PepXMLFileImport {
                     }
                 }
 
+                /*
                 if (existNoMatchFile) {
                     progressDialog.setRunFinished();
                     JOptionPane.showMessageDialog(
-                            null, "The spectrum file cannot match it in mzIdentML.",
+                            null, "The spectrum file cannot match with the MS/MS file in pepXML.",
                             "Error Matching", JOptionPane.ERROR_MESSAGE);
                     progressDialog.setRunFinished();
                     System.err.println("No matching file");
                     break;
-                }
+                }*/
 
                 if (tagNum == XmlPullParser.START_TAG && tagName.equals("search_summary")) {
 
@@ -320,7 +319,7 @@ public class PepXMLFileImport {
                                 Double massDiff = null;
                                 Double mass = null;
                                 String terminus = null;
-                                String description = null;
+                                String description = "*";
                                 String terminusName = null;
 
                                 for (int i = 0; i < xmlPullParser.getAttributeCount(); i++) {
@@ -349,7 +348,7 @@ public class PepXMLFileImport {
                                     }
                                 }
 
-                                if (variable != null && massDiff != null && mass != null && aminoAcid != null && description != null) {
+                                if (variable != null && massDiff != null && mass != null && aminoAcid != null) {
                                     if (!variable) {
                                         if (terminusName == null) {
                                             fixedModiMap.put(description + " of " + aminoAcid, " massDelta: " + massDiff);
@@ -377,7 +376,7 @@ public class PepXMLFileImport {
                                 Boolean variable = null;
                                 Double mass = null;
                                 String terminus = null;
-                                String description = null;
+                                String description = "*";
                                 Double massDiff = null;
 
                                 for (int i = 0; i < xmlPullParser.getAttributeCount(); i++) {
@@ -403,24 +402,22 @@ public class PepXMLFileImport {
                                     }
                                 }
 
-                                if (variable != null && mass != null && terminus != null && description != null) {
+                                if (variable != null && mass != null && terminus != null) {
                                     if (!variable) {
                                         if (terminus.equalsIgnoreCase("N")) {
                                             fixedModiMap.put(description + " on N-term", " massDelta: " + massDiff);
-                                            nTermFixedModificationMassesList.add(mass);
                                         } else {
                                             fixedModiMap.put(description + " on C-term", " massDelta: " + massDiff);
-                                            cTermFixedModificationMassesList.add(mass);
                                         }
                                     } else {
                                         if (terminus.equalsIgnoreCase("N")) {
                                             variableModiMap.put(description + " on N-term", " massDelta: " + massDiff);
-                                            nTermFixedModificationMassesList.add(mass);
                                         } else {
-                                            variableModiMap.put(description + " on C-term", " massDelta: " + massDiff);
-                                            cTermFixedModificationMassesList.add(mass);
+                                                variableModiMap.put(description + " on C-term", " massDelta: " + massDiff);
                                         }
                                     }
+				    
+				                    modMassToMassDif.put(mass, massDiff);
                                 } else {
                                     throw new IllegalArgumentException("An error occurred while parsing terminal_modification element. Missing values.");
                                 }
@@ -464,7 +461,7 @@ public class PepXMLFileImport {
                     count1 = 0;
                     for (String name : variableModiMap.keySet()) {
 
-                        detailsList.add("Variable Modification: " + count1 + "/t/" + name + "(" + variableModiMap.get(name) + "(");
+                        detailsList.add("Variable Modification: " + count1 + "/t/" + name + "(" + variableModiMap.get(name) + ")");
                         count1++;
                     }
 
@@ -505,6 +502,7 @@ public class PepXMLFileImport {
                 if (tagNum == XmlPullParser.START_TAG && tagName.equals("spectrum_query")) {
 
                     index = null;
+                    hasMatch = false;
                     String spectrumId = null;
                     String spectrumNativeID = null;
 
@@ -546,10 +544,8 @@ public class PepXMLFileImport {
                         rt = scans.getScanByNum(spectrumIndex).getRt();
                     }
 
-                    SpectrumMatch spectrumMatch = new SpectrumMatch(Spectrum.getSpectrumKey(spectrumFileName, spectrumTitle));
+                    SpectrumMatch spectrumMatch = new SpectrumMatch(Spectrum.getSpectrumKey(spectrumFileName, scanNum));
                     spectrumMatch.setSpectrumNumber(spectrumIndex);
-
-                    spectrumIndexList.add(String.valueOf(index));
 
                     currentMatch = spectrumMatch;
 
@@ -618,7 +614,6 @@ public class PepXMLFileImport {
                     }
                     if (!found) {
 
-                        Advocate advocate = Advocate.getAdvocate(searchEngine);
                         if (AminoAcidSequence.hasCombination(peptideSequence)) {
                             ArrayList<ModificationMatch> previousModificationMatchList = peptide.getModificationMatches(),
                                     newModificationMatchList = null;
@@ -636,11 +631,11 @@ public class PepXMLFileImport {
                                 PeptideAssumption newAssumption = new PeptideAssumption(newPeptide, peptideAssumption.getRank(),
                                         peptideAssumption.getAdvocate(), peptideAssumption.getIdentificationCharge(),
                                         peptideAssumption.getScore(), peptideAssumption.getIdentificationFile());
-                                currentMatch.addHit(advocate.getIndex(), newAssumption, false);
+                                currentMatch.addHit(1, newAssumption, false);
 
                             }
                         } else {
-                            currentMatch.addHit(advocate.getIndex(), peptideAssumption, false);
+                            currentMatch.addHit(1, peptideAssumption, false);
                         }
                     }
 
@@ -648,6 +643,9 @@ public class PepXMLFileImport {
                 if (tagNum == XmlPullParser.END_TAG && tagName.equals("spectrum_query")) {
 
                     if (hasMatch) {
+
+                        spectrumIndexList.add(String.valueOf(index));
+
                         String key = currentMatch.getKey();
                         if (!spectrumMatchesMap.containsKey(key)) {
                             spectrumMatchesMap.put(key, currentMatch);
@@ -705,6 +703,7 @@ public class PepXMLFileImport {
 
                             } else {
                                 pdvMainClass.pageNumJTextField.setText(String.valueOf(pdvMainClass.selectedPageNum) + "/" + String.valueOf(pdvMainClass.allSpectrumIndex.size()));
+                                pdvMainClass.buttonCheck();
                                 countRound++;
                             }
 
@@ -788,6 +787,7 @@ public class PepXMLFileImport {
         }
 
         HashMap<Double, String > massModification;
+        String modificationName = null;
 
         String tagName = xmlPullParser.getName();
         if (tagName.equals("modification_info")) {
@@ -805,33 +805,27 @@ public class PepXMLFileImport {
                         throw new IllegalArgumentException("An error occurred while parsing modification terminal mass " + value + ". Number expected.");
                     }
 
-                    boolean variableModification;
-                    if (attributeName.equals("mod_nterm_mass")) {
-                        variableModification = !nTermFixedModificationMassesList.contains(terminalMass);
-                    } else {
-                        variableModification = !cTermFixedModificationMassesList.contains(terminalMass);
-                    }
-
                     int site;
                     if (attributeName.equals("mod_nterm_mass")) {
                         site = 1;
-                        terminalMass -= Atom.H.getMonoisotopicMass();
+                        massModification = modificationMass.get("N-terminus");
+
                     } else {
                         site = sequence.length();
-                        terminalMass -= (Atom.O.getMonoisotopicMass() + Atom.H.getMonoisotopicMass());
+                        massModification = modificationMass.get("C-terminus");
+                    }
 
-                        if (searchEngine != null && searchEngine.equalsIgnoreCase("Comet")
-                                && searchEngineVersion != null
-                                && !searchEngineVersion.equalsIgnoreCase("2015.02 rev. 4")
-                                && !searchEngineVersion.equalsIgnoreCase("2015.02 rev. 5")) {
-                            terminalMass -= Atom.H.getMonoisotopicMass();
+                    for(Double mass: massModification.keySet()){
+                        if (Math.abs(mass-modMassToMassDif.get(terminalMass))<0.0005){//Mass error may cause problem
+                            modificationName = massModification.get(mass);
                         }
                     }
 
-                    char aa = sequence.charAt(site - 1);
-                    terminalMass = Util.roundDouble(terminalMass, 2);
-                    String tempModificationName = terminalMass + "@" + aa;
-                    ModificationMatch modificationMatch = new ModificationMatch(tempModificationName, variableModification, site);
+                    if (!allModifications.contains(modificationName)){
+                        allModifications.add(modificationName);
+                    }
+
+                    ModificationMatch modificationMatch = new ModificationMatch(modificationName, true, site);
                     modificationMatches.add(modificationMatch);
                 }
             }
@@ -885,10 +879,8 @@ public class PepXMLFileImport {
                                     massModification = modificationMass.get(aa+"");
                                 }
 
-                                String modificationName = null;
-
                                 for(Double mass: massModification.keySet()){
-                                    if (Math.abs(mass-modMassToMassDif.get(modifiedAaMass))<0.05){//Mass error may cause problem
+                                    if (Math.abs(mass-modMassToMassDif.get(modifiedAaMass))<0.0005){//Mass error may cause problem
                                         modificationName = massModification.get(mass);
                                     }
                                 }
@@ -938,12 +930,12 @@ public class PepXMLFileImport {
         }
 
         Peptide peptide = new Peptide(sequence, modificationMatches);
-        Advocate advocate = Advocate.getAdvocate(searchEngine);
+        //Advocate advocate = Advocate.getAdvocate(searchEngine);
         if(score == null){
             score = 0.0;
         }
 
-        return new PeptideAssumption(peptide, rank, advocate.getIndex(), new Charge(Charge.PLUS, charge), score, spectrumFileName);
+        return new PeptideAssumption(peptide, rank, 1, new Charge(Charge.PLUS, charge), score, spectrumFileName);
     }
 
     /**

@@ -174,7 +174,7 @@ public class PepXMLImport {
                                     }
                                 }
 
-                                if (variable != null && massDiff != null && mass != null && aminoAcid != null && description != null) {
+                                if (variable != null && massDiff != null && mass != null && aminoAcid != null) {
                                     if (!variable) {
                                         if (terminusName == null) {
                                         } else {
@@ -198,7 +198,7 @@ public class PepXMLImport {
                                 Boolean variable = null;
                                 Double mass = null;
                                 String terminus = null;
-                                String description = null;
+                                Double massDiff = null;
 
                                 for (int i = 0; i < xmlPullParser.getAttributeCount(); i++) {
                                     String name = xmlPullParser.getAttributeName(i);
@@ -210,7 +210,7 @@ public class PepXMLImport {
                                     } else if (name.equals("mass")) {
                                         mass = new Double(xmlPullParser.getAttributeValue(i));
                                     } else if (name.equals("massdiff")) {
-
+                                        massDiff = new Double(xmlPullParser.getAttributeValue(i));
                                     } else if (name.equals("variable")) {
                                         String variableString = xmlPullParser.getAttributeValue(i);
                                         if (variableString.equalsIgnoreCase("Y")) {
@@ -218,12 +218,10 @@ public class PepXMLImport {
                                         } else if (variableString.equalsIgnoreCase("N")) {
                                             variable = false;
                                         }
-                                    } else if (name.equals("description")) {
-                                        description = xmlPullParser.getAttributeValue(i);
                                     }
                                 }
 
-                                if (variable != null && mass != null && terminus != null && description != null) {
+                                if (variable != null && mass != null && terminus != null) {
                                     if (!variable) {
                                         if (terminus.equalsIgnoreCase("N")) {
                                             nTerminalFixedModificationMassesList.add(mass);
@@ -237,6 +235,7 @@ public class PepXMLImport {
                                             cTerminalFixedModificationMassesList.add(mass);
                                         }
                                     }
+                                    modifMassToMassDif.put(mass, massDiff);
                                 } else {
                                     throw new IllegalArgumentException("An error occurred while parsing terminal_modification element. Missing values.");
                                 }
@@ -283,7 +282,7 @@ public class PepXMLImport {
                         spectrumTitle = scanNum + "";
                     }
 
-                    String spectrumKey = Spectrum.getSpectrumKey(spectrumFileName, spectrumTitle);
+                    String spectrumKey = Spectrum.getSpectrumKey(spectrumFileName, scanNum);
                     SpectrumMatch spectrumMatch = new SpectrumMatch(spectrumKey);
                     spectrumMatch.setSpectrumNumber(Integer.valueOf(scanNum));
 
@@ -435,6 +434,7 @@ public class PepXMLImport {
         }
 
         HashMap<Double, String > massModification;
+        String modificationName = null;
 
         String tagName = xmlPullParser.getName();
         if (tagName.equals("modification_info")) {
@@ -462,23 +462,19 @@ public class PepXMLImport {
                     int site;
                     if (attributeName.equals("mod_nterm_mass")) {
                         site = 1;
-                        terminalMass -= Atom.H.getMonoisotopicMass();
+                        massModification = modificationMass.get("N-terminus");
                     } else {
                         site = sequence.length();
-                        terminalMass -= (Atom.O.getMonoisotopicMass() + Atom.H.getMonoisotopicMass());
+                        massModification = modificationMass.get("C-terminus");
+                    }
 
-                        if (searchEngine != null && searchEngine.equalsIgnoreCase("Comet")
-                                && searchEngineVersion != null
-                                && !searchEngineVersion.equalsIgnoreCase("2015.02 rev. 4")
-                                && !searchEngineVersion.equalsIgnoreCase("2015.02 rev. 5")) {
-                            terminalMass -= Atom.H.getMonoisotopicMass();
+                    for(Double mass: massModification.keySet()){
+                        if (Math.abs(mass-modifMassToMassDif.get(terminalMass))<0.0005){//Mass error may cause problem
+                            modificationName = massModification.get(mass);
                         }
                     }
 
-                    char aa = sequence.charAt(site - 1);
-                    terminalMass = Util.roundDouble(terminalMass, 2);
-                    String tempModificationName = terminalMass + "@" + aa;
-                    ModificationMatch modificationMatch = new ModificationMatch(tempModificationName, variableModification, site);
+                    ModificationMatch modificationMatch = new ModificationMatch(modificationName, true, site);
                     modificationMatches.add(modificationMatch);
                 }
             }
@@ -531,8 +527,6 @@ public class PepXMLImport {
                                 } else {
                                     massModification = modificationMass.get(aa+"");
                                 }
-
-                                String modificationName = null;
 
                                 for(Double mass: massModification.keySet()){
                                     if (Math.abs(mass-modifMassToMassDif.get(modifiedAaMass))<0.005){//Mass error may cause problem

@@ -429,7 +429,7 @@ public class MzIDFileImport {
                             }
 
                             for (Double mass : massModification.keySet()) {
-                                if (Math.abs(mass - monoMassDelta) < 0.05) {//Mass error may cause problem
+                                if (Math.abs(mass - monoMassDelta) < 0.005) {//Mass error may cause problem
                                     modificationName = massModification.get(mass);
                                 }
                             }
