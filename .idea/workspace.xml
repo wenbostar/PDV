@@ -2,18 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0b0cca48-ec31-481b-94db-b982afc0e540" name="Default" comment="PepXML results file import debug.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" afterPath="$PROJECT_DIR$/pom.xml" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVCLI/MzIDImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVCLI/MzIDImport.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVCLI/PepXMLImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVCLI/PepXMLImport.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVCLI/TextImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVCLI/TextImport.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/DeNovoFileImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/DeNovoFileImport.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MzIDFileImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MzIDFileImport.java" />
       <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/PepXMLFileImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/PepXMLFileImport.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/TextFileImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/TextFileImport.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PrideXMLDisplay.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PrideXMLDisplay.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/DatabaseImportDialog.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/DatabaseImportDialog.java" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -58,10 +47,10 @@
       <file leaf-file-name="PepXMLFileImport.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/PepXMLFileImport.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-640">
-              <caret line="163" column="21" lean-forward="true" selection-start-line="163" selection-start-column="21" selection-end-line="163" selection-end-column="21" />
+            <state relative-caret-position="510">
+              <caret line="378" column="66" lean-forward="false" selection-start-line="378" selection-start-column="66" selection-end-line="378" selection-end-column="66" />
               <folding>
-                <element signature="e#36424#36443#0" expanded="true" />
+                <element signature="e#36446#36465#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -1016,10 +1005,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/PepXMLFileImport.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-640">
-          <caret line="163" column="21" lean-forward="true" selection-start-line="163" selection-start-column="21" selection-end-line="163" selection-end-column="21" />
+        <state relative-caret-position="510">
+          <caret line="378" column="66" lean-forward="false" selection-start-line="378" selection-start-column="66" selection-end-line="378" selection-end-column="66" />
           <folding>
-            <element signature="e#36424#36443#0" expanded="true" />
+            <element signature="e#36446#36465#0" expanded="true" />
           </folding>
         </state>
       </provider>

@@ -319,7 +319,7 @@ public class PepXMLFileImport {
                                 Double massDiff = null;
                                 Double mass = null;
                                 String terminus = null;
-                                String description = "*";
+                                String description = "Modification";
                                 String terminusName = null;
 
                                 for (int i = 0; i < xmlPullParser.getAttributeCount(); i++) {
@@ -376,7 +376,7 @@ public class PepXMLFileImport {
                                 Boolean variable = null;
                                 Double mass = null;
                                 String terminus = null;
-                                String description = "*";
+                                String description = "Modification";
                                 Double massDiff = null;
 
                                 for (int i = 0; i < xmlPullParser.getAttributeCount(); i++) {
