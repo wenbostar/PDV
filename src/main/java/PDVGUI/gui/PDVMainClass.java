@@ -314,11 +314,11 @@ public class PDVMainClass extends JFrame {
     public static String getJarFilePath(){
         String jarPath = (new PDVMainClass()).getClass().getResource("PDVMainClass.class").getPath().split("!")[0];
 
-        if (jarPath.lastIndexOf("/" + "PDV-1.0.4") != -1) {
+        if (jarPath.lastIndexOf("/" + "PDV-1.0.5") != -1) {
             if (jarPath.startsWith("file:")) {
-                jarPath = jarPath.substring("file:".length(), jarPath.lastIndexOf("/" + "PDV-1.0.4"));
+                jarPath = jarPath.substring("file:".length(), jarPath.lastIndexOf("/" + "PDV-1.0.5"));
             } else {
-                jarPath = jarPath.substring(0, jarPath.lastIndexOf("/" + "PDV-1.0.4"));
+                jarPath = jarPath.substring(0, jarPath.lastIndexOf("/" + "PDV-1.0.5"));
             }
 
             if (System.getProperty("os.name").lastIndexOf("Windows") != -1) {
@@ -1849,7 +1849,7 @@ public class PDVMainClass extends JFrame {
                     }
                 }
                 System.err.println(System.getProperty("line.separator")  + new Date()
-                        + ": PDV 1.0.4.");
+                        + ": PDV 1.0.5.");
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(
                         null, "Failed to create the log file.",

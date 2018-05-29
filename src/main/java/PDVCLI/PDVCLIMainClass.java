@@ -550,7 +550,7 @@ public class PDVCLIMainClass extends JFrame {
 
             ISpectrum spectrum = iScan.getSpectrum();
 
-            Charge charge = new Charge(iScan.getPolarity().getSign(), iScan.getPrecursor().getCharge());
+            Charge charge = new Charge(1, iScan.getPrecursor().getCharge());
             ArrayList<Charge> charges = new ArrayList<>();
             charges.add(charge);
             Precursor precursor = new Precursor(iScan.getRt(), iScan.getPrecursor().getMzTarget(),
