@@ -174,28 +174,29 @@ public class PDVCLIMainClass extends JFrame {
 
         Options options = new Options();
 
-        options.addOption("rt", true, "Result type(e.g mzID: 1, pepXML: 2, proBAM: 3, txt: 4, maxQuant: 5).");
-        options.addOption("r", true, "Result file path.");
-        options.addOption("st", true, "Spectrum file type(e.g mgf: 1, mzml: 2, mzXML: 3).");
-        options.addOption("s", true, "Spectrum file path.");
-        options.addOption("k", true, "Selection mode(e.g spectrum key: s, peptide sequence: p).");
-        options.addOption("i", true, "Selection file path.");
-        options.addOption("o", true, "Output path.");
-        options.addOption("a", true, "Ion accuracy(in dal). Default: 0.5");
-        options.addOption("c", true, "Peak intensity cutoff(e.g 5 means up 5% peaks will be annotated). Default: 5");
-        options.addOption("fh", true, "Picture height. Default: 400");
-        options.addOption("fw", true, "Picture width. Default: 800");
-        options.addOption("u", true, "Picture unit(e.g cm, mm, px) Default: px");
-        options.addOption("pt", true, "Picture type(e.g png, pdf, tiff).");
-        options.addOption("pw", true, "Peak width. Default: 1");
-        options.addOption("ih", false, "Optional: Show H2O(default: No).");
-        options.addOption("in", false, "Optional: Show NH3(default: No).");
+        options.addOption("rt", true, "Identification file format (mzIdentML: 1, pepXML: 2, proBAM: 3, txt: 4, maxQuant: 5).");
+        options.addOption("r", true, "Identification file.");
+        options.addOption("st", true, "MS/MS data format (mgf: 1, mzML: 2, mzXML: 3).");
+        options.addOption("s", true, "MS/MS data file");
+        options.addOption("k", true, "The input data type for parameter -i (Spectrum ID: s, peptide sequence: p).");
+        options.addOption("i", true, "A file containing peptide sequences or spectrum IDs. PDV will generate figures for these peptides or spectra.");
+        options.addOption("o", true, "Output directory.");
+        options.addOption("a", true, "Error window for MS/MS fragment ion mass values. Unit is Da. The default value is 0.5.");
+        options.addOption("c", true, "The intensity percentile to consider for annotation. Default is 3 (3%), it means that the peaks with intensities >= (3% * max intensity) will be annotated.");
+        options.addOption("fh", true, "Figure height. Default is 400");
+        options.addOption("fw", true, "Figure width. Default is 800");
+        options.addOption("fu", true, "The units in which ‘height’(fh) and ‘width’(fw) are given. Can be cm, mm or px. Default is px");
+        options.addOption("ft", true, "Figure type. Can be png, pdf or tiff.");
+        options.addOption("pw", true, "Peak width. Default is 1");
+        options.addOption("ah", false, "Whether or not to consider neutral loss of H2O.");
+        options.addOption("an", false, "Whether or not to consider neutral loss of NH3.");
         options.addOption("h", false, "Help");
+        options.addOption("help", false, "Help");
 
         CommandLineParser parser = new PosixParser();
         CommandLine cmd = parser.parse(options, args);
 
-        if (cmd.hasOption("help") || args.length == 0) {
+        if (cmd.hasOption("help") || cmd.hasOption("h") || args.length == 0) {
             HelpFormatter f = new HelpFormatter();
             f.printHelp("Options", options);
             System.exit(0);
@@ -224,18 +225,18 @@ public class PDVCLIMainClass extends JFrame {
             this.isSpectrumKey = true;
         }
 
-        if (commandLine.getOptionValue("pt").equals("png")){
+        if (commandLine.getOptionValue("ft").equals("png")){
             this.imageType = ImageType.PNG;
-        } else if (commandLine.getOptionValue("pt").equals("pdf")){
+        } else if (commandLine.getOptionValue("ft").equals("pdf")){
             this.imageType = ImageType.PDF;
-        } else if (commandLine.getOptionValue("pt").equals("tiff")){
+        } else if (commandLine.getOptionValue("ft").equals("tiff")){
             this.imageType = ImageType.TIFF;
         }
 
-        if (commandLine.getOptionValue("ih") != null){
+        if (commandLine.getOptionValue("ah") != null){
             this.isH2O = true;
         }
-        if (commandLine.getOptionValue("in") != null){
+        if (commandLine.getOptionValue("an") != null){
             this.isNH3 = true;
         }
 
@@ -246,9 +247,9 @@ public class PDVCLIMainClass extends JFrame {
             ionAccurracy = Double.valueOf(commandLine.getOptionValue("a"));
         }
 
-        Double intensityFilter = 0.05;
+        Double intensityFilter = 0.03;
         if (commandLine.getOptionValue("c") == null){
-            intensityFilter = 0.05;
+            intensityFilter = 0.03;
         } else {
             intensityFilter = Double.valueOf(commandLine.getOptionValue("c")) * 0.01;
         }
@@ -267,10 +268,10 @@ public class PDVCLIMainClass extends JFrame {
         } else {
             this.width = Integer.valueOf(commandLine.getOptionValue("fw"));
         }
-        if (commandLine.getOptionValue("u") == null){
+        if (commandLine.getOptionValue("fu") == null){
             this.unit = "px";
         } else {
-            this.unit = commandLine.getOptionValue("u");
+            this.unit = commandLine.getOptionValue("fu");
         }
 
         this.errorFile = new File(outPutPath+"/error.txt");
