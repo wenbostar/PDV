@@ -314,11 +314,11 @@ public class PDVMainClass extends JFrame {
     public static String getJarFilePath(){
         String jarPath = (new PDVMainClass()).getClass().getResource("PDVMainClass.class").getPath().split("!")[0];
 
-        if (jarPath.lastIndexOf("/" + "PDV-1.0.2") != -1) {
+        if (jarPath.lastIndexOf("/" + "PDV-1.0.4") != -1) {
             if (jarPath.startsWith("file:")) {
-                jarPath = jarPath.substring("file:".length(), jarPath.lastIndexOf("/" + "PDV-1.0.2"));
+                jarPath = jarPath.substring("file:".length(), jarPath.lastIndexOf("/" + "PDV-1.0.4"));
             } else {
-                jarPath = jarPath.substring(0, jarPath.lastIndexOf("/" + "PDV-1.0.2"));
+                jarPath = jarPath.substring(0, jarPath.lastIndexOf("/" + "PDV-1.0.4"));
             }
 
             if (System.getProperty("os.name").lastIndexOf("Windows") != -1) {
@@ -1849,7 +1849,7 @@ public class PDVMainClass extends JFrame {
                     }
                 }
                 System.err.println(System.getProperty("line.separator")  + new Date()
-                        + ": PDV 1.0.2.");
+                        + ": PDV 1.0.4.");
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(
                         null, "Failed to create the log file.",
@@ -2907,6 +2907,24 @@ public class PDVMainClass extends JFrame {
             }
         }
         return modificationMass;
+    }
+
+    /**
+     * Update ptmSetting
+     */
+    public void updatePTMSetting(){
+        ArrayList<String> modification =  ptmFactory.getPTMs();
+        PtmSettings ptmSettings = new PtmSettings();
+
+        for(String fixedModification:modification){
+            ptmSettings.addFixedModification(ptmFactory.getPTM(fixedModification));
+        }
+
+        for(String variableModification:modification){
+            ptmSettings.addVariableModification(ptmFactory.getPTM(variableModification));
+        }
+
+        searchParameters.setPtmSettings(ptmSettings);
     }
 
     /**

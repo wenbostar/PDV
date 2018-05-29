@@ -3,9 +3,7 @@ package PDVGUI.fileimport;
 import PDVGUI.DB.SQLiteConnection;
 import PDVGUI.gui.PDVMainClass;
 import com.compomics.util.Util;
-import com.compomics.util.experiment.biology.AminoAcidSequence;
-import com.compomics.util.experiment.biology.Atom;
-import com.compomics.util.experiment.biology.Peptide;
+import com.compomics.util.experiment.biology.*;
 import com.compomics.util.experiment.identification.Advocate;
 import com.compomics.util.experiment.identification.SpectrumIdentificationAssumption;
 import com.compomics.util.experiment.identification.matches.ModificationMatch;
@@ -69,6 +67,7 @@ public class PepXMLFileImport {
      * Modification mass to mass difference map
      */
     private HashMap<Double, Double> modMassToMassDif = new HashMap<>();
+    private HashMap<Double, String> modMassToName = new HashMap<>();
     /**
      * Map stores term modification
      */
@@ -117,6 +116,10 @@ public class PepXMLFileImport {
      * Spectrum xmlPullParserFactory
      */
     private SpectrumFactory spectrumFactory;
+    /**
+     * PTM factory
+     */
+    PTMFactory ptmFactory = PTMFactory.getInstance();
     /**
      * Object saving spectrum
      */
@@ -240,7 +243,6 @@ public class PepXMLFileImport {
 
             SpectrumMatch currentMatch = null;
             Integer currentCharge = null;
-            Double rt = 0.0;
             String scanNum = null;
             String spectrumTitle = "";
             Integer index = null;
@@ -319,7 +321,7 @@ public class PepXMLFileImport {
                                 Double massDiff = null;
                                 Double mass = null;
                                 String terminus = null;
-                                String description = "Modification";
+                                String description = null;
                                 String terminusName = null;
 
                                 for (int i = 0; i < xmlPullParser.getAttributeCount(); i++) {
@@ -349,6 +351,24 @@ public class PepXMLFileImport {
                                 }
 
                                 if (variable != null && massDiff != null && mass != null && aminoAcid != null) {
+                                    String ptmName;
+                                    ArrayList<String> residues = new ArrayList<>();
+                                    if (description == null){
+                                        description = "[" + massDiff + "]";
+                                    }
+
+                                    ptmName = description + " of " + aminoAcid;
+
+                                    if (!ptmFactory.containsPTM(ptmName)){
+
+                                        residues.add(String.valueOf(aminoAcid));
+
+                                        PTM ptm = new PTM(PTM.MODAA, ptmName, massDiff, residues);
+                                        ptm.setShortName(description);
+
+                                        ptmFactory.addUserPTM(ptm);
+                                    }
+
                                     if (!variable) {
                                         if (terminusName == null) {
                                             fixedModiMap.put(description + " of " + aminoAcid, " massDelta: " + massDiff);
@@ -366,7 +386,7 @@ public class PepXMLFileImport {
                                         }
                                     }
 
-                                    modMassToMassDif.put(mass, massDiff);
+                                    modMassToName.put(mass, ptmName);
                                 } else {
                                     throw new IllegalArgumentException("An error occurred while parsing aminoacid_modification element. Missing values.");
                                 }
@@ -374,9 +394,10 @@ public class PepXMLFileImport {
                             } else if (xmlType == XmlPullParser.START_TAG && tagName1.equals("terminal_modification")) {
 
                                 Boolean variable = null;
+                                Boolean proteinTerm = false;
                                 Double mass = null;
                                 String terminus = null;
-                                String description = "Modification";
+                                String description = null;
                                 Double massDiff = null;
 
                                 for (int i = 0; i < xmlPullParser.getAttributeCount(); i++) {
@@ -385,6 +406,13 @@ public class PepXMLFileImport {
                                         String terminusString = xmlPullParser.getAttributeValue(i);
                                         if (terminusString.equalsIgnoreCase("N") || terminusString.equalsIgnoreCase("C")) {
                                             terminus = terminusString;
+                                        }
+                                    } else if (name.equals("protein_terminus")) {
+                                        String proteinTermString = xmlPullParser.getAttributeValue(i);
+                                        if (proteinTermString.equalsIgnoreCase("Y")){
+                                            proteinTerm = true;
+                                        } else if (proteinTermString.equalsIgnoreCase("N")){
+                                            proteinTerm = false;
                                         }
                                     } else if (name.equals("mass")) {
                                         mass = new Double(xmlPullParser.getAttributeValue(i));
@@ -403,6 +431,46 @@ public class PepXMLFileImport {
                                 }
 
                                 if (variable != null && mass != null && terminus != null) {
+
+                                    String ptmName;
+                                    if (description == null){
+                                        description = "[" + massDiff + "]";
+                                    }
+
+                                    if (terminus.equalsIgnoreCase("N")){
+                                        if (proteinTerm){
+                                            ptmName = description + " of Protein N-term";
+                                            if (!ptmFactory.containsPTM(ptmName)) {
+                                                PTM ptm = new PTM(PTM.MODN, ptmName, massDiff, null);
+                                                ptm.setShortName(description);
+                                                ptmFactory.addUserPTM(ptm);
+                                            }
+                                        } else {
+                                            ptmName = description + " of N-term";
+                                            if (!ptmFactory.containsPTM(ptmName)) {
+                                                PTM ptm = new PTM(PTM.MODNP, ptmName, massDiff, null);
+                                                ptm.setShortName(description);
+                                                ptmFactory.addUserPTM(ptm);
+                                            }
+                                        }
+                                    } else {
+                                        if (proteinTerm){
+                                            ptmName = description + " of Protein C-term";
+                                            if (!ptmFactory.containsPTM(ptmName)) {
+                                                PTM ptm = new PTM(PTM.MODC, ptmName, massDiff, null);
+                                                ptm.setShortName(description);
+                                                ptmFactory.addUserPTM(ptm);
+                                            }
+                                        } else {
+                                            ptmName = description + " of C-term";
+                                            if (!ptmFactory.containsPTM(ptmName)) {
+                                                PTM ptm = new PTM(PTM.MODCP, ptmName, massDiff, null);
+                                                ptm.setShortName(description);
+                                                ptmFactory.addUserPTM(ptm);
+                                            }
+                                        }
+                                    }
+
                                     if (!variable) {
                                         if (terminus.equalsIgnoreCase("N")) {
                                             fixedModiMap.put(description + " on N-term", " massDelta: " + massDiff);
@@ -417,7 +485,7 @@ public class PepXMLFileImport {
                                         }
                                     }
 				    
-				                    modMassToMassDif.put(mass, massDiff);
+                                    modMassToName.put(mass, ptmName);
                                 } else {
                                     throw new IllegalArgumentException("An error occurred while parsing terminal_modification element. Missing values.");
                                 }
@@ -538,13 +606,7 @@ public class PepXMLFileImport {
 
                     Integer spectrumIndex = Integer.valueOf(scanNum);
 
-                    if (spectrumFileType.equals("mgf")) {
-                        rt = ((MSnSpectrum) spectrumFactory.getSpectrum(spectrumFileName, spectrumTitle)).getPrecursor().getRtInMinutes();
-                    } else {
-                        rt = scans.getScanByNum(spectrumIndex).getRt();
-                    }
-
-                    SpectrumMatch spectrumMatch = new SpectrumMatch(Spectrum.getSpectrumKey(spectrumFileName, scanNum));
+                    SpectrumMatch spectrumMatch = new SpectrumMatch(Spectrum.getSpectrumKey(spectrumFileName, String.valueOf(spectrumIndex - 1)));
                     spectrumMatch.setSpectrumNumber(spectrumIndex);
 
                     currentMatch = spectrumMatch;
@@ -691,6 +753,8 @@ public class PepXMLFileImport {
                             connection.setAutoCommit(true);
                             preparedStatement.close();
 
+                            pdvMainClass.updatePTMSetting();
+
                             pdvMainClass.allSpectrumIndex.add(spectrumIndexList);
 
                             if (countRound == 0) {
@@ -726,6 +790,8 @@ public class PepXMLFileImport {
                 pdvMainClass.allSpectrumIndex.add(spectrumIndexList);
 
                 if (countRound == 0) {
+
+                    pdvMainClass.updatePTMSetting();
 
                     pdvMainClass.displayResult();
                     pdvMainClass.pageNumJTextField.setText(1 + "/" + 1);
@@ -808,17 +874,11 @@ public class PepXMLFileImport {
                     int site;
                     if (attributeName.equals("mod_nterm_mass")) {
                         site = 1;
-                        massModification = modificationMass.get("N-terminus");
+                        modificationName = modMassToName.get(terminalMass);
 
                     } else {
                         site = sequence.length();
-                        massModification = modificationMass.get("C-terminus");
-                    }
-
-                    for(Double mass: massModification.keySet()){
-                        if (Math.abs(mass-modMassToMassDif.get(terminalMass))<0.0005){//Mass error may cause problem
-                            modificationName = massModification.get(mass);
-                        }
+                        modificationName = modMassToName.get(terminalMass);
                     }
 
                     if (!allModifications.contains(modificationName)){
@@ -869,20 +929,14 @@ public class PepXMLFileImport {
 
                                 if(termModMassToTerm.containsKey(modifiedAaMass)){
                                     if(termModMassToTerm.get(modifiedAaMass).equals("n")){
-                                        massModification = modificationMass.get("N-terminus");
+                                        modificationName = modMassToName.get(modifiedAaMass);
                                         location = 1;
                                     } else {
-                                        massModification = modificationMass.get("C-terminus");
+                                        modificationName = modMassToName.get(modifiedAaMass);
                                         location = sequence.length();
                                     }
                                 } else {
-                                    massModification = modificationMass.get(aa+"");
-                                }
-
-                                for(Double mass: massModification.keySet()){
-                                    if (Math.abs(mass-modMassToMassDif.get(modifiedAaMass))<0.0005){//Mass error may cause problem
-                                        modificationName = massModification.get(mass);
-                                    }
+                                    modificationName = modMassToName.get(modifiedAaMass);
                                 }
 
                                 if (!allModifications.contains(modificationName)){

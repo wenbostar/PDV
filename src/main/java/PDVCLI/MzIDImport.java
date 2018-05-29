@@ -1,7 +1,9 @@
 package PDVCLI;
 
 import com.compomics.util.experiment.biology.AminoAcidSequence;
+import com.compomics.util.experiment.biology.PTM;
 import com.compomics.util.experiment.biology.PTMFactory;
+import com.compomics.util.experiment.identification.identification_parameters.PtmSettings;
 import com.compomics.util.experiment.identification.matches.ModificationMatch;
 import com.compomics.util.experiment.identification.matches.SpectrumMatch;
 import com.compomics.util.experiment.identification.spectrum_assumptions.PeptideAssumption;
@@ -28,10 +30,6 @@ public class MzIDImport {
      */
     private File idFile;
     /**
-     * Modification mass map from unimod
-     */
-    private HashMap<String,HashMap<Double, String >> modificationMass;
-    /**
      * Spectrum files ref amd details map
      */
     private HashMap<String, String> spectrumFileMap = new HashMap<>();
@@ -43,6 +41,14 @@ public class MzIDImport {
      * Spectrum factory
      */
     private SpectrumFactory spectrumFactory;
+    /**
+     * PTM factory
+     */
+    private PTMFactory ptmFactory = PTMFactory.getInstance();
+    /**
+     * PTM setting
+     */
+    public PtmSettings ptmSettings = new PtmSettings();
 
     /**
      * Constructor
@@ -52,7 +58,6 @@ public class MzIDImport {
      */
     public MzIDImport(File idFile, String spectrumFileName, Object spectrumsFileFactory){
 
-        this.modificationMass = getModificationMass();
         this.idFile = idFile;
         if (spectrumFileName.toLowerCase().endsWith("mgf")){
             this.spectrumFactory = (SpectrumFactory) spectrumsFileFactory;
@@ -126,7 +131,6 @@ public class MzIDImport {
         String spectrumID;
         List<ModificationType> modifications;
         String modificationName = null;
-        HashMap<Double, String> massModification;
         ArrayList<ModificationMatch> utilitiesModifications;
         Charge peptideCharge;
         PeptideAssumption peptideAssumption;
@@ -181,6 +185,7 @@ public class MzIDImport {
                     peptideSequence = (String) peptideMap.get(peptideRef)[0];
 
                     utilitiesModifications = new ArrayList<>();
+                    ArrayList<String> residues;
 
                     if (peptideMap.get(peptideRef)[1] != null) {
                         modifications = (List<ModificationType>) peptideMap.get(peptideRef)[1];
@@ -188,23 +193,60 @@ public class MzIDImport {
                         for (ModificationType modificationType : modifications) {
                             int location = modificationType.getLocation();
                             double monoMassDelta = modificationType.getMonoisotopicMassDelta();
+                            String nameFromMzID;
+                            List<CVParamType> cvParamTypes  = modificationType.getCvParam();
+
+                            if (cvParamTypes != null){
+
+                                CVParamType firstType = cvParamTypes.get(0);
+                                if (firstType.getName() != null){
+                                    nameFromMzID = firstType.getName();
+                                } else {
+                                    nameFromMzID = String.valueOf(monoMassDelta);
+                                }
+
+                            } else {
+                                nameFromMzID = String.valueOf(monoMassDelta);
+                            }
+
 
                             if (location == 0) {
-                                massModification = modificationMass.get("N-terminus"); //Todo Need add any term in it?
+
+                                modificationName = nameFromMzID + " of N-term";
+
+                                if (!ptmFactory.containsPTM(modificationName)){
+                                    PTM ptm = new PTM(PTM.MODNP, modificationName, monoMassDelta, null);
+                                    ptm.setShortName(nameFromMzID);
+                                    ptmFactory.addUserPTM(ptm);
+                                }
+
                                 location = 1;
 
                             } else if (location == peptideSequence.length() + 1) {
-                                massModification = modificationMass.get("C-terminus");
+
+                                modificationName = nameFromMzID + " of C-term";
+
+                                if (!ptmFactory.containsPTM(modificationName)){
+                                    PTM ptm = new PTM(PTM.MODCP, modificationName, monoMassDelta, null);
+                                    ptm.setShortName(nameFromMzID);
+                                    ptmFactory.addUserPTM(ptm);
+                                }
+
                                 location = peptideSequence.length();
 
                             } else {
-                                massModification = modificationMass.get(peptideSequence.charAt(location - 1) + "");
-                            }
+                                residues = new ArrayList<>();
+                                String aa = String.valueOf(peptideSequence.charAt(location - 1));
+                                residues.add(aa);
 
-                            for (Double mass : massModification.keySet()) {
-                                if (Math.abs(mass - monoMassDelta) < 0.005) {//Mass error may cause problem
-                                    modificationName = massModification.get(mass);
+                                modificationName = nameFromMzID + " of " + aa;
+
+                                if (!ptmFactory.containsPTM(modificationName)){
+                                    PTM ptm = new PTM(PTM.MODAA, modificationName, monoMassDelta, residues);
+                                    ptm.setShortName(nameFromMzID);
+                                    ptmFactory.addUserPTM(ptm);
                                 }
+
                             }
 
                             utilitiesModifications.add(new ModificationMatch(modificationName, true, location));
@@ -249,30 +291,16 @@ public class MzIDImport {
                 spectrumMatchesMap.put(spectrumTitle + "_rank_" + currentSpectrumFile, currentMatch);
             }
         }
-    }
 
-    /**
-     * Get Modification mass map
-     * @return HashMap
-     */
-    private HashMap<String,HashMap<Double, String >> getModificationMass(){
+        ArrayList<String> modification =  ptmFactory.getPTMs();
 
-        PTMFactory ptmFactory = PTMFactory.getInstance();
-
-        HashMap<String,HashMap<Double, String > > modificationMass = new HashMap<>();
-        ArrayList<String> orderedModifications = ptmFactory.getPTMs();
-        for (String  modificationName : orderedModifications){
-            String[] modificationNameSplit = String.valueOf(ptmFactory.getPTM(modificationName)).split(" ");
-            String aminoAcidName  = modificationNameSplit[modificationNameSplit.length-1];
-            if(modificationMass.containsKey(aminoAcidName)){
-                modificationMass.get(aminoAcidName).put(ptmFactory.getPTM(modificationName).getMass(), modificationName);
-            }else {
-                HashMap<Double, String> singleModi = new HashMap<>();
-                singleModi.put(ptmFactory.getPTM(modificationName).getMass(), modificationName);
-                modificationMass.put(aminoAcidName, singleModi);
-            }
+        for(String fixedModification:modification){
+            ptmSettings.addFixedModification(ptmFactory.getPTM(fixedModification));
         }
-        return modificationMass;
+
+        for(String variableModification:modification){
+            ptmSettings.addVariableModification(ptmFactory.getPTM(variableModification));
+        }
     }
 
     /**

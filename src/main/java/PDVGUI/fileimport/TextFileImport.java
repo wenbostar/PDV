@@ -2,6 +2,8 @@ package PDVGUI.fileimport;
 
 import PDVGUI.DB.SQLiteConnection;
 import PDVGUI.gui.PDVMainClass;
+import com.compomics.util.experiment.biology.PTM;
+import com.compomics.util.experiment.biology.PTMFactory;
 import com.compomics.util.experiment.biology.Peptide;
 import com.compomics.util.experiment.identification.matches.ModificationMatch;
 import com.compomics.util.experiment.identification.matches.SpectrumMatch;
@@ -46,10 +48,6 @@ public class TextFileImport {
      * Spectrum title to rank
      */
     private HashMap<String, Integer> spectrumTitleToRank = new HashMap<>();
-    /**
-     * Modification mass map from unimod
-     */
-    private HashMap<String,HashMap<Double, String >> modificationMassMap;
     /**
      * Progress dialog
      */
@@ -102,6 +100,10 @@ public class TextFileImport {
      * Name to DB index
      */
     private HashMap<String, Integer> nameToDBIndex = new HashMap<>();
+    /**
+     * PTM factory
+     */
+    private PTMFactory ptmFactory = PTMFactory.getInstance();
 
     /**
      * Constructor
@@ -118,7 +120,6 @@ public class TextFileImport {
         this.pdvMainClass = pdvMainClass;
         this.textIdFile = textIdFile;
         this.spectrumFile = spectrumFile;
-        this.modificationMassMap = modificationMass;
         this.progressDialog = progressDialog;
 
         String dbName = textIdFile.getParentFile().getAbsolutePath()+"/"+ textIdFile.getName()+".db";
@@ -213,7 +214,6 @@ public class TextFileImport {
 
         ArrayList<String> spectrumList = new ArrayList<>();
         ArrayList<ModificationMatch> utilitiesModifications;
-        HashMap<Double, String> massModification;
         SpectrumMatch currentMatch;
         PeptideAssumption peptideAssumption;
 
@@ -255,26 +255,37 @@ public class TextFileImport {
                 score = Double.valueOf(values[scoreIndex]);
                 peptideCharge = Integer.valueOf(values[chargeIndex]);
 
+                ArrayList<String> residues = new ArrayList<>();
+
                 if(!modificationNames.equals("-")){
                     for (String singleModification: modificationNames.split(";")){
                         singleModificationName = singleModification.split("@")[0];
                         modificationSite = Integer.valueOf(singleModification.split("@")[1].split("\\[")[0]);
                         modificationMass = Double.valueOf(singleModification.split("@")[1].split("\\[")[1].replace("]", ""));
 
-                        if (modificationSite == 0){
-                            massModification = modificationMassMap.get("N-terminus"); //Todo Need add any term in it?
-                            modificationSite = 1;
-                        } else if (modificationSite == sequence.length() + 1){
-                            massModification = modificationMassMap.get("C-terminus");
-                            modificationSite = sequence.length();
-                        } else {
-                            massModification = modificationMassMap.get(sequence.charAt(modificationSite - 1) + "");
+                        if (!ptmFactory.containsPTM(singleModificationName)){
+                            String modificationName = singleModificationName.split(" of ")[0];
+                            residues.add(singleModificationName.split(" of ")[1]);
+
+                            if (singleModificationName.toLowerCase().contains("n-term")){
+                                PTM ptm = new PTM(PTM.MODNPAA, singleModificationName, modificationMass, residues);
+                                ptm.setShortName(modificationName);
+                                ptmFactory.addUserPTM(ptm);
+                            } else if (singleModificationName.toLowerCase().contains("c-term")){
+                                PTM ptm = new PTM(PTM.MODCP, singleModificationName, modificationMass, residues);
+                                ptm.setShortName(modificationName);
+                                ptmFactory.addUserPTM(ptm);
+                            } else {
+                                PTM ptm = new PTM(PTM.MODAA, singleModificationName, modificationMass, residues);
+                                ptm.setShortName(modificationName);
+                                ptmFactory.addUserPTM(ptm);
+                            }
                         }
 
-                        for (Double mass : massModification.keySet()) {
-                            if (Math.abs(mass - modificationMass) < 0.005) {//Mass error may cause problem
-                                singleModificationName = massModification.get(mass);
-                            }
+                        if (singleModificationName.toLowerCase().contains("n-term")){
+                            modificationSite = 1;
+                        } else if (singleModificationName.toLowerCase().contains("c-term")){
+                            modificationSite = sequence.length();
                         }
 
                         if (!allModifications.contains(singleModificationName)){
@@ -357,6 +368,8 @@ public class TextFileImport {
 
                     count = 0;
 
+                    pdvMainClass.updatePTMSetting();
+
                     if(countRound == 0){
                         pdvMainClass.displayResult();
                         pdvMainClass.pageNumJTextField.setText(1 + "/" + 1);
@@ -381,6 +394,7 @@ public class TextFileImport {
             connection.commit();
             preparedStatement.close();
 
+            pdvMainClass.updatePTMSetting();
             pdvMainClass.allSpectrumIndex.add(spectrumList);
 
             if(countRound == 0){

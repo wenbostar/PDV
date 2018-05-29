@@ -183,14 +183,14 @@ public class PDVCLIMainClass extends JFrame {
         options.addOption("o", true, "Output path.");
         options.addOption("a", true, "Ion accuracy(in dal). Default: 0.5");
         options.addOption("c", true, "Peak intensity cutoff(e.g 5 means up 5% peaks will be annotated). Default: 5");
-        options.addOption("h", true, "Picture height. Default: 400");
-        options.addOption("w", true, "Picture width. Default: 800");
+        options.addOption("fh", true, "Picture height. Default: 400");
+        options.addOption("fw", true, "Picture width. Default: 800");
         options.addOption("u", true, "Picture unit(e.g cm, mm, px) Default: px");
         options.addOption("pt", true, "Picture type(e.g png, pdf, tiff).");
         options.addOption("pw", true, "Peak width. Default: 1");
         options.addOption("ih", false, "Optional: Show H2O(default: No).");
         options.addOption("in", false, "Optional: Show NH3(default: No).");
-        options.addOption("help", false, "Help");
+        options.addOption("h", false, "Help");
 
         CommandLineParser parser = new PosixParser();
         CommandLine cmd = parser.parse(options, args);
@@ -257,15 +257,15 @@ public class PDVCLIMainClass extends JFrame {
         } else {
             this.peahWidth = Float.valueOf(commandLine.getOptionValue("pw"));
         }
-        if (commandLine.getOptionValue("h") == null){
+        if (commandLine.getOptionValue("fh") == null){
             this.height = 400;
         } else {
-            this.height = Integer.valueOf(commandLine.getOptionValue("h"));
+            this.height = Integer.valueOf(commandLine.getOptionValue("fh"));
         }
-        if (commandLine.getOptionValue("w") == null){
-            this.width = 400;
+        if (commandLine.getOptionValue("fw") == null){
+            this.width = 800;
         } else {
-            this.width = Integer.valueOf(commandLine.getOptionValue("w"));
+            this.width = Integer.valueOf(commandLine.getOptionValue("fw"));
         }
         if (commandLine.getOptionValue("u") == null){
             this.unit = "px";
@@ -622,7 +622,7 @@ public class PDVCLIMainClass extends JFrame {
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
-                            String outputFigurePath = outPutPath + "\\" + peptideAssumption.getPeptide().getSequence() + FilePattern.matcher(spectrumIndex).replaceAll("").replace("rank_", "") + imageType.getExtension();
+                            String outputFigurePath = outPutPath + "/" + peptideAssumption.getPeptide().getSequence() + FilePattern.matcher(spectrumIndex).replaceAll("").replace("rank_", "") + imageType.getExtension();
                             exportFigure(spectrumSplitPane, outputFigurePath);
                         } else {
 

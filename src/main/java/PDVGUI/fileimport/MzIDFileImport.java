@@ -3,6 +3,8 @@ package PDVGUI.fileimport;
 import PDVGUI.DB.SQLiteConnection;
 import PDVGUI.gui.PDVMainClass;
 import com.compomics.util.experiment.biology.AminoAcidSequence;
+import com.compomics.util.experiment.biology.PTM;
+import com.compomics.util.experiment.biology.PTMFactory;
 import com.compomics.util.experiment.identification.matches.ModificationMatch;
 import com.compomics.util.experiment.identification.matches.SpectrumMatch;
 import com.compomics.util.experiment.identification.spectrum_assumptions.PeptideAssumption;
@@ -35,10 +37,6 @@ public class MzIDFileImport {
      */
     private MzIdentMLType mzIdentMLType;
     /**
-     * Modification mass map from unimod
-     */
-    private HashMap<String,HashMap<Double, String >> modificationMass;
-    /**
      * mzID file name
      */
     private String mzIDName;
@@ -54,6 +52,10 @@ public class MzIDFileImport {
      * SpectrumFactory load all spectrum files import from utilities
      */
     private SpectrumFactory spectrumFactory;
+    /**
+     * PTM factory
+     */
+    private PTMFactory ptmFactory = PTMFactory.getInstance();
     /**
      * Spectrum file type
      */
@@ -105,7 +107,6 @@ public class MzIDFileImport {
         this.pdvMainClass = pdvMainClass;
         this.mzIDName = mzIDFile.getName();
         this.mzIdentMLType = mzIdentMLType;
-        this.modificationMass = modificationMass;
         this.progressDialog = progressDialog;
         this.spectrumFactory = spectrumFactory;
         this.spectrumFileType = spectrumFileType;
@@ -408,6 +409,7 @@ public class MzIDFileImport {
 
                     // get the modifications
                     utilitiesModifications = new ArrayList<>();
+                    ArrayList<String> residues;
 
                     if (peptideMap.get(peptideRef)[1] != null) {
                         modifications = (List<ModificationType>) peptideMap.get(peptideRef)[1];
@@ -415,23 +417,59 @@ public class MzIDFileImport {
                         for (ModificationType modificationType : modifications) {
                             int location = modificationType.getLocation();
                             double monoMassDelta = modificationType.getMonoisotopicMassDelta();
+                            String nameFromMzID;
+                            List<CVParamType> cvParamTypes  = modificationType.getCvParam();
+
+                            if (cvParamTypes != null){
+
+                                CVParamType firstType = cvParamTypes.get(0);
+                                if (firstType.getName() != null){
+                                    nameFromMzID = firstType.getName();
+                                } else {
+                                    nameFromMzID = String.valueOf(monoMassDelta);
+                                }
+
+                            } else {
+                                nameFromMzID = String.valueOf(monoMassDelta);
+                            }
+
 
                             if (location == 0) {
-                                massModification = modificationMass.get("N-terminus"); //Todo Need add any term in it?
+
+                                modificationName = nameFromMzID + " of N-term";
+
+                                if (!ptmFactory.containsPTM(modificationName)){
+                                    PTM ptm = new PTM(PTM.MODNP, modificationName, monoMassDelta, null);
+                                    ptm.setShortName(nameFromMzID);
+                                    ptmFactory.addUserPTM(ptm);
+                                }
+
                                 location = 1;
 
                             } else if (location == peptideSequence.length() + 1) {
-                                massModification = modificationMass.get("C-terminus");
+                                modificationName = nameFromMzID + " of C-term";
+
+                                if (!ptmFactory.containsPTM(modificationName)){
+                                    PTM ptm = new PTM(PTM.MODCP, modificationName, monoMassDelta, null);
+                                    ptm.setShortName(nameFromMzID);
+                                    ptmFactory.addUserPTM(ptm);
+                                }
+
                                 location = peptideSequence.length();
 
                             } else {
-                                massModification = modificationMass.get(peptideSequence.charAt(location - 1) + "");
-                            }
+                                residues = new ArrayList<>();
+                                String aa = String.valueOf(peptideSequence.charAt(location - 1));
+                                residues.add(aa);
 
-                            for (Double mass : massModification.keySet()) {
-                                if (Math.abs(mass - monoMassDelta) < 0.005) {//Mass error may cause problem
-                                    modificationName = massModification.get(mass);
+                                modificationName = nameFromMzID + " of " + aa;
+
+                                if (!ptmFactory.containsPTM(modificationName)){
+                                    PTM ptm = new PTM(PTM.MODAA, modificationName, monoMassDelta, residues);
+                                    ptm.setShortName(nameFromMzID);
+                                    ptmFactory.addUserPTM(ptm);
                                 }
+
                             }
 
                             if (!allModifications.contains(modificationName)) {
@@ -549,6 +587,7 @@ public class MzIDFileImport {
                     connection.setAutoCommit(true);
                     preparedStatement.close();
 
+                    pdvMainClass.updatePTMSetting();
                     pdvMainClass.allSpectrumIndex.add(spectrumIndexList);
 
                     if(countRound == 0){
@@ -575,6 +614,7 @@ public class MzIDFileImport {
                 connection.setAutoCommit(true);
                 preparedStatement.close();
 
+                pdvMainClass.updatePTMSetting();
                 pdvMainClass.allSpectrumIndex.add(spectrumIndexList);
 
                 if(countRound == 0){

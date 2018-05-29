@@ -2,6 +2,7 @@ package PDVGUI.gui;
 
 import PDVGUI.gui.utils.FileImport.PrideXMLImportDialog;
 import PDVGUI.gui.utils.SpectrumMainPanel;
+import com.compomics.util.experiment.biology.PTM;
 import com.compomics.util.experiment.biology.PTMFactory;
 import com.compomics.util.experiment.biology.Peptide;
 import com.compomics.util.experiment.identification.identification_parameters.PtmSettings;
@@ -1161,6 +1162,7 @@ public class PrideXMLDisplay extends JFrame {
         SpectrumMatch spectrumMatch;
         Spectrum spectrum;
         Integer psmCount = 0;
+        ArrayList<String> residues = new ArrayList<>();
         for (PeptideItem peptideItem : currentPeptideItemList){
             psmCount ++;
             peptideSequence = peptideItem.getSequence();
@@ -1171,28 +1173,56 @@ public class PrideXMLDisplay extends JFrame {
 
             for (ModificationItem modificationItem : modificationItemList){
                 Integer location = modificationItem.getModLocation().intValue();
+                String accession = modificationItem.getModAccession();
+                String nameFromPride = "";
+                String modificationName = null;
+                List<CvParam> cvParams = modificationItem.getAdditional().getCvParam();
+
+                for (CvParam cvParam : cvParams){
+                    if (cvParam.getName() != null) {
+                        nameFromPride = cvParam.getName();
+                    } else {
+                        nameFromPride = accession;
+                    }
+                }
 
                 Double monoMassDelta = Double.valueOf(modificationItem.getModMonoDelta().get(0));
 
                 HashMap<Double, String > massModification;
 
                 if(location == 0){
-                    massModification = getModificationMass().get("N-terminus");
+                    modificationName = nameFromPride + " of N-term";
+
+                    if (!ptmFactory.containsPTM(modificationName)){
+                        PTM ptm = new PTM(PTM.MODNP, modificationName, monoMassDelta, null);
+                        ptm.setShortName(nameFromPride);
+                        ptmFactory.addUserPTM(ptm);
+                    }
+
                     location = 1;
 
                 }else if(location == peptideSequence.length() + 1){
-                    massModification = getModificationMass().get("C-terminus");
+                    modificationName = nameFromPride + " of C-term";
+
+                    if (!ptmFactory.containsPTM(modificationName)){
+                        PTM ptm = new PTM(PTM.MODCP, modificationName, monoMassDelta, null);
+                        ptm.setShortName(nameFromPride);
+                        ptmFactory.addUserPTM(ptm);
+                    }
+
                     location = peptideSequence.length();
 
                 }else {
-                    massModification = getModificationMass().get(peptideSequence.charAt(location - 1)+"");
-                }
+                    residues = new ArrayList<>();
+                    String aa = String.valueOf(peptideSequence.charAt(location - 1));
+                    residues.add(aa);
 
-                String modificationName = null;
+                    modificationName = nameFromPride + " of " + aa;
 
-                for(Double mass: massModification.keySet()){
-                    if (Math.abs(mass-monoMassDelta)<0.0005){//Mass error may cause problem
-                        modificationName = massModification.get(mass);
+                    if (!ptmFactory.containsPTM(modificationName)){
+                        PTM ptm = new PTM(PTM.MODAA, modificationName, monoMassDelta, residues);
+                        ptm.setShortName(nameFromPride);
+                        ptmFactory.addUserPTM(ptm);
                     }
                 }
 
