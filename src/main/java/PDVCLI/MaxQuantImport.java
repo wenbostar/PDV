@@ -437,7 +437,7 @@ public class MaxQuantImport {
 
         HashMap<String, BufferedWriter> fileNameToFileWriter = new HashMap<>();
         HashMap<String, ArrayList<String>> fileNameToScanNum = new HashMap<>();
-        String parentDictory = maxQuantDirectory.getAbsolutePath() + "/generatesMGF/";
+        String parentDictory = maxQuantDirectory.getAbsolutePath() + PDVCLIMainClass.FILE_SEPARATOR + "generatesMGF" + PDVCLIMainClass.FILE_SEPARATOR;
         ArrayList<String> currentScanNumList;
 
         ArrayList<String> allTitle = new ArrayList<>();
@@ -649,7 +649,7 @@ public class MaxQuantImport {
     private void addAllSpectrumFiles(){
         spectrumFactory = SpectrumFactory.getInstance();
 
-        String parentDictory = maxQuantDirectory.getAbsolutePath() + "/generatesMGF";
+        String parentDictory = maxQuantDirectory.getAbsolutePath() + PDVCLIMainClass.FILE_SEPARATOR + "generatesMGF";
         File mgfDirectory = new File(parentDictory);
 
         if (!mgfDirectory.exists()) {

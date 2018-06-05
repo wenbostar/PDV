@@ -164,6 +164,10 @@ public class PDVCLIMainClass extends JFrame {
      * Pattern removing illegal
      */
     private static Pattern FilePattern = Pattern.compile("[\\\\/:*?\"<>|]");
+    /**
+     * Get system separator
+     */
+    public static final String FILE_SEPARATOR = System.getProperty("file.separator");
 
     /**
      * Constructor
@@ -202,7 +206,7 @@ public class PDVCLIMainClass extends JFrame {
             System.exit(0);
         }
 
-        runCMD(cmd);
+        runCMD(cmd, options);
     }
 
     /**
@@ -210,27 +214,88 @@ public class PDVCLIMainClass extends JFrame {
      * @param commandLine Command line
      * @throws IOException
      */
-    private void runCMD(CommandLine commandLine) throws IOException {
+    private void runCMD(CommandLine commandLine, Options options) throws IOException {
 
-        this.idFile = new File(commandLine.getOptionValue("r"));
-        this.idFileType = Integer.valueOf(commandLine.getOptionValue("rt"));
-        this.spectrumFile  = new File(commandLine.getOptionValue("s"));
-        this.spectrumFileType = Integer.valueOf(commandLine.getOptionValue("st"));
-        this.indexFile = new File(commandLine.getOptionValue("i"));
-        this.outPutPath = commandLine.getOptionValue("o");
-
-        if(commandLine.getOptionValue("k").equals("p")){
-            this.isSpectrumKey = false;
-        }else {
-            this.isSpectrumKey = true;
+        if (commandLine.getOptionValue("r") != null){
+            this.idFile = new File(commandLine.getOptionValue("r"));
+        } else {
+            System.err.println("Lost result file path!");
+            HelpFormatter f = new HelpFormatter();
+            f.printHelp("Options", options);
+            System.exit(1);
         }
 
-        if (commandLine.getOptionValue("ft").equals("png")){
-            this.imageType = ImageType.PNG;
-        } else if (commandLine.getOptionValue("ft").equals("pdf")){
-            this.imageType = ImageType.PDF;
-        } else if (commandLine.getOptionValue("ft").equals("tiff")){
-            this.imageType = ImageType.TIFF;
+        if (commandLine.getOptionValue("rt") != null){
+            this.idFileType = Integer.valueOf(commandLine.getOptionValue("rt"));
+        } else {
+            System.err.println("Lost result file type! (mzID: 1, pepXML: 2, proBAM: 3, txt: 4, maxQuant: 5)");
+            HelpFormatter f = new HelpFormatter();
+            f.printHelp("Options", options);
+            System.exit(1);
+        }
+
+        if (commandLine.getOptionValue("s") != null){
+            this.spectrumFile  = new File(commandLine.getOptionValue("s"));
+        } else {
+            System.err.println("Lost spectrum file path!");
+            HelpFormatter f = new HelpFormatter();
+            f.printHelp("Options", options);
+            System.exit(1);
+        }
+
+        if (commandLine.getOptionValue("st") != null){
+            this.spectrumFileType = Integer.valueOf(commandLine.getOptionValue("st"));
+        } else {
+            System.err.println("Lost spectrum file type! (mgf: 1, mzml: 2, mzXML: 3)");
+            HelpFormatter f = new HelpFormatter();
+            f.printHelp("Options", options);
+            System.exit(1);
+        }
+
+        if (commandLine.getOptionValue("i") != null){
+            this.indexFile = new File(commandLine.getOptionValue("i"));
+        } else {
+            System.err.println("Lost selected index file!");
+            HelpFormatter f = new HelpFormatter();
+            f.printHelp("Options", options);
+            System.exit(1);
+        }
+
+        if (commandLine.getOptionValue("o") != null){
+            this.outPutPath = commandLine.getOptionValue("o");
+        } else {
+            System.err.println("Lost output path!");
+            HelpFormatter f = new HelpFormatter();
+            f.printHelp("Options", options);
+            System.exit(1);
+        }
+
+        if (commandLine.getOptionValue("k") != null){
+            if(commandLine.getOptionValue("k").equals("p")){
+                this.isSpectrumKey = false;
+            }else if(commandLine.getOptionValue("k").equals("s")) {
+                this.isSpectrumKey = true;
+            }
+        } else {
+            System.err.println("Lost selected index file type! (spectrum key: s, peptide sequence: p)");
+            HelpFormatter f = new HelpFormatter();
+            f.printHelp("Options", options);
+            System.exit(1);
+        }
+
+        if (commandLine.getOptionValue("ft") != null){
+            if (commandLine.getOptionValue("ft").equals("png")){
+                this.imageType = ImageType.PNG;
+            } else if (commandLine.getOptionValue("ft").equals("pdf")){
+                this.imageType = ImageType.PDF;
+            } else if (commandLine.getOptionValue("ft").equals("tiff")){
+                this.imageType = ImageType.TIFF;
+            }
+        } else {
+            System.err.println("Lost output picture type! (png, pdf, tiff)");
+            HelpFormatter f = new HelpFormatter();
+            f.printHelp("Options", options);
+            System.exit(1);
         }
 
         if (commandLine.getOptionValue("ah") != null){
@@ -282,7 +347,7 @@ public class PDVCLIMainClass extends JFrame {
 
         initComponent();
 
-        new ImportPTMsFromUnimod(new File(getJarFilePath() + "/resources/conf/unimod.xml"));
+        //new ImportPTMsFromUnimod(new File(getJarFilePath() + "/resources/conf/unimod.xml"));
 
         this.setVisible(true);
 
@@ -291,7 +356,6 @@ public class PDVCLIMainClass extends JFrame {
         importFile();
 
         displayResults();
-
     }
 
     /**
@@ -623,7 +687,7 @@ public class PDVCLIMainClass extends JFrame {
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
-                            String outputFigurePath = outPutPath + "/" + peptideAssumption.getPeptide().getSequence() + FilePattern.matcher(spectrumIndex).replaceAll("").replace("rank_", "") + imageType.getExtension();
+                            String outputFigurePath = outPutPath + FILE_SEPARATOR + peptideAssumption.getPeptide().getSequence() + FilePattern.matcher(spectrumIndex).replaceAll("").replace("rank_", "") + imageType.getExtension();
                             exportFigure(spectrumSplitPane, outputFigurePath);
                         } else {
 
@@ -652,7 +716,7 @@ public class PDVCLIMainClass extends JFrame {
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
-                            String outputFigurePath = outPutPath + "\\" + peptideAssumption.getPeptide().getSequence() + FilePattern.matcher(spectrumIndex).replaceAll("").replace("rank_", "") + imageType.getExtension();
+                            String outputFigurePath = outPutPath + FILE_SEPARATOR + peptideAssumption.getPeptide().getSequence() + FilePattern.matcher(spectrumIndex).replaceAll("").replace("rank_", "") + imageType.getExtension();
                             exportFigure(spectrumSplitPane, outputFigurePath);
                         } else {
 

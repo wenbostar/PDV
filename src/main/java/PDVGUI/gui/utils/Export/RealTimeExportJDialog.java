@@ -358,7 +358,7 @@ public class RealTimeExportJDialog extends JDialog {
                                     updateSpectrum(spectrumKey, mSnSpectrum, spectrumIdentificationAssumption);
                                     Thread.sleep(100);
 
-                                    String outputPathName = outputPath + "/" + FilePattern.matcher(mSnSpectrum.getSpectrumTitle()).replaceAll("") + imageType.getExtension();
+                                    String outputPathName = outputPath + PDVMainClass.FILE_SEPARATOR + FilePattern.matcher(mSnSpectrum.getSpectrumTitle()).replaceAll("") + imageType.getExtension();
                                     exportFigure(outputPathName);
 
                                     progressDialog.increasePrimaryProgressCounter();
@@ -448,7 +448,7 @@ public class RealTimeExportJDialog extends JDialog {
                                 }
                                 Thread.sleep(100);
 
-                                String outputPathName = outputPath + "/" + FilePattern.matcher(mSnSpectrum.getSpectrumTitle()).replaceAll("") + imageType.getExtension();
+                                String outputPathName = outputPath + PDVMainClass.FILE_SEPARATOR + FilePattern.matcher(mSnSpectrum.getSpectrumTitle()).replaceAll("") + imageType.getExtension();
                                 exportFigure(outputPathName);
 
                                 progressDialog.increasePrimaryProgressCounter();

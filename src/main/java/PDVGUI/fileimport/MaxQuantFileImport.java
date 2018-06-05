@@ -442,7 +442,7 @@ public class MaxQuantFileImport {
             public void run() {
                 HashMap<String, BufferedWriter> fileNameToFileWriter = new HashMap<>();
                 HashMap<String, ArrayList<String>> fileNameToScanNum = new HashMap<>();
-                String parentDictory = maxQuantDirectory.getAbsolutePath() + "/generatesMGF/";
+                String parentDictory = maxQuantDirectory.getAbsolutePath() + PDVMainClass.FILE_SEPARATOR +"generatesMGF" + PDVMainClass.FILE_SEPARATOR;
                 ArrayList<String> currentScanNumList;
 
                 File mgfDirectory = new File(parentDictory);
@@ -657,7 +657,7 @@ public class MaxQuantFileImport {
     public void addAllSpectrumFiles(){
         SpectrumFactory spectrumFactory = SpectrumFactory.getInstance();
 
-        String parentDictory = maxQuantDirectory.getAbsolutePath() + "/generatesMGF";
+        String parentDictory = maxQuantDirectory.getAbsolutePath() + PDVMainClass.FILE_SEPARATOR + "generatesMGF";
         File mgfDirectory = new File(parentDictory);
 
         ProgressDialogX progressDialog = new ProgressDialogX(pdvMainClass,

@@ -224,6 +224,10 @@ public class PDVMainClass extends JFrame {
      * Spectrum main Panel
      */
     private SpectrumMainPanel spectrumMainPanel;
+    /**
+     * Get system separator
+     */
+    public static final String FILE_SEPARATOR = System.getProperty("file.separator");
 
     /**
      * Main class
@@ -314,11 +318,11 @@ public class PDVMainClass extends JFrame {
     public static String getJarFilePath(){
         String jarPath = (new PDVMainClass()).getClass().getResource("PDVMainClass.class").getPath().split("!")[0];
 
-        if (jarPath.lastIndexOf("/" + "PDV-1.0.5") != -1) {
+        if (jarPath.lastIndexOf(FILE_SEPARATOR + "PDV-1.0.6") != -1) {
             if (jarPath.startsWith("file:")) {
-                jarPath = jarPath.substring("file:".length(), jarPath.lastIndexOf("/" + "PDV-1.0.5"));
+                jarPath = jarPath.substring("file:".length(), jarPath.lastIndexOf(FILE_SEPARATOR + "PDV-1.0.6"));
             } else {
-                jarPath = jarPath.substring(0, jarPath.lastIndexOf("/" + "PDV-1.0.5"));
+                jarPath = jarPath.substring(0, jarPath.lastIndexOf(FILE_SEPARATOR + "PDV-1.0.6"));
             }
 
             if (System.getProperty("os.name").lastIndexOf("Windows") != -1) {
@@ -1849,7 +1853,7 @@ public class PDVMainClass extends JFrame {
                     }
                 }
                 System.err.println(System.getProperty("line.separator")  + new Date()
-                        + ": PDV 1.0.5.");
+                        + ": PDV 1.0.6.");
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(
                         null, "Failed to create the log file.",

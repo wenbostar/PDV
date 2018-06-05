@@ -1,5 +1,6 @@
 package PDVGUI.gui.utils.Export;
 
+import PDVGUI.gui.PDVMainClass;
 import PDVGUI.gui.utils.SetAction;
 import PDVGUI.gui.utils.SpectrumMainPanel;
 import PDVGUI.utils.Export;
@@ -469,7 +470,7 @@ public class ExportExpectedSizeDialog extends JDialog {
                 break;
         }
 
-        File imageFile = new File(outputFolder+"/"+FilePattern.matcher(spectrumKey).replaceAll("")+ finalImageType.getExtension());
+        File imageFile = new File(outputFolder + PDVMainClass.FILE_SEPARATOR + FilePattern.matcher(spectrumKey).replaceAll("")+ finalImageType.getExtension());
 
         ProgressDialogX progressDialog = new ProgressDialogX(parentJFrame,
                 Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMass.png")),
