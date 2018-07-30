@@ -488,10 +488,6 @@ public class MaxQuantImport {
 
                         spectrumTitle = "RawFile: " + spectrumFileName + " Index: " + scanNum;
 
-                        if (!allTitle.contains(spectrumTitle)) {
-
-                            allTitle.add(spectrumTitle);
-
                             currentScanNumList = fileNameToScanNum.get(spectrumFileName);
 
                             if (currentScanNumList != null) {
@@ -516,9 +512,6 @@ public class MaxQuantImport {
                                 System.err.println("It can not find this file ");
                                 isFirstMentioned = false;
                             }
-                        } else {
-                            isFirstMentioned = false;
-                        }
 
                     } else if (line.startsWith("mz")) {
                         mass = line.split("=")[1];
@@ -542,8 +535,6 @@ public class MaxQuantImport {
                 bufferedReader.close();
             }
 
-            int count = 0;
-
             for (File file : allSilAPLFiles){
                 BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
                 String line;
@@ -564,12 +555,6 @@ public class MaxQuantImport {
                         scanNum = spectrumTitle.split(" ")[3];
 
                         spectrumTitle = "RawFile: " + spectrumFileName + " Index: " + scanNum;
-
-                        if (!allTitle.contains(spectrumTitle)) {
-
-                            count ++;
-
-                            allTitle.add(spectrumTitle);
 
                             currentScanNumList = fileNameToScanNum.get(spectrumFileName);
 
@@ -595,9 +580,6 @@ public class MaxQuantImport {
                                 System.err.println("It can not find this file ");
                                 isFirstMentioned = false;
                             }
-                        } else {
-                            isFirstMentioned = false;
-                        }
 
                     } else if (line.startsWith("mz")) {
                         mass = line.split("=")[1];
@@ -784,7 +766,7 @@ public class MaxQuantImport {
                 }
 
                 try {
-                    if (modificationSequence.contains("(")) {
+                    if (!modificationName.equals("Unmodified")) {
                         for (ArrayList<String> eachList : msIDSToModificationFileToEachSite.keySet()){
                             if (eachList.contains(String.valueOf(lineCount - 1))){
                                 fileNameToIDs = msIDSToModificationFileToEachSite.get(eachList);

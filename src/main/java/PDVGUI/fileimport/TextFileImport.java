@@ -123,6 +123,16 @@ public class TextFileImport {
         this.progressDialog = progressDialog;
 
         String dbName = textIdFile.getParentFile().getAbsolutePath()+"/"+ textIdFile.getName()+".db";
+
+        File dbFile = new File(dbName);
+        File dbJournalFile = new File(dbName + "-journal");
+        if (dbFile.isFile() && dbFile.exists()) {
+            dbFile.delete();
+        }
+        if (dbJournalFile.isFile() && dbJournalFile.exists()) {
+            dbJournalFile.delete();
+        }
+
         sqLiteConnection = new SQLiteConnection(dbName);
 
         getParameters();

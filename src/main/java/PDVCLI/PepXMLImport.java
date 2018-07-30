@@ -16,8 +16,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
 /**
  * PepXMLFile parsing
@@ -42,10 +41,6 @@ public class PepXMLImport {
      */
     private HashMap<Double, Double> modifMassToMassDif = new HashMap<>();
     /**
-     * Map stores term modification
-     */
-    private HashMap<Double, String> termModifMassToTerm = new HashMap<>();
-    /**
      * PTM factory
      */
     private PTMFactory ptmFactory = PTMFactory.getInstance();
@@ -57,15 +52,33 @@ public class PepXMLImport {
      * Map
      */
     HashMap<Double, String> modMassToName = new HashMap<>();
+    /**
+     * Map stores term modification
+     */
+    private HashMap<Double, String> termModMassToTerm = new HashMap<>();
+    /**
+     * Fixed modification list
+     */
+    private ArrayList<String> fixedModificationAAs = new ArrayList<>();
+    /**
+     * Spectrum ID to spectrum number
+     */
+    private HashMap<String, Integer> spectrumIdAndNumber;
+    /**
+     * Spectrum type
+     */
+    private Integer spectrumFileType;
 
     /**
      * Constructor of pepXMLImporter
      * @param spectrumFileName spectrumFile name
      * @param pepXMLFile pepXML file
      */
-    public PepXMLImport(String spectrumFileName, File pepXMLFile) {
+    public PepXMLImport(String spectrumFileName, File pepXMLFile, HashMap<String, Integer> spectrumIdAndNumber, Integer spectrumFileType) {
         this.spectrumFileName = spectrumFileName;
         this.pepXMLFile = pepXMLFile;
+        this.spectrumIdAndNumber = spectrumIdAndNumber;
+        this.spectrumFileType = spectrumFileType;
 
         try {
             importFile();
@@ -102,7 +115,6 @@ public class PepXMLImport {
             String scanNum = null;
 
             modifMassToMassDif = new HashMap<>();
-            termModifMassToTerm = new HashMap<>();
 
             while ((tagNum = xmlPullParser.next()) != XmlPullParser.END_DOCUMENT) {
 
@@ -181,14 +193,16 @@ public class PepXMLImport {
 
                                     if (!variable) {
                                         if (terminusName == null) {
+                                            fixedModificationAAs.add(String.valueOf(aminoAcid).toLowerCase());
                                         } else {
-                                            termModifMassToTerm.put(mass, terminus);
+                                            termModMassToTerm.put(mass, terminus);
+                                            fixedModificationAAs.add(String.valueOf(aminoAcid).toLowerCase());
                                         }
 
                                     } else {
                                         if (terminusName == null) {
                                         } else {
-                                            termModifMassToTerm.put(mass, terminus);
+                                            termModMassToTerm.put(mass, terminus);
                                         }
                                     }
                                     modMassToName.put(mass, ptmName);
@@ -323,13 +337,26 @@ public class PepXMLImport {
 
                     if (spectrumNativeID != null) {
                         spectrumTitle = spectrumNativeID;
+                    } else if (spectrumId != null){
+                        spectrumTitle = spectrumId;
                     } else {
                         spectrumTitle = scanNum + "";
                     }
 
-                    String spectrumKey = Spectrum.getSpectrumKey(spectrumFileName, spectrumTitle);
-                    SpectrumMatch spectrumMatch = new SpectrumMatch(spectrumKey);
-                    spectrumMatch.setSpectrumNumber(Integer.valueOf(scanNum));
+                    Integer spectrumIndex = Integer.valueOf(scanNum);
+
+                    SpectrumMatch spectrumMatch;
+
+                    if (spectrumFileType == 1){
+                        spectrumMatch = new SpectrumMatch(Spectrum.getSpectrumKey(spectrumFileName, spectrumTitle));
+                    } else if (spectrumFileType == 2){
+                        spectrumIndex = spectrumIdAndNumber.get(spectrumNativeID);
+                        spectrumMatch = new SpectrumMatch(Spectrum.getSpectrumKey(spectrumFileName, String.valueOf(spectrumIndex - 1)));
+                    } else {
+                        spectrumMatch = new SpectrumMatch(Spectrum.getSpectrumKey(spectrumFileName, String.valueOf(spectrumIndex - 1)));
+                    }
+
+                    spectrumMatch.setSpectrumNumber(spectrumIndex);
 
                     currentMatch = spectrumMatch;
 
@@ -444,10 +471,10 @@ public class PepXMLImport {
     }
 
     /**
-     * Get peptide assumption of one hit
+     * Return peptide assumption of one scan
      * @param xmlPullParser XML xmlPullParser
-     * @param charge Charge of the hit
-     * @return the peptide assumption
+     * @param charge Charge of the scan
+     * @return Peptide assumption
      * @throws XmlPullParserException
      * @throws IOException
      */
@@ -455,7 +482,10 @@ public class PepXMLImport {
 
         Integer rank = null;
         String sequence = null;
-        ArrayList<ModificationMatch> modificationMatches = new ArrayList<ModificationMatch>();
+        ArrayList<ModificationMatch> variableModifications = new ArrayList<>();
+        ArrayList<ModificationMatch> fixedModifications = new ArrayList<>();
+        HashMap<Integer, String> modificationMap = new HashMap<>();
+        HashMap<Integer, Double> locationAndScore = new HashMap<>();
         Double score = null;
 
         for (int i = 0; i < xmlPullParser.getAttributeCount(); i++) {
@@ -478,6 +508,11 @@ public class PepXMLImport {
         while ((tagNum = xmlPullParser.next()) != XmlPullParser.START_TAG) {
         }
 
+        while (xmlPullParser.getName().equals("alternative_protein")) {
+
+            while ((tagNum = xmlPullParser.next()) != XmlPullParser.START_TAG) {
+            }
+        }
         String modificationName = null;
 
         String tagName = xmlPullParser.getName();
@@ -506,8 +541,11 @@ public class PepXMLImport {
                         modificationName = modMassToName.get(terminalMass);
                     }
 
-                    ModificationMatch modificationMatch = new ModificationMatch(modificationName, true, site);
-                    modificationMatches.add(modificationMatch);
+                    if (fixedModificationAAs.contains("N-term") || fixedModificationAAs.contains("C-term") ){
+                        fixedModifications.add(new ModificationMatch(modificationName, true, site));
+                    } else {
+                        variableModifications.add(new ModificationMatch(modificationName, true, site));
+                    }
                 }
             }
 
@@ -544,10 +582,12 @@ public class PepXMLImport {
 
                             if (modifiedAaMass != null) {
 
+                                char aa = sequence.charAt(site - 1);
+
                                 location = site;
 
-                                if(termModifMassToTerm.containsKey(modifiedAaMass)){
-                                    if(termModifMassToTerm.get(modifiedAaMass).equals("n")){
+                                if(termModMassToTerm.containsKey(modifiedAaMass)){
+                                    if(termModMassToTerm.get(modifiedAaMass).equals("n")){
                                         modificationName = modMassToName.get(modifiedAaMass);
                                         location = 1;
                                     } else {
@@ -558,7 +598,13 @@ public class PepXMLImport {
                                     modificationName = modMassToName.get(modifiedAaMass);
                                 }
 
-                                modificationMatches.add(new ModificationMatch(modificationName, true, location));
+                                if (fixedModificationAAs.contains(String.valueOf(aa).toLowerCase())){
+                                    fixedModifications.add(new ModificationMatch(modificationName, true, location));
+                                } else {
+
+                                    modificationMap.put(location, modificationName);
+                                    variableModifications.add(new ModificationMatch(modificationName, true, location));
+                                }
                             }
                         }
                     } else if (tagNum == XmlPullParser.END_TAG && xmlPullParser.getName().equals("modification_info")) {
@@ -570,15 +616,153 @@ public class PepXMLImport {
             }
         }
 
-        Peptide peptide = new Peptide(sequence, modificationMatches);
-        if (score == null){
-            score = 0.0;
+        while (tagNum != XmlPullParser.END_DOCUMENT) {
+            tagName = xmlPullParser.getName();
+
+            if (tagName != null) {
+                if (tagNum == XmlPullParser.START_TAG && xmlPullParser.getName().equals("mod_aminoacid_probability")){
+                    String position = null;
+                    String value = null;
+                    for (int i = 0; i < xmlPullParser.getAttributeCount(); i++) {
+                        String attributeName = xmlPullParser.getAttributeName(i);
+                        if (attributeName.equals("position")) {
+                            position = xmlPullParser.getAttributeValue(i);
+                        } else if (attributeName.equals("probability")){
+                            value = xmlPullParser.getAttributeValue(i);
+                        }
+                    }
+                    if (value != null && position != null){
+                        locationAndScore.put(Integer.valueOf(position), Double.valueOf(value));
+                    }
+                } else if (tagNum == XmlPullParser.END_TAG && tagName.equals("search_hit")) {
+
+                    break;
+                }
+            }
+            tagNum = xmlPullParser.next();
         }
-        if (rank == null){
-            rank = 1;
+
+        if (locationAndScore.size() != 0){
+            variableModifications = getModificationMacthes(sequence, modificationMap, locationAndScore);
+        }
+
+        variableModifications.addAll(fixedModifications);
+
+        Peptide peptide = new Peptide(sequence, variableModifications);
+        //Advocate advocate = Advocate.getAdvocate(searchEngine);
+        if(score == null){
+            score = 0.0;
         }
 
         return new PeptideAssumption(peptide, rank, 1, new Charge(Charge.PLUS, charge), score, spectrumFileName);
+    }
+
+    /**
+     * Update modification according to the PTMProphet
+     */
+    private ArrayList<ModificationMatch> getModificationMacthes(String sequence, HashMap<Integer, String> modificationMap, HashMap<Integer, Double> locationAndScore){
+        ArrayList<ModificationMatch> variableModifications = new ArrayList<>();
+
+        HashMap<String, ArrayList<Integer>> aaToSites = new HashMap<>();
+        HashMap<String, HashMap<Integer, Double>> aaToSitesToScore = new HashMap<>();
+        HashMap<String, String> aaToModification = new HashMap<>();
+
+        for (Integer position : modificationMap.keySet()){
+            String aa = String.valueOf(sequence.charAt(position - 1));
+            if (aaToSites.containsKey(aa)){
+                aaToSites.get(aa).add(position);
+            } else {
+                ArrayList<Integer> sitesList = new ArrayList<>();
+                sitesList.add(position);
+                aaToSites.put(aa, sitesList);
+            }
+            aaToModification.put(aa, modificationMap.get(position));
+        }
+
+        for (Integer position : locationAndScore.keySet()){
+
+            String aa = String.valueOf(sequence.charAt(position - 1));
+            if (aaToSitesToScore.containsKey(aa)){
+                aaToSitesToScore.get(aa).put(position, locationAndScore.get(position));
+            } else {
+                HashMap<Integer, Double> sitesToScore = new HashMap<>();
+                sitesToScore.put(position, locationAndScore.get(position));
+                aaToSitesToScore.put(aa, sitesToScore);
+            }
+        }
+
+        for (String aa : aaToSites.keySet()){
+            ArrayList<Integer> sitesList = aaToSites.get(aa);
+            Integer size = sitesList.size();
+            HashMap<Integer, Double> sitesToScore = aaToSitesToScore.get(aa);
+
+            if (sitesToScore == null){
+                for (Integer site : sitesList){
+                    ModificationMatch modificationMatch = new ModificationMatch(aaToModification.get(aa), true, site);
+                    variableModifications.add(modificationMatch);
+                }
+            } else{
+
+                ArrayList<Integer> newSitesList = new ArrayList<>();
+
+                List<Map.Entry<Integer, Double>> list = new ArrayList<>(sitesToScore.entrySet());
+                Collections.sort(list, (o1, o2) -> {
+                    return o2.getValue().compareTo(o1.getValue());
+                });
+
+                if (size == 1){
+
+                    if (sitesToScore.get(sitesList.get(0)) < list.get(0).getValue()){
+                        newSitesList.add(list.get(0).getKey());
+                    } else {
+                        newSitesList.add(sitesList.get(0));
+                    }
+
+                } else if (size > 1){
+
+                    for (Integer index = 0; index < size; index ++){
+                        Integer site = sitesList.get(index);
+
+                        if (sitesToScore.get(site) == 1){
+                            sitesToScore.remove(site);
+                            sitesToScore.put(site, 0.0);
+                            newSitesList.add(site);
+                        }
+                    }
+
+                    sitesList.removeIf(newSitesList::contains);
+
+                    list = new ArrayList<>(sitesToScore.entrySet());
+                    Collections.sort(list, (o1, o2) -> {
+                        return o2.getValue().compareTo(o1.getValue());
+                    });
+
+                    for (Integer index = 0; index < sitesList.size(); index ++){
+                        Integer site = sitesList.get(index);
+
+                        if (sitesToScore.get(site) < list.get(0).getValue()){
+                            newSitesList.add(list.get(0).getKey());
+                            break;
+                        } else {
+                            newSitesList.add(site);
+                        }
+                    }
+                }
+
+                HashSet hashSet = new  HashSet(newSitesList);
+                newSitesList.clear();
+                newSitesList.addAll(hashSet);
+
+                for (Integer site : newSitesList){
+                    ModificationMatch modificationMatch = new ModificationMatch(aaToModification .get(aa), true, site);
+                    variableModifications.add(modificationMatch);
+                }
+
+            }
+        }
+
+        return variableModifications;
+
     }
 
     /**

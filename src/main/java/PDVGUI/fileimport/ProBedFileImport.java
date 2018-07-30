@@ -90,6 +90,15 @@ public class ProBedFileImport {
 
         String dbName = proBedFile.getParentFile().getAbsolutePath()+"/"+ proBedFile.getName()+".db";
 
+        File dbFile = new File(dbName);
+        File dbJournalFile = new File(dbName + "-journal");
+        if (dbFile.isFile() && dbFile.exists()) {
+            dbFile.delete();
+        }
+        if (dbJournalFile.isFile() && dbJournalFile.exists()) {
+            dbJournalFile.delete();
+        }
+
         scoreName.add("name");
         scoreName.add("score");
         scoreName.add("chrom");

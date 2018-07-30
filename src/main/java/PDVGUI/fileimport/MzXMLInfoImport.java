@@ -54,7 +54,7 @@ public class MzXMLInfoImport {
                     for (int i = 0; i < xmlPullParser.getAttributeCount(); i++) {
                         String name = xmlPullParser.getAttributeName(i);
                         if (name.equals("scanCount")){
-                            detailsList.add("MS Num/t/"+xmlPullParser.getAttributeValue(i));
+                            //detailsList.add("MS Num/t/"+xmlPullParser.getAttributeValue(i));
                         } else if (name.equals("startTime")){
                             time.append("Start:").append(xmlPullParser.getAttributeValue(i));
                         } else if (name.equals("endTime")){

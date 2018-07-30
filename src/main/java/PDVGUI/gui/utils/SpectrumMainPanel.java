@@ -89,11 +89,11 @@ public class SpectrumMainPanel extends JPanel {
     /**
      * Mirror spectrum panel
      */
-    private SpectrumPanel mirrorSpectrumPanel;
+    private SpectrumContainer mirrorSpectrumPanel;
     /**
      * Check peptide spectrum panel
      */
-    private SpectrumPanel checkPeptideSpectrumPanel;
+    private SpectrumContainer checkPeptideSpectrumPanel;
     /**
      * Original sequence fragment panel
      */
@@ -137,7 +137,7 @@ public class SpectrumMainPanel extends JPanel {
     /**
      * SpectrumPanel to paint spectrum import from utilities
      */
-    private SpectrumPanel spectrumPanel;
+    private SpectrumContainer spectrumPanel;
     /**
      * Original peptide sequence
      */
@@ -384,6 +384,8 @@ public class SpectrumMainPanel extends JPanel {
         JLabel matchBIonJLabel = new JLabel();
         JLabel matchYIonJLabel = new JLabel();
 
+        Font menuFont = new Font("Arial", Font.PLAIN, 12);
+
         spectrumMainPanel = new JPanel();
         mainShowJPanel = new JPanel();
         fragmentIonJPanel = new JPanel();
@@ -434,30 +436,37 @@ public class SpectrumMainPanel extends JPanel {
         annotationMenuBar.add(splitterMenu1);
 
         ionsMenu.setText("Ions");
+        ionsMenu.setFont(menuFont);
         ionsMenu.setEnabled(false);
 
         forwardAIonCheckBoxMenuItem.setText("a");
+        forwardAIonCheckBoxMenuItem.setFont(menuFont);
         forwardAIonCheckBoxMenuItem.addActionListener(this::forwardAIonCheckBoxMenuItemAction);
         ionsMenu.add(forwardAIonCheckBoxMenuItem);
 
         forwardBIonCheckBoxMenuItem.setText("b");
+        forwardBIonCheckBoxMenuItem.setFont(menuFont);
         forwardBIonCheckBoxMenuItem.addActionListener(this::forwardBIonCheckBoxMenuItemAction);
         ionsMenu.add(forwardBIonCheckBoxMenuItem);
 
         forwardCIonCheckBoxMenuItem.setText("c");
+        forwardCIonCheckBoxMenuItem.setFont(menuFont);
         forwardCIonCheckBoxMenuItem.addActionListener(this::forwardCIonCheckBoxMenuItemAction);
         ionsMenu.add(forwardCIonCheckBoxMenuItem);
         ionsMenu.add(jSeparator1);
 
         rewardXIonCheckBoxMenuItem.setText("x");
+        rewardXIonCheckBoxMenuItem.setFont(menuFont);
         rewardXIonCheckBoxMenuItem.addActionListener(this::rewardXIonCheckBoxMenuItemAction);
         ionsMenu.add(rewardXIonCheckBoxMenuItem);
 
         rewardYIonCheckBoxMenuItem.setText("y");
+        rewardYIonCheckBoxMenuItem.setFont(menuFont);
         rewardYIonCheckBoxMenuItem.addActionListener(this::rewardYIonCheckBoxMenuItemAction);
         ionsMenu.add(rewardYIonCheckBoxMenuItem);
 
         rewardZIonCheckBoxMenuItem.setText("z");
+        rewardZIonCheckBoxMenuItem.setFont(menuFont);
         rewardZIonCheckBoxMenuItem.addActionListener(this::rewardZIonCheckBoxMenuItemAction);
         ionsMenu.add(rewardZIonCheckBoxMenuItem);
 
@@ -468,25 +477,30 @@ public class SpectrumMainPanel extends JPanel {
         annotationMenuBar.add(splitterMenu2);
 
         otherMenu.setText("Other");
+        otherMenu.setFont(menuFont);
         otherMenu.setEnabled(false);
 
         precursorCheckMenuItem.setSelected(true);
         precursorCheckMenuItem.setText("Precursor");
+        precursorCheckMenuItem.setFont(menuFont);
         precursorCheckMenuItem.addActionListener(this::precursorCheckMenuItemAction);
         otherMenu.add(precursorCheckMenuItem);
 
         immoniumIonsCheckMenuItem.setSelected(true);
         immoniumIonsCheckMenuItem.setText("Immonium");
+        immoniumIonsCheckMenuItem.setFont(menuFont);
         immoniumIonsCheckMenuItem.addActionListener(this::immoniumIonsCheckMenuItemAction);
         otherMenu.add(immoniumIonsCheckMenuItem);
 
         relatedIonsCheckMenuItem.setSelected(true);
         relatedIonsCheckMenuItem.setText("Related");
+        relatedIonsCheckMenuItem.setFont(menuFont);
         relatedIonsCheckMenuItem.addActionListener(this::relatedIonsCheckMenuItemAction);
         otherMenu.add(relatedIonsCheckMenuItem);
 
         reporterIonsCheckMenuItem.setSelected(true);
         reporterIonsCheckMenuItem.setText("Reporter");
+        reporterIonsCheckMenuItem.setFont(menuFont);
         reporterIonsCheckMenuItem.addActionListener(this::reporterIonsCheckMenuItemAction);
         otherMenu.add(reporterIonsCheckMenuItem);
 
@@ -497,10 +511,12 @@ public class SpectrumMainPanel extends JPanel {
         annotationMenuBar.add(lossSplitter);
 
         lossMenu.setText("Loss");
+        lossMenu.setFont(menuFont);
         lossMenu.setEnabled(false);
         lossMenu.add(jSeparator2);
 
         defaultLossCheckBoxMenuItem.setText("Default");
+        defaultLossCheckBoxMenuItem.setFont(menuFont);
         defaultLossCheckBoxMenuItem.setToolTipText("Adapt losses to sequence and modifications");
         defaultLossCheckBoxMenuItem.addActionListener(this::defaultLossCheckBoxMenuItemAction);
         lossMenu.add(defaultLossCheckBoxMenuItem);
@@ -512,6 +528,7 @@ public class SpectrumMainPanel extends JPanel {
         annotationMenuBar.add(splitterMenu9);
 
         chargeMenu.setText("Charge");
+        chargeMenu.setFont(menuFont);
         chargeMenu.setEnabled(false);
         annotationMenuBar.add(chargeMenu);
 
@@ -520,12 +537,15 @@ public class SpectrumMainPanel extends JPanel {
         annotationMenuBar.add(splitterMenu3);
 
         deNovoMenu.setText("De Novo");
+        deNovoMenu.setFont(menuFont);
 
         forwardIonsDeNovoCheckBoxMenuItem.setText("b-ions");
+        forwardIonsDeNovoCheckBoxMenuItem.setFont(menuFont);
         forwardIonsDeNovoCheckBoxMenuItem.addActionListener(this::forwardIonsDeNovoCheckBoxMenuItemAction);
         deNovoMenu.add(forwardIonsDeNovoCheckBoxMenuItem);
 
         rewindIonsDeNovoCheckBoxMenuItem.setText("y-ions");
+        rewindIonsDeNovoCheckBoxMenuItem.setFont(menuFont);
         rewindIonsDeNovoCheckBoxMenuItem.addActionListener(this::rewindIonsDeNovoCheckBoxMenuItemAction);
         deNovoMenu.add(rewindIonsDeNovoCheckBoxMenuItem);
         deNovoMenu.add(jSeparator3);
@@ -533,11 +553,13 @@ public class SpectrumMainPanel extends JPanel {
         deNovoChargeButtonGroup.add(deNovoChargeOneJRadioButtonMenuItem);
         deNovoChargeOneJRadioButtonMenuItem.setSelected(true);
         deNovoChargeOneJRadioButtonMenuItem.setText("Single Charge");
+        deNovoChargeOneJRadioButtonMenuItem.setFont(menuFont);
         deNovoChargeOneJRadioButtonMenuItem.addActionListener(this::deNovoChargeOneJRadioButtonMenuItemAction);
         deNovoMenu.add(deNovoChargeOneJRadioButtonMenuItem);
 
         deNovoChargeButtonGroup.add(deNovoChargeTwoJRadioButtonMenuItem);
         deNovoChargeTwoJRadioButtonMenuItem.setText("Double Charge");
+        deNovoChargeTwoJRadioButtonMenuItem.setFont(menuFont);
         deNovoChargeTwoJRadioButtonMenuItem.addActionListener(this::deNovoChargeTwoJRadioButtonMenuItemAction);
         deNovoMenu.add(deNovoChargeTwoJRadioButtonMenuItem);
 
@@ -548,9 +570,11 @@ public class SpectrumMainPanel extends JPanel {
         annotationMenuBar.add(splitterMenu4);
 
         settingsMenu.setText("Settings");
+        settingsMenu.setFont(menuFont);
         settingsMenu.setEnabled(false);
 
         showAllPeaksMenuItem.setText("Show All Peaks");
+        showAllPeaksMenuItem.setFont(menuFont);
         showAllPeaksMenuItem.setToolTipText("Show all peaks or just the annotated peaks");
         showAllPeaksMenuItem.addActionListener(this::showAllPeaksMenuItemAction);
         settingsMenu.add(showAllPeaksMenuItem);
@@ -559,6 +583,7 @@ public class SpectrumMainPanel extends JPanel {
 
         defaultAnnotationCheckBoxMenuItem.setSelected(true);
         defaultAnnotationCheckBoxMenuItem.setText("Automatic Annotation");
+        defaultAnnotationCheckBoxMenuItem.setFont(menuFont);
         defaultAnnotationCheckBoxMenuItem.setToolTipText("Use automatic annotation");
         defaultAnnotationCheckBoxMenuItem.addActionListener(this::defaultAnnotationCheckBoxMenuItemAction);
         settingsMenu.add(defaultAnnotationCheckBoxMenuItem);
@@ -566,6 +591,7 @@ public class SpectrumMainPanel extends JPanel {
         settingsMenu.add(jSeparator5);
 
         annotationSettingsJMenuItem.setText("Annotation Setting");
+        annotationSettingsJMenuItem.setFont(menuFont);
         annotationSettingsJMenuItem.addActionListener(this::annotationSettingsJMenuItemActionPerformed);
         settingsMenu.add(annotationSettingsJMenuItem);
 
@@ -576,11 +602,14 @@ public class SpectrumMainPanel extends JPanel {
         annotationMenuBar.add(splitterMenu5);
 
         exportGraphicsMenu.setText("Export");
+        exportGraphicsMenu.setFont(menuFont);
         exportGraphicsMenu.setEnabled(false);
 
         exportSpectrumMenu.setText("Figure");
+        exportSpectrumMenu.setFont(menuFont);
 
         exportSpectrumGraphicsJMenuItem.setText("Spectra");
+        exportSpectrumGraphicsJMenuItem.setFont(menuFont);
         exportSpectrumGraphicsJMenuItem.addActionListener(this::exportSpectrumGraphicsJMenuItemActionPerformed);
         exportSpectrumMenu.add(exportSpectrumGraphicsJMenuItem);
 
@@ -593,24 +622,29 @@ public class SpectrumMainPanel extends JPanel {
         annotationMenuBar.add(splitterMenu6);
 
         switchPaneMenu.setText("Tools");
+        switchPaneMenu.setFont(menuFont);
         switchPaneMenu.setEnabled(false);
 
         showSpectrumJMenuItem.setText("Show spectrum");
+        showSpectrumJMenuItem.setFont(menuFont);
         showSpectrumJMenuItem.addActionListener(this::showSpectrumJMenuItemAction);
 
         switchPaneMenu.add(showSpectrumJMenuItem);
 
         showIonTableJMenuItem.setText("Ion Table");
+        showIonTableJMenuItem.setFont(menuFont);
         showIonTableJMenuItem.addActionListener(this::showIonTableJMenuItemAction);
 
         switchPaneMenu.add(showIonTableJMenuItem);
 
         showMirrorJMenuItem.setText("Check spectrum");
+        showMirrorJMenuItem.setFont(menuFont);
         showMirrorJMenuItem.addActionListener(this::showMirrorJMenuItemActionPerformed);
 
         switchPaneMenu.add(showMirrorJMenuItem);
 
         showCheckPeptideJMenuItem.setText("Check Peptide");
+        showCheckPeptideJMenuItem.setFont(menuFont);
         showCheckPeptideJMenuItem.addActionListener(this::showCheckPeptideJMenuItemActionPerformed);
 
         switchPaneMenu.add(showCheckPeptideJMenuItem);
@@ -623,9 +657,11 @@ public class SpectrumMainPanel extends JPanel {
         annotationMenuBar.add(splitterMenu7);
 
         checkFileMenu.setText("Add");
+        checkFileMenu.setFont(menuFont);
         checkFileMenu.setVisible(false);
 
         checkFileMenuItem.setText("Add Spectrum");
+        checkFileMenuItem.setFont(menuFont);
 
         checkFileMenuItem.addActionListener(this::checkFileMenuItemPerform);
 
@@ -634,9 +670,11 @@ public class SpectrumMainPanel extends JPanel {
         annotationMenuBar.add(checkFileMenu);
 
         peptideCheckMenu.setText("Add");
+        peptideCheckMenu.setFont(menuFont);
         peptideCheckMenu.setVisible(false);
 
         checkPeptideMenuItem.setText("Add Peptide");
+        checkPeptideMenuItem.setFont(menuFont);
         checkPeptideMenuItem.addActionListener(this::checkPeptideMenuItemPerform);
 
         peptideCheckMenu.add(checkPeptideMenuItem);
@@ -692,7 +730,12 @@ public class SpectrumMainPanel extends JPanel {
                         .addComponent(spectrumJLayeredPane, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
         );
 
-        matchedToAllJLabel.setText("Matched Peaks Intensity/ Total Intensity: ");
+        matchedToAllJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        matchBIonJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        matchYIonJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        matchIonNumJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+
+        matchedToAllJLabel.setText("Matched Peaks Intensity / Total Intensity: ");
         matchBIonJLabel.setText("b ions: ");
         matchBIonJLabel.setToolTipText("The number of all b ions.");
         matchYIonJLabel.setText("y ions: ");
@@ -721,12 +764,12 @@ public class SpectrumMainPanel extends JPanel {
                                 .addGap(5,5,10)
                                 .addComponent(matchIonNumJLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
                                 .addComponent(matchNumJLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))
-                        .addComponent(mainShowJPanel,100, 1240, 3000)
+                        .addComponent(mainShowJPanel,100, 1240, Short.MAX_VALUE)
         );
         spectrumMainPanelLayout.setVerticalGroup(
                 spectrumMainPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(spectrumMainPanelLayout.createSequentialGroup()
-                                .addComponent(mainShowJPanel, 100, 250, 1300)
+                                .addComponent(mainShowJPanel, 100, 250, Short.MAX_VALUE)
                                 .addGroup(spectrumMainPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addComponent(allJToolBar, 25, 25, GroupLayout.PREFERRED_SIZE)
                                         .addComponent(matchedToAllJLabel, 25, 25, GroupLayout.PREFERRED_SIZE)
@@ -1213,7 +1256,7 @@ public class SpectrumMainPanel extends JPanel {
 
                     double[] intensitiesAsArray = mSnSpectrum.getIntensityValuesNormalizedAsArray();
 
-                    spectrumPanel = new SpectrumPanel(
+                    spectrumPanel = new SpectrumContainer(
                             mSnSpectrum.getMzValuesAsArray(), intensitiesAsArray,
                             precursor.getMz(), precursor.getPossibleCharges().get(0).getChargeAsFormattedString(),
                             "", 40, false, false, false, 2, false);
@@ -1288,7 +1331,7 @@ public class SpectrumMainPanel extends JPanel {
 
                     double[] intensitiesAsArray = currentSpectrum.getIntensityValuesNormalizedAsArray();
 
-                    spectrumPanel = new SpectrumPanel(
+                    spectrumPanel = new SpectrumContainer(
                             currentSpectrum.getMzValuesAsArray(), intensitiesAsArray,
                             precursor.getMz(), (spectrumIdentificationAssumption.getIdentificationCharge().value) + "+",
                             "", 40, false, showDetails, false, 2, false);
@@ -1365,23 +1408,54 @@ public class SpectrumMainPanel extends JPanel {
 
                         Integer charge = ionMatch.charge;
 
-                        if (match.contains("b") && !match.contains("-")){
+                        if (match.contains("b")) {
 
-                            if (bIonMap.containsKey(charge)){
-                                bIonMap.get(charge).add(match.replace("+",""));
+                            if (!match.contains("-")) {
+
+                                if (bIonMap.containsKey(charge)) {
+                                    bIonMap.get(charge).add(match.replace("+", ""));
+                                } else {
+                                    bIonList = new ArrayList<>();
+                                    bIonList.add(match.replace("+", ""));
+                                    bIonMap.put(charge, bIonList);
+                                }
                             } else {
-                                bIonList = new ArrayList<>();
-                                bIonList.add(match.replace("+",""));
-                                bIonMap.put(charge, bIonList);
+
+                                String chargeMatch = match.split("-")[0];
+
+                                if (bIonMap.containsKey(charge)) {
+                                    bIonMap.get(charge).add(chargeMatch.replace("+", ""));
+                                } else {
+                                    bIonList = new ArrayList<>();
+                                    bIonList.add(chargeMatch.replace("+", ""));
+                                    bIonMap.put(charge, bIonList);
+                                }
+
                             }
 
-                        } else if (match.contains("y") && !match.contains("-")){
-                            if (yIonMap.containsKey(charge)){
-                                yIonMap.get(charge).add(match.replace("+",""));
+                        } else if (match.contains("y")){
+
+                            if (!match.contains("-")) {
+
+                                if (yIonMap.containsKey(charge)) {
+                                    yIonMap.get(charge).add(match.replace("+", ""));
+                                } else {
+                                    yIonList = new ArrayList<>();
+                                    yIonList.add(match.replace("+", ""));
+                                    yIonMap.put(charge, yIonList);
+                                }
                             } else {
-                                yIonList = new ArrayList<>();
-                                yIonList.add(match.replace("+",""));
-                                yIonMap.put(charge, yIonList);
+
+                                String chargeMatch = match.split("-")[0];
+
+                                if (yIonMap.containsKey(charge)) {
+                                    yIonMap.get(charge).add(chargeMatch.replace("+", ""));
+                                } else {
+                                    yIonList = new ArrayList<>();
+                                    yIonList.add(chargeMatch.replace("+", ""));
+                                    yIonMap.put(charge, yIonList);
+                                }
+
                             }
                         }
 
@@ -1424,7 +1498,7 @@ public class SpectrumMainPanel extends JPanel {
 
                     spectrumSetAction = new SetAction(this, spectrumJLayeredPane, sequenceFragmentationPanel, null, spectrumPanel, 0, 0, spectrumMainPanel);
 
-                    mirrorSpectrumPanel = new SpectrumPanel(
+                    mirrorSpectrumPanel = new SpectrumContainer(
                             currentSpectrum.getMzValuesAsArray(), intensitiesAsArray,
                             precursor.getMz(), spectrumIdentificationAssumption.getIdentificationCharge().toString(),
                             "", 40, false, false, false, 2, false);
@@ -1516,7 +1590,7 @@ public class SpectrumMainPanel extends JPanel {
 
                     mirrorSetAction = new SetAction(this, mirrorJLayeredPane, sequenceFragmentationPanelMirror, mirrorFragmentPanel, mirrorSpectrumPanel, 0, 0, spectrumMainPanel);
 
-                    checkPeptideSpectrumPanel = new SpectrumPanel(
+                    checkPeptideSpectrumPanel = new SpectrumContainer(
                             currentSpectrum.getMzValuesAsArray(), intensitiesAsArray,
                             precursor.getMz(), spectrumIdentificationAssumption.getIdentificationCharge().toString(),
                             "", 40, false, false, false, 2, false);
@@ -1684,21 +1758,20 @@ public class SpectrumMainPanel extends JPanel {
         Integer pairNum = 0;
         ArrayList<String> bIonList;
         ArrayList<String> yIonList;
+        ArrayList<Integer> bIonLength = new ArrayList<>();
+        ArrayList<Integer> yIonLength = new ArrayList<>();
 
         for (Integer eachCharge : bIonMap.keySet()){
             bIonList = bIonMap.get(eachCharge);
 
             bIonNum += bIonList.size();
 
-            if (yIonMap.containsKey(eachCharge)){
-                yIonList = yIonMap.get(eachCharge);
+            for (String eachMatch : bIonList){
 
-                for (String eachMatch : bIonList){
-                    for (String eachYMatch : yIonList){
-                        if (Integer.valueOf(eachMatch.substring(1, eachMatch.length())) + Integer.valueOf(eachYMatch.substring(1,eachYMatch.length())) == length){
-                            pairNum ++;
-                        }
-                    }
+                int ionLength = Integer.valueOf(eachMatch.substring(1, eachMatch.length()));
+
+                if (!bIonLength.contains(ionLength)){
+                    bIonLength.add(ionLength);
                 }
             }
         }
@@ -1706,7 +1779,23 @@ public class SpectrumMainPanel extends JPanel {
             yIonList = yIonMap.get(eachCharge);
 
             yIonNum += yIonList.size();
+
+            for (String eachYMatch : yIonList){
+
+                int ionLength = length - Integer.valueOf(eachYMatch.substring(1,eachYMatch.length()));
+
+                if (!yIonLength.contains(ionLength)) {
+                    yIonLength.add(ionLength);
+                }
+            }
         }
+
+        for (Integer bIon : bIonLength){
+            if (yIonLength.contains(bIon)){
+                pairNum ++;
+            }
+        }
+
         nums[0] = bIonNum;
         nums[1] = yIonNum;
         nums[2] = pairNum;

@@ -1,4 +1,4 @@
-package PDVGUI.gui.utils;
+package PDVGUI.gui.utils.Export;
 
 import PDVGUI.gui.PDVMainClass;
 import PDVGUI.utils.ExportReports;
@@ -185,7 +185,7 @@ public class ExportReportsJDialog extends JDialog {
         outputJPanel.setBorder(titledBorder);
         outputJPanel.setOpaque(false);
 
-        outputJLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+        outputJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         outputJLabel.setText("Output Path");
         outputJLabel.setForeground(new Color(255, 0, 0));
         outputJLabel.setToolTipText("Select the output path. Result file named as input file and ends with .txt");
@@ -265,8 +265,8 @@ public class ExportReportsJDialog extends JDialog {
         selectedColumnJScrollPane.setViewportView(selectedJTabel);
 
         selectedJTabel.setRowHeight(20);
-        selectedJTabel.setFont(new Font("Arial", Font.PLAIN, 10));
-        selectedJTabel.getTableHeader().setFont(new Font("Dialog", 0, 12));
+        selectedJTabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        selectedJTabel.getTableHeader().setFont(new Font("Dialog", Font.BOLD, 12));
 
         addColumnJButton.setText("<<");
         addColumnJButton.setToolTipText("Add as output reports column");
@@ -345,8 +345,8 @@ public class ExportReportsJDialog extends JDialog {
         allColumnJScrollPane.setViewportView(allColumnJTabel);
 
         allColumnJTabel.setRowHeight(20);
-        allColumnJTabel.setFont(new Font("Arial", Font.PLAIN, 10));
-        allColumnJTabel.getTableHeader().setFont(new Font("Dialog", 0, 12));
+        allColumnJTabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        allColumnJTabel.getTableHeader().setFont(new Font("Dialog", Font.BOLD, 12));
 
         GroupLayout allColumnJPanelLayout = new GroupLayout(allColumnJPanel);
         allColumnJPanel.setLayout(allColumnJPanelLayout);
@@ -368,7 +368,7 @@ public class ExportReportsJDialog extends JDialog {
         columnJSplitPane.setRightComponent(allColumnJPanel);
 
         precursorIonUnit.setModel(new DefaultComboBoxModel(new String[]{"Da", "ppm"}));
-        fragmentIonJLablel.setFont(new Font("Console", Font.PLAIN, 12));
+        fragmentIonJLablel.setFont(new Font("Arial", Font.PLAIN, 12));
         fragmentIonJLablel.setText("Fragment m/z Tolerance");
         fragmentIonAccuracyTxt.setHorizontalAlignment(0);
         fragmentIonAccuracyTxt.addKeyListener(new KeyAdapter() {
@@ -377,7 +377,7 @@ public class ExportReportsJDialog extends JDialog {
             }
         });
 
-        annotationLevelJLabel.setFont(new Font("Console", Font.PLAIN, 12));
+        annotationLevelJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         annotationLevelJLabel.setText("Annotation limit");
         annotationLevelJLabel.setToolTipText("Intensity percentile to ignore for annotation. e.g. 0.03 means that the 3% least intense peaks will be ignored.");
         annotationLevelJSpinner.setModel(new SpinnerNumberModel(Double.valueOf(0.75f), Double.valueOf(0.0f), Double.valueOf(1.0f), Double.valueOf(0.01f)));

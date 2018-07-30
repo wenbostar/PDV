@@ -195,13 +195,13 @@ public class SinglePeptideDisplay extends JFrame {
         newJMenuItem.setText("Open Database Result");
         newJMenuItem.addActionListener(this::newJMenuItemActionPerformed);
 
-        fileJMenu.add(newJMenuItem);
+        //fileJMenu.add(newJMenuItem);
 
         openDenovoJMenuItem.setMnemonic('D');
         openDenovoJMenuItem.setText("Open DeNovo Result");
         openDenovoJMenuItem.addActionListener(this::openDenovoJMenuItemActionPerformed);
 
-        fileJMenu.add(openDenovoJMenuItem);
+        //fileJMenu.add(openDenovoJMenuItem);
 
         exitJMenuItem.setMnemonic('E');
         exitJMenuItem.setText("Exist");

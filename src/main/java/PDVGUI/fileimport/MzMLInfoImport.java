@@ -97,9 +97,12 @@ public class MzMLInfoImport {
             //referenceableParamGroup
             Map<String, List<CVParamType>> stringListHashMap =  mzmlRunInfo.getRefParamGroups();
             for (String key : stringListHashMap.keySet()){
+                StringBuilder wholeName = new StringBuilder();
                 for (CVParamType cvParamType : stringListHashMap.get(key)){
-                    detailsList.add(key + "/t/" + cvParamType.getName()+"("+cvParamType.getValue()+")");
+                    wholeName.append("/").append(cvParamType.getName()).append("(").append(cvParamType.getValue()).append(")");
                 }
+                detailsList.add(key + "/t/" + wholeName.substring(1, wholeName.length()));
+
             }
 
             //referenceableParamGroupList
@@ -125,31 +128,38 @@ public class MzMLInfoImport {
             //softwareList
             InstrumentConfigurationListType instrumentConfigurationListType = mzMLType.getInstrumentConfigurationList();
             SoftwareListType softwareListType = mzMLType.getSoftwareList();
+            StringBuilder softWholeName = new StringBuilder();
             for (SoftwareType softwareType : softwareListType.getSoftware()){
-
-                detailsList.add("Software/t/"+softwareType.getId()+"("+softwareType.getVersion()+")");
+                softWholeName.append("/").append(softwareType.getId()).append("(").append(softwareType.getVersion()).append(")");
             }
+            detailsList.add("Software/t/" + softWholeName.substring(1, softWholeName.length()));
 
             //instrumentConfigurationList
              for (InstrumentConfigurationType instrumentConfigurationType : instrumentConfigurationListType.getInstrumentConfiguration()){
 
                  for (AnalyzerComponentType analyzerComponentType : instrumentConfigurationType.getComponentList().getAnalyzer()){
+                     StringBuilder wholeName = new StringBuilder();
                      for (CVParamType cvParamType : analyzerComponentType.getCvParam()){
 
-                         detailsList.add(instrumentConfigurationType.getId()+": analyzer/t/" + cvParamType.getName());
+                         wholeName.append("/").append(cvParamType.getName());
                      }
+                     detailsList.add(instrumentConfigurationType.getId()+": analyzer/t/" + wholeName.substring(1, wholeName.length()));
                  }
                  for (DetectorComponentType detectorComponentType : instrumentConfigurationType.getComponentList().getDetector()){
+                     StringBuilder wholeName = new StringBuilder();
                      for (CVParamType cvParamType : detectorComponentType.getCvParam()){
 
-                         detailsList.add(instrumentConfigurationType.getId()+": detector/t/" + cvParamType.getName());
+                         wholeName.append("/").append(cvParamType.getName());
                      }
+                     detailsList.add(instrumentConfigurationType.getId()+": detector/t/" + wholeName.substring(1, wholeName.length()));
                  }
                  for (SourceComponentType sourceComponentType : instrumentConfigurationType.getComponentList().getSource()){
-                      for (CVParamType cvParamType : sourceComponentType.getCvParam()){
+                     StringBuilder wholeName = new StringBuilder();
+                     for (CVParamType cvParamType : sourceComponentType.getCvParam()){
 
-                          detailsList.add(instrumentConfigurationType.getId()+": source/t/" + cvParamType.getName());
-                      }
+                         wholeName.append("/").append(cvParamType.getName());
+                     }
+                     detailsList.add(instrumentConfigurationType.getId()+": source/t/" + wholeName.substring(1, wholeName.length()));
                  }
             }
 
@@ -157,10 +167,11 @@ public class MzMLInfoImport {
             DataProcessingListType dataProcessingListType = mzMLType.getDataProcessingList();
             for (DataProcessingType dataProcessingType : dataProcessingListType.getDataProcessing()){
                 for (ProcessingMethodType processingMethodType : dataProcessingType.getProcessingMethod()){
+                    StringBuilder wholeName = new StringBuilder();
                     for (CVParamType cvParamType : processingMethodType.getCvParam()){
-
-                        detailsList.add(dataProcessingType.getId() + " :" +processingMethodType.getOrder()+"/t/"+cvParamType.getName());
+                        wholeName.append("/").append(cvParamType.getName());
                     }
+                    detailsList.add(dataProcessingType.getId() + " :" +processingMethodType.getOrder()+"/t/"+wholeName.substring(1, wholeName.length()));
                 }
             }
 

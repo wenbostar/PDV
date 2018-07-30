@@ -1,6 +1,6 @@
 package PDVGUI.gui;
 
-import PDVGUI.gui.utils.FileImport.RawDataImportDialog;
+import PDVGUI.gui.utils.FileImport.MSDataImportDialog;
 import PDVGUI.gui.utils.InfoPanel;
 import PDVGUI.gui.utils.TICPanel;
 
@@ -12,14 +12,15 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.WindowEvent;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * Display raw data
+ * Display MS data
  * Created by Ken on 10/26/2017.
  */
-public class RawDataDisplay extends JFrame {
+public class MSDataDisplay extends JFrame {
 
     private JPanel ticShowJPanel;
     private JPanel treeJPanel;
@@ -36,6 +37,14 @@ public class RawDataDisplay extends JFrame {
      * File to hash
      */
     private HashMap<String, HashMap<String, ArrayList<float[]>>> fileToHash = new HashMap<>();
+    /**
+     * File to biggest num
+     */
+    private HashMap<String, Integer> fileToBiggestNum = new HashMap<>();
+    /**
+     * Top num
+     */
+    private Integer topNum = 0;
     /**
      * Selected nodes
      */
@@ -61,7 +70,7 @@ public class RawDataDisplay extends JFrame {
      * Constructor
      * @param pdvStart Start panel
      */
-    public RawDataDisplay(PDVStart pdvStart){
+    public MSDataDisplay(PDVStart pdvStart){
 
         initComponents();
 
@@ -73,7 +82,7 @@ public class RawDataDisplay extends JFrame {
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMass.png")));
         setVisible(true);
 
-        new RawDataImportDialog(this);
+        new MSDataImportDialog(this);
     }
 
     /**
@@ -99,7 +108,7 @@ public class RawDataDisplay extends JFrame {
         selectShow = new JComboBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        setTitle("PDV - Raw file(s) Display");
+        setTitle("PDV - MS file(s) Display");
         setBackground(new java.awt.Color(255, 255, 255));
         setMinimumSize(new java.awt.Dimension(760, 600));
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -214,7 +223,7 @@ public class RawDataDisplay extends JFrame {
         GroupLayout ticShowJPanelLayout = new GroupLayout(ticShowJPanel);
         ticShowJPanel.setLayout(ticShowJPanelLayout);
 
-        ticPanel = new TICPanel();
+        ticPanel = new TICPanel(this);
         ticPanel.setBackground(Color.WHITE);
         ticPanel.setOpaque(false);
 
@@ -394,7 +403,7 @@ public class RawDataDisplay extends JFrame {
      * @param evt Mouse click event
      */
     private void addNewJButtonActionPerform(ActionEvent evt){
-        new RawDataImportDialog(this);
+        new MSDataImportDialog(this);
     }
 
     /**
@@ -416,7 +425,7 @@ public class RawDataDisplay extends JFrame {
      * @param keyToRtAndInt Spectrum key to RT and intensity
      * @param originalInfor Original information
      */
-    public synchronized void updateTree(String spectrumFileName, HashMap<String, ArrayList<float[]>> keyToRtAndInt, ArrayList<String> originalInfor){
+    public synchronized void updateTree(String spectrumFileName, HashMap<String, ArrayList<float[]>> keyToRtAndInt, ArrayList<String> originalInfor, BigInteger biggestNum){
 
         allJSplitPane.setDividerLocation(0.3);
 
@@ -424,7 +433,16 @@ public class RawDataDisplay extends JFrame {
 
             treeJPanel.removeAll();
 
+            int exp = 1;
+            int length = String.valueOf(biggestNum).length() - 3;
+
             fileToHash.put(spectrumFileName, keyToRtAndInt);
+
+            for (int i = 0; i < length; i++){
+                exp *= 10;
+            }
+
+            fileToBiggestNum.put(spectrumFileName, exp);
 
             originalInforMap.put(spectrumFileName, originalInfor);
 
@@ -442,6 +460,7 @@ public class RawDataDisplay extends JFrame {
 
             JTree tree = new JTree(treeModel);
             tree.setOpaque(true);
+            tree.setFont(new Font("Arial", Font.PLAIN, 12));
             tree.setBackground(Color.white);
             tree.getSelectionModel().setSelectionMode(
                     TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
@@ -500,6 +519,8 @@ public class RawDataDisplay extends JFrame {
 
             if (fileToHash.containsKey(nodeName)) {
 
+                topNum = fileToBiggestNum.get(nodeName);
+
                 selectedOri.put(nodeName, originalInforMap.get(nodeName));
 
                 updateDetails(selectedOri);
@@ -509,6 +530,9 @@ public class RawDataDisplay extends JFrame {
                 updateTic();
             }
         } else {
+
+            int numHere = 0;
+
             for (String nodeName : selectedNodeList) {
 
                 if (fileToHash.containsKey(nodeName)){
@@ -517,7 +541,13 @@ public class RawDataDisplay extends JFrame {
 
                     nameToKeyToRtAndInt.put(nodeName, fileToHash.get(nodeName));
                 }
+
+                if (fileToBiggestNum.get(nodeName) > numHere){
+                    numHere = fileToBiggestNum.get(nodeName);
+                }
             }
+
+            topNum = numHere;
 
             updateDetails(selectedOri);
 
@@ -529,7 +559,7 @@ public class RawDataDisplay extends JFrame {
      * Update TIC
      */
     private void updateTic(){
-        ticPanel.updatePanel(selectFileName, fileToHash.get(selectFileName), selectShow.getSelectedIndex());
+        ticPanel.updatePanel(selectFileName, fileToHash.get(selectFileName), selectShow.getSelectedIndex(), topNum);
 
         ticShowJPanel.revalidate();
         ticShowJPanel.repaint();
@@ -540,7 +570,7 @@ public class RawDataDisplay extends JFrame {
      * @param nameToKeyToRtAndInt File name to spectrum key to RT and intensity
      */
     private void updateTic(HashMap<String, HashMap<String, ArrayList<float[]>>> nameToKeyToRtAndInt){
-        ticPanel.updatePanel(nameToKeyToRtAndInt, selectShow.getSelectedIndex());
+        ticPanel.updatePanel(nameToKeyToRtAndInt, selectShow.getSelectedIndex(), topNum);
 
         ticShowJPanel.revalidate();
         ticShowJPanel.repaint();

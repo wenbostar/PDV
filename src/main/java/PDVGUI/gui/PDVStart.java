@@ -150,7 +150,7 @@ public class PDVStart extends JDialog {
         newDatabaseResultJButton.setFont(new Font("Arial", Font.BOLD, 14));
         newDatabaseResultJButton.setBackground(new Color(239, 252,255));
         newDatabaseResultJButton.setIcon(new ImageIcon(getClass().getResource("/icons/data.png")));
-        newDatabaseResultJButton.setText("Database searching");
+        newDatabaseResultJButton.setText("Database Searching");
         newDatabaseResultJButton.setFocusPainted(false);
         newDatabaseResultJButton.setHorizontalAlignment(SwingConstants.LEFT);
         newDatabaseResultJButton.setIconTextGap(5);
@@ -172,7 +172,7 @@ public class PDVStart extends JDialog {
         newDeNovoResultJButton.setFont(new Font("Arial", Font.BOLD, 14));
         newDeNovoResultJButton.setBackground(new Color(239, 252,255));
         newDeNovoResultJButton.setIcon(new ImageIcon(getClass().getResource("/icons/lab.png")));
-        newDeNovoResultJButton.setText("Denovo sequencing");
+        newDeNovoResultJButton.setText("Denovo Sequencing");
         newDeNovoResultJButton.setFocusPainted(false);
         newDeNovoResultJButton.setHorizontalAlignment(SwingConstants.LEFT);
         newDeNovoResultJButton.setBorder(null);
@@ -297,8 +297,8 @@ public class PDVStart extends JDialog {
 
         openSpectrumFileJButton.setFont(new Font("Arial", Font.BOLD, 14));
         openSpectrumFileJButton.setBackground(new Color(239, 252,255));
-        openSpectrumFileJButton.setIcon(new ImageIcon(getClass().getResource("/icons/raw.png")));
-        openSpectrumFileJButton.setText("Raw MS Data" );
+        openSpectrumFileJButton.setIcon(new ImageIcon(getClass().getResource("/icons/ms.png")));
+        openSpectrumFileJButton.setText("MS Data" );
         openSpectrumFileJButton.setFocusPainted(false);
         openSpectrumFileJButton.setHorizontalAlignment(SwingConstants.LEFT);
         openSpectrumFileJButton.setBorder(null);
@@ -320,7 +320,7 @@ public class PDVStart extends JDialog {
         openProteoQCJButton.setFont(new Font("Arial", Font.BOLD, 14));
         openProteoQCJButton.setBackground(new Color(239, 252,255));
         openProteoQCJButton.setIcon(new ImageIcon(getClass().getResource("/icons/control.png")));
-        openProteoQCJButton.setText("QC analysis");
+        openProteoQCJButton.setText("QC Analysis");
         openProteoQCJButton.setFocusPainted(false);
         openProteoQCJButton.setHorizontalAlignment(SwingConstants.LEFT);
         openProteoQCJButton.setBorder(null);
@@ -1199,7 +1199,7 @@ public class PDVStart extends JDialog {
      * @param evt
      */
     private void openSpectrumFileJButtonActionPerformed(ActionEvent evt){
-        new RawDataDisplay(this);
+        new MSDataDisplay(this);
     }
 
     /**
@@ -1214,7 +1214,7 @@ public class PDVStart extends JDialog {
 
         setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 
-        JLabel openSpectrumFileJLabel = new JLabel("<html>Visualize raw MS data in mzml/mzXML format.</html>");
+        JLabel openSpectrumFileJLabel = new JLabel("<html>Visualize MS data in mzML/mzXML format.</html>");
         openSpectrumFileJLabel.setFont(new Font("simsun", Font.ITALIC, 12));
 
         GroupLayout secondPartJPanelLayout = new GroupLayout(secondPartJPanel);

@@ -72,7 +72,7 @@ public class PTMColorDialog extends JDialog {
 
         mainJPanel.setBackground(new java.awt.Color(250, 250, 250));
 
-        okJButton.setText("Ok");
+        okJButton.setText("OK");
         okJButton.addActionListener(this::okJButtonActionPerformed);
 
         colorJPanel.setOpaque(false);
@@ -80,7 +80,7 @@ public class PTMColorDialog extends JDialog {
         colorJScrollPane.setOpaque(false);
 
         colorJTable.setRowHeight(20);
-        colorJTable.setFont(new Font("Arial", Font.PLAIN, 10));
+        colorJTable.setFont(new Font("Arial", Font.PLAIN, 12));
         colorJTable.getTableHeader().setFont(new Font("Dialog", 0, 12));
         colorJTable.setOpaque(false);
         colorJTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);

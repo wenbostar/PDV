@@ -14,12 +14,14 @@ import com.compomics.util.gui.filehandling.FileDisplayDialog;
 import com.compomics.util.gui.renderers.AlignedListCellRenderer;
 import com.compomics.util.gui.waiting.waitinghandlers.ProgressDialogX;
 import umich.ms.datatypes.LCMSDataSubset;
+import umich.ms.datatypes.scan.IScan;
 import umich.ms.datatypes.scan.StorageStrategy;
 import umich.ms.datatypes.scancollection.impl.ScanCollectionDefault;
 import umich.ms.fileio.exceptions.FileParsingException;
 import umich.ms.fileio.filetypes.mzidentml.MzIdentMLParser;
 import umich.ms.fileio.filetypes.mzidentml.jaxb.standard.MzIdentMLType;
 import umich.ms.fileio.filetypes.mzml.MZMLFile;
+import umich.ms.fileio.filetypes.mzml.MZMLIndexElement;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -99,6 +101,10 @@ public class DatabaseImportDialog extends JDialog {
      * Check if all identification imported done or not 
      */
     private int mzIdentMLCheck = 0;
+    /**
+     * Spectrum ID to spectrum number
+     */
+    private HashMap<String, Integer> spectrumIdAndNumber = new HashMap<>();
 
     /**
      * Creates a new open dialog.
@@ -467,6 +473,14 @@ public class DatabaseImportDialog extends JDialog {
                             System.exit(1);
                         }
 
+                        Map<String, MZMLIndexElement> idMap = mzmlFile.getIndex().getMapById();
+
+                        for (String id : idMap.keySet()){
+                            MZMLIndexElement mzmlIndexElement = idMap.get(id);
+
+                            spectrumIdAndNumber.put(id, mzmlIndexElement.getNumber());
+                        }
+
                         spectrumsFileFactory = scans;
                     }else if(spectrumFileType.equals("mzxml")){
 
@@ -708,11 +722,11 @@ public class DatabaseImportDialog extends JDialog {
 
         if(idFile.getName().toLowerCase().endsWith(".mzid")) {
 
-            pdvMainClass.importMzID(spectrumsFileFactory, idFile, mzIdentMLType, spectrumFileType);
+            pdvMainClass.importMzID(spectrumsFileFactory, idFile, mzIdentMLType, spectrumFileType, spectrumIdAndNumber);
             idFile = null;
 
         }else if(idFile.getName().toLowerCase().endsWith("xml")){
-            pdvMainClass.importFilePep(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType);
+            pdvMainClass.importFilePep(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType, spectrumIdAndNumber);
             idFile = null;
         } else if(idFile.getName().toLowerCase().endsWith(".txt")){
             pdvMainClass.importTextResults(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType);

@@ -61,7 +61,7 @@ public class ExportBatchDialog extends JDialog {
 
         this.pdvMainClass = pdvMainClass;
         this.selectionSize = selectionSize;
-        this.lastFolder = pdvMainClass.lastSelectedFolder.getLastSelectedFolder();
+        this.lastFolder = PDVMainClass.lastSelectedFolder.getLastSelectedFolder();
 
         setUpGui();
 
@@ -109,24 +109,6 @@ public class ExportBatchDialog extends JDialog {
     }
 
     /**
-     * Constructor
-     * @param pdvMainClass Parent class
-     * @param selectionSize All spectral
-     * @param all Boolean
-     */
-    public ExportBatchDialog(PDVMainClass pdvMainClass, Integer selectionSize, Boolean all){
-        super(pdvMainClass, true);
-
-        this.pdvMainClass = pdvMainClass;
-        this.selectionSize = selectionSize;
-        this.lastFolder = pdvMainClass.lastSelectedFolder.getLastSelectedFolder();
-        setLocationRelativeTo(pdvMainClass);
-
-        setUpGui();
-        setVisible(true);
-    }
-
-    /**
      * Set up the GUI
      */
     private void setUpGui() {
@@ -135,7 +117,7 @@ public class ExportBatchDialog extends JDialog {
 
         typeJComboBox.setEnabled(true);
         typeJComboBox.setRenderer(new AlignedListCellRenderer(0));
-        pathJText.setText(" No Selection");
+        pathJText.setText("No Selection");
     }
 
     /**
@@ -147,8 +129,9 @@ public class ExportBatchDialog extends JDialog {
         JButton pathBrowseJButton = new JButton();
         JLabel typeJLabel = new JLabel();
         JLabel inforJLabel = new JLabel();
-        JLabel picHeightJLabel = new JLabel("Pic Height");
-        JLabel picWidthJlabel = new JLabel("Pic Width");
+        JLabel picHeightJLabel = new JLabel("Height");
+        JLabel picWidthJlabel = new JLabel("Width");
+        JLabel blankJLabel = new JLabel(" ");
         exportJButton = new JButton();
         typeJComboBox = new JComboBox();
         pathJLabel = new JLabel();
@@ -177,7 +160,7 @@ public class ExportBatchDialog extends JDialog {
         detailJPanel.setBackground(Color.white);
 
         pathJLabel.setText("Output Path");
-        pathJLabel.setFont(new Font("Console", Font.PLAIN, 11));
+        pathJLabel.setFont(new Font("Console", Font.PLAIN, 12));
         pathJLabel.setBackground(new Color(255, 0, 0));
 
         pathJText.setHorizontalAlignment(SwingConstants.CENTER);
@@ -189,8 +172,8 @@ public class ExportBatchDialog extends JDialog {
         pathBrowseJButton.setContentAreaFilled(false);
         pathBrowseJButton.addActionListener(this::pathBrowseJButtonActionPerformed);
 
-        typeJLabel.setText("Export type");
-        typeJLabel.setFont(new Font("Console", Font.PLAIN, 11));
+        typeJLabel.setText("Type");
+        typeJLabel.setFont(new Font("Console", Font.PLAIN, 12));
 
         typeJComboBox.setModel(new DefaultComboBoxModel(this.picType));
         typeJComboBox.addItemListener(this::typeJComboBoxdMouseClicked);
@@ -208,14 +191,15 @@ public class ExportBatchDialog extends JDialog {
         exportJButton.setEnabled(false);
         exportJButton.addActionListener(this::exportJButtonActionPerformed);
 
-        picHeightJLabel.setFont(new Font("Console", Font.PLAIN, 11));
-        picWidthJlabel.setFont(new Font("Console", Font.PLAIN, 11));
+        picHeightJLabel.setFont(new Font("Console", Font.PLAIN, 12));
+        picWidthJlabel.setFont(new Font("Console", Font.PLAIN, 12));
 
         unitJCombox.setModel(new DefaultComboBoxModel(new String[]{"mm", "cm", "in", "px"}));
 
         GroupLayout detailJPanelLayout = new GroupLayout(detailJPanel);
         detailJPanel.setLayout(detailJPanelLayout);;
 
+        /*
         detailJPanelLayout.setHorizontalGroup(
                 detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(detailJPanelLayout.createSequentialGroup()
@@ -243,20 +227,49 @@ public class ExportBatchDialog extends JDialog {
                                 .addComponent(picWidthJText, GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(unitJCombox, GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE))
+        );*/
+
+        detailJPanelLayout.setHorizontalGroup(
+                detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(detailJPanelLayout.createSequentialGroup()
+                                .addGroup(detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addComponent(pathJLabel, GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
+                                        .addComponent(typeJLabel, GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
+                                        .addComponent(blankJLabel, GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE))
+                                .addGroup(detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addGroup(detailJPanelLayout.createSequentialGroup()
+                                                .addComponent(pathJText, GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(pathBrowseJButton))
+                                        .addComponent(typeJComboBox, GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
+                                        .addGroup(detailJPanelLayout.createSequentialGroup()
+                                                .addComponent(picHeightJLabel, GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
+                                                .addComponent(picHeightJText, GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
+                                                .addGap(10,40,80)
+                                                .addComponent(picWidthJlabel, GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(picWidthJText, GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(unitJCombox, GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE))))
         );
 
         detailJPanelLayout.setVerticalGroup(
                 detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                                .addGroup(detailJPanelLayout.createSequentialGroup()
+                                        .addComponent(pathJLabel, GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
+                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(typeJLabel, GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
+                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(blankJLabel, GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE))
+                        )
                         .addGroup(detailJPanelLayout.createSequentialGroup()
                                 .addGroup(detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
                                         .addComponent(pathJText)
-                                        .addComponent(pathJLabel)
                                         .addComponent(pathBrowseJButton))
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
-                                        .addComponent(typeJLabel)
-                                        .addComponent(typeJComboBox))
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(typeJComboBox)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
                                         .addComponent(picHeightJLabel)
                                         .addComponent(picHeightJText)
@@ -284,7 +297,7 @@ public class ExportBatchDialog extends JDialog {
                         .addGroup(mainJPanelLayout.createSequentialGroup()
                                 .addComponent(detailJPanel)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                .addGroup(mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
                                         .addComponent(inforJLabel)
                                         .addComponent(exportJButton, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
                                 .addContainerGap())
@@ -353,7 +366,7 @@ public class ExportBatchDialog extends JDialog {
             }
 
             if (pdvMainClass != null){
-                pdvMainClass.lastSelectedFolder.setLastSelectedFolder(outputFolder);
+                PDVMainClass.lastSelectedFolder.setLastSelectedFolder(outputFolder);
             } else if(spectrumLibDisplay != null){
                 spectrumLibDisplay.lastSelectedFolder.setLastSelectedFolder(outputFolder);
             }

@@ -4,6 +4,7 @@ import com.compomics.util.experiment.biology.Peptide;
 import com.compomics.util.experiment.identification.SpectrumIdentificationAssumption;
 import com.compomics.util.experiment.identification.amino_acid_tags.Tag;
 import com.compomics.util.experiment.identification.identification_parameters.SearchParameters;
+import com.compomics.util.experiment.identification.matches.ModificationMatch;
 import com.compomics.util.experiment.identification.matches.SpectrumMatch;
 import com.compomics.util.experiment.identification.spectrum_assumptions.PeptideAssumption;
 import com.compomics.util.experiment.massspectrometry.MSnSpectrum;
@@ -60,6 +61,10 @@ public class DatabaseTableModel extends DefaultTableModel {
      */
     private Boolean isMaxQuant = false;
     /**
+     * Is pepXML or not
+     */
+    private Boolean isPepXML = false;
+    /**
      * Spectrum key and it's selected boolean
      */
     private HashMap<String, Boolean> spectrumKeyToSelected;
@@ -80,7 +85,7 @@ public class DatabaseTableModel extends DefaultTableModel {
      * @param isMaxQuant Is maxQUANT or not
      */
     public DatabaseTableModel(SearchParameters searchParameters, ArrayList<String> scoreName, Object spectrumsFileFactory, String spectrumFileType,
-                              HashMap<String, Boolean> spectrumKeyToSelected, Boolean isNewSoft, Boolean isMaxQuant){
+                              HashMap<String, Boolean> spectrumKeyToSelected, Boolean isNewSoft, Boolean isMaxQuant, Boolean isPepXML){
 
         this.searchParameters = searchParameters;
         this.scoreName = scoreName;
@@ -89,6 +94,7 @@ public class DatabaseTableModel extends DefaultTableModel {
         this.spectrumKeyToSelected = spectrumKeyToSelected;
         this.isNewSoft = isNewSoft;
         this.isMaxQuant = isMaxQuant;
+        this.isPepXML = isPepXML;
     }
 
     /**
@@ -180,7 +186,7 @@ public class DatabaseTableModel extends DefaultTableModel {
                     String spectrumTitle;
                     if( isNewSoft ){
                         spectrumTitle = spectrumKey.split("_rank_")[0];
-                    } else if (isMaxQuant){
+                    } else if (isMaxQuant || isPepXML){
                         spectrumTitle = spectrumKey;
                     } else {
                         spectrumTitle = spectrumFactory.getSpectrumTitle(spectrumFileName, Integer.parseInt(spectrumKey)+1);
@@ -310,6 +316,9 @@ public class DatabaseTableModel extends DefaultTableModel {
                     ScanCollectionDefault scanCollectionDefault = (ScanCollectionDefault) spectrumsFileFactory;
 
                     int spectrumNumber = spectrumMatch.getSpectrumNumber();
+
+                    //System.out.println("The spectrum number is "+spectrumNumber);
+
                     IScan iScan = scanCollectionDefault.getScanByNum(spectrumNumber);
 
                     PrecursorInfo precursor = iScan.getPrecursor();

@@ -101,9 +101,9 @@ public class InfoPanel extends JPanel {
 
             JLabel fileJLabel = new JLabel(fileName);
             fileJLabel.setOpaque(false);
-            fileJLabel.setFont(new Font("Dialog", Font.BOLD, 15));
+            fileJLabel.setFont(new Font("Dialog", Font.ITALIC, 15));
 
-            tableJPanel.add(fileJLabel);
+            tableJPanel.add(fileJLabel, CENTER_ALIGNMENT);
 
             JTable detailsJTable = new JTable(){
                 public Component prepareRenderer(TableCellRenderer renderer, int row, int column){

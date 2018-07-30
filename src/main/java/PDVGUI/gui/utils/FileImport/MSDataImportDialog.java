@@ -1,7 +1,7 @@
 package PDVGUI.gui.utils.FileImport;
 
 import PDVGUI.fileimport.MSOneImport;
-import PDVGUI.gui.RawDataDisplay;
+import PDVGUI.gui.MSDataDisplay;
 import com.compomics.util.gui.waiting.waitinghandlers.ProgressDialogX;
 
 import javax.swing.*;
@@ -13,15 +13,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Import raw spectrum file
+ * Import MS spectrum file
  * Created by Ken on 10/26/2017.
  */
-public class RawDataImportDialog extends JDialog {
+public class MSDataImportDialog extends JDialog {
 
     /**
      * Parent class
      */
-    private RawDataDisplay rawDataDisplay;
+    private MSDataDisplay msDataDisplay;
     /**
      * Spectrum file and it's type
      */
@@ -33,11 +33,11 @@ public class RawDataImportDialog extends JDialog {
 
     /**
      * Constructor
-     * @param rawDataDisplay Parent class
+     * @param msDataDisplay Parent class
      */
-    public RawDataImportDialog(RawDataDisplay rawDataDisplay){
+    public MSDataImportDialog(MSDataDisplay msDataDisplay){
 
-        this.rawDataDisplay = rawDataDisplay;
+        this.msDataDisplay = msDataDisplay;
 
         addFile();
 
@@ -52,7 +52,7 @@ public class RawDataImportDialog extends JDialog {
     private void addFile(){
 
         JFileChooser fileChooser = new JFileChooser(lastSelectedFolder);
-        fileChooser.setDialogTitle("Select Raw File(s)");
+        fileChooser.setDialogTitle("Select Spectrum File(s)");
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fileChooser.setMultiSelectionEnabled(true);
 
@@ -73,7 +73,7 @@ public class RawDataImportDialog extends JDialog {
 
         fileChooser.setFileFilter(filter);
 
-        int returnValue = fileChooser.showDialog(rawDataDisplay, "OK");
+        int returnValue = fileChooser.showDialog(msDataDisplay, "OK");
 
         if (returnValue == JFileChooser.APPROVE_OPTION) {
 
@@ -109,7 +109,7 @@ public class RawDataImportDialog extends JDialog {
 
         ExecutorService threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-        ProgressDialogX progressDialog = new ProgressDialogX(rawDataDisplay,
+        ProgressDialogX progressDialog = new ProgressDialogX(msDataDisplay,
                 Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMass.png")),
                 Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMassWait.png")),
                 true);
@@ -179,7 +179,7 @@ public class RawDataImportDialog extends JDialog {
         @Override
         public void run() {
             MSOneImport msOneImport = new MSOneImport(spectrumFile.getAbsolutePath(), fileType);
-            rawDataDisplay.updateTree(spectrumFile.getName(), msOneImport.getKeyToRtAndInt(), msOneImport.getDetailsList());
+            msDataDisplay.updateTree(spectrumFile.getName(), msOneImport.getKeyToRtAndInt(), msOneImport.getDetailsList(), msOneImport.getBiggestNum());
 
             if (!progressDialog.isRunFinished()){
                 progressDialog.setRunFinished();

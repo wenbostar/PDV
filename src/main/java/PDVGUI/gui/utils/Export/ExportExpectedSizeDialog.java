@@ -164,7 +164,7 @@ public class ExportExpectedSizeDialog extends JDialog {
         detailJPanel.setBackground(Color.white);
 
         pathJLabel.setText("Output Path");
-        pathJLabel.setFont(new Font("Console", Font.PLAIN, 11));
+        pathJLabel.setFont(new Font("Console", Font.PLAIN, 12));
         pathJLabel.setBackground(new Color(255, 0, 0));
 
         pathJText.setHorizontalAlignment(SwingConstants.CENTER);
@@ -176,8 +176,8 @@ public class ExportExpectedSizeDialog extends JDialog {
         pathBrowseJButton.setContentAreaFilled(false);
         pathBrowseJButton.addActionListener(this::pathBrowseJButtonActionPerformed);
 
-        typeJLabel.setText("Export type");
-        typeJLabel.setFont(new Font("Console", Font.PLAIN, 11));
+        typeJLabel.setText("Type");
+        typeJLabel.setFont(new Font("Console", Font.PLAIN, 12));
 
         typeJComboBox.setModel(new DefaultComboBoxModel(this.picType));
         typeJComboBox.addItemListener(this::typeJComboBoxdMouseClicked);
@@ -186,8 +186,8 @@ public class ExportExpectedSizeDialog extends JDialog {
 
         picWidthJText.setHorizontalAlignment(SwingConstants.CENTER);
 
-        picHeightJLabel.setFont(new Font("Console", Font.PLAIN, 11));
-        picWidthJLabel.setFont(new Font("Console", Font.PLAIN, 11));
+        picHeightJLabel.setFont(new Font("Console", Font.PLAIN, 12));
+        picWidthJLabel.setFont(new Font("Console", Font.PLAIN, 12));
 
         previewJButton.setOpaque(true);
         previewJButton.setFont(new Font("Lucida", Font.BOLD, 12));
@@ -204,57 +204,52 @@ public class ExportExpectedSizeDialog extends JDialog {
         unitJCombox.setModel(new DefaultComboBoxModel(new String[]{"mm", "cm", "in", "px"}));
 
         GroupLayout detailJPanelLayout = new GroupLayout(detailJPanel);
-        detailJPanel.setLayout(detailJPanelLayout);;
+        detailJPanel.setLayout(detailJPanelLayout);
 
         detailJPanelLayout.setHorizontalGroup(
                 detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(detailJPanelLayout.createSequentialGroup()
-                                .addGroup(detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addGroup(detailJPanelLayout.createSequentialGroup()
-                                                .addComponent(pathJLabel, GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE )
-                                                .addComponent(pathJText, GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
-                                                .addComponent(pathBrowseJButton))
-                                        .addGroup(detailJPanelLayout.createSequentialGroup()
-                                                .addComponent(picHeightJLabel, GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE)
-                                                .addComponent(picHeightJText, GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
-                                                .addGap(10, 40, 60)
-                                                .addComponent(picWidthJLabel, GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                                .addComponent(picWidthJText, GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
-                                                .addGap(10, 40, 60)
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                                .addComponent(unitJCombox)))
-                                .addGap(10, 30, 50)
-                                .addGroup(detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                                        .addGroup(detailJPanelLayout.createSequentialGroup()
-                                                .addComponent(typeJLabel, GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)
-                                                .addComponent(typeJComboBox, GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE))
-                                        .addGroup(detailJPanelLayout.createSequentialGroup()
-                                                        .addComponent(previewJButton)
-                                                )))
+                                .addComponent(pathJLabel)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(pathJText, GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(pathBrowseJButton)
+                                .addGap(20,40,80)
+                                .addComponent(typeJLabel)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(typeJComboBox, GroupLayout.DEFAULT_SIZE, 200, 300)
+                                .addGap(10, 20, 400)
+                                .addComponent(picHeightJLabel)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(picHeightJText, GroupLayout.DEFAULT_SIZE, 20, 40)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(picWidthJLabel)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(picWidthJText, GroupLayout.DEFAULT_SIZE, 20, 40)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(unitJCombox, GroupLayout.DEFAULT_SIZE, 20, 40)
+                                .addGap(10, 20,100)
+                                .addComponent(previewJButton))
         );
 
         detailJPanelLayout.setVerticalGroup(
                 detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(detailJPanelLayout.createSequentialGroup()
+                                .addGap(5)
                                 .addGroup(detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
                                         .addComponent(pathJText, GroupLayout.DEFAULT_SIZE, 25, GroupLayout.PREFERRED_SIZE)
                                         .addComponent(pathJLabel, GroupLayout.DEFAULT_SIZE, 25, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(pathBrowseJButton))
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                                        .addComponent(pathBrowseJButton)
+                                        .addComponent(typeJLabel, GroupLayout.DEFAULT_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(typeJComboBox, GroupLayout.DEFAULT_SIZE, 25, GroupLayout.PREFERRED_SIZE)
                                         .addComponent(picHeightJLabel, GroupLayout.DEFAULT_SIZE, 25, GroupLayout.PREFERRED_SIZE)
                                         .addComponent(picHeightJText, GroupLayout.DEFAULT_SIZE, 25, GroupLayout.PREFERRED_SIZE)
                                         .addComponent(picWidthJLabel, GroupLayout.DEFAULT_SIZE, 25, GroupLayout.PREFERRED_SIZE)
                                         .addComponent(picWidthJText, GroupLayout.DEFAULT_SIZE, 25, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(unitJCombox, GroupLayout.DEFAULT_SIZE, 25, GroupLayout.PREFERRED_SIZE)))
-                        .addGroup(detailJPanelLayout.createSequentialGroup()
-                                .addGroup(detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
-                                        .addComponent(typeJLabel, GroupLayout.DEFAULT_SIZE, 25, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(typeJComboBox, GroupLayout.DEFAULT_SIZE, 25, GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
-                                        .addComponent(previewJButton, GroupLayout.DEFAULT_SIZE, 25, GroupLayout.PREFERRED_SIZE)))
+                                        .addComponent(unitJCombox, GroupLayout.DEFAULT_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(previewJButton, GroupLayout.DEFAULT_SIZE, 25, GroupLayout.PREFERRED_SIZE))
+                                .addGap(5))
+
         );
 
         titledBorder = BorderFactory.createTitledBorder("Preview" + " \t ");
@@ -295,7 +290,7 @@ public class ExportExpectedSizeDialog extends JDialog {
         mainJPanelLayout.setHorizontalGroup(
                 mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                         .addComponent(detailJPanel)
-                        .addComponent(viewerJPanel, GroupLayout.DEFAULT_SIZE, 800, Short.MAX_VALUE)
+                        .addComponent(viewerJPanel, GroupLayout.DEFAULT_SIZE, 600, Short.MAX_VALUE)
                         .addGroup(mainJPanelLayout.createSequentialGroup()
                                 .addComponent(exportJButton, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
                                 .addContainerGap())
@@ -304,9 +299,9 @@ public class ExportExpectedSizeDialog extends JDialog {
         mainJPanelLayout.setVerticalGroup(
                 mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(mainJPanelLayout.createSequentialGroup()
-                                .addComponent(detailJPanel, 100, 100, 100)
+                                .addComponent(detailJPanel, 50, 50, 60)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(viewerJPanel, 50, 400, Short.MAX_VALUE)
+                                .addComponent(viewerJPanel, 50, 300, Short.MAX_VALUE)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(exportJButton, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
                                 .addContainerGap())

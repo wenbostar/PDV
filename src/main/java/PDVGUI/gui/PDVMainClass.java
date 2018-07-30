@@ -5,6 +5,7 @@ import PDVGUI.fileimport.*;
 import PDVGUI.DB.SQLiteConnection;
 import PDVGUI.gui.utils.*;
 import PDVGUI.gui.utils.Export.ExportBatchDialog;
+import PDVGUI.gui.utils.Export.ExportReportsJDialog;
 import PDVGUI.gui.utils.Export.RealTimeExportJDialog;
 import PDVGUI.gui.utils.FileImport.DatabaseImportDialog;
 import PDVGUI.gui.utils.FileImport.DeNovoImportDialog;
@@ -111,7 +112,7 @@ public class PDVMainClass extends JFrame {
     /**
      * LastSelectFolder accessed easily
      */
-    public LastSelectedFolder lastSelectedFolder;
+    public static LastSelectedFolder lastSelectedFolder;
     /**
      * Utilities user preferences
      */
@@ -177,6 +178,10 @@ public class PDVMainClass extends JFrame {
      */
     private Boolean isDenovo = false;
     /**
+     * Boolean indicate if pepXML or not
+     */
+    private Boolean isPepXML = false;
+    /**
      * Original information hash
      */
     private HashMap<String, Object> originalInfor = new HashMap<>();
@@ -228,6 +233,10 @@ public class PDVMainClass extends JFrame {
      * Get system separator
      */
     public static final String FILE_SEPARATOR = System.getProperty("file.separator");
+    /**
+     * Version
+     */
+    private static final String VERSION = "1.1.0";
 
     /**
      * Main class
@@ -318,11 +327,11 @@ public class PDVMainClass extends JFrame {
     public static String getJarFilePath(){
         String jarPath = (new PDVMainClass()).getClass().getResource("PDVMainClass.class").getPath().split("!")[0];
 
-        if (jarPath.lastIndexOf(FILE_SEPARATOR + "PDV-1.0.6") != -1) {
+        if (jarPath.lastIndexOf("/" + "PDV-" + VERSION) != -1) {
             if (jarPath.startsWith("file:")) {
-                jarPath = jarPath.substring("file:".length(), jarPath.lastIndexOf(FILE_SEPARATOR + "PDV-1.0.6"));
+                jarPath = jarPath.substring("file:".length(), jarPath.lastIndexOf("/" + "PDV-" + VERSION));
             } else {
-                jarPath = jarPath.substring(0, jarPath.lastIndexOf(FILE_SEPARATOR + "PDV-1.0.6"));
+                jarPath = jarPath.substring(0, jarPath.lastIndexOf("/" + "PDV-" + VERSION));
             }
 
             if (System.getProperty("os.name").lastIndexOf("Windows") != -1) {
@@ -434,12 +443,12 @@ public class PDVMainClass extends JFrame {
         JPanel loadingJPanel = new JPanel();
         JLabel allSelectedJLabel = new JLabel();
         JLabel splitJLabel1 = new JLabel(" | ");
-        JLabel splitJLabel2 = new JLabel(" | ");
+        JLabel splitJLabel2 = new JLabel("  ");
         JLabel splitJLabel3 = new JLabel(" | ");
         JLabel splitJLabel4 = new JLabel(" | ");
         JLabel fragmentIonAccuracyJLabel = new JLabel("Fragment m/z Tolerance: ");
-        JLabel fragmentIonType1Lbl = new JLabel("Fragment Ion Types: ");
-        JLabel sortJLabel = new JLabel("Sort results: ");
+        JLabel fragmentIonType1Lbl = new JLabel("Unit: ");
+        JLabel sortJLabel = new JLabel("Sort: ");
 
         msAndTableJSplitPane = new JSplitPane();
         settingColorJButton = new JButton();
@@ -495,8 +504,8 @@ public class PDVMainClass extends JFrame {
         };
 
         spectrumJTable.setRowHeight(20);
-        spectrumJTable.setFont(new Font("Arial", Font.PLAIN, 10));
-        spectrumJTable.getTableHeader().setFont(new Font("Dialog", 0, 12));
+        spectrumJTable.setFont(new Font("Arial", Font.PLAIN, 12));
+        spectrumJTable.getTableHeader().setFont(new Font("Dialog", 1, 13));
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("PDV");
@@ -540,19 +549,19 @@ public class PDVMainClass extends JFrame {
         newJMenuItem.setText("Open dataBase Result");
         newJMenuItem.addActionListener(this::newJMenuItemActionPerformed);
 
-        fileJMenu.add(newJMenuItem);
+        //fileJMenu.add(newJMenuItem);
 
         openDenovoJMenuItem.setMnemonic('D');
         openDenovoJMenuItem.setText("Open DeNovo Result");
         openDenovoJMenuItem.addActionListener(this::openDenovoJMenuItemActionPerformed);
 
-        fileJMenu.add(openDenovoJMenuItem);
+        //fileJMenu.add(openDenovoJMenuItem);
 
         openSingleMenuItem.setMnemonic('S');
         openSingleMenuItem.setText("Open Single Spectrum");
         openSingleMenuItem.addActionListener(this::openSingleMenuItemActionPerformed);
 
-        fileJMenu.add(openSingleMenuItem);
+        //fileJMenu.add(openSingleMenuItem);
 
         fileJMenu.add(jSeparator1);
 
@@ -679,14 +688,13 @@ public class PDVMainClass extends JFrame {
 
         setJMenuBar(menuBar);
 
-        precursorIonUnit.setModel(new DefaultComboBoxModel(new String[]{"Da", "ppm"}));
+        fragmentIonAccuracyTxt.setHorizontalAlignment(SwingConstants.CENTER);
+        fragmentIonAccuracyTxt.setMaximumSize(new Dimension(100, 20));
+        fragmentIonAccuracyTxt.setMinimumSize(new Dimension(50, 20));
 
+        precursorIonUnit.setModel(new DefaultComboBoxModel(new String[]{"Da", "ppm"}));
         precursorIonUnit.setMaximumSize(new Dimension(50, 20));
         precursorIonUnit.setBackground(Color.WHITE);
-
-        fragmentIonAccuracyTxt.setHorizontalAlignment(SwingConstants.CENTER);
-        fragmentIonAccuracyTxt.setMaximumSize(new Dimension(40, 20));
-        fragmentIonAccuracyTxt.setMinimumSize(new Dimension(40, 20));
 
         setButton.setIcon(new ImageIcon(getClass().getResource("/icons/update.png")));
         setButton.setBorder(null);
@@ -727,12 +735,16 @@ public class PDVMainClass extends JFrame {
 
         settingJPanel.setLayout(new BoxLayout(settingJPanel, BoxLayout.X_AXIS));
 
+        fragmentIonAccuracyJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        fragmentIonType1Lbl.setFont(new Font("Arial", Font.PLAIN, 12));
+        sortJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+
         settingJPanel.add(splitJLabel1);
-        settingJPanel.add(fragmentIonType1Lbl);
-        settingJPanel.add(precursorIonUnit);
-        settingJPanel.add(splitJLabel2);
         settingJPanel.add(fragmentIonAccuracyJLabel);
         settingJPanel.add(fragmentIonAccuracyTxt);
+        settingJPanel.add(splitJLabel2);
+        //settingJPanel.add(fragmentIonType1Lbl);
+        settingJPanel.add(precursorIonUnit);
         settingJPanel.add(setButton);
         settingJPanel.add(splitJLabel3);
         settingJPanel.add(sortJLabel);
@@ -815,6 +827,7 @@ public class PDVMainClass extends JFrame {
         psmsJPanel.setBorder(titledBorder);
 
         allSelectedJLabel.setText("Whole page");
+        allSelectedJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         allSelectedJLabel.setToolTipText("Select all spectrum in this page");
         allSelectedJCheckBox.setToolTipText("Select all spectrum in this page");
         allSelectedJCheckBox.setSelected(false);
@@ -1214,10 +1227,11 @@ public class PDVMainClass extends JFrame {
      * @param pepXMLFile PepXML File
      * @param spectrumFileType Type of spectrum file
      */
-    public void importFilePep(File spectrumFile, Object spectrumsFileFactory, File pepXMLFile, String spectrumFileType) {
+    public void importFilePep(File spectrumFile, Object spectrumsFileFactory, File pepXMLFile, String spectrumFileType, HashMap<String, Integer> spectrumIdAndNumber) {
 
         isMaxQuant = false;
         isNewSoft = false;
+        isPepXML = true;
 
         this.spectrumsFileFactory = spectrumsFileFactory;
         this.spectrumFileType = spectrumFileType;
@@ -1257,7 +1271,8 @@ public class PDVMainClass extends JFrame {
                 PepXMLFileImport pepXMLFileImport;
 
                 try {
-                    pepXMLFileImport = new PepXMLFileImport(PDVMainClass.this, spectrumFile.getName(), pepXMLFile, getModificationMass(), spectrumFactory, scans, spectrumFileType, progressDialog);
+                    pepXMLFileImport = new PepXMLFileImport(PDVMainClass.this, spectrumFile.getName(), pepXMLFile, getModificationMass(), spectrumFactory,
+                            scans, spectrumFileType, progressDialog, spectrumIdAndNumber);
 
                     sqliteConnection = pepXMLFileImport.getSqLiteConnection();
                     originalInfor = pepXMLFileImport.getOriginalInfor();
@@ -1291,7 +1306,7 @@ public class PDVMainClass extends JFrame {
      * @param mzIdentMLType Object saving mzIdentML
      * @param spectrumFileType spectrum file type
      */
-    public void importMzID(Object spectrumsFileFactory, File mzIdentMLFile, MzIdentMLType mzIdentMLType, String spectrumFileType){
+    public void importMzID(Object spectrumsFileFactory, File mzIdentMLFile, MzIdentMLType mzIdentMLType, String spectrumFileType, HashMap<String, Integer> spectrumIdAndNumber){
 
         isMaxQuant = false;
         isNewSoft = false;
@@ -1335,7 +1350,7 @@ public class PDVMainClass extends JFrame {
 
                 try {
                     mzIDFileImport = new MzIDFileImport(PDVMainClass.this, mzIdentMLFile, mzIdentMLType, getModificationMass(),
-                            spectrumFactory, spectrumFileType, progressDialog);
+                            spectrumFactory, spectrumFileType, progressDialog, spectrumIdAndNumber);
 
                     sqliteConnection = mzIDFileImport.getSqLiteConnection();
                     originalInfor = mzIDFileImport.getOriginalInfor();
@@ -1824,13 +1839,13 @@ public class PDVMainClass extends JFrame {
         if ( !PDVMainClass.getJarFilePath().equalsIgnoreCase(".")) {
             try {
 
-                File logsFolder = new File(PDVMainClass.getJarFilePath() + "/logs/");
+                File logsFolder = new File(PDVMainClass.getJarFilePath() + FILE_SEPARATOR + "logs" +FILE_SEPARATOR);
 
                 if(!logsFolder.exists()){
                     logsFolder.mkdir();
                 }
 
-                String path = PDVMainClass.getJarFilePath() + "/logs/PDV.log";
+                String path = PDVMainClass.getJarFilePath() + FILE_SEPARATOR + "logs" + FILE_SEPARATOR + "PDV.log";
 
                 File file = new File(path);
                 System.setErr(new java.io.PrintStream(new FileOutputStream(file, true)));
@@ -1853,7 +1868,7 @@ public class PDVMainClass extends JFrame {
                     }
                 }
                 System.err.println(System.getProperty("line.separator")  + new Date()
-                        + ": PDV 1.0.6.");
+                        + ": PDV-" + VERSION);
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(
                         null, "Failed to create the log file.",
@@ -1900,9 +1915,9 @@ public class PDVMainClass extends JFrame {
 
         }
 
-        fragmentIonAccuracyTxt.setText(String.valueOf(annotationSettings.getFragmentIonAccuracy()));
+        fragmentIonAccuracyTxt.setText("  "+String.valueOf(annotationSettings.getFragmentIonAccuracy())+"  ");
 
-        databaseTableModel = new DatabaseTableModel(searchParameters, scoreName, spectrumsFileFactory, spectrumFileType, spectrumKeyToSelected, isNewSoft, isMaxQuant);
+        databaseTableModel = new DatabaseTableModel(searchParameters, scoreName, spectrumsFileFactory, spectrumFileType, spectrumKeyToSelected, isNewSoft, isMaxQuant, isPepXML);
         spectrumJTable.setModel(databaseTableModel);
 
         updateTable();
@@ -2631,7 +2646,7 @@ public class PDVMainClass extends JFrame {
         for (ArrayList<String> each : allSpectrumIndex){
             size += each.size();
         }
-        new ExportBatchDialog(this, size, true);
+        new ExportBatchDialog(this, size);
     }
 
     /**
@@ -2707,10 +2722,10 @@ public class PDVMainClass extends JFrame {
         if(spectrumFileType.equals("mgf")){
 
             String spectrumTitle = null;
-            if(!isMaxQuant && !isNewSoft){
+            if(!isMaxQuant && !isNewSoft && !isPepXML){
                 spectrumTitle = spectrumFactory.getSpectrumTitle(spectrumFileName, Integer.parseInt(spectrumKey)+1);
 
-            } else if(isMaxQuant) {
+            } else if(isMaxQuant || isPepXML) {
                 spectrumTitle = spectrumKey;
             } else if(isNewSoft){
                 spectrumTitle = spectrumKey.split("_rank_")[0];
@@ -2731,6 +2746,7 @@ public class PDVMainClass extends JFrame {
             Charge charge = spectrumMatch.getBestPeptideAssumption().getIdentificationCharge();
             ArrayList<Charge> charges = new ArrayList<>();
             charges.add(charge);
+
             Precursor precursor = new Precursor(scans.getScanByNum(iScan.getPrecursor().getParentScanNum()).getRt(), iScan.getPrecursor().getMzTarget(),
                     iScan.getPrecursor().getIntensity(), charges);
 
@@ -2957,9 +2973,9 @@ public class PDVMainClass extends JFrame {
 
             if (spectrumFileType.equals("mgf")) {
                 String spectrumTitle = null;
-                if(!isMaxQuant && !isNewSoft){
+                if(!isMaxQuant && !isNewSoft && !isPepXML){
                     spectrumTitle = spectrumFactory.getSpectrumTitle(spectrumFileName, Integer.parseInt(spectrumKey)+1);
-                }else if(isMaxQuant) {
+                }else if(isMaxQuant || isPepXML) {
                     spectrumTitle = spectrumKey;
                 } else if(isNewSoft){
                     spectrumTitle = spectrumKey.split("_rank_")[0];

@@ -85,6 +85,16 @@ public class SpectrumLibrarySplibImport {
         getAllFiles();
 
         dbName = splibFileDirectory+"/"+ sptxtFile.getName()+".db";
+
+        File dbFile = new File(dbName);
+        File dbJournalFile = new File(dbName + "-journal");
+        if (dbFile.isFile() && dbFile.exists()) {
+            dbFile.delete();
+        }
+        if (dbJournalFile.isFile() && dbJournalFile.exists()) {
+            dbJournalFile.delete();
+        }
+
         sqLiteConnection = new SQLiteConnection(dbName);
 
         new Thread("DisplayThread") {

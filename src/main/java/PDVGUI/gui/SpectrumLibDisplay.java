@@ -322,12 +322,16 @@ public class SpectrumLibDisplay extends JFrame {
         settingJPanel.setMinimumSize(new Dimension(20, 0));
         settingJPanel.setLayout(new BoxLayout(settingJPanel, BoxLayout.X_AXIS));
 
-        settingJPanel.add(splitJLabel1);
-        settingJPanel.add(fragmentIonType1Lbl);
-        settingJPanel.add(precursorIonUnit);
+        fragmentIonAccuracyJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        fragmentIonType1Lbl.setFont(new Font("Arial", Font.PLAIN, 12));
+        sortJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+
         settingJPanel.add(splitJLabel2);
         settingJPanel.add(fragmentIonAccuracyJLabel);
         settingJPanel.add(fragmentIonAccuracyTxt);
+        settingJPanel.add(splitJLabel1);
+        settingJPanel.add(fragmentIonType1Lbl);
+        settingJPanel.add(precursorIonUnit);
         settingJPanel.add(setButton);
         settingJPanel.add(splitJLabel3);
         settingJPanel.add(sortJLabel);

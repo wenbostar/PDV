@@ -12,6 +12,8 @@ import umich.ms.datatypes.scan.StorageStrategy;
 import umich.ms.datatypes.scancollection.impl.ScanCollectionDefault;
 
 import java.io.File;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -40,6 +42,10 @@ public class MSOneImport {
      * Detail list
      */
     private ArrayList<String> detailsList = new ArrayList<>();
+    /**
+     * The biggest number.
+     */
+    private float biggestNum = 0;
 
     /**
      * Constructor
@@ -92,13 +98,19 @@ public class MSOneImport {
 
                 for (Chromatogram chromatogram : mzMLRawDataFile.getChromatograms()) {
                     rtToItem = new ArrayList<>();
+                    float[] rtArray = chromatogram.getRetentionTimes();
+                    float[] intArray = chromatogram.getIntensityValues();
 
-                    for (int index = 0; index < chromatogram.getRetentionTimes().length; index++) {
+                    for (int index = 0; index < rtArray.length; index++) {
 
                         rtAndItem = new float[2];
-                        rtAndItem[0] = chromatogram.getRetentionTimes()[index];
-                        rtAndItem[1] = chromatogram.getIntensityValues()[index];
+                        rtAndItem[0] = rtArray[index];
+                        rtAndItem[1] = intArray[index];
                         rtToItem.add(rtAndItem);
+
+                        if (rtAndItem[1] > biggestNum){
+                            biggestNum = rtAndItem[1];
+                        }
                     }
 
                     keyToRtAndInt.put(chromatogram.getChromatogramType().toString(), rtToItem);
@@ -110,15 +122,29 @@ public class MSOneImport {
 
             } else {
 
+                float startRT = 10000;
+                float endRT = 0f;
+
                 for (MsScan msScan : mzMLRawDataFile.getScans()) {
 
                     if (msScan.getMsLevel() == 1) {
                         rtAndItem = new float[2];
                         ms1Count++;
 
-                        rtAndItem[0] = msScan.getRetentionTime();
+                        rtAndItem[0] = msScan.getRetentionTime()/60;
                         rtAndItem[1] = msScan.getTIC();
                         rtToItem.add(rtAndItem);
+
+                        if (rtAndItem[1] > biggestNum){
+                            biggestNum = rtAndItem[1];
+                        }
+
+                        if (rtAndItem[0] > endRT){
+                            endRT = rtAndItem[0];
+                        }
+                        if (rtAndItem[0] < startRT){
+                            startRT = rtAndItem[0];
+                        }
 
                     } else if (msScan.getMsLevel() == 2) {
                         ms2Count++;
@@ -127,7 +153,7 @@ public class MSOneImport {
 
                 keyToRtAndInt.put("TIC", rtToItem);
 
-                detailsList.add("RT/t/Start:-1"+" End:-1");
+                detailsList.add("RT (min)/t/Start:" + startRT +" End:" + endRT);
             }
 
         } else if (spectrumFileType.equals("mzxml")){
@@ -152,8 +178,12 @@ public class MSOneImport {
 
                     ms1Count ++;
 
-                    rtAndItem[0] = msScan.getRetentionTime();
+                    rtAndItem[0] = msScan.getRetentionTime()/60;
                     rtAndItem[1] = msScan.getTIC();
+
+                    if (rtAndItem[1] > biggestNum){
+                        biggestNum = rtAndItem[1];
+                    }
 
                     rtToItem.add(rtAndItem);
 
@@ -163,7 +193,7 @@ public class MSOneImport {
             }
             keyToRtAndInt.put("TIC", rtToItem);
 
-            detailsList.add("RT/t/Start:-1"+" End:-1");
+            //detailsList.add("RT/t/Start:-1"+" End:-1");
         }
 
          String[] msNum = new String[3];
@@ -173,7 +203,7 @@ public class MSOneImport {
          msNum[2] = String.valueOf(ms2Count);
 
          detailsList.add("MS Num/t/MS1:"+ms1Count+" MS2:"+ms2Count);
-     }
+    }
 
     /**
      * Return key to RT and Int
@@ -189,5 +219,12 @@ public class MSOneImport {
      */
      public ArrayList<String> getDetailsList() {
         return detailsList;
+    }
+
+    /**
+     * Get biggest num
+     */
+    public BigInteger getBiggestNum(){
+        return BigInteger.valueOf((long) biggestNum);
     }
 }

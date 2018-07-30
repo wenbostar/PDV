@@ -49,6 +49,14 @@ public class MzIDImport {
      * PTM setting
      */
     public PtmSettings ptmSettings = new PtmSettings();
+    /**
+     * Spectrum ID to spectrum number
+     */
+    private HashMap<String, Integer> spectrumIdAndNumber;
+    /**
+     * Spectrum type
+     */
+    private Integer spectrumFileType;
 
     /**
      * Constructor
@@ -56,9 +64,12 @@ public class MzIDImport {
      * @param spectrumFileName Spectrum file name
      * @param spectrumsFileFactory Spectrum file factory
      */
-    public MzIDImport(File idFile, String spectrumFileName, Object spectrumsFileFactory){
+    public MzIDImport(File idFile, String spectrumFileName, Object spectrumsFileFactory, HashMap<String, Integer> spectrumIdAndNumber, Integer spectrumFileType){
 
         this.idFile = idFile;
+        this.spectrumIdAndNumber =spectrumIdAndNumber;
+        this.spectrumFileType = spectrumFileType;
+
         if (spectrumFileName.toLowerCase().endsWith("mgf")){
             this.spectrumFactory = (SpectrumFactory) spectrumsFileFactory;
         } else {
@@ -157,13 +168,17 @@ public class MzIDImport {
                 spectrumFileRef = spectrumIdentificationResultType.getSpectraDataRef();
                 currentSpectrumFile = spectrumFileMap.get(spectrumFileRef);
 
-                if (spectrumFactory != null){
+                currentMatch = new SpectrumMatch(Spectrum.getSpectrumKey(currentSpectrumFile, spectrumIndex));
+
+                if (spectrumFileType == 1){
                     spectrumTitle = spectrumFactory.getSpectrumTitle(currentSpectrumFile, Integer.parseInt(spectrumIndex) + 1);
+                } else if (spectrumFileType == 2) {
+                    currentMatch.setSpectrumNumber(spectrumIdAndNumber.get(spectrumID));
+                    spectrumTitle = spectrumIndex;
                 } else {
+                    currentMatch.setSpectrumNumber(Integer.valueOf(spectrumIndex));
                     spectrumTitle = spectrumIndex;
                 }
-
-                currentMatch = new SpectrumMatch(Spectrum.getSpectrumKey(currentSpectrumFile, spectrumTitle));
 
                 spectrumIdentificationItems = spectrumIdentificationResultType.getSpectrumIdentificationItem();
 

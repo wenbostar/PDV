@@ -159,6 +159,16 @@ public class MaxQuantFileImport {
         this.progressDialog = progressDialog;
 
         String databasePath = maxQuantDirectory.getAbsolutePath()+"/combined.db";
+
+        File dbFile = new File(databasePath);
+        File dbJournalFile = new File(databasePath + "-journal");
+        if (dbFile.isFile() && dbFile.exists()) {
+            dbFile.delete();
+        }
+        if (dbJournalFile.isFile() && dbJournalFile.exists()) {
+            dbJournalFile.delete();
+        }
+
         sqLiteConnection = new SQLiteConnection(databasePath);
 
         sqLiteConnection.setScoreNum(1);
@@ -427,7 +437,7 @@ public class MaxQuantFileImport {
                 Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMass.png")),
                 Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMassWait.png")),
                 true);
-        progressDialog.setTitle("Generating spectrum. Please Wait...");
+        progressDialog.setTitle("Generating spectrum. Please wait...");
         new Thread("GenerateMGFProgress") {
             @Override
             public void run() {
@@ -453,7 +463,7 @@ public class MaxQuantFileImport {
                 }
 
                 try {
-                    progressDialog.setMaxPrimaryProgressCounter(allAPLFiles.size());
+                    progressDialog.setMaxPrimaryProgressCounter(allAPLFiles.size() + allSilAPLFiles.size());
                     for (String fileName : fileToTitleToRTMap.keySet()) {
                         BufferedWriter fileWriter = new BufferedWriter(new FileWriter(new File(parentDictory + fileName + ".mgf")));
                         fileNameToFileWriter.put(fileName, fileWriter);
@@ -468,6 +478,7 @@ public class MaxQuantFileImport {
                     String mass = null;
                     String charge = null;
                     boolean isFirstMentioned = true;
+
                     for (File eachAPLFile : allAPLFiles) {
 
                         BufferedReader bufferedReader = new BufferedReader(new FileReader(eachAPLFile));
@@ -484,17 +495,12 @@ public class MaxQuantFileImport {
                                 insideSpectrum = true;
 
                             } else if (line.startsWith("header")) {
+
                                 spectrumTitle = line.split(" Precursor")[0].split("=")[1];
                                 spectrumFileName = spectrumTitle.split(" ")[1];
                                 scanNum = spectrumTitle.split(" ")[3];
 
                                 spectrumTitle = "RawFile: " + spectrumFileName + " Index: " + scanNum;
-
-                                currentScanNumList = fileNameToScanNum.get(spectrumFileName);
-
-                                if (!allTitle.contains(spectrumTitle)) {
-
-                                    allTitle.add(spectrumTitle);
 
                                     currentScanNumList = fileNameToScanNum.get(spectrumFileName);
 
@@ -508,6 +514,7 @@ public class MaxQuantFileImport {
                                         }
 
                                         if (isFirstMentioned) {
+                                            long start2 = System.currentTimeMillis();
                                             fileWriter = fileNameToFileWriter.get(spectrumFileName);
 
                                             fileWriter.write("BEGIN IONS\n");
@@ -515,14 +522,12 @@ public class MaxQuantFileImport {
                                             fileWriter.write("PEPMASS=" + mass + "\n");
                                             fileWriter.write("CHARGE=" + charge + "+\n");
                                             fileWriter.write("RTINSECONDS=" + Double.valueOf(fileToTitleToRTMap.get(spectrumFileName).get(spectrumTitle)) * 60 + "\n");
+
                                         }
                                     } else {
                                         System.out.println("It can not find this file ");
                                         isFirstMentioned = false;
                                     }
-                                } else {
-                                    isFirstMentioned = false;
-                                }
 
                             } else if (line.startsWith("mz")) {
                                 mass = line.split("=")[1];
@@ -544,10 +549,12 @@ public class MaxQuantFileImport {
                             }
                         }
                         bufferedReader.close();
+
                         progressDialog.increasePrimaryProgressCounter();
                     }
 
                     for (File file : allSilAPLFiles){
+
                         BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
                         String line;
                         boolean insideSpectrum = false;
@@ -567,10 +574,6 @@ public class MaxQuantFileImport {
                                 scanNum = spectrumTitle.split(" ")[3];
 
                                 spectrumTitle = "RawFile: " + spectrumFileName + " Index: " + scanNum;
-
-                                if (!allTitle.contains(spectrumTitle)) {
-
-                                    allTitle.add(spectrumTitle);
 
                                     currentScanNumList = fileNameToScanNum.get(spectrumFileName);
 
@@ -596,9 +599,6 @@ public class MaxQuantFileImport {
                                         System.out.println("It can not find this file ");
                                         isFirstMentioned = false;
                                     }
-                                } else {
-                                    isFirstMentioned = false;
-                                }
 
                             } else if (line.startsWith("mz")) {
                                 mass = line.split("=")[1];
@@ -620,6 +620,10 @@ public class MaxQuantFileImport {
                             }
 
                         }
+
+                        bufferedReader.close();
+                        progressDialog.increasePrimaryProgressCounter();
+
                     }
 
                     fileWriter.close();
@@ -641,6 +645,7 @@ public class MaxQuantFileImport {
 
                     if(e.getClass().getName().contains("Error")){
                         progressDialog.setRunFinished();
+                        MaxQuantFileImport.this.progressDialog.setRunFinished();
                         JOptionPane.showMessageDialog(pdvMainClass, "Please increase JVM memory! ", "Memory Error", JOptionPane.ERROR_MESSAGE);
                     } else {
                         progressDialog.setRunFinished();
@@ -665,7 +670,7 @@ public class MaxQuantFileImport {
                 Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMassWait.png")),
                 true);
 
-        progressDialog.setTitle("Parsing spectrum. Please Wait...");
+        progressDialog.setTitle("Parsing spectrum. Please wait...");
         new Thread("ParseMGFProgress") {
             @Override
             public void run() {
@@ -714,6 +719,7 @@ public class MaxQuantFileImport {
                         } catch (IOException | Error e ) {
                             if(e.getClass().getName().contains("Error")){
                                 progressDialog.setRunFinished();
+                                MaxQuantFileImport.this.progressDialog.setRunFinished();
                                 JOptionPane.showMessageDialog(pdvMainClass, "Please increase JVM memory! ", "Memory Error", JOptionPane.ERROR_MESSAGE);
                             } else {
                                 progressDialog.setRunFinished();
@@ -934,7 +940,7 @@ public class MaxQuantFileImport {
                 }
 
                 try {
-                    if (modificationSequence.contains("(")) {
+                    if (!modificationName.equals("Unmodified")) {
                         for (ArrayList<String> eachList : msIDSToModificationFileToEachSite.keySet()){
                             if (eachList.contains(String.valueOf(lineCount - 1))){
                                 fileNameToIDs = msIDSToModificationFileToEachSite.get(eachList);
@@ -981,6 +987,7 @@ public class MaxQuantFileImport {
                                             }
                                         }
                                         utilitiesModificationName = fileName.split(" \\(")[0].replace(">","&gt;") + " of " + sequence.charAt(site - 1);
+
                                         utilitiesModifications.add(new ModificationMatch(utilitiesModificationName, true, site));
                                         if (!allModifications.contains(utilitiesModificationName)) {
                                             allModifications.add(utilitiesModificationName);

@@ -15,7 +15,6 @@ import com.compomics.util.experiment.identification.spectrum_annotation.Spectrum
 import com.compomics.util.experiment.identification.spectrum_annotation.spectrum_annotators.PeptideSpectrumAnnotator;
 import com.compomics.util.experiment.identification.spectrum_assumptions.PeptideAssumption;
 import com.compomics.util.experiment.massspectrometry.*;
-import com.compomics.util.gui.spectrum.GraphicsPanel;
 import com.compomics.util.gui.spectrum.SequenceFragmentationPanel;
 import com.compomics.util.gui.spectrum.SpectrumPanel;
 import com.compomics.util.preferences.SequenceMatchingPreferences;
@@ -31,15 +30,13 @@ import umich.ms.datatypes.scancollection.impl.ScanCollectionDefault;
 import umich.ms.datatypes.spectrum.ISpectrum;
 import umich.ms.fileio.exceptions.FileParsingException;
 import umich.ms.fileio.filetypes.mzml.MZMLFile;
+import umich.ms.fileio.filetypes.mzml.MZMLIndexElement;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static PDVGUI.gui.PDVMainClass.getJarFilePath;
@@ -168,6 +165,10 @@ public class PDVCLIMainClass extends JFrame {
      * Get system separator
      */
     public static final String FILE_SEPARATOR = System.getProperty("file.separator");
+    /**
+     * Spectrum ID to spectrum number
+     */
+    private HashMap<String, Integer> spectrumIdAndNumber = new HashMap<>();
 
     /**
      * Constructor
@@ -474,7 +475,7 @@ public class PDVCLIMainClass extends JFrame {
 
             processSpectrumFile();
 
-            MzIDImport mzIDImport = new MzIDImport(idFile, spectrumFile.getName(), spectrumsFileFactory);
+            MzIDImport mzIDImport = new MzIDImport(idFile, spectrumFile.getName(), spectrumsFileFactory, spectrumIdAndNumber, spectrumFileType);
 
             spectrumMatchesMap = mzIDImport.getSpectrumMatchesMap();
 
@@ -482,7 +483,7 @@ public class PDVCLIMainClass extends JFrame {
 
             processSpectrumFile();
 
-            PepXMLImport pepXMLImport = new PepXMLImport(spectrumFile.getName(), idFile);
+            PepXMLImport pepXMLImport = new PepXMLImport(spectrumFile.getName(), idFile, spectrumIdAndNumber, spectrumFileType);
 
             spectrumMatchesMap = pepXMLImport.getSpectrumMatchesMap();
 
@@ -547,6 +548,14 @@ public class PDVCLIMainClass extends JFrame {
                 scans.loadData(LCMSDataSubset.MS2_WITH_SPECTRA);
             } catch (FileParsingException e) {
                 e.printStackTrace();
+            }
+
+            Map<String, MZMLIndexElement> idMap = mzmlFile.getIndex().getMapById();
+
+            for (String id : idMap.keySet()){
+                MZMLIndexElement mzmlIndexElement = idMap.get(id);
+
+                spectrumIdAndNumber.put(id, mzmlIndexElement.getNumber());
             }
 
             spectrumsFileFactory = scans;

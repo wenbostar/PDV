@@ -177,11 +177,11 @@ public class ColumnSelectionDialog extends JDialog{
                     for (int i = 0; i < 2; i++) {
                         if (key.equals("Other Assumption")) {
                             spectrumJTable.getColumn(key).setPreferredWidth(200);
-                            spectrumJTable.getColumn(key).setMinWidth(200);
+                            spectrumJTable.getColumn(key).setMinWidth(20);
                             spectrumJTable.getColumn(key).setMaxWidth(400);
                         } else {
                             spectrumJTable.getColumn(key).setPreferredWidth(70);
-                            spectrumJTable.getColumn(key).setMinWidth(70);
+                            spectrumJTable.getColumn(key).setMinWidth(20);
                             spectrumJTable.getColumn(key).setMaxWidth(400);
                         }
                     }

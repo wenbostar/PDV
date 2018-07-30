@@ -88,6 +88,10 @@ public class MzIDFileImport {
      * ALl modification
      */
     private ArrayList<String> allModifications = new ArrayList<>();
+    /**
+     * Spectrum ID to spectrum number
+     */
+    private HashMap<String, Integer> spectrumIdAndNumber;
 
     /**
      * Constructor
@@ -102,7 +106,7 @@ public class MzIDFileImport {
      * @throws ClassNotFoundException
      */
     public MzIDFileImport(PDVMainClass pdvMainClass, File mzIDFile, MzIdentMLType mzIdentMLType, HashMap<String,HashMap<Double, String >> modificationMass,
-                          SpectrumFactory spectrumFactory, String spectrumFileType, ProgressDialogX progressDialog) throws SQLException, ClassNotFoundException {
+                          SpectrumFactory spectrumFactory, String spectrumFileType, ProgressDialogX progressDialog, HashMap<String, Integer> spectrumIdAndNumber) throws SQLException, ClassNotFoundException {
 
         this.pdvMainClass = pdvMainClass;
         this.mzIDName = mzIDFile.getName();
@@ -110,11 +114,19 @@ public class MzIDFileImport {
         this.progressDialog = progressDialog;
         this.spectrumFactory = spectrumFactory;
         this.spectrumFileType = spectrumFileType;
+        this.spectrumIdAndNumber = spectrumIdAndNumber;
 
         String dbName = mzIDFile.getParentFile().getAbsolutePath()+"/"+ mzIDName+".db";
-        if (new File(dbName).exists()){
-            dbName = mzIDFile.getParentFile().getAbsolutePath()+"/"+ mzIDName+"1.db";
+
+        File dbFile = new File(dbName);
+        File dbJournalFile = new File(dbName + "-journal");
+        if (dbFile.isFile() && dbFile.exists()) {
+            dbFile.delete();
         }
+        if (dbJournalFile.isFile() && dbJournalFile.exists()) {
+            dbJournalFile.delete();
+        }
+
         sqLiteConnection = new SQLiteConnection(dbName);
 
         scoreName = getAllOtherPara();
@@ -373,6 +385,7 @@ public class MzIDFileImport {
                 currentMatch = new SpectrumMatch(Spectrum.getSpectrumKey(currentSpectrumFile, spectrumIndex));
 
                 if (spectrumFileType.equals("mgf")) {
+                    currentMatch.setSpectrumNumber(Integer.valueOf(spectrumIndex));
                     try {
                         spectrumTitle = spectrumFactory.getSpectrumTitle(currentSpectrumFile, Integer.parseInt(spectrumIndex) + 1);
                     } catch (Exception e) {
@@ -382,11 +395,13 @@ public class MzIDFileImport {
                         progressDialog.setRunFinished();
                         e.printStackTrace();
                     }
+                } else if (spectrumFileType.equals("mzml")) {
+                    currentMatch.setSpectrumNumber(spectrumIdAndNumber.get(spectrumID));
+                    spectrumTitle = spectrumIndex;
                 } else {
+                    currentMatch.setSpectrumNumber(Integer.valueOf(spectrumIndex));
                     spectrumTitle = spectrumIndex;
                 }
-
-                currentMatch.setSpectrumNumber(Integer.valueOf(spectrumIndex));
 
                 spectrumIdentificationItems = spectrumIdentificationResultType.getSpectrumIdentificationItem();
 

@@ -1,6 +1,11 @@
 package PDVGUI.gui.utils;
 
+import PDVGUI.gui.MSDataDisplay;
+import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.block.BlockBorder;
+import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.xy.XYDataset;
 
 import javax.swing.*;
@@ -15,7 +20,7 @@ import static PDVGUI.gui.utils.ChartUtils.creatXYDataset;
  * TIC panel
  * Created by Ken on 10/26/2017.
  */
-public class TICPanel extends JPanel {
+public class TICPanel extends JPanel{
 
     private JPanel viewJPanel;
 
@@ -27,11 +32,16 @@ public class TICPanel extends JPanel {
      * Spectrum key to RT and intensity
      */
     private HashMap<String, ArrayList<float[]>> keyToRtAndInt;
+    /**
+     * Parent class
+     */
+    private MSDataDisplay msDataDisplay;
 
     /**
      * Constructor
      */
-    public TICPanel(){
+    public TICPanel(MSDataDisplay msDataDisplay){
+        this.msDataDisplay = msDataDisplay;
 
         initComponents();
     }
@@ -42,12 +52,12 @@ public class TICPanel extends JPanel {
      * @param keyToRtAndInt Key to RT and intensity
      * @param mode Mode
      */
-    public void updatePanel(String spectrumFileName, HashMap<String, ArrayList<float[]>> keyToRtAndInt, Integer mode){
+    public void updatePanel(String spectrumFileName, HashMap<String, ArrayList<float[]>> keyToRtAndInt, Integer mode, Integer topNum){
 
         this.spectrumFileName = spectrumFileName;
         this.keyToRtAndInt = keyToRtAndInt;
 
-        processData(mode);
+        processData(mode, topNum);
     }
 
     /**
@@ -55,13 +65,18 @@ public class TICPanel extends JPanel {
      * @param nameToKeyToRtAndInt File name to spectrum key to RT and intensity
      * @param mode Mode
      */
-    public void updatePanel(HashMap<String, HashMap<String, ArrayList<float[]>>> nameToKeyToRtAndInt, Integer mode){
+    public void updatePanel(HashMap<String, HashMap<String, ArrayList<float[]>>> nameToKeyToRtAndInt, Integer mode, Integer topNum){
 
-        XYDataset xyDataset = creatMultiXYDataset(nameToKeyToRtAndInt, mode);
+        XYDataset xyDataset = creatMultiXYDataset(nameToKeyToRtAndInt, mode, topNum);
+
+        JFreeChart chart = ChartFactory.createXYLineChart(spectrumFileName,"Elution Time","Intensity (10^" + (topNum.toString().length() - 1) +")", xyDataset, PlotOrientation.VERTICAL,true,false,false);
+        ChartUtils.setAntiAlias(chart);
+        ChartUtils.setLineRender(chart.getXYPlot());
+        chart.getLegend().setFrame(new BlockBorder(Color.WHITE));
 
         viewJPanel.removeAll();
 
-        ChartPanel chartPanel = new LineChart().createChart(xyDataset, nameToKeyToRtAndInt.size()+" Files ");
+        ChartPanel chartPanel = new LineChart(msDataDisplay, chart);
 
         GroupLayout viewJPanelLayout = new GroupLayout(viewJPanel);
         viewJPanel.setLayout(viewJPanelLayout);
@@ -111,13 +126,18 @@ public class TICPanel extends JPanel {
      * Process data
      * @param mode Mode
      */
-    private void processData(Integer mode){
+    private void processData(Integer mode, Integer topNum){
 
-        XYDataset xyDataset = creatXYDataset(keyToRtAndInt, mode);
+        XYDataset xyDataset = creatXYDataset(keyToRtAndInt, mode, topNum);
+
+        JFreeChart chart = ChartFactory.createXYLineChart(spectrumFileName,"Elution Time","Intensity (10^" + (topNum.toString().length() - 1) + ")", xyDataset, PlotOrientation.VERTICAL,true,false,false);
+        ChartUtils.setAntiAlias(chart);
+        ChartUtils.setLineRender(chart.getXYPlot());
+        chart.getLegend().setFrame(new BlockBorder(Color.WHITE));
 
         viewJPanel.removeAll();
 
-        ChartPanel chartPanel = new LineChart().createChart(xyDataset, spectrumFileName);
+        ChartPanel chartPanel = new LineChart(msDataDisplay, chart);
 
         GroupLayout viewJPanelLayout = new GroupLayout(viewJPanel);
         viewJPanel.setLayout(viewJPanelLayout);

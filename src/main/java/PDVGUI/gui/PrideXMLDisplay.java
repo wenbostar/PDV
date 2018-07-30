@@ -211,7 +211,7 @@ public class PrideXMLDisplay extends JFrame {
         JMenu fileJMenu = new JMenu();
         JMenuItem exitJMenuItem = new JMenuItem();
         JLabel fragmentIonAccuracyJLabel = new JLabel("Fragment m/z Tolerance: ");
-        JLabel fragmentIonType1Lbl = new JLabel("Fragment Ion Types: ");
+        JLabel fragmentIonType1Lbl = new JLabel("Unit: ");
         JScrollPane inforJScrollPane = new JScrollPane();
         JScrollPane psmsScrollPane = new JScrollPane();
         JScrollPane spectrumTableScrollPane = new JScrollPane();
@@ -374,12 +374,15 @@ public class PrideXMLDisplay extends JFrame {
 
         settingJPanel.setLayout(new BoxLayout(settingJPanel, BoxLayout.X_AXIS));
 
-        settingJPanel.add(splitJLabel1);
-        settingJPanel.add(fragmentIonType1Lbl);
-        settingJPanel.add(precursorIonUnit);
+        fragmentIonAccuracyJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        fragmentIonType1Lbl.setFont(new Font("Arial", Font.PLAIN, 12));
+
         settingJPanel.add(splitJLabel2);
         settingJPanel.add(fragmentIonAccuracyJLabel);
         settingJPanel.add(fragmentIonAccuracyTxt);
+        settingJPanel.add(splitJLabel1);
+        settingJPanel.add(fragmentIonType1Lbl);
+        settingJPanel.add(precursorIonUnit);
         settingJPanel.add(setButton);
 
         allJSplitPane.setBorder(null);

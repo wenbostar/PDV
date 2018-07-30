@@ -30,10 +30,6 @@ import org.jfree.ui.RectangleInsets;
 public class ChartUtils {
 
     /**
-     * Default font
-     */
-    private static Font FONT = new Font("Arial", Font.BOLD, 10);
-    /**
      * Default color
      */
     private static Color[] CHART_COLORS = {
@@ -50,10 +46,10 @@ public class ChartUtils {
      */
     private static void setChartTheme() {
         StandardChartTheme chartTheme = new StandardChartTheme("US");
-        chartTheme.setExtraLargeFont(FONT);
-        chartTheme.setRegularFont(FONT);
-        chartTheme.setLargeFont(FONT);
-        chartTheme.setSmallFont(FONT);
+        chartTheme.setExtraLargeFont(new Font("Arial", Font.BOLD, 14));
+        chartTheme.setRegularFont(new Font("Arial", Font.PLAIN, 13));
+        chartTheme.setLargeFont(new Font("Arial", Font.PLAIN, 14));
+        chartTheme.setSmallFont(new Font("Arial", Font.PLAIN, 12));
         chartTheme.setTitlePaint(new Color(51, 51, 51));
         chartTheme.setSubtitlePaint(new Color(85, 85, 85));
 
@@ -102,7 +98,7 @@ public class ChartUtils {
      * @param mode Mode
      * @return XY dataset
      */
-    public static XYDataset creatXYDataset(HashMap<String, ArrayList<float[]>> keyToRtAndInt, Integer mode){
+    public static XYDataset creatXYDataset(HashMap<String, ArrayList<float[]>> keyToRtAndInt, Integer mode, Integer topNum){
         XYSeriesCollection dataset = new XYSeriesCollection();
 
         for (String name : keyToRtAndInt.keySet()){
@@ -110,7 +106,7 @@ public class ChartUtils {
                 XYSeries xySeries = new XYSeries(name);
 
                 for (float[] each : keyToRtAndInt.get(name)){
-                    xySeries.add(each[0], each[1]);
+                    xySeries.add(each[0], each[1]/topNum);
                 }
 
                 dataset.addSeries(xySeries);
@@ -118,7 +114,7 @@ public class ChartUtils {
                 XYSeries xySeries = new XYSeries(name);
 
                 for (float[] each : keyToRtAndInt.get(name)){
-                    xySeries.add(each[0], each[1]);
+                    xySeries.add(each[0], each[1]/topNum);
                 }
 
                 dataset.addSeries(xySeries);
@@ -142,7 +138,7 @@ public class ChartUtils {
      * @param mode Mode
      * @return XY data set
      */
-    public static XYDataset creatMultiXYDataset(HashMap<String, HashMap<String, ArrayList<float[]>>> nameToKeyToRtAndInt, Integer mode){
+    public static XYDataset creatMultiXYDataset(HashMap<String, HashMap<String, ArrayList<float[]>>> nameToKeyToRtAndInt, Integer mode, Integer topNum){
         XYSeriesCollection dataset = new XYSeriesCollection();
 
         HashMap<String, ArrayList<float[]>> keyToRtAndInt;
@@ -160,7 +156,7 @@ public class ChartUtils {
 
                     if (name.equals("TIC")){
                         for (float[] each : keyToRtAndInt.get(name)){
-                            xySeries.add(each[0], each[1]);
+                            xySeries.add(each[0], each[1]/topNum);
                         }
 
                         dataset.addSeries(xySeries);
@@ -178,7 +174,7 @@ public class ChartUtils {
                     XYSeries xySeries = new XYSeries(fileName + name);
 
                     for (float[] each : keyToRtAndInt.get(name)){
-                        xySeries.add(each[0], each[1]);
+                        xySeries.add(each[0], each[1]/topNum);
                     }
 
                     dataset.addSeries(xySeries);
