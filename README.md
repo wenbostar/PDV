@@ -43,9 +43,9 @@ The PDV package can be downloaded at [https://github.com/wenbostar/PDV/releases]
 
 
 | Type        | Example files |
-| ----------------|:---------------|
-| proBAM | mgf:txt |
-| proBed | mgf:txt |
+| ------------|---------------|
+| proBAM | [ProBAM.tar.gz](http://pdv.zhang-lab.org/data/download/ProBAM.tar.gz) |
+| proBed | [ProBed.tar.gz](http://pdv.zhang-lab.org/data/download/ProBed.tar.gz) |
 
 #### One PSM:
 
@@ -54,8 +54,10 @@ The PDV package can be downloaded at [https://github.com/wenbostar/PDV/releases]
 
 #### MS data:
 
-mzML: 
-mzXML: 
+| Type   |Example files|
+| -------|-------------|
+| mzML | [SF_200217_U2OS_TiO2_HCD_OT_rep1.mzML.gz](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mzML.gz) |
+| mzXML|[SF_200217_U2OS_TiO2_HCD_OT_rep1.mzXML.gz](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mzXML.gz) |
 
 #### PRIDE XML:
 
