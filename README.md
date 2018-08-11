@@ -35,9 +35,10 @@ The PDV package can be downloaded at [https://github.com/wenbostar/PDV/releases]
 
 | Software        | Example files |
 | ----------------|:---------------|
-| Novor | mgf:txt |
+| Novor (v1.06.0634) | [mgf](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf.gz):[csv](http://pdv.zhang-lab.org/data/download/test_data/novor/SF_200217_U2OS_TiO2_HCD_OT_rep1_novor.csv) |
 | DeepNovo | mgf:txt |
 | PepNovo | mgf:txt |
+| pNovo+ | mgf:txt |
 
 #### Proteogenomics:
 
