@@ -14,6 +14,56 @@ A user's manual and example dataset are available at [http://pdv.zhang-lab.org](
 
 The PDV package can be downloaded at [https://github.com/wenbostar/PDV/releases](https://github.com/wenbostar/PDV/releases).
 
+## Example
+
+#### Database searching:
+
+| Software        | Example files |
+| ----------------|:---------------|
+| MS-GF+ | [mgf](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf.gz):[mzid](http://pdv.zhang-lab.org/data/download/test_data/msgfplus/SF_200217_U2OS_TiO2_HCD_OT_mgf.mzid.gz)<br>[mzML](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mzML.gz):[mzid](http://pdv.zhang-lab.org/data/download/test_data/msgfplus/SF_200217_U2OS_TiO2_HCD_OT_mzML.mzid.gz)<br>[mzXML](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mzXML.gz):[mzid](http://pdv.zhang-lab.org/data/download/test_data/msgfplus/SF_200217_U2OS_TiO2_HCD_OT_mzXML.mzid.gz)|
+| X!Tandem | [mgf](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf.gz):[mzid](http://pdv.zhang-lab.org/data/download/test_data/xtandem/SF_200217_U2OS_TiO2_HCD_OT_mgf.mzid.gz) |
+| MyriMatch | [mgf](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf.gz):[mzid](http://pdv.zhang-lab.org/data/download/test_data/myrimatch/SF_200217_U2OS_TiO2_HCD_OT_rep1_myrimatch_mgf.mzid.gz)<br>[mzML](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mzML.gz):[mzid](http://pdv.zhang-lab.org/data/download/test_data/myrimatch/SF_200217_U2OS_TiO2_HCD_OT_rep1_myrimatch_mzML.mzid.gz)<br>[mzXML](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mzXML.gz):[mzid](http://pdv.zhang-lab.org/data/download/test_data/myrimatch/SF_200217_U2OS_TiO2_HCD_OT_rep1_myrimatch_mzXML.mzid.gz) |
+| Comet | [mgf](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf.gz):[pepXML](http://pdv.zhang-lab.org/data/download/test_data/comet/SF_200217_U2OS_TiO2_HCD_OT_rep1_mgf.pep.xml.gz)<br>[mzML](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mzML.gz):[pepXML](http://pdv.zhang-lab.org/data/download/test_data/comet/SF_200217_U2OS_TiO2_HCD_OT_rep1_mzML.pep.xml.gz)<br>[mzXML](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mzXML.gz):[pepXML](http://pdv.zhang-lab.org/data/download/test_data/comet/SF_200217_U2OS_TiO2_HCD_OT_rep1_mzXML.pep.xml.gz) |
+| Crux/Tide | [mgf](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf.gz):[pepXML](http://pdv.zhang-lab.org/data/download/test_data/crux/crux-output_mgf/tide-search.pep.xml.gz)<br> [mgf](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf.gz):[mzid](http://pdv.zhang-lab.org/data/download/test_data/crux/crux-output_mgf/tide-search.mzid.gz)<br>[mzML](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mzML.gz):[pepXML](http://pdv.zhang-lab.org/data/download/test_data/crux/crux-output_mzml/tide-search.pep.xml.gz)<br>[mzML](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mzML.gz):[mzid](http://pdv.zhang-lab.org/data/download/test_data/crux/crux-output_mzml/tide-search.mzid.gz)<br>[mzXML](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mzXML.gz):[pepXML](http://pdv.zhang-lab.org/data/download/test_data/crux/crux-output_mzxml/tide-search.pep.xml.gz)<br>[mzXML](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mzXML.gz):[mzid](http://pdv.zhang-lab.org/data/download/test_data/crux/crux-output_mzxml/tide-search.mzid.gz) |
+| MS Amanda | [mgf](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf.gz):[csv](http://pdv.zhang-lab.org/data/download/test_data/SF_200217_U2OS_TiO2_HCD_OT_rep1_MSAmanda_mgf.csv.gz)(MS Amanda format)<br>[mzML](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mzML.gz):[csv](http://pdv.zhang-lab.org/data/download/test_data/SF_200217_U2OS_TiO2_HCD_OT_rep1_MSAmanda_mzML.csv.gz)(MS Amanda format) |
+| MSFragger | [mzML](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mzML.gz):[pepXML](http://pdv.zhang-lab.org/data/download/test_data/msfragger/SF_200217_U2OS_TiO2_HCD_OT_rep1_msfragger_mzML.pepXML.gz)<br>[mzXML](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mzXML.gz):[pepXML](http://pdv.zhang-lab.org/data/download/test_data/msfragger/SF_200217_U2OS_TiO2_HCD_OT_rep1_msfragger_mzXML.pepXML.gz)|
+| MaxQuant | [version 1.5.5.1](http://pdv.zhang-lab.org/data/download/test_data/maxquant/maxquant/1.5.5.1.tar.gz)<br>[version 1.5.8.3](http://pdv.zhang-lab.org/data/download/test_data/maxquant/maxquant/1.5.8.3.tar.gz)<br>[version 1.6.0.1](http://pdv.zhang-lab.org/data/download/test_data/maxquant/maxquant/1.6.0.1.tar.gz)<br>[version 1.6.2.3](http://pdv.zhang-lab.org/data/download/test_data/maxquant/maxquant/1.6.2.3.tar.gz) |
+| IPeak| [mgf](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf.gz):[mzid](http://pdv.zhang-lab.org/data/download/test_data/ipeak/SF_200217_U2OS_TiO2_HCD_OT_rep1_IPeak_mgf.mzid.gz) |
+
+
+#### Denovo sequencing:
+
+| Software        | Example files |
+| ----------------|:---------------|
+| Novor | mgf:txt |
+| DeepNovo | mgf:txt |
+| PepNovo | mgf:txt |
+
+#### Proteogenomics:
+
+
+| Type        | Example files |
+| ----------------|:---------------|
+| proBAM | mgf:txt |
+| proBed | mgf:txt |
+
+#### One PSM:
+
+
+#### Spectrum library:
+
+#### MS data:
+
+mzML: 
+mzXML: 
+
+#### PRIDE XML:
+
+
+#### QC analysis:
+
+Please find an example in this tutorial: [QC analysis](http://bioconductor.org/packages/devel/bioc/vignettes/proteoQC/inst/doc/proteoQC.html). 
+
 
 ## Citation
 
