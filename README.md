@@ -45,8 +45,8 @@ The PDV package can be downloaded at [https://github.com/wenbostar/PDV/releases]
 
 | Type        | Example files |
 | ------------|---------------|
-| proBAM | [ProBAM.tar.gz](http://pdv.zhang-lab.org/data/download/ProBAM.tar.gz) |
-| proBed | [ProBed.tar.gz](http://pdv.zhang-lab.org/data/download/ProBed.tar.gz) |
+| proBAM | [ProBAM.tar.gz](http://pdv.zhang-lab.org/data/download/upload/ProBAM.tar.gz) |
+| proBed | [ProBed.tar.gz](http://pdv.zhang-lab.org/data/download/upload/ProBed.tar.gz) |
 
 #### One PSM:
 
