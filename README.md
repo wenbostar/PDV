@@ -31,7 +31,7 @@ The PDV package can be downloaded at [https://github.com/wenbostar/PDV/releases]
 | [IPeak](https://www.ncbi.nlm.nih.gov/pubmed/25951428)| [mgf](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf.gz):[mzid](http://pdv.zhang-lab.org/data/download/test_data/ipeak/SF_200217_U2OS_TiO2_HCD_OT_rep1_IPeak_mgf.mzid.gz) |
 | [IdentiPy](https://bitbucket.org/levitsky/identipy) (v0.2)|[mgf](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf.gz):[pepXML](http://pdv.zhang-lab.org/data/download/test_data/identipy/SF_200217_U2OS_TiO2_HCD_OT_rep1_identipy_mgf.pep.xml.gz)<br>[mzML](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mzML.gz):[pepXML](http://pdv.zhang-lab.org/data/download/test_data/identipy/SF_200217_U2OS_TiO2_HCD_OT_rep1_identipy_mzML.pep.xml.gz)|
 | [MetaMorpheus](https://github.com/smith-chem-wisc/MetaMorpheus) (v0.0.286) | [mzML](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mzML.gz):[mzid]()|
-| [OMSSA](https://pubchem.ncbi.nlm.nih.gov/omssa/) | TODO |
+| [OMSSA](https://pubchem.ncbi.nlm.nih.gov/omssa/) (v2.1.9) | [mgf](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf.gz):[pepXML](http://pdv.zhang-lab.org/data/download/test_data/omssa/SF_200217_U2OS_TiO2_HCD_OT_rep1_omssa_mgf.pep.xml.gz) |
 | [Mascot](http://www.matrixscience.com/) | TODO |
 | [Proteome Discoverer](https://www.thermofisher.com/order/catalog/product/OPTON-30809?SID=srch-srp-OPTON-30809)| TODO |
 | [ProteinPilot](https://sciex.com/products/software/proteinpilot-software) | TODO |
