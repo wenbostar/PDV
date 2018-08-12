@@ -92,4 +92,4 @@ Coming soon.
 
 Contributions to the package are more than welcome. 
 
-[![Analytics](https://ga-beacon-nocache.appspot.com/UA-99895661-4/github/wenbostar/PDV/landing-page?flat&useReferer)](https://github.com/igrigorik/ga-beacon)
+[![Analytics](https://ga-beacon-nocache.appspot.com/UA-99895661-4/wenbostar/PDV/landing-page?flat&useReferer)](https://github.com/igrigorik/ga-beacon)
