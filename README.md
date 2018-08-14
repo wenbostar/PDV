@@ -62,6 +62,8 @@ The PDV package can be downloaded at [https://github.com/wenbostar/PDV/releases]
 
 #### Spectrum library:
 
+[Spectrum Library Central at PeptideAtlas](http://www.peptideatlas.org/speclib/)
+
 #### MS data:
 
 | Type   |Example files|
