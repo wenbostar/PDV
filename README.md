@@ -45,9 +45,9 @@ The PDV package can be downloaded at [https://github.com/wenbostar/PDV/releases]
 | Software        | Example files |
 | ----------------|:---------------|
 | [Novor](https://www.ncbi.nlm.nih.gov/pubmed/26122521) | [mgf](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf.gz):[csv](http://pdv.zhang-lab.org/data/download/test_data/novor/SF_200217_U2OS_TiO2_HCD_OT_rep1.novor.csv.gz) (only support the Novor result generated through [DeNovoGUI](https://github.com/compomics/denovogui)) |
-| [DeepNovo](https://github.com/nh2tran/DeepNovo) | mgf:txt |
+| [DeepNovo](https://github.com/nh2tran/DeepNovo) | [mgf](http://pdv.zhang-lab.org/data/download/test_data/deepnovo/peaks.db.mgf.test.dup.mgf.gz):[txt](http://pdv.zhang-lab.org/data/download/test_data/deepnovo/output.deepnovo_db.tab) |
 | [PepNovo+](http://proteomics.ucsd.edu/software-tools/531-2/) | [mgf](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf.gz):[txt](http://pdv.zhang-lab.org/data/download/test_data/pepnovo/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf.out) |
-| [pNovo+](http://pfind.ict.ac.cn/software/pNovo/) | mgf:txt |
+| [pNovo+](http://pfind.ict.ac.cn/software/pNovo/) | [mgf](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf.gz):[txt](http://pdv.zhang-lab.org/data/download/test_data/pnovo/pNovo_output.zip) |
 
 #### Proteogenomics:
 
