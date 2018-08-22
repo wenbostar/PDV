@@ -359,11 +359,7 @@ public class ExportBatchDialog extends JDialog {
 
             File selectedFile = fileChooser.getSelectedFile();
 
-            if (selectedFile.isDirectory()) {
-                outputFolder = selectedFile.getAbsolutePath();
-            } else {
-                JOptionPane.showMessageDialog(this, "Please select one directory", "File Format Error", JOptionPane.WARNING_MESSAGE);
-            }
+            outputFolder = selectedFile.getAbsolutePath();
 
             if (pdvMainClass != null){
                 PDVMainClass.lastSelectedFolder.setLastSelectedFolder(outputFolder);

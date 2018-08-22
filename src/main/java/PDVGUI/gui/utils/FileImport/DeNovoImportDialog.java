@@ -58,7 +58,7 @@ public class DeNovoImportDialog extends JDialog {
     /**
      * MS2 ion tolerance
      */
-    private Double fragmentIonMZTolerance = 0.5;
+    private Double fragmentIonMZTolerance = 0.05;
     /**
      * MS2 ion tolerance type (ppm or dal)
      */
@@ -128,7 +128,7 @@ public class DeNovoImportDialog extends JDialog {
         initComponents();
         idFileJTextField.setText("No file selected");
         spectrumFileJTextField.setText("No file selected");
-        fragmentIonAccuracyTxt.setText("0.5");
+        fragmentIonAccuracyTxt.setText("0.05");
         precursorIonUnit.setEnabled(true);
         precursorIonUnit.setRenderer(new AlignedListCellRenderer(0));
 
@@ -209,7 +209,7 @@ public class DeNovoImportDialog extends JDialog {
         browseSpectraJButton.setContentAreaFilled(false);
         browseSpectraJButton.addActionListener(this::browseSpectraJButtonActionPerformed);
 
-        titledBorder = BorderFactory.createTitledBorder("Search parameters" + " \t ");
+        titledBorder = BorderFactory.createTitledBorder("Project Settings" + " \t ");
         titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
 
         annotationSettingJPanel.setBorder(titledBorder);
@@ -444,6 +444,8 @@ public class DeNovoImportDialog extends JDialog {
 
                     if (identificationFile.getName().endsWith(".tab")){
                         pdvMainClass.importDeepNovoResults(identificationFile, spectrumFile, spectrumFactory);
+                    } else if (identificationFile.getName().endsWith(".tsk")){
+                        pdvMainClass.importPNovoResults(identificationFile, spectrumFile, spectrumFactory);
                     } else {
                         pdvMainClass.importDeNovoResults(identificationFile, spectrumFile, spectrumFactory);
                     }
@@ -523,15 +525,16 @@ public class DeNovoImportDialog extends JDialog {
             public boolean accept(File myFile) {
 
                 return   myFile.getName().toLowerCase().endsWith(".tags")
-                        || myFile.getName().toLowerCase().endsWith(".novor.csv")
+                        || myFile.getName().toLowerCase().endsWith("novor.csv")
                         || myFile.getName().toLowerCase().endsWith(".out")
                         || myFile.getName().toLowerCase().endsWith(".tab")
+                        || myFile.getName().toLowerCase().endsWith(".tsk")
                         || myFile.isDirectory();
             }
 
             @Override
             public String getDescription() {
-                return " pepNovo+ (.out), DirecTag (.tags), DeepNovo (.tab) and Novor (.novor.csv)";
+                return " pepNovo+ (.out), DirecTag (.tags), DeepNovo (.tab), pNovo (.tsk) and Novor (.novor.csv)";
             }
         };
 

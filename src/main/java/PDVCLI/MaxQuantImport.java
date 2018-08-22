@@ -9,8 +9,7 @@ import com.compomics.util.experiment.massspectrometry.Spectrum;
 import com.compomics.util.experiment.massspectrometry.SpectrumFactory;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
 /**
  * MaxQuant results parsing
@@ -38,6 +37,10 @@ public class MaxQuantImport {
      * All modification files
      */
     private ArrayList<File> modificationFiles = new ArrayList<>();
+    /**
+     * All varied modifications
+     */
+    private ArrayList<String> variedModifications = new ArrayList<>();
     /**
      * Modification map
      */
@@ -179,6 +182,8 @@ public class MaxQuantImport {
                             parametersFile = eachFileInTxt;
                         } else if (eachFileInTxt.getName().contains("Sites")){
                             modificationFiles.add(eachFileInTxt);
+
+                            variedModifications.add(eachFileInTxt.getName().split("Sites")[0].replace("-_", "->"));
                         } else if (eachFileInTxt.getName().equals("modificationSpecificPeptides.txt")){
                             modificationSpecificPeptidesFile = eachFileInTxt;
                         }
@@ -705,6 +710,10 @@ public class MaxQuantImport {
         ArrayList<ModificationMatch> utilitiesModifications;
         SpectrumMatch currentMatch;
 
+        HashMap<String, Integer> modificationNumIndex = new HashMap<>();
+        HashMap<String, Integer> modificationPosIndex = new HashMap<>();
+        HashMap<Integer, Double> modIndexToPos;
+
         int lineCount = 0;
 
         while ((line = bufferedReader.readLine()) != null) {
@@ -730,6 +739,10 @@ public class MaxQuantImport {
                         scoreIndex = index;
                     } else if(values[index].equals("Charge")){
                         chargeIndex = index;
+                    } else if (variedModifications.contains(values[index])){
+                        modificationNumIndex.put(values[index], index);
+                    } else if (values[index].contains("Probabilities")){
+                        modificationPosIndex.put(values[index].split(" Probabilities")[0], index);
                     }
                 }
             } else {
@@ -767,6 +780,7 @@ public class MaxQuantImport {
 
                 try {
                     if (!modificationName.equals("Unmodified")) {
+                        /*
                         for (ArrayList<String> eachList : msIDSToModificationFileToEachSite.keySet()){
                             if (eachList.contains(String.valueOf(lineCount - 1))){
                                 fileNameToIDs = msIDSToModificationFileToEachSite.get(eachList);
@@ -816,6 +830,54 @@ public class MaxQuantImport {
                                         utilitiesModifications.add(new ModificationMatch(utilitiesModificationName, true, site));
                                     }
                                 }
+                            }
+                        }*/
+
+                        for (String modName : modificationNumIndex.keySet()){
+
+                            Integer modNumIndex = modificationNumIndex.get(modName);
+
+                            Integer modNum = Integer.valueOf(values[modNumIndex]);
+
+                            Integer modPosIndex = modificationPosIndex.get(modName);
+
+                            String modPosSequence = values[modPosIndex];
+
+                            modIndexToPos = new HashMap<>();
+
+                            if (modNum != 0){
+
+                                String[] firstSplitList = modPosSequence.split("\\)");
+
+                                Integer accumPosition = 0;
+                                String splitSequence;
+                                Double splitPos;
+
+                                for (String firstSplit : firstSplitList){
+
+                                    if (firstSplit.contains("(")){
+                                        splitSequence = firstSplit.split("\\(")[0];
+                                        splitPos = Double.valueOf(firstSplit.split("\\(")[1]);
+
+                                        accumPosition += splitSequence.length();
+
+                                        modIndexToPos.put(accumPosition, splitPos);
+                                    }
+                                }
+
+                                List<Map.Entry<Integer, Double>> list = new ArrayList<>(modIndexToPos.entrySet());
+                                Collections.sort(list, Comparator.comparing(Map.Entry::getKey));
+
+                                Collections.sort(list, (o1, o2) -> o2.getValue().compareTo(o1.getValue()));
+
+                                for (int i = 0; i < modNum; i ++){
+
+                                    Integer position = list.get(i).getKey();
+                                    utilitiesModificationName = modName.split(" \\(")[0].replace(">","&gt;") + " of " + sequence.charAt(position - 1);
+
+                                    utilitiesModifications.add(new ModificationMatch(utilitiesModificationName, true, position));
+                                }
+
                             }
                         }
 

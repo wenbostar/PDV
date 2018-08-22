@@ -8,11 +8,8 @@ import io.github.msdk.io.mzml.MzMLFileImportMethod;
 import io.github.msdk.io.mzml.data.MzMLRawDataFile;
 import io.github.msdk.io.mzxml.MzXMLFileParser;
 import io.github.msdk.io.mzxml.MzXMLRawDataFile;
-import umich.ms.datatypes.scan.StorageStrategy;
-import umich.ms.datatypes.scancollection.impl.ScanCollectionDefault;
 
 import java.io.File;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -30,10 +27,6 @@ public class MSOneImport {
      * Spectrum file type
      */
     private String spectrumFileType;
-    /**
-     * Object saving spectrum
-     */
-    private ScanCollectionDefault scans = new ScanCollectionDefault();
     /**
      * Spectrum key to Rt and Int
      */
@@ -72,9 +65,6 @@ public class MSOneImport {
 
         float[] rtAndItem;
         ArrayList<float[]> rtToItem = new ArrayList<>();
-
-        scans.setDefaultStorageStrategy(StorageStrategy.SOFT);
-        scans.isAutoloadSpectra(true);
 
         if (spectrumFileType.equals("mzml")){
 

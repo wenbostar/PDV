@@ -61,6 +61,4 @@ public class LineChart extends ChartPanel{
         new ExportTICDialog(msDataDisplay, this.getChart(), this);
     }
 
-
-
 }

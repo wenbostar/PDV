@@ -65,25 +65,9 @@ public class TextFileImport {
      */
     private Integer modificationIndex = 0;
     /**
-     * Score column index
-     */
-    private Integer scoreIndex = -1;
-    /**
-     * Exp mass column index
-     */
-    private Integer expMassIndex = -1;
-    /**
-     * Pep mass column index
-     */
-    private Integer pepMssIndex = 0;
-    /**
      * Charge column index
      */
     private Integer chargeIndex = 0;
-    /**
-     * Mz column index
-     */
-    private Integer mzIndex = -1;
     /**
      * ALl modification
      */
@@ -115,7 +99,7 @@ public class TextFileImport {
      * @throws ClassNotFoundException
      * @throws IOException
      */
-    public TextFileImport(PDVMainClass pdvMainClass, File textIdFile, File spectrumFile, HashMap<String,HashMap<Double, String >> modificationMass, ProgressDialogX progressDialog) throws SQLException, ClassNotFoundException, IOException {
+    public TextFileImport(PDVMainClass pdvMainClass, File textIdFile, File spectrumFile, ProgressDialogX progressDialog) throws SQLException, ClassNotFoundException, IOException {
 
         this.pdvMainClass = pdvMainClass;
         this.textIdFile = textIdFile;
@@ -137,7 +121,7 @@ public class TextFileImport {
 
         getParameters();
 
-        sqLiteConnection.setScoreNum(2 + indexToName.size());
+        sqLiteConnection.setScoreNum(1 + indexToName.size());
 
         new Thread("DisplayThread") {
             @Override
@@ -174,7 +158,7 @@ public class TextFileImport {
         Statement statement = connection.createStatement();
 
         StringBuilder addQuery = new StringBuilder();
-        StringBuilder addValuesQuery = new StringBuilder("VALUES(?,?,?,?,?,?,?,?");
+        StringBuilder addValuesQuery = new StringBuilder("VALUES(?,?,?,?,?,?,?");
 
         int countFirst = 0;
         for (Integer index : indexToName.keySet()){
@@ -182,12 +166,12 @@ public class TextFileImport {
                 countFirst ++;
                 addQuery.append(", ").append(indexToName.get(index)).append(" OBJECT(50)");
                 addValuesQuery.append(",?");
-                nameToDBIndex.put(indexToName.get(index), 8+countFirst);
+                nameToDBIndex.put(indexToName.get(index), 7+countFirst);
             }
         }
         addValuesQuery.append(")");
 
-        String matchTableQuery = "CREATE TABLE SpectrumMatch (PSMIndex INT(10), MZ DOUBLE, Title Char, Sequence Char, MassError DOUBLE, Match Object, Score DOUBLE, Modification varchar(200)" + addQuery +", PRIMARY KEY(PSMIndex))";
+        String matchTableQuery = "CREATE TABLE SpectrumMatch (PSMIndex INT(10), MZ DOUBLE, Title Char, Sequence Char, MassError DOUBLE, Match Object, Modification varchar(200)" + addQuery +", PRIMARY KEY(PSMIndex))";
 
         try {
             statement.execute(matchTableQuery);
@@ -213,12 +197,9 @@ public class TextFileImport {
         String modificationNames;
         String singleModificationName;
         String sequence;
-        Double score;
-        Double massError;
         Integer modificationSite;
         Double modificationMass;
         Integer peptideCharge;
-        Double mz;
         String rankString;
         Peptide peptide;
 
@@ -248,21 +229,7 @@ public class TextFileImport {
 
                 spectrumTitle = values[spectrumTitleIndex];
                 sequence = values[sequenceIndex];
-
-                if (expMassIndex == -1){
-                    massError = 0.0;
-                } else {
-                    massError = Double.valueOf(values[expMassIndex]) - Double.valueOf(values[pepMssIndex]);
-                }
-
-                if (scoreIndex == -1){
-                    score = -1.0;
-                } else {
-                    score = Double.valueOf(values[scoreIndex]);
-                }
-
                 modificationNames = values[modificationIndex];
-                score = Double.valueOf(values[scoreIndex]);
                 peptideCharge = Integer.valueOf(values[chargeIndex]);
 
                 ArrayList<String> residues = new ArrayList<>();
@@ -321,8 +288,7 @@ public class TextFileImport {
 
                 peptide = new Peptide(sequence, utilitiesModifications);
 
-                peptideAssumption = new PeptideAssumption(peptide, 1, 0, new Charge(+1, peptideCharge), massError, "*");
-                peptideAssumption.setRawScore(score);
+                peptideAssumption = new PeptideAssumption(peptide, 1, 0, new Charge(+1, peptideCharge), 0, "*");
 
                 currentMatch.addHit(0, peptideAssumption, false);
                 currentMatch.setBestPeptideAssumption(peptideAssumption);
@@ -341,22 +307,13 @@ public class TextFileImport {
                     bos.close();
                 }
 
-                if (mzIndex != -1){
-                    mz = Double.valueOf(values[mzIndex]);
-                } else if (expMassIndex != -1){
-                    mz = Double.valueOf(values[expMassIndex])/peptideCharge;
-                } else {
-                    mz = Double.valueOf(values[pepMssIndex])/peptideCharge;
-                }
-
                 preparedStatement.setInt(1, lineCount);
-                preparedStatement.setDouble(2, mz);
+                preparedStatement.setDouble(2, peptide.getMass()/peptideCharge);
                 preparedStatement.setString(3, spectrumTitle);
                 preparedStatement.setString(4, sequence);
-                preparedStatement.setDouble(5, Math.abs(massError));
+                preparedStatement.setDouble(5, -1);
                 preparedStatement.setBytes(6, bos.toByteArray());
-                preparedStatement.setDouble(7, score);
-                preparedStatement.setString(8, modificationNames);
+                preparedStatement.setString(7, modificationNames);
 
                 for (Integer index : indexToName.keySet()){
                     String name = indexToName.get(index);
@@ -449,23 +406,11 @@ public class TextFileImport {
                         case "peptide":
                             sequenceIndex = index;
                             break;
-                        case "exp_mass":
-                            expMassIndex = index;
-                            break;
-                        case "pep_mass":
-                            pepMssIndex = index;
-                            break;
                         case "modification":
                             modificationIndex = index;
                             break;
-                        case "score":
-                            scoreIndex = index;
-                            break;
                         case "charge":
                             chargeIndex = index;
-                            break;
-                        case "mz":
-                            mzIndex = index;
                             break;
                         default:
                             indexToName.put(index, values[index]);
@@ -495,7 +440,6 @@ public class TextFileImport {
 
         ArrayList<String> scoreName = new ArrayList<>();
 
-        scoreName.add("Score");
         scoreName.add("Modification");
 
         for (Integer index : indexToName.keySet()){

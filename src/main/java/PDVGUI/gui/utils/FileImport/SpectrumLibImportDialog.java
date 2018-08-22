@@ -12,6 +12,7 @@ import com.compomics.util.preferences.DigestionPreferences;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
@@ -46,11 +47,11 @@ public class SpectrumLibImportDialog extends JDialog {
     /**
      * MS2 ion tolerance
      */
-    private Double fragmentIonMZTolerance = 0.5;
+    private Double fragmentIonMZTolerance = 0.05;
     /**
      * spectrumLib directory
      */
-    private String spectrumLibResultPath;
+    private String spectrumLibResultFilePath;
     /**
      * LastSelectedFolder for opening easily
      */
@@ -78,7 +79,7 @@ public class SpectrumLibImportDialog extends JDialog {
         initComponents();
         this.precursorIonUnit.setEnabled(true);
         this.precursorIonUnit.setRenderer(new AlignedListCellRenderer(0));
-        fragmentIonAccuracyTxt.setText(String.valueOf(0.5));
+        fragmentIonAccuracyTxt.setText(String.valueOf(0.05));
 
         settingsComboBox.setRenderer(new AlignedListCellRenderer(SwingConstants.CENTER));
         spectrumLibResultTxt.setText( "No selected");
@@ -315,7 +316,7 @@ public class SpectrumLibImportDialog extends JDialog {
             pdvStart.setVisible(false);
         }
 
-        new SpectrumLibDisplay(spectrumLibResultPath, searchParameters, annotationPreferences);
+        new SpectrumLibDisplay(spectrumLibResultFilePath, searchParameters, annotationPreferences);
     }
 
     /**
@@ -338,9 +339,24 @@ public class SpectrumLibImportDialog extends JDialog {
     private void browseIdJButtonActionPerformed(ActionEvent evt) {
 
         JFileChooser fileChooser = new JFileChooser(lastSelectedFolder);
-        fileChooser.setDialogTitle("Select Results Directory");
-        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fileChooser.setDialogTitle("Select Spectrum library");
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fileChooser.setMultiSelectionEnabled(true);
+
+        FileFilter filter = new FileFilter() {
+            @Override
+            public boolean accept(File myFile) {
+                return myFile.getName().toLowerCase().endsWith(".sptxt")
+                        || myFile.isDirectory();
+            }
+
+            @Override
+            public String getDescription() {
+                return "spectrum library txt file .sptxt";
+            }
+        };
+
+        fileChooser.setFileFilter(filter);
 
         int returnValue = fileChooser.showDialog(this, "Add");
 
@@ -348,15 +364,11 @@ public class SpectrumLibImportDialog extends JDialog {
 
             File selectedFile = fileChooser.getSelectedFile();
 
-            if (selectedFile.isDirectory()) {
-                spectrumLibResultPath = selectedFile.getAbsolutePath();
-            } else {
-                JOptionPane.showMessageDialog(this, "Please select one directory", "File Format Error", JOptionPane.WARNING_MESSAGE);
-            }
+            spectrumLibResultFilePath = selectedFile.getAbsolutePath();
 
             lastSelectedFolder = selectedFile.getParent();
 
-            spectrumLibResultTxt.setText(" File selected");
+            spectrumLibResultTxt.setText("File selected");
             validateInput();
         }
     }
@@ -368,7 +380,7 @@ public class SpectrumLibImportDialog extends JDialog {
 
         boolean allValid = true;
 
-        if (spectrumLibResultPath != null) {
+        if (spectrumLibResultFilePath != null) {
             spectrumLibResultLabel.setForeground(Color.BLACK);
             spectrumLibResultLabel.setToolTipText(null);
         } else {

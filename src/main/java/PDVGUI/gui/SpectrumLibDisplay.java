@@ -190,7 +190,7 @@ public class SpectrumLibDisplay extends JFrame {
         upJButton = new JButton();
         pageNumJTextField = new JTextField();
         pageSelectNumJTextField = new JTextField();
-        fragmentIonAccuracyTxt = new JTextField("0.5");
+        fragmentIonAccuracyTxt = new JTextField("0.05");
         precursorIonUnit = new JComboBox();
         sortColumnJCombox = new JComboBox();
 
@@ -212,8 +212,8 @@ public class SpectrumLibDisplay extends JFrame {
         JLabel splitJLabel3 = new JLabel(" | ");
         JLabel splitJLabel4 = new JLabel(" | ");
         JLabel fragmentIonAccuracyJLabel = new JLabel("Fragment m/z Tolerance: ");
-        JLabel fragmentIonType1Lbl = new JLabel("Fragment Ion Types: ");
-        JLabel sortJLabel = new JLabel("Sort results: ");
+        JLabel fragmentIonType1Lbl = new JLabel("Unit: ");
+        JLabel sortJLabel = new JLabel("Sort: ");
 
         psmJTable = new JTable() {
             protected JTableHeader createDefaultTableHeader() {
@@ -247,7 +247,7 @@ public class SpectrumLibDisplay extends JFrame {
         };
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        setTitle("PDV - SpectrumLib");
+        setTitle("PDV - Spectrum Library");
         setBackground(new java.awt.Color(255, 255, 255));
         setMinimumSize(new java.awt.Dimension(760, 600));
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -290,7 +290,8 @@ public class SpectrumLibDisplay extends JFrame {
         precursorIonUnit.setBackground(Color.WHITE);
 
         fragmentIonAccuracyTxt.setHorizontalAlignment(SwingConstants.CENTER);
-        fragmentIonAccuracyTxt.setMaximumSize(new Dimension(40, 20));
+        fragmentIonAccuracyTxt.setMaximumSize(new Dimension(100, 20));
+        fragmentIonAccuracyTxt.setMinimumSize(new Dimension(50, 20));
 
         setButton.setIcon(new ImageIcon(getClass().getResource("/icons/update.png")));
         setButton.setBorder(null);
@@ -320,6 +321,7 @@ public class SpectrumLibDisplay extends JFrame {
 
         settingJPanel.setBackground(new Color(255, 255, 255));
         settingJPanel.setMinimumSize(new Dimension(20, 0));
+        settingJPanel.setOpaque(false);
         settingJPanel.setLayout(new BoxLayout(settingJPanel, BoxLayout.X_AXIS));
 
         fragmentIonAccuracyJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
@@ -343,7 +345,7 @@ public class SpectrumLibDisplay extends JFrame {
         mainJPanel.setOpaque(true);
         mainJPanel.setPreferredSize(new java.awt.Dimension(1260, 800));
 
-        TitledBorder titledBorder = BorderFactory.createTitledBorder("Psm Table" + " \t ");
+        TitledBorder titledBorder = BorderFactory.createTitledBorder("PSM Table" + " \t ");
         titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
         psmJPanel.setBorder(titledBorder);
         psmJPanel.setBackground(Color.white);
@@ -362,8 +364,8 @@ public class SpectrumLibDisplay extends JFrame {
         });
 
         psmJTable.setRowHeight(20);
-        psmJTable.setFont(new Font("Arial", Font.PLAIN, 10));
-        psmJTable.getTableHeader().setFont(new Font("Dialog", 0, 12));
+        psmJTable.setFont(new Font("Arial", Font.PLAIN, 12));
+        psmJTable.getTableHeader().setFont(new Font("Dialog", 0, 13));
 
         psmJTable.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(KeyEvent evt) {
@@ -474,13 +476,13 @@ public class SpectrumLibDisplay extends JFrame {
 
         mainJPanelLayout.setHorizontalGroup(
                 mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(settingJPanel)
+                        .addComponent(settingJPanel,GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(allSplitPane, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         mainJPanelLayout.setVerticalGroup(
                 mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(mainJPanelLayout.createSequentialGroup()
-                                .addComponent(settingJPanel, GroupLayout.DEFAULT_SIZE, 20, 20)
+                                .addComponent(settingJPanel, 25, 25, 25)
                                 .addComponent(allSplitPane, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -683,7 +685,7 @@ public class SpectrumLibDisplay extends JFrame {
      * @param evt Mouse click event
      */
     private void setButtonActionPerform(ActionEvent evt){
-        Double fragmentIonMZTolerance = 0.5;
+        Double fragmentIonMZTolerance = 0.05;
         if(fragmentIonAccuracyTxt.getText() != "" && fragmentIonAccuracyTxt.getText() != null){
             fragmentIonMZTolerance = Double.valueOf(fragmentIonAccuracyTxt.getText());
         }
@@ -986,6 +988,8 @@ public class SpectrumLibDisplay extends JFrame {
      * Display results
      */
     public void displayResults(){
+
+        fragmentIonAccuracyTxt.setText("  "+String.valueOf(annotationSettings.getFragmentIonAccuracy())+"  ");
 
         updatePSMJTable();
 

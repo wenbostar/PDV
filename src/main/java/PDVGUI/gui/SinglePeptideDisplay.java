@@ -53,7 +53,6 @@ public class SinglePeptideDisplay extends JFrame {
     private JPanel spectrumAnnotationMenuPanel;
     private JPanel spectrumShowJPanel;
     private JMenuBar annotationMenuBar;
-    private JCheckBox showDetailsJCheckBox;
     private JMenu switchPaneMenu;
     private JComboBox precursorIonUnit;
     private JTextField fragmentIonAccuracyTxt;
@@ -133,7 +132,7 @@ public class SinglePeptideDisplay extends JFrame {
         spectrumMainPanel = new SpectrumMainPanel(this);
 
         initComponents();
-        fragmentIonAccuracyTxt.setText("0.5");
+        fragmentIonAccuracyTxt.setText("0.05");
         spectrumAnnotationMenuPanel.add(annotationMenuBar);
         this.precursorIonUnit.setEnabled(true);
         this.precursorIonUnit.setRenderer(new AlignedListCellRenderer(0));
@@ -157,7 +156,6 @@ public class SinglePeptideDisplay extends JFrame {
         fragmentIonAccuracyTxt = new JTextField();
         annotationMenuBar = new JMenuBar();
         switchPaneMenu = new JMenu();
-        showDetailsJCheckBox = new JCheckBox();
 
         JPanel mainJPanel = new JPanel();
         JToolBar allJToolBar = new JToolBar();
@@ -168,10 +166,9 @@ public class SinglePeptideDisplay extends JFrame {
         JMenuItem newJMenuItem = new JMenuItem();
         JMenuItem openDenovoJMenuItem = new JMenuItem();
         JMenuItem exitJMenuItem = new JMenuItem();
-        JLabel showDetailsJLabel = new JLabel();
 
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-        setTitle("PDV - Single Display");
+        setTitle("PDV - One PSM");
         setBackground(new java.awt.Color(255, 255, 255));
         setMinimumSize(new java.awt.Dimension(760, 600));
         addWindowListener(new WindowAdapter() {
@@ -244,17 +241,10 @@ public class SinglePeptideDisplay extends JFrame {
             }
         });
 
-        startJButton.setText("Start Annotating");
+        startJButton.setText("Start");
         startJButton.setBackground(Color.green);
         startJButton.setEnabled(false);
         startJButton.addActionListener(this::startJButtonActionPerformed);
-
-        showDetailsJLabel.setText("Show details");
-        showDetailsJLabel.setFont(new Font("Console", Font.PLAIN, 12));
-        showDetailsJLabel.setToolTipText("Show spectrum details or not in spectrum panel");
-
-        showDetailsJCheckBox.setSelected(false);
-        showDetailsJCheckBox.setOpaque(false);
 
         precursorIonUnit.setModel(new DefaultComboBoxModel(new String[]{"Da", "ppm"}));
         fragmentIonLbl.setText("Fragment m/z Tolerance");
@@ -290,9 +280,6 @@ public class SinglePeptideDisplay extends JFrame {
                                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(precursorIonUnit, GroupLayout.DEFAULT_SIZE, 50, 70))
                                 .addGap(10, 150, 500)
-                                .addComponent(showDetailsJLabel, 100, 100, 100)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(showDetailsJCheckBox)
                                 .addGap(20, 50, 200)
                                 .addGroup(inputJPanelLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                                         .addGroup(inputJPanelLayout.createSequentialGroup()
@@ -322,9 +309,7 @@ public class SinglePeptideDisplay extends JFrame {
                                         .addGroup(inputJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
                                                 .addComponent(fragmentIonLbl)
                                                 .addComponent(fragmentIonAccuracyTxt, 20, 30 ,30)
-                                                .addComponent(precursorIonUnit, 20, 30 ,30)
-                                                .addComponent(showDetailsJLabel)
-                                                .addComponent(showDetailsJCheckBox))
+                                                .addComponent(precursorIonUnit, 20, 30 ,30))
                                         .addGroup(inputJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
                                                 .addComponent(startJButton)))
                                 .addGap(15,15,15))
@@ -675,11 +660,11 @@ public class SinglePeptideDisplay extends JFrame {
         SpectrumFactory spectrumFactory = SpectrumFactory.getInstance();
         ArrayList<String > spectrumTitle;
 
-        Double fragmentIonMZTolerance = 0.5;
+        Double fragmentIonMZTolerance = 0.05;
         if (fragmentIonAccuracyTxt.getText()!= ""){
             fragmentIonMZTolerance = Double.valueOf(fragmentIonAccuracyTxt.getText());
         }else {
-            fragmentIonMZTolerance = 0.5;
+            fragmentIonMZTolerance = 0.05;
         }
 
         SpectrumPanel.setIonColor(Ion.getGenericIon(Ion.IonType.PEPTIDE_FRAGMENT_ION, 1), new Color(0, 153, 0));
@@ -717,7 +702,7 @@ public class SinglePeptideDisplay extends JFrame {
         annotationSettings.setPreferencesFromSearchParameters(searchParameters);
 
         spectrumMainPanel.updateSearchParameters(searchParameters);
-        spectrumMainPanel.setShowDetails(showDetailsJCheckBox.isSelected());
+        spectrumMainPanel.setShowDetails(false);
         spectrumMainPanel.setAnnotationSettings(annotationSettings);
 
         Peptide peptide = new Peptide(peptideSequence, modificationMatches);

@@ -229,6 +229,7 @@ public class PTMColorDialog extends JDialog {
          * Constructor
          */
         public PTMColorTableModel(){
+            System.out.println(allModification);
         }
 
         @Override

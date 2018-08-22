@@ -373,8 +373,8 @@ public class ExportExpectedSizeDialog extends JDialog {
             Integer resizeJPanelWidth = Math.toIntExact(Math.round(resizeJPanel.getPreferredSize().getWidth()));
             Integer resizeJPanelHeight = Math.toIntExact(Math.round(resizeJPanel.getPreferredSize().getHeight()));
 
-            if(resizeJPanelWidth < 200){
-                JOptionPane.showMessageDialog(null, "The width must be bigger than 200 pixels.", "Warning", JOptionPane.WARNING_MESSAGE);
+            if(resizeJPanelWidth <= 200 || resizeJPanelHeight<= 200){
+                JOptionPane.showMessageDialog(null, "Please set a bigger size.", "Warning", JOptionPane.WARNING_MESSAGE);
 
             } else {
 
@@ -414,11 +414,7 @@ public class ExportExpectedSizeDialog extends JDialog {
 
             File selectedFile = fileChooser.getSelectedFile();
 
-            if (selectedFile.isDirectory()) {
-                outputFolder = selectedFile.getAbsolutePath();
-            } else {
-                JOptionPane.showMessageDialog(this, "Please select one directory", "File Format Error", JOptionPane.WARNING_MESSAGE);
-            }
+            outputFolder = selectedFile.getAbsolutePath();
 
             pathJText.setText(outputFolder+" selected");
             validateInput();

@@ -65,6 +65,10 @@ public class MSDataDisplay extends JFrame {
      * Information panel
      */
     private InfoPanel infoPanel = new InfoPanel();
+    /**
+     * Last selected folder
+     */
+    public String lastSelectedFolder;
 
     /**
      * Constructor
@@ -82,7 +86,7 @@ public class MSDataDisplay extends JFrame {
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMass.png")));
         setVisible(true);
 
-        new MSDataImportDialog(this);
+        new MSDataImportDialog(this, "");
     }
 
     /**
@@ -403,7 +407,7 @@ public class MSDataDisplay extends JFrame {
      * @param evt Mouse click event
      */
     private void addNewJButtonActionPerform(ActionEvent evt){
-        new MSDataImportDialog(this);
+        new MSDataImportDialog(this, lastSelectedFolder);
     }
 
     /**
@@ -558,7 +562,7 @@ public class MSDataDisplay extends JFrame {
     /**
      * Update TIC
      */
-    private void updateTic(){
+    public void updateTic(){
         ticPanel.updatePanel(selectFileName, fileToHash.get(selectFileName), selectShow.getSelectedIndex(), topNum);
 
         ticShowJPanel.revalidate();

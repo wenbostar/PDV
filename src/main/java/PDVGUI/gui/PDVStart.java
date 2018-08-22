@@ -33,7 +33,6 @@ public class PDVStart extends JDialog {
     private JButton openPrideXMLJButton;
     private JButton openSpectrumFileJButton;
     private JButton openProteoQCJButton;
-    private JLabel openProteoQCLinkJLabel;
 
     /**
      * Parent frame
@@ -106,7 +105,6 @@ public class PDVStart extends JDialog {
         openPrideXMLJButton = new JButton();
         openSpectrumFileJButton = new JButton();
         openProteoQCJButton = new JButton();
-        openProteoQCLinkJLabel = new JLabel();
 
         JPanel paintJPanel = new JPanel(){
             Image image=null;
@@ -122,7 +120,7 @@ public class PDVStart extends JDialog {
                     image= ImageIO.read(new File(pngFilePath));
 
                     Map mapH = new HashMap();
-                    mapH.put(RenderingHints.KEY_ANTIALIASING,  RenderingHints.VALUE_ANTIALIAS_ON); 
+                    mapH.put(RenderingHints.KEY_ANTIALIASING,  RenderingHints.VALUE_ANTIALIAS_ON);
                     mapH.put(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
                     g2.setRenderingHints(mapH);
@@ -339,29 +337,6 @@ public class PDVStart extends JDialog {
             }
         });
 
-        openProteoQCLinkJLabel.setFont(new Font("Arial", Font.ITALIC, 11));
-        openProteoQCLinkJLabel.setText("<html><u><a href=\"http://www.bioconductor.org/packages/release/bioc/html/proteoQC.html\">Click to see how to use ProteoQC</a></u></html>");
-        openProteoQCLinkJLabel.setToolTipText("http://www.bioconductor.org/packages/release/bioc/html/proteoQC.html");
-        openProteoQCLinkJLabel.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent evt) {
-                openProteoQCLinkJButtonMouseEntered(evt);
-            }
-
-            public void mouseClicked(MouseEvent e) {
-                try {
-                    Desktop.getDesktop().browse(
-                            new java.net.URI("http://www.bioconductor.org/packages/release/bioc/html/proteoQC.html"));
-                } catch (Exception ex) {
-                }
-            }
-
-        });
-        openProteoQCLinkJLabel.addMouseListener(new MouseAdapter() {
-            public void mouseExited(MouseEvent evt) {
-                openProteoQCLinkJButtonMouseExited(evt);
-            }
-        });
-
         optionJPanel.setOpaque(false);
 
         firstPartJPanel.setBorder(null);
@@ -410,8 +385,7 @@ public class PDVStart extends JDialog {
                         .addComponent(openSpectrumFileJButton, GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE)
                         .addGroup(secondPartJPanelLayout.createSequentialGroup()
                                 .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 100, 100)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(openProteoQCLinkJLabel, GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE))
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED))
         );
 
         secondPartJPanelLayout.setVerticalGroup(
@@ -424,8 +398,7 @@ public class PDVStart extends JDialog {
                                 .addComponent(openPrideXMLJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addGroup(secondPartJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(openProteoQCLinkJLabel, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE))
                         )
         );
 
@@ -480,8 +453,8 @@ public class PDVStart extends JDialog {
                         .addGroup(optionJPanelLayout.createSequentialGroup()
                                 .addContainerGap()
                                 .addGroup(optionJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(firstPartJPanel, GroupLayout.DEFAULT_SIZE, 285, Short.MAX_VALUE)
-                                        .addComponent(secondPartJPanel, GroupLayout.DEFAULT_SIZE, 285, Short.MAX_VALUE)
+                                        .addComponent(firstPartJPanel, GroupLayout.DEFAULT_SIZE, 315, Short.MAX_VALUE)
+                                        .addComponent(secondPartJPanel, GroupLayout.DEFAULT_SIZE, 315, Short.MAX_VALUE)
                                         )
                                 .addComponent(logoJPanel, 53, 53, Short.MAX_VALUE)
                                 .addContainerGap())
@@ -505,7 +478,7 @@ public class PDVStart extends JDialog {
                 .addGroup(GroupLayout.Alignment.TRAILING, backgroundPanelLayout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(paintJPanel, GroupLayout.DEFAULT_SIZE, 331, Short.MAX_VALUE)
-                        .addComponent(optionJPanel, GroupLayout.DEFAULT_SIZE, 330, Short.MAX_VALUE)
+                        .addComponent(optionJPanel, GroupLayout.DEFAULT_SIZE, 368, Short.MAX_VALUE)
                         //.addGap(25, 25, 25)
                 )
         );
@@ -635,7 +608,7 @@ public class PDVStart extends JDialog {
      */
     private void newDeNovoResultJButtonMouseEntered(MouseEvent evt) {
 
-        JLabel deNovoJLabel = new JLabel("<html>Visualize denovo sequencing result (DeepNovo, Novor, PepNovo, DirecTag).</html>");
+        JLabel deNovoJLabel = new JLabel("<html>Visualize denovo sequencing result (DeepNovo, Novor, PepNovo, pNovo).</html>");
 
         deNovoJLabel.setFont(new Font("simsun", Font.ITALIC, 12));
 
@@ -1036,8 +1009,7 @@ public class PDVStart extends JDialog {
                         .addComponent(openSpectrumFileJButton, GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE)
                         .addGroup(secondPartJPanelLayout.createSequentialGroup()
                                 .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 100, 100)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(openProteoQCLinkJLabel, GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE))
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED))
         );
 
         secondPartJPanelLayout.setVerticalGroup(
@@ -1050,8 +1022,7 @@ public class PDVStart extends JDialog {
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(openPrideXMLJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE)
                                 .addGroup(secondPartJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(openProteoQCLinkJLabel, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE))
                         )
         );
     }
@@ -1078,8 +1049,7 @@ public class PDVStart extends JDialog {
                         .addComponent(openSpectrumFileJButton, GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE)
                         .addGroup(secondPartJPanelLayout.createSequentialGroup()
                                 .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 100, 100)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(openProteoQCLinkJLabel, GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE))
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED))
         );
 
         secondPartJPanelLayout.setVerticalGroup(
@@ -1092,8 +1062,7 @@ public class PDVStart extends JDialog {
                                 .addComponent(openPrideXMLJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addGroup(secondPartJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(openProteoQCLinkJLabel, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE))
                         )
         );
     }
@@ -1132,8 +1101,7 @@ public class PDVStart extends JDialog {
                         .addComponent(openSpectrumFileJButton, GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE)
                         .addGroup(secondPartJPanelLayout.createSequentialGroup()
                                 .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 100, 100)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(openProteoQCLinkJLabel, GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE))
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED))
         );
 
         secondPartJPanelLayout.setVerticalGroup(
@@ -1146,8 +1114,7 @@ public class PDVStart extends JDialog {
                                 .addComponent(openPrideXMLJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE)
                                 .addComponent(prideXMLJLabel, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE)
                                 .addGroup(secondPartJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(openProteoQCLinkJLabel, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE))
                         )
         );
     }
@@ -1174,8 +1141,7 @@ public class PDVStart extends JDialog {
                         .addComponent(openSpectrumFileJButton, GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE)
                         .addGroup(secondPartJPanelLayout.createSequentialGroup()
                                 .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 100, 100)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(openProteoQCLinkJLabel, GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE))
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED))
         );
 
         secondPartJPanelLayout.setVerticalGroup(
@@ -1188,8 +1154,7 @@ public class PDVStart extends JDialog {
                                 .addComponent(openPrideXMLJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addGroup(secondPartJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(openProteoQCLinkJLabel, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE))
                         )
         );
     }
@@ -1228,8 +1193,7 @@ public class PDVStart extends JDialog {
                         .addComponent(openSpectrumFileJLabel, GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
                         .addGroup(secondPartJPanelLayout.createSequentialGroup()
                                 .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 100, 100)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(openProteoQCLinkJLabel, GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE))
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED))
         );
 
         secondPartJPanelLayout.setVerticalGroup(
@@ -1242,8 +1206,7 @@ public class PDVStart extends JDialog {
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(openPrideXMLJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE)
                                 .addGroup(secondPartJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(openProteoQCLinkJLabel, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE))
                         )
         );
     }
@@ -1270,8 +1233,7 @@ public class PDVStart extends JDialog {
                         .addComponent(openSpectrumFileJButton, GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE)
                         .addGroup(secondPartJPanelLayout.createSequentialGroup()
                                 .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 100, 100)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(openProteoQCLinkJLabel, GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE))
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED))
         );
 
         secondPartJPanelLayout.setVerticalGroup(
@@ -1284,8 +1246,7 @@ public class PDVStart extends JDialog {
                                 .addComponent(openPrideXMLJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addGroup(secondPartJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(openProteoQCLinkJLabel, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE))
                         )
         );
     }
@@ -1324,8 +1285,7 @@ public class PDVStart extends JDialog {
                         .addComponent(openProteoQCJLabel, GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
                         .addGroup(secondPartJPanelLayout.createSequentialGroup()
                                 .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 100, 100)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(openProteoQCLinkJLabel, GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE))
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED))
         );
 
         secondPartJPanelLayout.setVerticalGroup(
@@ -1338,8 +1298,7 @@ public class PDVStart extends JDialog {
                                 .addComponent(openPrideXMLJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addGroup(secondPartJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(openProteoQCLinkJLabel, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE))
                                 .addComponent(openProteoQCJLabel, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE)
                         )
         );
@@ -1367,8 +1326,7 @@ public class PDVStart extends JDialog {
                         .addComponent(openSpectrumFileJButton, GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE)
                         .addGroup(secondPartJPanelLayout.createSequentialGroup()
                                 .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 100, 100)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(openProteoQCLinkJLabel, GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE))
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED))
         );
 
         secondPartJPanelLayout.setVerticalGroup(
@@ -1381,26 +1339,9 @@ public class PDVStart extends JDialog {
                                 .addComponent(openPrideXMLJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addGroup(secondPartJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(openProteoQCLinkJLabel, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(openProteoQCJButton, GroupLayout.DEFAULT_SIZE, 35, GroupLayout.PREFERRED_SIZE))
                         )
         );
-    }
-
-    /**
-     * Change the mouse into hand
-     * @param evt
-     */
-    private void openProteoQCLinkJButtonMouseEntered(MouseEvent evt){
-        setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-    }
-
-    /**
-     * Change the mouse into default
-     * @param evt
-     */
-    private void openProteoQCLinkJButtonMouseExited(MouseEvent evt) {
-        setCursor(new java.awt.Cursor(Cursor.DEFAULT_CURSOR));
     }
 
     /**

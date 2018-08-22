@@ -92,6 +92,10 @@ public class MzIDFileImport {
      * Spectrum ID to spectrum number
      */
     private HashMap<String, Integer> spectrumIdAndNumber;
+    /**
+     * Soft name
+     */
+    private String softName;
 
     /**
      * Constructor
@@ -263,7 +267,8 @@ public class MzIDFileImport {
             for (SpectraDataType spectraDataType : spectraDataTypeList) {
                 spectrumLocationList.add(spectraDataType.getLocation());
                 if (spectraDataType.getName() != null) {
-                    spectrumFileMap.put(spectraDataType.getId(), spectraDataType.getName());
+                    String[] fileNameArray = spectraDataType.getName().split("/");
+                    spectrumFileMap.put(spectraDataType.getId(), fileNameArray[fileNameArray.length - 1]);
                 } else {
                     String spectrumFileName;
                     if (spectraDataType.getLocation().contains("/")){
@@ -316,7 +321,7 @@ public class MzIDFileImport {
         String spectrumIndex;//Spectrum index in spectrum file;
         String spectrumNumber;//Spectrum id in mzID;
         String spectrumFileRef;
-        String currentSpectrumFile;
+        String currentSpectrumFile = "";
         String peptideRef;
         int rank;
         double massError = 0;
@@ -338,6 +343,7 @@ public class MzIDFileImport {
         PeptideAssumption peptideAssumption;
         SpectrumMatch currentMatch;
         List<SpectrumIdentificationItemType> spectrumIdentificationItems;
+        ArrayList<String> countParam;
 
         Pattern pattern = Pattern.compile("-?[0-9]+.?[0-9]+");
 
@@ -360,8 +366,25 @@ public class MzIDFileImport {
                 if(spectrumID.contains(" ")){
                     String [] eachBig = spectrumID.split(" ");
                     spectrumIndex = eachBig[eachBig.length-1].split("=")[1];
+
+                    if (softName.toLowerCase().contains("mascot")){ // Soft: MASCOT spectrumID="mzMLid=controllerType=0 controllerNumber=1 scan=0"
+                        spectrumID = spectrumID.split("mzMLid=")[1];
+                    }
                 }else {
-                    spectrumIndex = spectrumID.split("=")[1];
+                    if (spectrumID.contains("=")) {
+                        spectrumIndex = spectrumID.split("=")[1];
+
+                        if (softName.toLowerCase().contains("metamorpheus")){ // soft: MetaMorpheus Scan=000
+                            spectrumID = "controllerType=0 controllerNumber=1 scan="+spectrumIndex;
+                        }
+
+                    } else { // soft:Crux
+                        spectrumIndex = spectrumID.split("-")[0];
+                        if (spectrumFileType.equals("mgf")){
+                            spectrumIndex = String.valueOf(Integer.valueOf(spectrumID.split("-")[0]) - 1);
+                        }
+                        spectrumID = "controllerType=0 controllerNumber=1 scan="+spectrumIndex;
+                    }
                 }
 
                 //get id of mzID
@@ -380,7 +403,17 @@ public class MzIDFileImport {
                 spectrumIndexList.add(spectrumNumber);
 
                 spectrumFileRef = spectrumIdentificationResultType.getSpectraDataRef();
-                currentSpectrumFile = spectrumFileMap.get(spectrumFileRef);
+                if (spectrumFileRef == null){
+                    for (String key : spectrumFileMap.keySet()){
+                        currentSpectrumFile = spectrumFileMap.get(key);
+                    }
+                } else {
+                    currentSpectrumFile = spectrumFileMap.get(spectrumFileRef);
+                }
+
+                if (currentSpectrumFile.contains("/")){
+                    currentSpectrumFile = currentSpectrumFile.substring(currentSpectrumFile.lastIndexOf("/") + 1, currentSpectrumFile.length());
+                }
 
                 currentMatch = new SpectrumMatch(Spectrum.getSpectrumKey(currentSpectrumFile, spectrumIndex));
 
@@ -410,11 +443,14 @@ public class MzIDFileImport {
                     rankNum++;
 
                     rank = spectrumIdentificationItemType.getRank();
-
-                    calculatedMZ = spectrumIdentificationItemType.getCalculatedMassToCharge();
                     experimentMZ = spectrumIdentificationItemType.getExperimentalMassToCharge();
 
-                    massError = experimentMZ - calculatedMZ;
+                    if (spectrumIdentificationItemType.getCalculatedMassToCharge() != null){
+                        calculatedMZ = spectrumIdentificationItemType.getCalculatedMassToCharge();
+                        massError = experimentMZ - calculatedMZ;
+                    } else { // CalculatedMassToCharge is not required value
+                        massError = -1;
+                    }
 
                     peptideCharge = new Charge(Charge.PLUS, spectrumIdentificationItemType.getChargeState()); // + 1
 
@@ -484,7 +520,6 @@ public class MzIDFileImport {
                                     ptm.setShortName(nameFromMzID);
                                     ptmFactory.addUserPTM(ptm);
                                 }
-
                             }
 
                             if (!allModifications.contains(modificationName)) {
@@ -492,7 +527,6 @@ public class MzIDFileImport {
                             }
 
                             utilitiesModifications.add(new ModificationMatch(modificationName, true, location));
-
                         }
                     }
 
@@ -523,7 +557,6 @@ public class MzIDFileImport {
                                 currentMatch.setBestPeptideAssumption(newAssumption);
                                 abstractParamTypeList = spectrumIdentificationItemType.getParamGroup();//It is parameter of one SpectrumIdentificationItem seem as all score;
                             }
-
                         }
 
                     } else {
@@ -556,6 +589,8 @@ public class MzIDFileImport {
                 preparedStatement.setDouble(5, Math.abs(massError));
                 preparedStatement.setBytes(6, bos.toByteArray());
 
+                countParam = new ArrayList<>();
+
                 for (AbstractParamType abstractParamType : abstractParamTypeList) {
 
                     if (abstractParamType instanceof CVParamType) {
@@ -564,13 +599,21 @@ public class MzIDFileImport {
                             name = name.substring(0, 29);
                         }
 
-                        Integer index = scoreName.indexOf(name) + 7;
+                        if (scoreName.contains(name)) {
 
-                        String value = abstractParamType.getValue();
-                        if (pattern.matcher(value).matches()) {
-                            preparedStatement.setDouble(index, Double.parseDouble(value));
-                        } else {
-                            preparedStatement.setString(index, value);
+                            Integer index = scoreName.indexOf(name) + 7;
+                            countParam.add(name);
+
+                            String value = abstractParamType.getValue();
+                            if (value != null) {
+                                if (pattern.matcher(value).matches()) {
+                                    preparedStatement.setDouble(index, Double.parseDouble(value));
+                                } else {
+                                    preparedStatement.setString(index, value);
+                                }
+                            } else {
+                                preparedStatement.setDouble(index, 0); // TODO: 8/14/2018   Risk
+                            }
                         }
 
                     } else if (abstractParamType instanceof UserParamType) {
@@ -579,14 +622,28 @@ public class MzIDFileImport {
                             name = name.substring(0, 29);
                         }
 
-                        Integer index = scoreName.indexOf(name) + 7;
+                        if (scoreName.contains(name)) {
+                            Integer index = scoreName.indexOf(name) + 7;
+                            countParam.add(name);
 
-                        String value = abstractParamType.getValue();
+                            String value = abstractParamType.getValue();
+                            if (value != null) {
+                                if (pattern.matcher(value).matches()) {
+                                    preparedStatement.setDouble(index, Double.parseDouble(value));
+                                } else {
+                                    preparedStatement.setString(index, value);
+                                }
+                            } else {
+                                preparedStatement.setDouble(index, 0);// TODO: 8/14/2018   Risk
+                            }
+                        }
+                    }
+                }
 
-                        if (pattern.matcher(value).matches()) {
-                            preparedStatement.setDouble(index, Double.parseDouble(value));
-                        } else {
-                            preparedStatement.setString(index, value);
+                if (countParam.size() != scoreName.size()){
+                    for (String name : scoreName){
+                        if (!countParam.contains(name)){
+                            preparedStatement.setDouble(scoreName.indexOf(name) + 7, 0);// TODO: 8/14/2018   Risk
                         }
                     }
                 }
@@ -662,9 +719,26 @@ public class MzIDFileImport {
             detailsList.add("Spectrum file: "+index +"/t/" + spectrumLocationList.get(index));
         }
 
-        for(AnalysisSoftwareType analysisSoftwareType: mzIdentMLType.getAnalysisSoftwareList().getAnalysisSoftware()){
-            detailsList.add("AnalysisSoftware/t/"+analysisSoftwareType.getName()+"("+analysisSoftwareType.getVersion()+")");
-            originalInfor.put("Soft Name", analysisSoftwareType.getName()+" version: "+analysisSoftwareType.getVersion());
+        if (mzIdentMLType.getAnalysisSoftwareList() != null) {
+            for (AnalysisSoftwareType analysisSoftwareType : mzIdentMLType.getAnalysisSoftwareList().getAnalysisSoftware()) {
+
+                if (analysisSoftwareType.getName() == null && analysisSoftwareType.getSoftwareName() != null){
+                    if (analysisSoftwareType.getSoftwareName().getCvParam() != null){
+                        detailsList.add("AnalysisSoftware/t/" + analysisSoftwareType.getSoftwareName().getCvParam().getName() + "(" + analysisSoftwareType.getVersion() + ")");
+                        originalInfor.put("Soft Name", analysisSoftwareType.getSoftwareName().getCvParam().getName() + " version: " + analysisSoftwareType.getVersion());
+                        softName = analysisSoftwareType.getSoftwareName().getCvParam().getName();
+                    } else {
+                        detailsList.add("AnalysisSoftware/t/" + analysisSoftwareType.getName() + "(" + analysisSoftwareType.getVersion() + ")");
+                        originalInfor.put("Soft Name", analysisSoftwareType.getName() + " version: " + analysisSoftwareType.getVersion());
+
+                    }
+                } else {
+                    detailsList.add("AnalysisSoftware/t/" + analysisSoftwareType.getName() + "(" + analysisSoftwareType.getVersion() + ")");
+                    originalInfor.put("Soft Name", analysisSoftwareType.getName() + " version: " + analysisSoftwareType.getVersion());
+                    softName = analysisSoftwareType.getName();
+                }
+
+            }
         }
 
         for(SearchDatabaseType searchDatabaseType: mzIdentMLType.getDataCollection().getInputs().getSearchDatabase()){
@@ -685,15 +759,47 @@ public class MzIDFileImport {
             for (SearchModificationType searchModificationType: spectrumIdentificationProtocolType.getModificationParams().getSearchModification()){
                 if (searchModificationType.isFixedMod()){
                     if(searchModificationType.getResidues().size() == 0 || searchModificationType.getResidues().get(0).equals(".") && searchModificationType.getSpecificityRules().size()!=0){
-                        fixedModiMap.put(searchModificationType.getCvParam().get(0).getName()+" on "+searchModificationType.getSpecificityRules().get(0).getCvParam().get(0).getName(), " massDelta: "+searchModificationType.getMassDelta());
+                        if (searchModificationType.getCvParam() == null || searchModificationType.getCvParam().size() == 0){ // Some files don't have CV
+                            fixedModiMap.put(String.valueOf(searchModificationType.getMassDelta()), " massDelta: "+searchModificationType.getMassDelta());
+                        } else {
+                            if (searchModificationType.getCvParam().get(0).getName() == null){
+                                fixedModiMap.put(String.valueOf(searchModificationType.getMassDelta()), " massDelta: "+searchModificationType.getMassDelta());
+                            }else {
+                                fixedModiMap.put(searchModificationType.getCvParam().get(0).getName() + " on " + searchModificationType.getSpecificityRules().get(0).getCvParam().get(0).getName(), " massDelta: " + searchModificationType.getMassDelta());
+                            }
+                        }
                     } else {
-                        fixedModiMap.put(searchModificationType.getCvParam().get(0).getName()+" of "+searchModificationType.getResidues().get(0), " massDelta: "+searchModificationType.getMassDelta());
+                        if (searchModificationType.getCvParam() == null || searchModificationType.getCvParam().size() == 0){
+                            fixedModiMap.put(searchModificationType.getMassDelta() + " of " + searchModificationType.getResidues().get(0), " massDelta: " + searchModificationType.getMassDelta());
+                        } else {
+                            if (searchModificationType.getCvParam().get(0).getName() == null){
+                                fixedModiMap.put(searchModificationType.getMassDelta() + " of " + searchModificationType.getResidues().get(0), " massDelta: " + searchModificationType.getMassDelta());
+                            } else {
+                                fixedModiMap.put(searchModificationType.getCvParam().get(0).getName() + " of " + searchModificationType.getResidues().get(0), " massDelta: " + searchModificationType.getMassDelta());
+                            }
+                        }
                     }
                 } else {
                     if(searchModificationType.getResidues().size() == 0 || searchModificationType.getResidues().get(0).equals(".") && searchModificationType.getSpecificityRules().size()!=0){
-                        variableModiMap.put(searchModificationType.getCvParam().get(0).getName()+" on "+searchModificationType.getSpecificityRules().get(0).getCvParam().get(0).getName(),  " massDelta: "+searchModificationType.getMassDelta());
+                        if (searchModificationType.getCvParam() == null || searchModificationType.getCvParam().size() == 0){
+                            variableModiMap.put(String.valueOf(searchModificationType.getMassDelta()), " massDelta: "+searchModificationType.getMassDelta());
+                        } else {
+                            if (searchModificationType.getCvParam().get(0).getName() == null) {
+                                variableModiMap.put(String.valueOf(searchModificationType.getMassDelta()), " massDelta: "+searchModificationType.getMassDelta());
+                            }else {
+                                variableModiMap.put(searchModificationType.getCvParam().get(0).getName() + " on " + searchModificationType.getSpecificityRules().get(0).getCvParam().get(0).getName(), " massDelta: " + searchModificationType.getMassDelta());
+                            }
+                        }
                     } else {
-                        variableModiMap.put(searchModificationType.getCvParam().get(0).getName()+" of "+searchModificationType.getResidues().get(0), " massDelta: "+searchModificationType.getMassDelta());
+                        if (searchModificationType.getCvParam() == null || searchModificationType.getCvParam().size() == 0){
+                            variableModiMap.put(searchModificationType.getMassDelta() + " of " + searchModificationType.getResidues().get(0), " massDelta: " + searchModificationType.getMassDelta());
+                        } else {
+                            if (searchModificationType.getCvParam().get(0).getName() == null){
+                                variableModiMap.put(searchModificationType.getMassDelta() + " of " + searchModificationType.getResidues().get(0), " massDelta: " + searchModificationType.getMassDelta());
+                            } else {
+                                variableModiMap.put(searchModificationType.getCvParam().get(0).getName() + " of " + searchModificationType.getResidues().get(0), " massDelta: " + searchModificationType.getMassDelta());
+                            }
+                        }
                     }
                 }
             }
@@ -706,23 +812,27 @@ public class MzIDFileImport {
             count = 0;
             for (String name : variableModiMap.keySet()){
 
-                detailsList.add("Variable Modification: "+count +"/t/"+name+"("+variableModiMap.get(name)+"(");
+                detailsList.add("Variable Modification: "+count +"/t/"+name+"("+variableModiMap.get(name)+")");
                 count ++;
             }
             originalInfor.put("Fixed Modification", fixedModiMap);
             originalInfor.put("Variable Modification", variableModiMap);
 
-            for (EnzymeType enzymeType: spectrumIdentificationProtocolType.getEnzymes().getEnzyme()){
-                detailsList.add("Enzyme/t/"+enzymeType.getEnzymeName().getParamGroup().get(0).getName()+"("+enzymeType.getMissedCleavages()+")");
-                originalInfor.put("Enzyme", enzymeType.getEnzymeName().getParamGroup().get(0).getName()+" missedCleavages: "+enzymeType.getMissedCleavages());
+            if (spectrumIdentificationProtocolType.getEnzymes() != null) {
+                for (EnzymeType enzymeType : spectrumIdentificationProtocolType.getEnzymes().getEnzyme()) {
+                    detailsList.add("Enzyme/t/" + enzymeType.getEnzymeName().getParamGroup().get(0).getName() + "(" + enzymeType.getMissedCleavages() + ")");
+                    originalInfor.put("Enzyme", enzymeType.getEnzymeName().getParamGroup().get(0).getName() + " missedCleavages: " + enzymeType.getMissedCleavages());
+                }
             }
 
             ArrayList<String> parentToleranceList = new ArrayList<>();
-            for (CVParamType cvParamType : spectrumIdentificationProtocolType.getParentTolerance().getCvParam()){
-                parentToleranceList.add(cvParamType.getName()+": "+cvParamType.getValue()+" "+cvParamType.getUnitName());
-                detailsList.add(cvParamType.getName()+"/t/"+cvParamType.getValue()+"("+cvParamType.getUnitName()+")");
+            if (spectrumIdentificationProtocolType.getParentTolerance() != null) {
+                for (CVParamType cvParamType : spectrumIdentificationProtocolType.getParentTolerance().getCvParam()) {
+                    parentToleranceList.add(cvParamType.getName() + ": " + cvParamType.getValue() + " " + cvParamType.getUnitName());
+                    detailsList.add(cvParamType.getName() + "/t/" + cvParamType.getValue() + "(" + cvParamType.getUnitName() + ")");
+                }
+                originalInfor.put("Parent Tolerance", parentToleranceList);
             }
-            originalInfor.put("Parent Tolerance", parentToleranceList);
 
             HashMap<String, String> additionalPara = new HashMap<>();
 

@@ -35,9 +35,10 @@ public class MSDataImportDialog extends JDialog {
      * Constructor
      * @param msDataDisplay Parent class
      */
-    public MSDataImportDialog(MSDataDisplay msDataDisplay){
+    public MSDataImportDialog(MSDataDisplay msDataDisplay, String lastSelectedFolder){
 
         this.msDataDisplay = msDataDisplay;
+        this.lastSelectedFolder = lastSelectedFolder;
 
         addFile();
 
@@ -106,6 +107,8 @@ public class MSDataImportDialog extends JDialog {
      * Import file
      */
     private void importFile(){
+
+        msDataDisplay.lastSelectedFolder = lastSelectedFolder;
 
         ExecutorService threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 

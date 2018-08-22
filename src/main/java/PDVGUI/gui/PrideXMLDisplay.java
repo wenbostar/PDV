@@ -1,6 +1,7 @@
 package PDVGUI.gui;
 
 import PDVGUI.gui.utils.FileImport.PrideXMLImportDialog;
+import PDVGUI.gui.utils.InfoPanel;
 import PDVGUI.gui.utils.SpectrumMainPanel;
 import com.compomics.util.experiment.biology.PTM;
 import com.compomics.util.experiment.biology.PTMFactory;
@@ -48,7 +49,6 @@ public class PrideXMLDisplay extends JFrame {
     private JTable psmJTable;
     private JTable spectrumJTable;
     private JButton openSidebarJButton;
-    private JEditorPane inforJEditor;
     private JTabbedPane pSMSpectrumJTabbedpane;
     private JComboBox precursorIonUnit;
     private JTextField fragmentIonAccuracyTxt;
@@ -129,6 +129,10 @@ public class PrideXMLDisplay extends JFrame {
      * Current table psm key list
      */
     private ArrayList<String> currentTablePSMKeyList = new ArrayList<>();
+    /**
+     * Information panel
+     */
+    private InfoPanel infoPanel = new InfoPanel();
 
     /**
      * Constructor
@@ -221,9 +225,8 @@ public class PrideXMLDisplay extends JFrame {
         allJSplitPane = new JSplitPane();
         tabelAndChartJSplit = new JSplitPane();
         spectrumShowJPanel  = new JPanel();
-        inforJEditor = new JEditorPane();
         pSMSpectrumJTabbedpane = new JTabbedPane();
-        fragmentIonAccuracyTxt = new JTextField("0.5");
+        fragmentIonAccuracyTxt = new JTextField("0.05");
         precursorIonUnit = new JComboBox();
         psmJPanel = new JPanel();
         spectrumTableJPanel = new JPanel();
@@ -263,8 +266,8 @@ public class PrideXMLDisplay extends JFrame {
         };
 
         psmJTable.setRowHeight(20);
-        psmJTable.setFont(new Font("Arial", Font.PLAIN, 10));
-        psmJTable.getTableHeader().setFont(new Font("Dialog", 0, 12));
+        psmJTable.setFont(new Font("Arial", Font.PLAIN, 12));
+        psmJTable.getTableHeader().setFont(new Font("Dialog", 0, 13));
         psmJTable.setAutoCreateRowSorter(true);
 
         spectrumJTable = new JTable() {
@@ -300,8 +303,8 @@ public class PrideXMLDisplay extends JFrame {
         };
 
         spectrumJTable.setRowHeight(20);
-        spectrumJTable.setFont(new Font("Arial", Font.PLAIN, 10));
-        spectrumJTable.getTableHeader().setFont(new Font("Dialog", 0, 12));
+        spectrumJTable.setFont(new Font("Arial", Font.PLAIN, 12));
+        spectrumJTable.getTableHeader().setFont(new Font("Dialog", 0, 13));
         spectrumJTable.setAutoCreateRowSorter(true);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -368,7 +371,7 @@ public class PrideXMLDisplay extends JFrame {
         setButton.setToolTipText("Set New setting");
         setButton.addActionListener(this::setButtonActionPerform);
 
-        //settingJPanel.setBackground(new Color(217, 248, 255));
+        settingJPanel.setBackground(new Color(255, 255, 255));
         settingJPanel.setMinimumSize(new Dimension(20, 0));
         settingJPanel.setOpaque(false);
 
@@ -412,24 +415,20 @@ public class PrideXMLDisplay extends JFrame {
         detailsJPanel.setOpaque(false);
         detailsJPanel.setBorder(BorderFactory.createTitledBorder("Details"));
 
-        inforJEditor.setContentType("text/html");
-        inforJEditor.setEditable(false);
-        inforJScrollPane.setViewportView(inforJEditor);
-
         GroupLayout detailsJPanelLayout = new GroupLayout(detailsJPanel);
         detailsJPanel.setLayout(detailsJPanelLayout);
         detailsJPanelLayout.setHorizontalGroup(
                 detailsJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(detailsJPanelLayout.createSequentialGroup()
                                 .addContainerGap()
-                                .addComponent(inforJScrollPane, GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
+                                .addComponent(infoPanel, GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
                                 .addContainerGap())
         );
         detailsJPanelLayout.setVerticalGroup(
                 detailsJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(detailsJPanelLayout.createSequentialGroup()
                                 .addContainerGap()
-                                .addComponent(inforJScrollPane, GroupLayout.DEFAULT_SIZE, 490, Short.MAX_VALUE)
+                                .addComponent(infoPanel, GroupLayout.DEFAULT_SIZE, 490, Short.MAX_VALUE)
                                 .addContainerGap())
         );
 
@@ -552,6 +551,7 @@ public class PrideXMLDisplay extends JFrame {
         allJSplitPane.setRightComponent(tabelAndChartJSplit);
 
         backJPanel.setBackground(Color.WHITE);
+        backJPanel.setOpaque(false);
 
         GroupLayout backJPanelLayout = new GroupLayout(backJPanel);
         backJPanel.setLayout(backJPanelLayout);
@@ -578,14 +578,14 @@ public class PrideXMLDisplay extends JFrame {
 
         mainJPanelLayout.setHorizontalGroup(
                 mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(settingJPanel)
+                        .addComponent(settingJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(backJPanel)
         );
 
         mainJPanelLayout.setVerticalGroup(
                 mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(mainJPanelLayout.createSequentialGroup()
-                                .addComponent(settingJPanel, 30, 30, 30)
+                                .addComponent(settingJPanel, 25, 25, 25)
                                 .addComponent(backJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -707,7 +707,7 @@ public class PrideXMLDisplay extends JFrame {
      * @param evt Mouse click event
      */
     private void setButtonActionPerform(ActionEvent evt){
-        Double fragmentIonMZTolerance = 0.5;
+        Double fragmentIonMZTolerance = 0.05;
         if(fragmentIonAccuracyTxt.getText() != "" && fragmentIonAccuracyTxt.getText() != null){
             fragmentIonMZTolerance = Double.valueOf(fragmentIonAccuracyTxt.getText());
         }
@@ -1314,131 +1314,123 @@ public class PrideXMLDisplay extends JFrame {
      */
     private void updateDetails(){
 
-        StringBuilder allInfor = new StringBuilder("<html>");
+        ArrayList<String> detailsList = new ArrayList<>();
 
-        allInfor.append("<br><b>Title</b> : <br>");
-
-        allInfor.append(currentPrideXmlReader.getExpTitle() +"<br>");
+        if (currentPrideXmlReader.getExpTitle() != null){
+            detailsList.add("Exp Title /t/" + currentPrideXmlReader.getExpTitle());
+        }
 
         if(currentPrideXmlReader.getExpShortLabel() != null ){
-            allInfor.append("<br><b>Short Label</b> : <br>");
-            allInfor.append(currentPrideXmlReader.getExpShortLabel() +"<br>");
+            detailsList.add("Short Label /t/" + currentPrideXmlReader.getExpShortLabel());
         }
 
         Protocol currentProtocol = currentPrideXmlReader.getProtocol();
 
-        allInfor.append("<br><b>Protocol Name</b> :"+currentProtocol.getProtocolName());
+        if (currentProtocol.getProtocolName() != null){
+            detailsList.add("Protocol Name /t/" + currentProtocol.getProtocolName());
+        }
 
-        List<Param> protocolSteps = currentProtocol.getProtocolSteps().getStepDescription();
+        if (currentProtocol.getProtocolSteps() != null){
+            if (currentProtocol.getProtocolSteps().getStepDescription() != null){
+                List<Param> protocolSteps = currentProtocol.getProtocolSteps().getStepDescription();
 
-        allInfor.append("<table border=\"1\">\n");
-        for (Param param : protocolSteps){
+                for (Param param : protocolSteps){
 
-            for(CvParam cvParam : param.getCvParam()){
-                allInfor.append(" <tr>\n" +
-                        "        <td>"+ cvParam.getName() +"</td>\n" +
-                        "        <td>"+ cvParam.getValue() +"</td>\n" +
-                        "    </tr>");
+                    for(CvParam cvParam : param.getCvParam()){
+
+                        detailsList.add(cvParam.getName() + "/t/" + cvParam.getValue());
+
+                    }
+                }
+
             }
         }
-        allInfor.append("</table>");
 
-        Admin currentAdmin = currentPrideXmlReader.getAdmin();
+        if (currentPrideXmlReader.getAdmin() != null){
+            Admin currentAdmin = currentPrideXmlReader.getAdmin();
 
-        allInfor.append("<br><b>Sample Name</b> :"+currentAdmin.getSampleName());
+            detailsList.add("Sample Name /t/" + currentAdmin.getSampleName());
 
-        allInfor.append("<table border=\"1\">\n");
-        for (CvParam cvParam : currentAdmin.getSampleDescription().getCvParam()){
-            allInfor.append(" <tr>\n" +
-                    "        <td>"+ cvParam.getCvLabel() +"</td>\n" +
-                    "        <td>"+ cvParam.getName() +"</td>\n" +
-                    "    </tr>");
-        }
-        allInfor.append("</table>");
+            if (currentAdmin.getSampleDescription() != null){
+                for (CvParam cvParam : currentAdmin.getSampleDescription().getCvParam()){
 
-        allInfor.append("<table border=\"1\">\n");
-        for (Contact contact : currentAdmin.getContact()){
-            if(contact.getName() != null){
-                allInfor.append(" <tr>\n" +
-                        "        <td>"+ "Name" +"</td>\n" +
-                        "        <td>"+ contact.getName() +"</td>\n" +
-                        "    </tr>");
+                    detailsList.add(cvParam.getCvLabel() + "/t/" + cvParam.getName());
+                }
             }
-            if(contact.getInstitution() != null){
-                allInfor.append(" <tr>\n" +
-                        "        <td>"+ "Institution" +"</td>\n" +
-                        "        <td>"+ contact.getInstitution() +"</td>\n" +
-                        "    </tr>");
-            }
-            if(contact.getContactInfo() != null){
-                allInfor.append(" <tr>\n" +
-                        "        <td>"+ "Contact Info" +"</td>\n" +
-                        "        <td>"+ contact.getContactInfo() +"</td>\n" +
-                        "    </tr>");
+
+            if (currentAdmin.getContact() != null){
+                for (Contact contact : currentAdmin.getContact()){
+                    if(contact.getName() != null){
+                        detailsList.add("Name /t/" + contact.getName());
+                    }
+                    if(contact.getInstitution() != null){
+                        detailsList.add("Institution /t/" + contact.getInstitution());
+                    }
+                    if(contact.getContactInfo() != null){
+                        detailsList.add("Contact Info /t/" + contact.getContactInfo());
+                    }
+                }
             }
         }
-        allInfor.append("</table>");
 
-        Instrument instrument = currentPrideXmlReader.getInstrument();
+        if (currentPrideXmlReader.getInstrument() !=null){
+            Instrument instrument = currentPrideXmlReader.getInstrument();
 
-        allInfor.append("<br><b>Instrument Name</b> :"+instrument.getInstrumentName());
+            detailsList.add("Instrument Name /t/" + instrument.getInstrumentName());
 
-        allInfor.append("<table border=\"1\">\n");
-        for(CvParam cvParam : instrument.getSource().getCvParam()){
-            allInfor.append(" <tr>\n" +
-                    "        <td>"+ "Source" +"</td>\n" +
-                    "        <td>"+ cvParam.getName() +"</td>\n" +
-                    "    </tr>");
-        }
-        Integer count = 1;
-        for (Param param : instrument.getAnalyzerList().getAnalyzer()){
-            for(CvParam cvParam : param.getCvParam()){
-                allInfor.append(" <tr>\n" +
-                        "        <td>"+ "Analyzer"+ count +"</td>\n" +
-                        "        <td>"+ cvParam.getName() +"</td>\n" +
-                        "    </tr>");
+            if (instrument.getSource() != null){
+                for(CvParam cvParam : instrument.getSource().getCvParam()){
+                    detailsList.add("Source /t/" + cvParam.getName());
+                }
             }
-            count ++;
+
+            if (instrument.getAnalyzerList() != null) {
+                Integer count = 1;
+                if (instrument.getAnalyzerList().getAnalyzer() != null) {
+                    for (Param param : instrument.getAnalyzerList().getAnalyzer()) {
+                        for (CvParam cvParam : param.getCvParam()) {
+                            detailsList.add("Analyzer" + count + "/t/" + cvParam.getName());
+                        }
+                        count++;
+                    }
+                }
+            }
+
+            if (instrument.getDetector() != null) {
+                for (CvParam cvParam : instrument.getDetector().getCvParam()) {
+                    detailsList.add("Detector /t/ "+ cvParam.getName());
+                }
+            }
         }
 
-        for (CvParam cvParam : instrument.getDetector().getCvParam()){
-            allInfor.append(" <tr>\n" +
-                    "        <td>"+ "Detector" +"</td>\n" +
-                    "        <td>"+ cvParam.getName() +"</td>\n" +
-                    "    </tr>");
+        if (currentPrideXmlReader.getDataProcessing() != null){
+            DataProcessing currentDataProcessing = currentPrideXmlReader.getDataProcessing();
+
+            if (currentDataProcessing.getSoftware() != null){
+                detailsList.add("Software /t/ " + currentDataProcessing.getSoftware().getName() + "-"+currentDataProcessing.getSoftware().getVersion());
+            }
+
+            if (currentDataProcessing.getProcessingMethod() != null){
+                for(CvParam cvParam : currentDataProcessing.getProcessingMethod().getCvParam()){
+
+                    detailsList.add("Processing Method: " + cvParam.getName() + "/t/" + cvParam.getValue());
+                }
+            }
+
         }
-        allInfor.append("</table>");
 
-        DataProcessing currentDataProcessing = currentPrideXmlReader.getDataProcessing();
+        if (currentPrideXmlReader.getAdditionalParams() != null){
+            for(CvParam cvParam : currentPrideXmlReader.getAdditionalParams().getCvParam()){
 
-        allInfor.append("<br><b>Software </b> :"+currentDataProcessing.getSoftware().getName() + "-"+currentDataProcessing.getSoftware().getVersion());
-
-        allInfor.append("<table border=\"1\">\n");
-        allInfor.append(" <tr>\n" +
-                "        <td>"+ "Processing Method" +"</td>\n" +
-                "    </tr>");
-        for(CvParam cvParam : currentDataProcessing.getProcessingMethod().getCvParam()){
-            allInfor.append(" <tr>\n" +
-                    "        <td>"+ cvParam.getName() +"</td>\n" +
-                    "        <td>"+ cvParam.getValue() +"</td>\n" +
-                    "    </tr>");
+                detailsList.add(cvParam.getName() + "/t/" + cvParam.getValue());
+            }
         }
-        allInfor.append("</table>");
 
-        allInfor.append("<br><b>Additional Details</b>: <br>");
-        allInfor.append("<table border=\"1\">\n");
-        for(CvParam cvParam : currentPrideXmlReader.getAdditionalParams().getCvParam()){
-            allInfor.append(" <tr>\n" +
-                    "        <td>"+ cvParam.getName() +"</td>\n" +
-                    "        <td>"+ cvParam.getValue() +"</td>\n" +
-                    "    </tr>");
-        }
-        allInfor.append("</table>");
+        HashMap<String, ArrayList<String>> selectedOri = new HashMap<>();
 
-        allInfor.append("<br></html>");
+        selectedOri.put(currentPrideXmlReader.getExpTitle(), detailsList);
 
-        inforJEditor.setText(allInfor.toString());
-        inforJEditor.setCaretPosition(0);
+        infoPanel.updateInfo(selectedOri);
     }
 
     /**

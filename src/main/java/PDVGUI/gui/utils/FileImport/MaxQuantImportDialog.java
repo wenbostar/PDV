@@ -51,7 +51,7 @@ public class MaxQuantImportDialog extends JDialog {
     /**
      * MS2 ion tolerance
      */
-    private Double fragmentIonMZTolerance = 0.5;
+    private Double fragmentIonMZTolerance = 0.05;
     /**
      * MS2 ion tolerance type (ppm or dal)
      */
@@ -89,7 +89,7 @@ public class MaxQuantImportDialog extends JDialog {
         initComponents();
         this.precursorIonUnit.setEnabled(true);
         this.precursorIonUnit.setRenderer(new AlignedListCellRenderer(0));
-        fragmentIonAccuracyTxt.setText(String.valueOf(0.5));
+        fragmentIonAccuracyTxt.setText(String.valueOf(0.05));
 
         settingsComboBox.setRenderer(new AlignedListCellRenderer(SwingConstants.CENTER));
         maxQuantResultTxt.setText( "No selected");
@@ -188,7 +188,7 @@ public class MaxQuantImportDialog extends JDialog {
 
         maxQuantResultLabel.setForeground(new Color(255, 0, 0));
         maxQuantResultLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-        maxQuantResultLabel.setText("MaxQuant results *");
+        maxQuantResultLabel.setText("MaxQuant result *");
 
         maxQuantResultTxt.setHorizontalAlignment(JTextField.CENTER);
 
@@ -428,12 +428,8 @@ public class MaxQuantImportDialog extends JDialog {
         if (returnValue == JFileChooser.APPROVE_OPTION) {
 
             File selectedFile = fileChooser.getSelectedFile();
-            
-            if (selectedFile.isDirectory()) {
-                maxQuantResultPath = selectedFile.getAbsolutePath();
-            } else {
-                JOptionPane.showMessageDialog(this, "Please select one directory", "File Format Error", JOptionPane.WARNING_MESSAGE);
-            }
+
+            maxQuantResultPath = selectedFile.getAbsolutePath();
 
             lastSelectedFolder = selectedFile.getParent();
 

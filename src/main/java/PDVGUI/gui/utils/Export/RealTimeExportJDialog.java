@@ -332,8 +332,8 @@ public class RealTimeExportJDialog extends JDialog {
                     resizeJPanelWidth = Math.toIntExact(Math.round(resizeJPanel.getPreferredSize().getWidth()));
                     resizeJPanelHeight = Math.toIntExact(Math.round(resizeJPanel.getPreferredSize().getHeight()));
 
-                    if (resizeJPanelWidth < 200) {
-                        JOptionPane.showMessageDialog(null, "The width must be bigger than 200 pixels or " + 200 / Toolkit.getDefaultToolkit().getScreenResolution() + " inch.", "Warning", JOptionPane.WARNING_MESSAGE);
+                    if (resizeJPanelWidth <= 200 || resizeJPanelHeight<= 200) {
+                        JOptionPane.showMessageDialog(null, "Please set a bigger size", "Warning", JOptionPane.WARNING_MESSAGE);
 
                         progressDialog.setRunFinished();
 

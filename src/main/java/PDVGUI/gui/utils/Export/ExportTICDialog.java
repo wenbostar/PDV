@@ -6,6 +6,7 @@ import PDVGUI.utils.Export;
 import com.compomics.util.enumeration.ImageType;
 import com.compomics.util.gui.renderers.AlignedListCellRenderer;
 import com.compomics.util.gui.waiting.waitinghandlers.ProgressDialogX;
+import com.jgoodies.forms.layout.FormLayout;
 import org.jfree.chart.JFreeChart;
 
 import javax.swing.*;
@@ -21,10 +22,15 @@ public class ExportTICDialog extends JDialog {
 
     private JLabel pathJLabel;
     private JLabel fileNameJLabel;
+    private JLabel heightJLabel;
+    private JLabel widthJLabel;
     private JTextField pathJText;
     private JTextField fileNameJText;
+    private JTextField heightJText;
+    private JTextField widthJText;
     private JButton exportJButton;
     private JComboBox typeJComboBox;
+    private JComboBox unitJComboBox;
     private JFreeChart chart;
     private JPanel chartPanel;
 
@@ -49,6 +55,22 @@ public class ExportTICDialog extends JDialog {
      */
     private String picName;
     /**
+     * Height
+     */
+    private String height;
+    /**
+     * Width
+     */
+    private String width;
+    /**
+     * Old height
+     */
+    private Integer oldHeight;
+    /**
+     * Old width
+     */
+    private Integer oldWidth;
+    /**
      * Pattern removing illegal
      */
     private static Pattern FilePattern = Pattern.compile("[\\\\/:*?\"<>|]");
@@ -65,6 +87,8 @@ public class ExportTICDialog extends JDialog {
         this.msDataDisplay = msDataDisplay;
         this.chart = chart;
         this.chartPanel = chartPanel;
+        this.oldHeight = chartPanel.getHeight();
+        this.oldWidth = chartPanel.getWidth();
 
         setupGUI();
 
@@ -101,6 +125,11 @@ public class ExportTICDialog extends JDialog {
         pathJText = new JTextField();
         fileNameJLabel = new JLabel();
         fileNameJText = new JTextField();
+        heightJLabel = new JLabel();
+        heightJText = new JTextField();
+        widthJText = new JTextField();
+        widthJLabel = new JLabel();
+        unitJComboBox = new JComboBox();
 
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("PDV - Export");
@@ -152,12 +181,42 @@ public class ExportTICDialog extends JDialog {
 
         typeJComboBox.setModel(new DefaultComboBoxModel(this.picType));
 
+        heightJLabel.setText("Height");
+        heightJLabel.setFont(new Font("Console", Font.PLAIN, 12));
+        heightJLabel.setBackground(new Color(255, 0, 0));
+
+        heightJText.setHorizontalAlignment(SwingConstants.CENTER);
+        heightJText.setEditable(true);
+
+        heightJText.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(KeyEvent evt) {
+                heightJTextKeyReleased(evt);
+            }
+        });
+
+        widthJLabel.setText("Width");
+        widthJLabel.setFont(new Font("Console", Font.PLAIN, 12));
+        widthJLabel.setBackground(new Color(255, 0, 0));
+
+        widthJText.setHorizontalAlignment(SwingConstants.CENTER);
+        widthJText.setEditable(true);
+
+        widthJText.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(KeyEvent evt) {
+                widthJTextKeyReleased(evt);
+            }
+        });
+
+        unitJComboBox.setModel(new DefaultComboBoxModel(new String[]{"in", "cm", "mm"}));
+
         exportJButton.setText("Export");
         exportJButton.setFont(new Font("Lucida", Font.BOLD, 13));
         exportJButton.setBackground(Color.GREEN);
         exportJButton.setOpaque(false);
         exportJButton.setEnabled(false);
         exportJButton.addActionListener(this::exportJButtonActionPerformed);
+
+        JLabel blankJLable = new JLabel(" ");
 
         GroupLayout detailJPanelLayout = new GroupLayout(detailJPanel);
         detailJPanel.setLayout(detailJPanelLayout);
@@ -168,32 +227,55 @@ public class ExportTICDialog extends JDialog {
                                 .addGroup(detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addComponent(pathJLabel, GroupLayout.DEFAULT_SIZE, 100, 100)
                                         .addComponent(fileNameJLabel, GroupLayout.DEFAULT_SIZE, 100, 100)
-                                        .addComponent(typeJLabel, GroupLayout.DEFAULT_SIZE, 100, 100))
+                                        .addComponent(typeJLabel, GroupLayout.DEFAULT_SIZE, 100, 100)
+                                        .addComponent(blankJLable, GroupLayout.DEFAULT_SIZE, 100, 100))
                                 .addGroup(detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addGroup(detailJPanelLayout.createSequentialGroup()
                                                 .addComponent(pathJText, GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
                                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                                                 .addComponent(pathBrowseJButton))
                                         .addComponent(fileNameJText, GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
-                                        .addComponent(typeJComboBox, GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)))
+                                        .addComponent(typeJComboBox, GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
+                                        .addGroup(detailJPanelLayout.createSequentialGroup()
+                                                .addComponent(heightJLabel)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(heightJText, GroupLayout.DEFAULT_SIZE, 20, 40)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(widthJLabel)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(widthJText, GroupLayout.DEFAULT_SIZE, 20, 40)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(unitJComboBox, GroupLayout.DEFAULT_SIZE, 20, 40))))
         );
 
         detailJPanelLayout.setVerticalGroup(
                 detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(detailJPanelLayout.createSequentialGroup()
-                                .addComponent(pathJLabel, GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(fileNameJLabel, GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(typeJLabel, GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE))
-                        .addGroup(detailJPanelLayout.createSequentialGroup()
-                                .addGroup(detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
-                                        .addComponent(pathJText)
-                                        .addComponent(pathBrowseJButton))
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(fileNameJText)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(typeJComboBox))
+                                .addGroup(detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addGroup(detailJPanelLayout.createSequentialGroup()
+                                                .addComponent(pathJLabel, GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(fileNameJLabel, GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(typeJLabel, GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(blankJLable, GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE))
+                                        .addGroup(detailJPanelLayout.createSequentialGroup()
+                                                .addGroup(detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                                                        .addComponent(pathJText)
+                                                        .addComponent(pathBrowseJButton))
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(fileNameJText)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(typeJComboBox)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(detailJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                                                        .addComponent(heightJLabel, GroupLayout.DEFAULT_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(heightJText, GroupLayout.DEFAULT_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(widthJLabel, GroupLayout.DEFAULT_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(widthJText, GroupLayout.DEFAULT_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(unitJComboBox, GroupLayout.DEFAULT_SIZE, 25, GroupLayout.PREFERRED_SIZE)))))
+
         );
 
         GroupLayout mainJPanelLayout = new GroupLayout(mainJPanel);
@@ -260,6 +342,28 @@ public class ExportTICDialog extends JDialog {
             allValid = false;
         }
 
+        if (height != null && !height.equals("")){
+
+            heightJLabel.setForeground(Color.BLACK);
+            heightJLabel.setToolTipText(null);
+        } else {
+            heightJLabel.setForeground(Color.red);
+            heightJLabel.setToolTipText("Please input height.");
+            heightJText.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            allValid = false;
+        }
+
+        if (width != null && !width.equals("")){
+
+            widthJLabel.setForeground(Color.BLACK);
+            widthJLabel.setToolTipText(null);
+        } else {
+            widthJLabel.setForeground(Color.red);
+            widthJLabel.setToolTipText("Please input width.");
+            widthJText.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            allValid = false;
+        }
+
         exportJButton.setEnabled(allValid);
     }
 
@@ -268,6 +372,15 @@ public class ExportTICDialog extends JDialog {
      * @param evt window event
      */
     private void formWindowClosing(WindowEvent evt) {
+
+        msDataDisplay.updateTic();
+        /*
+        chartPanel.setBounds(0,0, oldWidth, oldHeight);
+        chartPanel.setPreferredSize(new Dimension(oldWidth, oldHeight));
+
+        chartPanel.revalidate();
+        chartPanel.repaint();
+        */
         this.dispose();
     }
 
@@ -287,11 +400,7 @@ public class ExportTICDialog extends JDialog {
 
             File selectedFile = fileChooser.getSelectedFile();
 
-            if (selectedFile.isDirectory()) {
-                outputFolder = selectedFile.getAbsolutePath();
-            } else {
-                JOptionPane.showMessageDialog(this, "Please select one directory", "File Format Error", JOptionPane.WARNING_MESSAGE);
-            }
+            outputFolder = selectedFile.getAbsolutePath();
 
             lastFolder = outputFolder;
 
@@ -314,6 +423,30 @@ public class ExportTICDialog extends JDialog {
     }
 
     /**
+     * heightJTextKeyReleased
+     * @param evt Key event
+     */
+    private void heightJTextKeyReleased(KeyEvent evt) {
+
+        height = heightJText.getText();
+        heightJText.setText(height);
+
+        validateInput();
+    }
+
+    /**
+     * widthJTextKeyReleased
+     * @param evt Key event
+     */
+    private void widthJTextKeyReleased(KeyEvent evt) {
+
+        width = widthJText.getText();
+        widthJText.setText(width);
+
+        validateInput();
+    }
+
+    /**
      * Export selected spectrum
      * @param evt mouse click event
      */
@@ -322,6 +455,7 @@ public class ExportTICDialog extends JDialog {
         ImageType finalImageType = null;
 
         Integer selectIndex = typeJComboBox.getSelectedIndex();
+        String unitName = (String) unitJComboBox.getSelectedItem();
 
         switch (selectIndex){
             case 0:
@@ -337,6 +471,23 @@ public class ExportTICDialog extends JDialog {
 
         File imageFile = new File(outputFolder + PDVMainClass.FILE_SEPARATOR + picName + finalImageType.getExtension());
 
+        FormLayout layout = new FormLayout(width+unitName, height+unitName);
+
+        JPanel newPanel = new JPanel();
+        newPanel.add(chartPanel);
+
+        newPanel.setLayout(layout);
+        newPanel.revalidate();
+        newPanel.repaint();
+
+        Integer resizeJPanelWidth = Math.toIntExact(Math.round(newPanel.getPreferredSize().getWidth()));
+        Integer resizeJPanelHeight = Math.toIntExact(Math.round(newPanel.getPreferredSize().getHeight()));
+
+        chartPanel.setBounds(0,0, resizeJPanelWidth, resizeJPanelHeight);
+        chartPanel.setPreferredSize(new Dimension(resizeJPanelWidth, resizeJPanelHeight));
+
+        chartPanel.revalidate();
+        chartPanel.repaint();
 
         ProgressDialogX progressDialog = new ProgressDialogX(msDataDisplay,
                 Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMass.png")),

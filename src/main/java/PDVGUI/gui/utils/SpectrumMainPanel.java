@@ -224,6 +224,10 @@ public class SpectrumMainPanel extends JPanel {
      * Check peptide mirror spectrum setAction
      */
     private SetAction checkSetAction;
+    /**
+     * If true, de novo function
+     */
+    private boolean isDenovo;
 
     /**
      * Constructor
@@ -908,6 +912,11 @@ public class SpectrumMainPanel extends JPanel {
      * @param evt Mouse click event
      */
     private void forwardIonsDeNovoCheckBoxMenuItemAction(ActionEvent evt) {
+        if (forwardIonsDeNovoCheckBoxMenuItem.isSelected()){
+            isDenovo = true;
+        } else {
+            isDenovo = false;
+        }
         updateSpectrum();
     }
 
@@ -916,6 +925,11 @@ public class SpectrumMainPanel extends JPanel {
      * @param evt Mouse click event
      */
     private void rewindIonsDeNovoCheckBoxMenuItemAction(ActionEvent evt) {
+        if (rewindIonsDeNovoCheckBoxMenuItem.isSelected()){
+            isDenovo = true;
+        } else {
+            isDenovo = false;
+        }
         updateSpectrum();
     }
 
@@ -1259,7 +1273,7 @@ public class SpectrumMainPanel extends JPanel {
                     spectrumPanel = new SpectrumContainer(
                             mSnSpectrum.getMzValuesAsArray(), intensitiesAsArray,
                             precursor.getMz(), precursor.getPossibleCharges().get(0).getChargeAsFormattedString(),
-                            "", 40, false, false, false, 2, false);
+                            "", 40, false, false, false, 2, false, isDenovo);
                     spectrumPanel.setKnownMassDeltas(getCurrentMassDeltas());
                     spectrumPanel.setDeltaMassWindow(annotationSettings.getFragmentIonAccuracy());
                     spectrumPanel.setBorder(null);
@@ -1334,7 +1348,7 @@ public class SpectrumMainPanel extends JPanel {
                     spectrumPanel = new SpectrumContainer(
                             currentSpectrum.getMzValuesAsArray(), intensitiesAsArray,
                             precursor.getMz(), (spectrumIdentificationAssumption.getIdentificationCharge().value) + "+",
-                            "", 40, false, showDetails, false, 2, false);
+                            "", 40, false, showDetails, false, 2, false, isDenovo);
 
                     spectrumPanel.setFont(new Font("Arial", Font.PLAIN, 13));
 
@@ -1403,6 +1417,7 @@ public class SpectrumMainPanel extends JPanel {
                     HashMap<Integer, ArrayList<String>> yIonMap = new HashMap<>();
                     ArrayList<String> bIonList;
                     ArrayList<String> yIonList;
+                    ArrayList<Double> mzList = new ArrayList<>();
                     for (IonMatch ionMatch : annotations){
                         String match = ionMatch.getPeakAnnotation();
 
@@ -1459,7 +1474,10 @@ public class SpectrumMainPanel extends JPanel {
                             }
                         }
 
-                        allMatchInt += ionMatch.peak.getIntensity();
+                        if (!mzList.contains(ionMatch.peak.getMz())){
+                            allMatchInt += ionMatch.peak.getIntensity();
+                            mzList.add(ionMatch.peak.getMz());
+                        }
                     }
 
                     for (Double each : currentSpectrum.getIntensityValuesAsArray()){
@@ -1501,7 +1519,7 @@ public class SpectrumMainPanel extends JPanel {
                     mirrorSpectrumPanel = new SpectrumContainer(
                             currentSpectrum.getMzValuesAsArray(), intensitiesAsArray,
                             precursor.getMz(), spectrumIdentificationAssumption.getIdentificationCharge().toString(),
-                            "", 40, false, false, false, 2, false);
+                            "", 40, false, false, false, 2, false, isDenovo);
 
                     sequenceFragmentationPanelMirror = new SequenceFragmentationPanel(
                             modSequence, annotations, true, searchParameters.getPtmSettings(), PeptideFragmentIon.B_ION, PeptideFragmentIon.Y_ION);
@@ -1593,7 +1611,7 @@ public class SpectrumMainPanel extends JPanel {
                     checkPeptideSpectrumPanel = new SpectrumContainer(
                             currentSpectrum.getMzValuesAsArray(), intensitiesAsArray,
                             precursor.getMz(), spectrumIdentificationAssumption.getIdentificationCharge().toString(),
-                            "", 40, false, false, false, 2, false);
+                            "", 40, false, false, false, 2, false, isDenovo);
 
                     sequenceFragmentationPanelCheck = new SequenceFragmentationPanel(
                             modSequence,

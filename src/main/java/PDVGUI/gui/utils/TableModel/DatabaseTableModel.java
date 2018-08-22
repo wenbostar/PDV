@@ -317,8 +317,6 @@ public class DatabaseTableModel extends DefaultTableModel {
 
                     int spectrumNumber = spectrumMatch.getSpectrumNumber();
 
-                    //System.out.println("The spectrum number is "+spectrumNumber);
-
                     IScan iScan = scanCollectionDefault.getScanByNum(spectrumNumber);
 
                     PrecursorInfo precursor = iScan.getPrecursor();

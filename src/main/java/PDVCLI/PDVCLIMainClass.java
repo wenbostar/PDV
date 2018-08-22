@@ -1,8 +1,9 @@
 package PDVCLI;
 
+import PDVGUI.fileimport.MSOneImport;
 import PDVGUI.fileimport.MzXMLScanImport;
-import PDVGUI.utils.ImportPTMsFromUnimod;
-import com.compomics.util.Export;
+import PDVGUI.gui.utils.TICPanel;
+import PDVGUI.utils.Export;
 import com.compomics.util.enumeration.ImageType;
 import com.compomics.util.experiment.biology.*;
 import com.compomics.util.experiment.biology.ions.PeptideFragmentIon;
@@ -22,6 +23,7 @@ import com.compomics.util.preferences.UtilitiesUserPreferences;
 import com.jgoodies.forms.layout.FormLayout;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.commons.cli.*;
+import org.jfree.chart.JFreeChart;
 import umich.ms.datatypes.LCMSDataSubset;
 import umich.ms.datatypes.scan.IScan;
 import umich.ms.datatypes.scan.StorageStrategy;
@@ -39,7 +41,6 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static PDVGUI.gui.PDVMainClass.getJarFilePath;
 
 public class PDVCLIMainClass extends JFrame {
 
@@ -140,7 +141,7 @@ public class PDVCLIMainClass extends JFrame {
     /**
      * Spectrum peak width
      */
-    private Float peahWidth;
+    private Float peakWidth;
     /**
      * The pics' size unit
      */
@@ -179,7 +180,7 @@ public class PDVCLIMainClass extends JFrame {
 
         Options options = new Options();
 
-        options.addOption("rt", true, "Identification file format (mzIdentML: 1, pepXML: 2, proBAM: 3, txt: 4, maxQuant: 5).");
+        options.addOption("rt", true, "Identification file format (mzIdentML: 1, pepXML: 2, proBAM: 3, txt: 4, maxQuant: 5, TIC: 6).");
         options.addOption("r", true, "Identification file.");
         options.addOption("st", true, "MS/MS data format (mgf: 1, mzML: 2, mzXML: 3).");
         options.addOption("s", true, "MS/MS data file");
@@ -217,14 +218,11 @@ public class PDVCLIMainClass extends JFrame {
      */
     private void runCMD(CommandLine commandLine, Options options) throws IOException {
 
-        if (commandLine.getOptionValue("r") != null){
-            this.idFile = new File(commandLine.getOptionValue("r"));
-        } else {
-            System.err.println("Lost result file path!");
-            HelpFormatter f = new HelpFormatter();
-            f.printHelp("Options", options);
-            System.exit(1);
-        }
+        initComponent();
+
+        this.annotationPreferences.setFragmentIonPpm(false);
+
+        this.setVisible(true);
 
         if (commandLine.getOptionValue("rt") != null){
             this.idFileType = Integer.valueOf(commandLine.getOptionValue("rt"));
@@ -244,41 +242,10 @@ public class PDVCLIMainClass extends JFrame {
             System.exit(1);
         }
 
-        if (commandLine.getOptionValue("st") != null){
-            this.spectrumFileType = Integer.valueOf(commandLine.getOptionValue("st"));
-        } else {
-            System.err.println("Lost spectrum file type! (mgf: 1, mzml: 2, mzXML: 3)");
-            HelpFormatter f = new HelpFormatter();
-            f.printHelp("Options", options);
-            System.exit(1);
-        }
-
-        if (commandLine.getOptionValue("i") != null){
-            this.indexFile = new File(commandLine.getOptionValue("i"));
-        } else {
-            System.err.println("Lost selected index file!");
-            HelpFormatter f = new HelpFormatter();
-            f.printHelp("Options", options);
-            System.exit(1);
-        }
-
         if (commandLine.getOptionValue("o") != null){
             this.outPutPath = commandLine.getOptionValue("o");
         } else {
             System.err.println("Lost output path!");
-            HelpFormatter f = new HelpFormatter();
-            f.printHelp("Options", options);
-            System.exit(1);
-        }
-
-        if (commandLine.getOptionValue("k") != null){
-            if(commandLine.getOptionValue("k").equals("p")){
-                this.isSpectrumKey = false;
-            }else if(commandLine.getOptionValue("k").equals("s")) {
-                this.isSpectrumKey = true;
-            }
-        } else {
-            System.err.println("Lost selected index file type! (spectrum key: s, peptide sequence: p)");
             HelpFormatter f = new HelpFormatter();
             f.printHelp("Options", options);
             System.exit(1);
@@ -299,31 +266,6 @@ public class PDVCLIMainClass extends JFrame {
             System.exit(1);
         }
 
-        if (commandLine.getOptionValue("ah") != null){
-            this.isH2O = true;
-        }
-        if (commandLine.getOptionValue("an") != null){
-            this.isNH3 = true;
-        }
-
-        Double ionAccurracy;
-        if (commandLine.getOptionValue("a") == null){
-            ionAccurracy = 0.5;
-        } else {
-            ionAccurracy = Double.valueOf(commandLine.getOptionValue("a"));
-        }
-
-        Double intensityFilter = 0.03;
-        if (commandLine.getOptionValue("c") == null){
-            intensityFilter = 0.03;
-        } else {
-            intensityFilter = Double.valueOf(commandLine.getOptionValue("c")) * 0.01;
-        }
-        if (commandLine.getOptionValue("pw") == null){
-            this.peahWidth = 1f;
-        } else {
-            this.peahWidth = Float.valueOf(commandLine.getOptionValue("pw"));
-        }
         if (commandLine.getOptionValue("fh") == null){
             this.height = 400;
         } else {
@@ -342,21 +284,86 @@ public class PDVCLIMainClass extends JFrame {
 
         this.errorFile = new File(outPutPath+"/error.txt");
 
-        this.annotationPreferences.setFragmentIonAccuracy(ionAccurracy);
-        this.annotationPreferences.setIntensityFilter(intensityFilter);
-        this.annotationPreferences.setFragmentIonPpm(false);
+        if (idFileType != 6){
 
-        initComponent();
+            if (commandLine.getOptionValue("r") != null){
+                this.idFile = new File(commandLine.getOptionValue("r"));
+            } else {
+                System.err.println("Lost result file path!");
+                HelpFormatter f = new HelpFormatter();
+                f.printHelp("Options", options);
+                System.exit(1);
+            }
 
-        //new ImportPTMsFromUnimod(new File(getJarFilePath() + "/resources/conf/unimod.xml"));
+            if (commandLine.getOptionValue("st") != null){
+                this.spectrumFileType = Integer.valueOf(commandLine.getOptionValue("st"));
+            } else {
+                System.err.println("Lost spectrum file type! (mgf: 1, mzml: 2, mzXML: 3)");
+                HelpFormatter f = new HelpFormatter();
+                f.printHelp("Options", options);
+                System.exit(1);
+            }
 
-        this.setVisible(true);
+            if (commandLine.getOptionValue("i") != null){
+                this.indexFile = new File(commandLine.getOptionValue("i"));
+            } else {
+                System.err.println("Lost selected index file!");
+                HelpFormatter f = new HelpFormatter();
+                f.printHelp("Options", options);
+                System.exit(1);
+            }
 
-        processIndexFile();
+            if (commandLine.getOptionValue("k") != null){
+                if(commandLine.getOptionValue("k").equals("p")){
+                    this.isSpectrumKey = false;
+                }else if(commandLine.getOptionValue("k").equals("s")) {
+                    this.isSpectrumKey = true;
+                }
+            } else {
+                System.err.println("Lost selected index file type! (spectrum key: s, peptide sequence: p)");
+                HelpFormatter f = new HelpFormatter();
+                f.printHelp("Options", options);
+                System.exit(1);
+            }
 
-        importFile();
+            if (commandLine.getOptionValue("ah") != null){
+                this.isH2O = true;
+            }
+            if (commandLine.getOptionValue("an") != null){
+                this.isNH3 = true;
+            }
 
-        displayResults();
+            Double ionAccurracy;
+            if (commandLine.getOptionValue("a") == null){
+                ionAccurracy = 0.5;
+            } else {
+                ionAccurracy = Double.valueOf(commandLine.getOptionValue("a"));
+            }
+
+            Double intensityFilter = 0.03;
+            if (commandLine.getOptionValue("c") == null){
+                intensityFilter = 0.03;
+            } else {
+                intensityFilter = Double.valueOf(commandLine.getOptionValue("c")) * 0.01;
+            }
+            if (commandLine.getOptionValue("pw") == null){
+                this.peakWidth = 1f;
+            } else {
+                this.peakWidth = Float.valueOf(commandLine.getOptionValue("pw"));
+            }
+
+            this.annotationPreferences.setFragmentIonAccuracy(ionAccurracy);
+            this.annotationPreferences.setIntensityFilter(intensityFilter);
+
+            processIndexFile();
+
+            importFile();
+
+            displayResults();
+        } else {
+
+            importSpectrumFiles();
+        }
     }
 
     /**
@@ -467,6 +474,111 @@ public class PDVCLIMainClass extends JFrame {
     }
 
     /**
+     * Import mzML or mzXML files for TIC output
+     */
+    private void importSpectrumFiles(){
+
+       HashMap<String, HashMap<String, ArrayList<float[]>>> nameToKeyToRtAndInt = new HashMap<>();
+       int topNum = 0;
+
+        if (spectrumFile.isDirectory()){
+
+            File[] spectrumFiles = spectrumFile.listFiles();
+
+            for (File eachFile : spectrumFiles){
+                if (eachFile.getName().toLowerCase().endsWith("mzml")){
+
+                    System.out.println("the file is "+eachFile.getName());
+                    MSOneImport msOneImport = new MSOneImport(eachFile.getAbsolutePath(), "mzml");
+
+                    System.out.println("The size is "+msOneImport.getKeyToRtAndInt().size());
+
+                    nameToKeyToRtAndInt.put(eachFile.getName(), msOneImport.getKeyToRtAndInt());
+
+                    int exp = 1;
+                    int length = String.valueOf(msOneImport.getBiggestNum()).length() - 3;
+                    for (int i = 0; i < length; i++){
+                        exp *= 10;
+                    }
+                    if (exp > topNum){
+                        topNum = exp;
+                    }
+                    System.out.println("the top is "+ topNum);
+
+                } else if (eachFile.getName().toLowerCase().endsWith("mzxml")){
+                    MSOneImport msOneImport = new MSOneImport(eachFile.getAbsolutePath(), "mzxml");
+                    nameToKeyToRtAndInt.put(eachFile.getName(), msOneImport.getKeyToRtAndInt());
+
+                    int exp = 1;
+                    int length = String.valueOf(msOneImport.getBiggestNum()).length() - 3;
+                    for (int i = 0; i < length; i++){
+                        exp *= 10;
+                    }
+                    if (exp > topNum){
+                        topNum = exp;
+                    }
+
+                }
+            }
+
+            TICPanel ticPanel = new TICPanel(null);
+
+            ticPanel.updatePanel(nameToKeyToRtAndInt, 0, topNum);
+
+            spectrumSplitPane.setDividerLocation(0);
+
+            spectrumJPanel.removeAll();
+            spectrumJPanel.add(ticPanel);
+            spectrumJPanel.revalidate();
+            spectrumJPanel.repaint();
+
+            spectrumSplitPane.revalidate();
+            spectrumSplitPane.repaint();
+
+            resizeJPanel.revalidate();
+            resizeJPanel.repaint();
+
+            outputTIC(ticPanel.getChartPanel().getChart());
+
+        } else {
+
+        }
+    }
+
+    /**
+     * Output TIC
+     */
+    private void outputTIC(JFreeChart chart){
+
+        FormLayout formLayout = new FormLayout(width + unit, height + unit);
+
+        resizeJPanel.setLayout(formLayout);
+        resizeJPanel.revalidate();
+        resizeJPanel.repaint();
+
+        resizeJPanelWidth = Math.toIntExact(Math.round(resizeJPanel.getPreferredSize().getWidth()));
+        resizeJPanelHeight = Math.toIntExact(Math.round(resizeJPanel.getPreferredSize().getHeight()));
+        if (resizeJPanelWidth <= 200 || resizeJPanelHeight <= 200) {
+            System.err.println("WARNING!\n Please set bigger size!" );
+        } else {
+
+            spectrumSplitPane.setBounds(0, 0, resizeJPanelWidth, resizeJPanelHeight);
+            spectrumSplitPane.setPreferredSize(new Dimension(resizeJPanelWidth, resizeJPanelHeight));
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            String outputFigurePath = outPutPath + FILE_SEPARATOR + "TIC" + imageType.getExtension();
+            exportFigure(chart, outputFigurePath);
+        }
+
+        formWindowClosing(null);
+
+    }
+
+    /**
      * Import results file
      */
     private void importFile() throws IOException {
@@ -483,7 +595,7 @@ public class PDVCLIMainClass extends JFrame {
 
             processSpectrumFile();
 
-            PepXMLImport pepXMLImport = new PepXMLImport(spectrumFile.getName(), idFile, spectrumIdAndNumber, spectrumFileType);
+            PepXMLImport pepXMLImport = new PepXMLImport(spectrumFile.getName(), idFile, spectrumsFileFactory, spectrumIdAndNumber, spectrumFileType);
 
             spectrumMatchesMap = pepXMLImport.getSpectrumMatchesMap();
 
@@ -664,8 +776,8 @@ public class PDVCLIMainClass extends JFrame {
 
         resizeJPanelWidth = Math.toIntExact(Math.round(resizeJPanel.getPreferredSize().getWidth()));
         resizeJPanelHeight = Math.toIntExact(Math.round(resizeJPanel.getPreferredSize().getHeight()));
-        if (resizeJPanelWidth < 200) {
-            System.err.println("WARNING!\n The width must be bigger than 200 pixels or " + 200 / Toolkit.getDefaultToolkit().getScreenResolution() + " inch.");
+        if (resizeJPanelWidth <= 200 || resizeJPanelHeight <= 200) {
+            System.err.println("WARNING!\n Please set bigger size!" );
         } else {
 
             spectrumSplitPane.setBounds(0, 0, resizeJPanelWidth, resizeJPanelHeight);
@@ -793,7 +905,7 @@ public class PDVCLIMainClass extends JFrame {
                     spectrumPanel.setFont(new Font("Arial", Font.PLAIN, 13));
                     spectrumPanel.setDataPointAndLineColor(utilitiesUserPreferences.getSpectrumAnnotatedPeakColor(), 0);
                     spectrumPanel.setPeakWaterMarkColor(utilitiesUserPreferences.getSpectrumBackgroundPeakColor());
-                    spectrumPanel.setPeakWidth(peahWidth);
+                    spectrumPanel.setPeakWidth(peakWidth);
                     spectrumPanel.setBackgroundPeakWidth(utilitiesUserPreferences.getSpectrumBackgroundPeakWidth());
 
                     Peptide currentPeptide = tempPeptideAssumption.getPeptide();
@@ -867,7 +979,22 @@ public class PDVCLIMainClass extends JFrame {
     private void exportFigure(Component graphicsPanel, String finalSelectedFile){
 
         try {
-            Export.exportComponent(graphicsPanel, graphicsPanel.getBounds(), new File(finalSelectedFile), imageType);
+            Export.exportPic(graphicsPanel, graphicsPanel.getBounds(), new File(finalSelectedFile), imageType);
+        } catch (IOException | TranscoderException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Export chart
+     * @param chart chart
+     * @param finalSelectedFile pic file path
+     */
+    private void exportFigure(JFreeChart chart, String finalSelectedFile){
+
+        try {
+            Export.exportPic(chart, spectrumSplitPane.getBounds(), new File(finalSelectedFile), imageType);
         } catch (IOException | TranscoderException e) {
             e.printStackTrace();
         }

@@ -36,6 +36,10 @@ public class TICPanel extends JPanel{
      * Parent class
      */
     private MSDataDisplay msDataDisplay;
+    /**
+     * Chart panel
+     */
+    private ChartPanel chartPanel;
 
     /**
      * Constructor
@@ -69,14 +73,14 @@ public class TICPanel extends JPanel{
 
         XYDataset xyDataset = creatMultiXYDataset(nameToKeyToRtAndInt, mode, topNum);
 
-        JFreeChart chart = ChartFactory.createXYLineChart(spectrumFileName,"Elution Time","Intensity (10^" + (topNum.toString().length() - 1) +")", xyDataset, PlotOrientation.VERTICAL,true,false,false);
+        JFreeChart chart = ChartFactory.createXYLineChart("TIC","Elution Time","Intensity (10^" + (topNum.toString().length() - 1) +")", xyDataset, PlotOrientation.VERTICAL,true,false,false);
         ChartUtils.setAntiAlias(chart);
         ChartUtils.setLineRender(chart.getXYPlot());
         chart.getLegend().setFrame(new BlockBorder(Color.WHITE));
 
         viewJPanel.removeAll();
 
-        ChartPanel chartPanel = new LineChart(msDataDisplay, chart);
+        chartPanel = new LineChart(msDataDisplay, chart);
 
         GroupLayout viewJPanelLayout = new GroupLayout(viewJPanel);
         viewJPanel.setLayout(viewJPanelLayout);
@@ -97,6 +101,15 @@ public class TICPanel extends JPanel{
 
         viewJPanel.revalidate();
         viewJPanel.repaint();
+    }
+
+    /**
+     * Get chart panel
+     * @return Chartpanel
+     */
+    public ChartPanel getChartPanel(){
+
+        return chartPanel;
     }
 
     /**
@@ -130,7 +143,7 @@ public class TICPanel extends JPanel{
 
         XYDataset xyDataset = creatXYDataset(keyToRtAndInt, mode, topNum);
 
-        JFreeChart chart = ChartFactory.createXYLineChart(spectrumFileName,"Elution Time","Intensity (10^" + (topNum.toString().length() - 1) + ")", xyDataset, PlotOrientation.VERTICAL,true,false,false);
+        JFreeChart chart = ChartFactory.createXYLineChart("TIC","Elution Time","Intensity (10^" + (topNum.toString().length() - 1) + ")", xyDataset, PlotOrientation.VERTICAL,true,false,false);
         ChartUtils.setAntiAlias(chart);
         ChartUtils.setLineRender(chart.getXYPlot());
         chart.getLegend().setFrame(new BlockBorder(Color.WHITE));

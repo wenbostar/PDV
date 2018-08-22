@@ -21,23 +21,11 @@ import java.util.HashMap;
  * Created by Ken on 9/12/2017.
  */
 public class SpectrumLibrarySplibImport {
-
-    /**
-     * Spectrum library path
-     */
-    private File splibFileDirectory;
+    
     /**
      * SPTXT file
      */
     private File sptxtFile;
-    /**
-     * SPLIB file
-     */
-    private File splibFile;
-    /**
-     * PEPID file
-     */
-    private File pepIdFile;
     /**
      * Database connection
      */
@@ -69,22 +57,20 @@ public class SpectrumLibrarySplibImport {
 
     /**
      * Constructor
-     * @param splibFileDirectory Spectrum library file path
+     * @param sptxtFile Spectrum library file path
      * @param spectrumLibDisplay Parent class
      * @param progressDialog Progress dialog
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public SpectrumLibrarySplibImport(File splibFileDirectory, SpectrumLibDisplay spectrumLibDisplay, ProgressDialogX progressDialog)
+    public SpectrumLibrarySplibImport(File sptxtFile, SpectrumLibDisplay spectrumLibDisplay, ProgressDialogX progressDialog)
             throws SQLException, ClassNotFoundException {
 
-        this.splibFileDirectory = splibFileDirectory;
+        this.sptxtFile = sptxtFile;
         this.spectrumLibDisplay = spectrumLibDisplay;
         this.progressDialog = progressDialog;
-
-        getAllFiles();
-
-        dbName = splibFileDirectory+"/"+ sptxtFile.getName()+".db";
+        
+        dbName = sptxtFile.getAbsolutePath() +".db";
 
         File dbFile = new File(dbName);
         File dbJournalFile = new File(dbName + "-journal");
@@ -120,25 +106,7 @@ public class SpectrumLibrarySplibImport {
     public String getDbName(){
         return dbName;
     }
-
-    /**
-     * Get all files in result folder
-     */
-    private void getAllFiles(){
-        if(splibFileDirectory.isDirectory() && splibFileDirectory.listFiles() != null){
-            for (File file : splibFileDirectory.listFiles()){
-                String fileName = file.getName();
-                if(fileName.contains("pepidx")){
-                    this.pepIdFile = file;
-                } else if (fileName.contains("splib")){
-                    this.splibFile = file;
-                } else if (fileName.contains("sptxt")){
-                    this.sptxtFile = file;
-                }
-            }
-        }
-    }
-
+    
     /**
      * Parsing file
      * @throws IOException

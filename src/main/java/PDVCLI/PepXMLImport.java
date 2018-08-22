@@ -8,6 +8,7 @@ import com.compomics.util.experiment.identification.matches.SpectrumMatch;
 import com.compomics.util.experiment.identification.spectrum_assumptions.PeptideAssumption;
 import com.compomics.util.experiment.massspectrometry.Charge;
 import com.compomics.util.experiment.massspectrometry.Spectrum;
+import com.compomics.util.experiment.massspectrometry.SpectrumFactory;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -65,6 +66,10 @@ public class PepXMLImport {
      */
     private HashMap<String, Integer> spectrumIdAndNumber;
     /**
+     * Spectrum xmlPullParserFactory
+     */
+    private Object spectrumFactory;
+    /**
      * Spectrum type
      */
     private Integer spectrumFileType;
@@ -74,11 +79,12 @@ public class PepXMLImport {
      * @param spectrumFileName spectrumFile name
      * @param pepXMLFile pepXML file
      */
-    public PepXMLImport(String spectrumFileName, File pepXMLFile, HashMap<String, Integer> spectrumIdAndNumber, Integer spectrumFileType) {
+    public PepXMLImport(String spectrumFileName, File pepXMLFile, Object spectrumFactory, HashMap<String, Integer> spectrumIdAndNumber, Integer spectrumFileType) {
         this.spectrumFileName = spectrumFileName;
         this.pepXMLFile = pepXMLFile;
         this.spectrumIdAndNumber = spectrumIdAndNumber;
         this.spectrumFileType = spectrumFileType;
+        this.spectrumFactory = spectrumFactory;
 
         try {
             importFile();
@@ -113,6 +119,8 @@ public class PepXMLImport {
             SpectrumMatch currentMatch = null;
             Integer currentCharge = null;
             String scanNum = null;
+            String searchEngine = "";
+            String spectrumMatchKey = "";
 
             modifMassToMassDif = new HashMap<>();
 
@@ -121,6 +129,13 @@ public class PepXMLImport {
                 String tagName = xmlPullParser.getName();
 
                 if (tagNum == XmlPullParser.START_TAG && tagName.equals("search_summary")) {
+
+                    for (int i = 0; i < xmlPullParser.getAttributeCount(); i++) {
+                        String name = xmlPullParser.getAttributeName(i);
+                        if (name.equals("search_engine")) {
+                            searchEngine = xmlPullParser.getAttributeValue(i);
+                        }
+                    }
 
                     int xmlType;
 
@@ -323,7 +338,7 @@ public class PepXMLImport {
                                 throw new IllegalArgumentException("An error occurred while parsing index " + value + ". Integer expected.");
                             }
                         } else if (name.equals("spectrumNativeID")) {
-                            spectrumNativeID = xmlPullParser.getAttributeValue(i);
+                            spectrumNativeID = xmlPullParser.getAttributeValue(i).trim();
                         } else if (name.equals("start_scan")) {
                             scanNum = xmlPullParser.getAttributeValue(i);
                         }
@@ -348,11 +363,31 @@ public class PepXMLImport {
                     SpectrumMatch spectrumMatch;
 
                     if (spectrumFileType == 1){
+                        SpectrumFactory curerntSpectrumFactory = (SpectrumFactory) spectrumFactory;
+                        if (searchEngine.toLowerCase().contains("crux")){
+                            spectrumTitle = curerntSpectrumFactory.getSpectrumTitle(spectrumFileName, Integer.parseInt(scanNum));
+                        } else if (searchEngine.toLowerCase().contains("myrimatch")){
+                            spectrumTitle = curerntSpectrumFactory.getSpectrumTitle(spectrumFileName, Integer.parseInt(scanNum) + 1);
+                        }
+                        spectrumMatchKey = spectrumTitle;
                         spectrumMatch = new SpectrumMatch(Spectrum.getSpectrumKey(spectrumFileName, spectrumTitle));
                     } else if (spectrumFileType == 2){
+                        if (spectrumNativeID == null){
+                            if (searchEngine.toLowerCase().contains("mascot")){ // scan number is wrong
+                                spectrumNativeID = spectrumTitle;
+                                spectrumMatchKey = spectrumNativeID.split("scan=")[1];
+                            } else {
+                                spectrumMatchKey = scanNum;
+                                spectrumNativeID = "controllerType=0 controllerNumber=1 scan=" + scanNum;
+                            }
+                        } else {
+                            spectrumMatchKey = spectrumNativeID.split("scan=")[1];
+                        }
                         spectrumIndex = spectrumIdAndNumber.get(spectrumNativeID);
+
                         spectrumMatch = new SpectrumMatch(Spectrum.getSpectrumKey(spectrumFileName, String.valueOf(spectrumIndex - 1)));
                     } else {
+                        spectrumMatchKey = scanNum;
                         spectrumMatch = new SpectrumMatch(Spectrum.getSpectrumKey(spectrumFileName, String.valueOf(spectrumIndex - 1)));
                     }
 
@@ -360,7 +395,7 @@ public class PepXMLImport {
 
                     currentMatch = spectrumMatch;
 
-                    SpectrumMatch previousMatch = spectrumMatchesMap.get(scanNum);
+                    SpectrumMatch previousMatch = spectrumMatchesMap.get(spectrumMatchKey);
                     if (previousMatch != null) {
                         currentMatch = previousMatch;
                     }
@@ -389,73 +424,43 @@ public class PepXMLImport {
                     Peptide peptide = peptideAssumption.getPeptide();
                     String peptideSequence = peptide.getSequence();
                     hasMatch = true;
-                    boolean found = false;
                     if (first == 1) {
                         currentMatch.setBestPeptideAssumption(peptideAssumption);
                     }
 
-                    if (currentMatch.getAllAssumptions() != null) {
-                        for (SpectrumIdentificationAssumption tempAssumption : currentMatch.getAllAssumptions()) {
-                            PeptideAssumption tempPeptideAssumption = (PeptideAssumption) tempAssumption;
-                            Peptide tempPeptide = tempPeptideAssumption.getPeptide();
-                            if (peptide.getSequence().equals(tempPeptide.getSequence())) {
-                                boolean sameModifications = peptide.getNModifications() == tempPeptide.getNModifications();
-                                if (sameModifications && peptide.isModified()) {
-                                    for (ModificationMatch originalMatch : peptide.getModificationMatches()) {
-                                        boolean ptmFound = false;
-                                        for (ModificationMatch otherMatch : tempPeptide.getModificationMatches()) {
-                                            if (originalMatch.getTheoreticPtm().equals(otherMatch.getTheoreticPtm()) && originalMatch.getModificationSite() == otherMatch.getModificationSite()) {
-                                                ptmFound = true;
-                                                break;
-                                            }
-                                        }
-                                        if (!ptmFound) {
-                                            sameModifications = false;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (sameModifications) {
-                                    found = true;
-                                    break;
-                                }
-                            }
+                    if (AminoAcidSequence.hasCombination(peptideSequence)) {
+                        ArrayList<ModificationMatch> previousModificationMatchList = peptide.getModificationMatches(),
+                                newModificationMatchList = null;
+                        if (previousModificationMatchList != null) {
+                            newModificationMatchList = new ArrayList<>(previousModificationMatchList.size());
                         }
-                    }
-                    if (!found) {
-
-                        if (AminoAcidSequence.hasCombination(peptideSequence)) {
-                            ArrayList<ModificationMatch> previousModificationMatchList = peptide.getModificationMatches(),
-                                    newModificationMatchList = null;
+                        for (StringBuilder expandedSequence : AminoAcidSequence.getCombinations(peptide.getSequence())) {
+                            Peptide newPeptide = new Peptide(expandedSequence.toString(), newModificationMatchList);
                             if (previousModificationMatchList != null) {
-                                newModificationMatchList = new ArrayList<>(previousModificationMatchList.size());
-                            }
-                            for (StringBuilder expandedSequence : AminoAcidSequence.getCombinations(peptide.getSequence())) {
-                                Peptide newPeptide = new Peptide(expandedSequence.toString(), newModificationMatchList);
-                                if (previousModificationMatchList != null) {
-                                    for (ModificationMatch modificationMatch : previousModificationMatchList) {
-                                        newPeptide.addModificationMatch(new ModificationMatch(modificationMatch.getTheoreticPtm(),
-                                                modificationMatch.isVariable(), modificationMatch.getModificationSite()));
-                                    }
+                                for (ModificationMatch modificationMatch : previousModificationMatchList) {
+                                    newPeptide.addModificationMatch(new ModificationMatch(modificationMatch.getTheoreticPtm(),
+                                            modificationMatch.isVariable(), modificationMatch.getModificationSite()));
                                 }
-                                PeptideAssumption newAssumption = new PeptideAssumption(newPeptide, peptideAssumption.getRank(),
-                                        1, peptideAssumption.getIdentificationCharge(),
-                                        peptideAssumption.getScore(), peptideAssumption.getIdentificationFile());
-                                currentMatch.addHit(1, newAssumption, false);
-
                             }
-                        } else {
-                            currentMatch.addHit(1, peptideAssumption, false);
-                        }
-                    }
+                            PeptideAssumption newAssumption = new PeptideAssumption(newPeptide, peptideAssumption.getRank(),
+                                    peptideAssumption.getAdvocate(), peptideAssumption.getIdentificationCharge(),
+                                    peptideAssumption.getScore(), peptideAssumption.getIdentificationFile());
+                            currentMatch.addHit(1, newAssumption, false);
 
+                        }
+                    } else {
+                        currentMatch.addHit(1, peptideAssumption, false);
+                    }
                 }
+
                 if (tagNum == XmlPullParser.END_TAG && tagName.equals("spectrum_query")) {
 
                     if (hasMatch) {
-                        String key = String.valueOf(currentMatch.getSpectrumNumber());
-                        if (!spectrumMatchesMap.containsKey(key)) {
-                            spectrumMatchesMap.put(key, currentMatch);
+
+                        //spectrumFileName
+
+                        if (!spectrumMatchesMap.containsKey(spectrumMatchKey)) {
+                            spectrumMatchesMap.put(spectrumMatchKey, currentMatch);
                         }
 
                         hasMatch = false;

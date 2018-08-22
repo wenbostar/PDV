@@ -166,7 +166,7 @@ public class CheckPeptideJDialog extends JDialog {
         );
 
         setJButton.setEnabled(false);
-        setJButton.setText("Set Peptide");
+        setJButton.setText("Add");
         setJButton.setFont(new Font("Lucida", Font.BOLD, 12));
         setJButton.addActionListener(this::setJButtonActionPerformed);
 

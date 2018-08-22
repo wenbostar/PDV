@@ -101,7 +101,7 @@ public class DeNovoFileImport {
 
         sqLiteConnection = new SQLiteConnection(dbName);
 
-        sqLiteConnection.setScoreNum(0);
+        sqLiteConnection.setScoreNum(1);
 
         new Thread("DisplayThread") {
             @Override
@@ -126,7 +126,7 @@ public class DeNovoFileImport {
         connection.setAutoCommit(false);
         Statement statement = connection.createStatement();
 
-        String addTableQuery = "CREATE TABLE SpectrumMatch (PSMIndex INT(10), MZ DOUBLE, Title Char, Sequence Char, MassError DOUBLE, Match Object, PRIMARY KEY(PSMIndex))";
+        String addTableQuery = "CREATE TABLE SpectrumMatch (PSMIndex INT(10), MZ DOUBLE, Title Char, Sequence Char, MassError DOUBLE, Match Object, Score DOUBLE, PRIMARY KEY(PSMIndex))";
         try {
             statement.execute(addTableQuery);
         }catch (SQLException e){
@@ -137,54 +137,57 @@ public class DeNovoFileImport {
             statement.close();
         }
 
-        String addDataIntoTable = "INSERT INTO SpectrumMatch VALUES(?,?,?,?,?,?)";
+        String addDataIntoTable = "INSERT INTO SpectrumMatch VALUES(?,?,?,?,?,?,?)";
 
         PreparedStatement preparedStatement = null;
 
         IdfileReader idfileReader = IdfileReaderFactory.getInstance().getFileReader(resultFile);
 
-        HashMap<String, ArrayList<String>> softs = idfileReader.getSoftwareVersions();
+        if (idfileReader.getSoftwareVersions() != null) {
 
-        if (softs.keySet().contains("DirecTag")){
-            DirecTagIdfileReader direcTagIdfileReader = (DirecTagIdfileReader) idfileReader;
+            HashMap<String, ArrayList<String>> softs = idfileReader.getSoftwareVersions();
 
-            String dynamicMods = direcTagIdfileReader.getTagParameter("DynamicMods");
+            if (softs.keySet().contains("DirecTag")) {
+                DirecTagIdfileReader direcTagIdfileReader = (DirecTagIdfileReader) idfileReader;
 
-            String[] modItems = dynamicMods.split(" ");
+                String dynamicMods = direcTagIdfileReader.getTagParameter("DynamicMods");
 
-            int countRe = 0;
-            String residue = "";
-            Double mass;
-            HashMap<Double, String> massToName;
+                String[] modItems = dynamicMods.split(" ");
 
-            ArrayList<String> modificationName = new ArrayList<>();
+                int countRe = 0;
+                String residue = "";
+                Double mass;
+                HashMap<Double, String> massToName;
 
-            for (String eachItem : modItems){
+                ArrayList<String> modificationName = new ArrayList<>();
 
-                countRe ++;
+                for (String eachItem : modItems) {
 
-                if (countRe % 3 == 1){
-                    residue = eachItem;
-                } else if (countRe % 3 == 0){
-                    mass = Double.valueOf(eachItem);
+                    countRe++;
 
-                    massToName = modificationMassMap.get(residue);
+                    if (countRe % 3 == 1) {
+                        residue = eachItem;
+                    } else if (countRe % 3 == 0) {
+                        mass = Double.valueOf(eachItem);
 
-                    for (Double eachMass : massToName.keySet()){
-                        if (Math.abs(eachMass - mass) < 0.005){
-                            if (!massToName.get(eachMass).contains("term")) {
-                                modificationName.add(massToName.get(eachMass));
+                        massToName = modificationMassMap.get(residue);
+
+                        for (Double eachMass : massToName.keySet()) {
+                            if (Math.abs(eachMass - mass) < 0.005) {
+                                if (!massToName.get(eachMass).contains("term")) {
+                                    modificationName.add(massToName.get(eachMass));
+                                }
                             }
                         }
                     }
                 }
+
+                DirecTagParameters direcTagParameters = new DirecTagParameters();
+
+                direcTagParameters.setPtms(modificationName);
+
+                searchParameters.setIdentificationAlgorithmParameter(Advocate.direcTag.getIndex(), direcTagParameters);
             }
-
-            DirecTagParameters direcTagParameters = new DirecTagParameters();
-
-            direcTagParameters.setPtms(modificationName);
-
-            searchParameters.setIdentificationAlgorithmParameter(Advocate.direcTag.getIndex(), direcTagParameters);
         }
 
         LinkedList<SpectrumMatch> spectrumMatches = idfileReader.getAllSpectrumMatches(null, searchParameters);
@@ -247,6 +250,7 @@ public class DeNovoFileImport {
                             bos.close();
                         }
                         preparedStatement.setBytes(6, bos.toByteArray());
+                        preparedStatement.setDouble(7, peptideAssumption.getScore());
 
                         preparedStatement.addBatch();
 
@@ -282,6 +286,7 @@ public class DeNovoFileImport {
                             bos.close();
                         }
                         preparedStatement.setBytes(6, bos.toByteArray());
+                        preparedStatement.setDouble(7, tagAssumption.getScore());
 
                         preparedStatement.addBatch();
 

@@ -18,6 +18,7 @@ import umich.ms.fileio.exceptions.FileParsingException;
 import umich.ms.fileio.filetypes.mzidentml.MzIdentMLParser;
 import umich.ms.fileio.filetypes.mzidentml.jaxb.standard.MzIdentMLType;
 import umich.ms.fileio.filetypes.mzml.MZMLFile;
+import umich.ms.fileio.filetypes.mzml.MZMLIndexElement;
 import umich.ms.fileio.filetypes.mzxml.MZXMLFile;
 
 import javax.swing.*;
@@ -28,6 +29,8 @@ import java.awt.event.*;
 import java.io.*;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -77,7 +80,7 @@ public class ProBamImportDialog extends JDialog{
     /**
      * MS2 ion tolerance
      */
-    private Double fragmentIonMZTolerance = 0.5;
+    private Double fragmentIonMZTolerance = 0.05;
     /**
      * Parent frame
      */
@@ -110,6 +113,10 @@ public class ProBamImportDialog extends JDialog{
      * Check if all identification imported done or not
      */
     private int mzIdentMLCheck = 0;
+    /**
+     * Spectrum ID to spectrum number
+     */
+    private HashMap<String, Integer> spectrumIdAndNumber = new HashMap<>();
 
     /**
      * New dialog constructor
@@ -135,7 +142,7 @@ public class ProBamImportDialog extends JDialog{
         initComponents();
         this.precursorIonUnit.setEnabled(true);
         this.precursorIonUnit.setRenderer(new AlignedListCellRenderer(0));
-        fragmentIonAccuracyTxt.setText(String.valueOf(0.5));
+        fragmentIonAccuracyTxt.setText(String.valueOf(0.05));
         settingsComboBox.setRenderer(new AlignedListCellRenderer(SwingConstants.CENTER));
         fileTypeCombox.setRenderer(new AlignedListCellRenderer(SwingConstants.CENTER));
         proGenomicsFileTxt.setText( "No selected");
@@ -694,6 +701,8 @@ public class ProBamImportDialog extends JDialog{
 
                 }else if(spectrumFileType.equals("mzml")){
 
+                    Integer threads = Runtime.getRuntime().availableProcessors();
+
                     MZMLFile mzmlFile = new MZMLFile(spectrumFile.getAbsolutePath());
 
                     ScanCollectionDefault scans = new ScanCollectionDefault();
@@ -704,7 +713,7 @@ public class ProBamImportDialog extends JDialog{
 
                     scans.setDataSource(mzmlFile);
 
-                    mzmlFile.setNumThreadsForParsing(null);
+                    mzmlFile.setNumThreadsForParsing(threads);
 
                     try {
                         scans.loadData(LCMSDataSubset.MS2_WITH_SPECTRA);
@@ -715,7 +724,16 @@ public class ProBamImportDialog extends JDialog{
                         System.exit(1);
                     }
 
+                    Map<String, MZMLIndexElement> idMap = mzmlFile.getIndex().getMapById();
+
+                    for (String id : idMap.keySet()){
+                        MZMLIndexElement mzmlIndexElement = idMap.get(id);
+
+                        spectrumIdAndNumber.put(id, mzmlIndexElement.getNumber());
+                    }
+
                     spectrumsFileFactory = scans;
+
                 }else if(spectrumFileType.equals("mzxml")){
                     MzXMLScanImport mzXMLScanImport = new MzXMLScanImport(spectrumFile.getAbsolutePath());
 
@@ -731,7 +749,7 @@ public class ProBamImportDialog extends JDialog{
 
                             progressDialog.setRunFinished();
 
-                            pdvMainClass.importProBedFile(proGenomicsFile, spectrumFileType, spectrumsFileFactory, mzIdentMLType);
+                            pdvMainClass.importProBedFile(proGenomicsFile, spectrumFileType, spectrumsFileFactory, mzIdentMLType, spectrumIdAndNumber);
 
                             mzIDFile = null;
 

@@ -118,6 +118,7 @@ public class PrideXMLImportDialog {
                     progressDialog.setRunFinished();
                 } catch (Exception e){
                     e.printStackTrace();
+                    JOptionPane.showMessageDialog(prideXMLDisplay, e.getMessage(), "File Error", JOptionPane.WARNING_MESSAGE);
                     progressDialog.setRunFinished();
                 }
             }

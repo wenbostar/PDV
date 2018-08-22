@@ -181,29 +181,30 @@ public class ProteoQCParaJDialog extends JDialog {
         JPanel inputFileJPanel = new JPanel();
         JPanel outputJPanel = new JPanel();
         JPanel parameterJPanel = new JPanel();
-        JSplitPane paraSplitPane = new JSplitPane();
+        JPanel variableModsPanel = new JPanel();
+        JPanel fixedModsPanel = new JPanel();
+        JPanel availableModsPanel = new JPanel();
         JPanel firstParaJPanel = new JPanel();
         JPanel secondParaJPanel = new JPanel();
-        JButton spectralListFileJButton = new JButton();
-        JButton fastaFileJButton = new JButton();
-        JButton outdirJButton = new JButton();
         JLabel modeJLabel = new JLabel();
         JLabel cpuJLabel = new JLabel();
         JLabel xmxJLabel = new JLabel();
         JLabel refineJLabel = new JLabel();
         JLabel nttJLabel = new JLabel();
-        JPanel variableModsPanel = new JPanel();
-        JPanel fixedModsPanel = new JPanel();
-        JPanel availableModsPanel = new JPanel();
+        JLabel openProteoQCLinkJLabel = new JLabel();
+        JLabel fixedModificationsLabel = new JLabel();
+        JLabel variableModificationsLabel = new JLabel();
         JSplitPane modificationTypesSplitPane = new JSplitPane();
         JSplitPane modsSplitPane = new JSplitPane();
+        JSplitPane paraSplitPane = new JSplitPane();
         JScrollPane modificationsJScrollPane = new JScrollPane();
         JScrollPane fixedModsJScrollPane = new JScrollPane();
         JScrollPane variableModsJScrollPane = new JScrollPane();
-        JLabel fixedModificationsLabel = new JLabel();
-        JLabel variableModificationsLabel = new JLabel();
         JButton addFixedModification = new JButton();
         JButton addVariableModification = new JButton();
+        JButton spectralListFileJButton = new JButton();
+        JButton fastaFileJButton = new JButton();
+        JButton outdirJButton = new JButton();
         
         spectralListFileJText = new JTextField();
         fastaFileJText = new JTextField();
@@ -252,7 +253,7 @@ public class ProteoQCParaJDialog extends JDialog {
         inputFileJPanel.setOpaque(false);
 
         spectralListFileJLabel.setText("List File *");
-        spectralListFileJLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+        spectralListFileJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         spectralListFileJLabel.setForeground(new Color(255, 0, 0));
         spectralListFileJLabel.setToolTipText("A file contains the experiment design or a single mgf file");
 
@@ -267,7 +268,7 @@ public class ProteoQCParaJDialog extends JDialog {
         spectralListFileJButton.addActionListener(this::spectralListFileJButtonActionPerformed);
 
         fastaFileJLabel.setText("Fasta File *");
-        fastaFileJLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+        fastaFileJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         fastaFileJLabel.setForeground(new Color(255, 0, 0));
         fastaFileJLabel.setToolTipText("database file, must contain decoy sequences");
 
@@ -318,7 +319,7 @@ public class ProteoQCParaJDialog extends JDialog {
         outputJPanel.setOpaque(false);
         
         outdirJLabel.setText("Output Path *");
-        outdirJLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+        outdirJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         outdirJLabel.setForeground(new Color(255, 0, 0));
         outdirJLabel.setToolTipText("output directory");
 
@@ -648,7 +649,7 @@ public class ProteoQCParaJDialog extends JDialog {
         nttJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         nttJLabel.setToolTipText("Semi-tryptic, 1; fully-tryptic, 2.");
 
-        nttJCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Semi-tryptic", "fully-tryptic" }));
+        nttJCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "semi-tryptic", "fully-tryptic" }));
         nttJCombo.setBackground(Color.WHITE);
         nttJCombo.setOpaque(false);
         nttJCombo.setToolTipText("Semi-tryptic, 1; fully-tryptic, 2.");
@@ -664,26 +665,26 @@ public class ProteoQCParaJDialog extends JDialog {
                                 .addGap(10,10,10)
                                 .addGroup(firstParaJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addGroup(firstParaJPanelLayout.createSequentialGroup()
-                                                .addComponent(tolJLabel, 20, 20, 70)
-                                                .addComponent(tolJText, 20, 20, 35)
+                                                .addComponent(tolJLabel, 30, 30, 30)
+                                                .addComponent(tolJText, 35, 35, 40)
                                                 .addGap(5,5,5)
-                                                .addComponent(toluJCombo, 20, 60, 70))
+                                                .addComponent(toluJCombo, 70, 70, Short.MAX_VALUE))
                                         .addGroup(firstParaJPanelLayout.createSequentialGroup()
-                                                .addComponent(itolJLabel, 20, 20, 70)
-                                                .addComponent(itolJText, 20, 20, 35)
+                                                .addComponent(itolJLabel, 30, 30, 30)
+                                                .addComponent(itolJText, 35, 35, 40)
                                                 .addGap(5,5,5)
-                                                .addComponent(itoluJCombo, 20, 60, 70))
+                                                .addComponent(itoluJCombo, 70, 70, Short.MAX_VALUE))
                                         .addGroup(firstParaJPanelLayout.createSequentialGroup()
-                                                .addComponent(refineJLabel, GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
-                                                .addComponent(refineJCombo, 20, 20, 100)))
-                                .addGap(10,10,10)
+                                                .addComponent(refineJLabel, GroupLayout.DEFAULT_SIZE, 40, 100)
+                                                .addComponent(refineJCombo, 70, 70, Short.MAX_VALUE)))
+                                .addGap(5,10,10)
                                 .addGroup(firstParaJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addGroup(firstParaJPanelLayout.createSequentialGroup()
-                                                .addComponent(nttJLabel, GroupLayout.DEFAULT_SIZE, 20, 50)
-                                                .addComponent(nttJCombo, GroupLayout.DEFAULT_SIZE, 100, 100))
+                                                .addComponent(nttJLabel, GroupLayout.DEFAULT_SIZE, 20, 35)
+                                                .addComponent(nttJCombo, 110, 110, Short.MAX_VALUE))
                                         .addGroup(firstParaJPanelLayout.createSequentialGroup()
-                                                .addComponent(modeJLabel, GroupLayout.DEFAULT_SIZE, 20, 50)
-                                                .addComponent(modeJCombo, GroupLayout.DEFAULT_SIZE, 100, 100)))
+                                                .addComponent(modeJLabel, GroupLayout.DEFAULT_SIZE, 20, 35)
+                                                .addComponent(modeJCombo, 110, 110, Short.MAX_VALUE)))
                                 .addGap(10,10,10))
 
         );
@@ -840,6 +841,29 @@ public class ProteoQCParaJDialog extends JDialog {
                                 )
         );
 
+        openProteoQCLinkJLabel.setFont(new Font("Arial", Font.ITALIC, 11));
+        openProteoQCLinkJLabel.setText("<html><u><a href=\"http://www.bioconductor.org/packages/release/bioc/html/proteoQC.html\">Click to see how to use ProteoQC</a></u></html>");
+        openProteoQCLinkJLabel.setToolTipText("http://www.bioconductor.org/packages/release/bioc/html/proteoQC.html");
+        openProteoQCLinkJLabel.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent evt) {
+                openProteoQCLinkJButtonMouseEntered(evt);
+            }
+
+            public void mouseClicked(MouseEvent e) {
+                try {
+                    Desktop.getDesktop().browse(
+                            new java.net.URI("http://www.bioconductor.org/packages/release/bioc/html/proteoQC.html"));
+                } catch (Exception ex) {
+                }
+            }
+
+        });
+        openProteoQCLinkJLabel.addMouseListener(new MouseAdapter() {
+            public void mouseExited(MouseEvent evt) {
+                openProteoQCLinkJButtonMouseExited(evt);
+            }
+        });
+
         startJButton.setBackground(Color.green);
         startJButton.setFont(new Font("Lucida", Font.BOLD, 13));
         startJButton.setText("Start");
@@ -854,11 +878,14 @@ public class ProteoQCParaJDialog extends JDialog {
                 mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(mainJPanelLayout.createSequentialGroup()
                                 .addContainerGap()
-                                .addGroup(mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                                .addGroup(mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addComponent(inputFileJPanel)
                                         .addComponent(outputJPanel)
                                         .addComponent(parameterJPanel)
-                                                .addComponent(startJButton)
+                                        .addGroup(mainJPanelLayout.createSequentialGroup()
+                                                .addComponent(openProteoQCLinkJLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                .addGap(5, 50, Short.MAX_VALUE)
+                                                .addComponent(startJButton))
                                         )
                                 .addContainerGap())
         );
@@ -870,7 +897,9 @@ public class ProteoQCParaJDialog extends JDialog {
                                 .addComponent(inputFileJPanel)
                                 .addComponent(outputJPanel)
                                 .addComponent(parameterJPanel)
-                                .addComponent(startJButton)
+                                .addGroup(mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                                        .addComponent(openProteoQCLinkJLabel)
+                                        .addComponent(startJButton))
                                 .addContainerGap())
         );
 
@@ -955,6 +984,22 @@ public class ProteoQCParaJDialog extends JDialog {
         if(waitingDialog.isRunCanceled()){
             proteoQCCMD.cancel(true);
         }
+    }
+
+    /**
+     * Change the mouse into hand
+     * @param evt
+     */
+    private void openProteoQCLinkJButtonMouseEntered(MouseEvent evt){
+        setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+    }
+
+    /**
+     * Change the mouse into default
+     * @param evt
+     */
+    private void openProteoQCLinkJButtonMouseExited(MouseEvent evt) {
+        setCursor(new java.awt.Cursor(Cursor.DEFAULT_CURSOR));
     }
 
     /**

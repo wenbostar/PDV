@@ -14,7 +14,6 @@ import com.compomics.util.gui.filehandling.FileDisplayDialog;
 import com.compomics.util.gui.renderers.AlignedListCellRenderer;
 import com.compomics.util.gui.waiting.waitinghandlers.ProgressDialogX;
 import umich.ms.datatypes.LCMSDataSubset;
-import umich.ms.datatypes.scan.IScan;
 import umich.ms.datatypes.scan.StorageStrategy;
 import umich.ms.datatypes.scancollection.impl.ScanCollectionDefault;
 import umich.ms.fileio.exceptions.FileParsingException;
@@ -30,7 +29,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.nio.file.Paths;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -48,6 +46,11 @@ public class DatabaseImportDialog extends JDialog {
     private JLabel fragmentIonJLable;
     private JComboBox precursorIonUnit;
     private JTextField fragmentIonAccuracyTxt;
+    private JLabel msAmandaJLable;
+    private JCheckBox msAmandaJChekBox;
+    private JPanel inputFilesPanel;
+    private JPanel annotationSettingJPanel;
+    private JPanel mainJPanel;
 
     /**
      * PTM factory import form utilities
@@ -88,7 +91,7 @@ public class DatabaseImportDialog extends JDialog {
     /**
      * MS2 ion tolerance
      */
-    private Double fragmentIonMZTolerance = 0.5;
+    private Double fragmentIonMZTolerance = 0.05;
     /**
      * MS2 ion tolerance type (ppm or dal)
      */
@@ -148,7 +151,7 @@ public class DatabaseImportDialog extends JDialog {
         initComponents();
         this.precursorIonUnit.setEnabled(true);
         this.precursorIonUnit.setRenderer(new AlignedListCellRenderer(0));
-        fragmentIonAccuracyTxt.setText(String.valueOf(0.5));
+        fragmentIonAccuracyTxt.setText(String.valueOf(0.05));
 
         settingsComboBox.setRenderer(new AlignedListCellRenderer(SwingConstants.CENTER));
         idFilesTxt.setText( "No selected");
@@ -171,9 +174,11 @@ public class DatabaseImportDialog extends JDialog {
         settingsComboBox = new JComboBox();
         idFilesLabel = new JLabel();
         idFilesTxt = new JTextField();
-        JPanel mainJPanel = new JPanel();
-        JPanel annotationSettingJPanel = new JPanel();
-        JPanel inputFilesPanel = new JPanel();
+        msAmandaJLable = new JLabel("Is MS Amanda? ");
+        msAmandaJChekBox = new JCheckBox();
+        annotationSettingJPanel = new JPanel();
+        inputFilesPanel = new JPanel();
+        mainJPanel = new JPanel();
         JButton browseIdJButton = new JButton();
         JButton browseSpectraJButton = new JButton();
 
@@ -250,7 +255,7 @@ public class DatabaseImportDialog extends JDialog {
 
         idFilesLabel.setForeground(new Color(255, 0, 0));
         idFilesLabel.setFont(new Font("Console", Font.PLAIN, 12));
-        idFilesLabel.setText("Results File*");
+        idFilesLabel.setText("Identification File*");
 
         idFilesTxt.setHorizontalAlignment(JTextField.CENTER);
 
@@ -600,12 +605,13 @@ public class DatabaseImportDialog extends JDialog {
                         ||myFile.getName().toLowerCase().endsWith(".pepxml")
                         ||myFile.getName().toLowerCase().endsWith(".txt")
                         ||myFile.getName().toLowerCase().endsWith(".xml")
+                        ||myFile.getName().toLowerCase().endsWith(".csv")
                         || myFile.isDirectory();
             }
 
             @Override
             public String getDescription() {
-                return "mzIdentML (.mzid), PepXML (.pepxml), New Id File (.txt)";
+                return "mzIdentML (.mzid), PepXML (.pepxml), Text File (.txt), MS Amanda (.csv, .txt)";
             }
         };
 
@@ -622,6 +628,35 @@ public class DatabaseImportDialog extends JDialog {
             idFilesTxt.setText(idFile.getName() + " selected");
 
             if(idFile.getName().toLowerCase().endsWith(".mzid")) {
+                mainJPanel.removeAll();
+                GroupLayout mainJPanelLayout = new GroupLayout(mainJPanel);
+                mainJPanel.setLayout(mainJPanelLayout);
+                mainJPanelLayout.setHorizontalGroup(
+                        mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                .addGroup(mainJPanelLayout.createSequentialGroup()
+                                        .addContainerGap()
+                                        .addGroup(mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                                .addGroup(mainJPanelLayout.createSequentialGroup()
+                                                        .addGap(150, 220, 500)
+                                                        .addComponent(startJButton, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
+                                                        .addGap(15, 15, 15))
+                                                .addComponent(inputFilesPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(annotationSettingJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addContainerGap())
+                );
+                mainJPanelLayout.setVerticalGroup(
+                        mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                .addGroup(mainJPanelLayout.createSequentialGroup()
+                                        .addContainerGap()
+                                        .addComponent(inputFilesPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(annotationSettingJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                        .addGroup(mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                                                .addComponent(startJButton, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
+                                        .addContainerGap())
+                );
+
                 Thread importIDThread = new Thread(new Runnable() {
                     public void run() {
                         try {
@@ -640,6 +675,84 @@ public class DatabaseImportDialog extends JDialog {
 
                 importIDThread.start();
             }else {
+                if (idFile.getName().toLowerCase().endsWith(".txt") || idFile.getName().toLowerCase().endsWith(".csv")){
+
+                    int value = JOptionPane.showConfirmDialog(this,
+                            "Is this file MS Amanda result file? ",
+                            "Kind of result file",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.QUESTION_MESSAGE);
+
+                    if (value == JOptionPane.YES_OPTION){
+                        msAmandaJChekBox.setSelected(true);
+                    } else if (value == JOptionPane.NO_OPTION){
+                        msAmandaJChekBox.setSelected(false);
+                    }
+
+                    GroupLayout mainJPanelLayout = new GroupLayout(mainJPanel);
+                    mainJPanel.setLayout(mainJPanelLayout);
+                    mainJPanelLayout.setHorizontalGroup(
+                            mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                    .addGroup(mainJPanelLayout.createSequentialGroup()
+                                            .addContainerGap()
+                                            .addGroup(mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                                    .addGroup(mainJPanelLayout.createSequentialGroup()
+                                                            .addGap(5,8,10)
+                                                            .addComponent(msAmandaJLable)
+                                                            .addGap(5,8,10)
+                                                            .addComponent(msAmandaJChekBox)
+                                                            .addGap(100, 220, 500)
+                                                            .addComponent(startJButton, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
+                                                            .addGap(15, 15, 15))
+                                                    .addComponent(inputFilesPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                    .addComponent(annotationSettingJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                            .addContainerGap())
+                    );
+                    mainJPanelLayout.setVerticalGroup(
+                            mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                    .addGroup(mainJPanelLayout.createSequentialGroup()
+                                            .addContainerGap()
+                                            .addComponent(inputFilesPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                            .addComponent(annotationSettingJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                            .addGroup(mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                                                    .addComponent(startJButton, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
+                                                    .addComponent(msAmandaJLable)
+                                                    .addComponent(msAmandaJChekBox))
+                                            .addContainerGap())
+                    );
+
+                } else {
+                    mainJPanel.removeAll();
+                    GroupLayout mainJPanelLayout = new GroupLayout(mainJPanel);
+                    mainJPanel.setLayout(mainJPanelLayout);
+                    mainJPanelLayout.setHorizontalGroup(
+                            mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                    .addGroup(mainJPanelLayout.createSequentialGroup()
+                                            .addContainerGap()
+                                            .addGroup(mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                                    .addGroup(mainJPanelLayout.createSequentialGroup()
+                                                            .addGap(150, 220, 500)
+                                                            .addComponent(startJButton, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
+                                                            .addGap(15, 15, 15))
+                                                    .addComponent(inputFilesPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                    .addComponent(annotationSettingJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                            .addContainerGap())
+                    );
+                    mainJPanelLayout.setVerticalGroup(
+                            mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                    .addGroup(mainJPanelLayout.createSequentialGroup()
+                                            .addContainerGap()
+                                            .addComponent(inputFilesPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                            .addComponent(annotationSettingJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                            .addGroup(mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                                                    .addComponent(startJButton, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
+                                            .addContainerGap())
+                    );
+                }
                 mzIdentMLCheck = 1;
             }
 
@@ -728,8 +841,13 @@ public class DatabaseImportDialog extends JDialog {
         }else if(idFile.getName().toLowerCase().endsWith("xml")){
             pdvMainClass.importFilePep(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType, spectrumIdAndNumber);
             idFile = null;
-        } else if(idFile.getName().toLowerCase().endsWith(".txt")){
-            pdvMainClass.importTextResults(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType);
+        } else if(idFile.getName().toLowerCase().endsWith(".txt") || idFile.getName().toLowerCase().endsWith(".csv")){
+
+            if (msAmandaJChekBox.isSelected()){
+                pdvMainClass.importMSAmandaResults(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType, spectrumIdAndNumber);
+            } else{
+                pdvMainClass.importTextResults(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType);
+            }
             idFile = null;
         } else {
             JOptionPane.showMessageDialog(pdvMainClass, JOptionEditorPane.getJOptionEditorPane(

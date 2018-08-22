@@ -12,6 +12,7 @@ import com.compomics.util.experiment.massspectrometry.Charge;
 import com.compomics.util.experiment.massspectrometry.Spectrum;
 import com.compomics.util.experiment.massspectrometry.SpectrumFactory;
 import com.compomics.util.gui.waiting.waitinghandlers.ProgressDialogX;
+import uk.ac.ebi.jmzidml.model.mzidml.PeptideEvidence;
 import umich.ms.fileio.filetypes.mzidentml.jaxb.standard.*;
 
 import javax.swing.*;
@@ -43,6 +44,10 @@ public class ProBedFileImport {
      */
     private HashMap<String, ArrayList<String[]>> proteinAndSpectrumMap = new HashMap<>();
     /**
+     * Protein accession to peptide
+     */
+    private HashMap<String, Peptide> proteinAndPeptide = new HashMap<>();
+    /**
      * Object to save spectrum
      */
     private SpectrumFactory spectrumFactory;
@@ -70,6 +75,14 @@ public class ProBedFileImport {
      * All modifications list
      */
     private ArrayList<String> allModifications = new ArrayList<>();
+    /**
+     * Spectrum file type
+     */
+    private String  spectrumFileType;
+    /**
+     * Spectrum ID to spectrum number
+     */
+    private HashMap<String, Integer> spectrumIdAndNumber = new HashMap<>();
 
     /**
      * Main constructor
@@ -81,12 +94,16 @@ public class ProBedFileImport {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public ProBedFileImport(PDVMainClass pdvMainClass, SpectrumFactory spectrumFactory, File proBedFile, MzIdentMLType mzIdentMLType, ProgressDialogX progressDialog) throws SQLException, ClassNotFoundException {
+    public ProBedFileImport(PDVMainClass pdvMainClass, SpectrumFactory spectrumFactory, File proBedFile, MzIdentMLType mzIdentMLType,
+                            ProgressDialogX progressDialog, String spectrumFileType, HashMap<String, Integer> spectrumIdAndNumber)
+            throws SQLException, ClassNotFoundException {
         this.pdvMainClass = pdvMainClass;
         this.spectrumFactory = spectrumFactory;
         this.proBedFilePath = proBedFile.getAbsolutePath();
         this.mzIdentMLType = mzIdentMLType;
         this.progressDialog = progressDialog;
+        this.spectrumFileType = spectrumFileType;
+        this.spectrumIdAndNumber = spectrumIdAndNumber;
 
         String dbName = proBedFile.getParentFile().getAbsolutePath()+"/"+ proBedFile.getName()+".db";
 
@@ -159,6 +176,10 @@ public class ProBedFileImport {
         ArrayList<ModificationMatch> utilitiesModifications;
         Peptide peptide;
         PeptideAssumption peptideAssumption;
+        String spectrumIndex;
+        String spectrumTitle = "";
+        String currentSpectrumFile;
+        String spectrumID;
 
         int countAll = 0;
         int count = 0;
@@ -166,7 +187,7 @@ public class ProBedFileImport {
         String score = "";
         String proteinAccesion = "";
         String peptideSequence = "";
-        Double psmScore = 0.0;
+        //Double psmScore = 0.0;
         String modifications = "";
         Integer charge = 0;
         Double expMassToCharge = 0.0;
@@ -223,178 +244,173 @@ public class ProBedFileImport {
 
             eachItem = line.split("\t");
 
-            for (Integer index = 0; index < eachItem.length; index ++){
+            if (!eachItem[0].contains("#")) {
 
-                if (index == 4){
-                    score = eachItem[4];
-                } else if (index == 12){
-                    proteinAccesion = eachItem[12];
-                } else if (index == 13){
-                    peptideSequence = eachItem[13];
-                } else if (index == 16){
-                    psmScore = Double.valueOf(eachItem[16]);
-                } else if (index == 18){
-                    modifications = eachItem[18].replace("\"", "");
-                } else if (index == 19){
-                    charge = Integer.valueOf(eachItem[19]);
-                } else if (index == 20){
-                    expMassToCharge = Double.valueOf(eachItem[20]);
-                } else if (index == 21){
-                    calMassToCharge = Double.valueOf(eachItem[21]);
-                } else if (index == 22){
-                    rank = eachItem[22];
-                } else if (index == 0){
-                    chrom = eachItem[0];
-                } else if (index == 1){
-                    chromStart = eachItem[1];
-                } else if (index == 2){
-                    chromEnd = eachItem[2];
-                } else if (index == 3){
-                    name = eachItem[3];
-                } else if (index == 5){
-                    strand = eachItem[5];
-                } else if (index == 6){
-                    thickStart = eachItem[6];
-                } else if (index == 7){
-                    thickEnd = eachItem[7];
-                } else if (index == 8){
-                    reserved = eachItem[8];
-                } else if (index == 9){
-                    blockCount = eachItem[9];
-                } else if (index == 10){
-                    blockSites = eachItem[10];
-                } else if (index == 11){
-                    chromStarts = eachItem[11];
-                } else if (index == 14){
-                    uniqueness = eachItem[14];
-                } else if (index == 15){
-                    genomeReferenceVersion = eachItem[15];
-                } else if (index == 17){
-                    fdr = eachItem[17];
-                } else if (index == 23){
-                    datasetID = eachItem[23];
-                } else if (index ==24){
-                    uri = eachItem[24];
+                for (Integer index = 0; index < eachItem.length; index++) {
+
+                    if (index == 4) {
+                        score = eachItem[4];
+                    } else if (index == 12) {
+                        proteinAccesion = eachItem[12];
+                    } else if (index == 13) {
+                        peptideSequence = eachItem[13];
+                    } else if (index == 16) {
+                        //psmScore = Double.valueOf(eachItem[16]);
+                    } else if (index == 18) {
+                        modifications = eachItem[18].replace("\"", "");
+                    } else if (index == 19) {
+                        charge = Integer.valueOf(eachItem[19]);
+                    } else if (index == 20) {
+                        expMassToCharge = Double.valueOf(eachItem[20]);
+                    } else if (index == 21) {
+                        calMassToCharge = Double.valueOf(eachItem[21]);
+                    } else if (index == 22) {
+                        rank = eachItem[22];
+                    } else if (index == 0) {
+                        chrom = eachItem[0];
+                    } else if (index == 1) {
+                        chromStart = eachItem[1];
+                    } else if (index == 2) {
+                        chromEnd = eachItem[2];
+                    } else if (index == 3) {
+                        name = eachItem[3];
+                    } else if (index == 5) {
+                        strand = eachItem[5];
+                    } else if (index == 6) {
+                        thickStart = eachItem[6];
+                    } else if (index == 7) {
+                        thickEnd = eachItem[7];
+                    } else if (index == 8) {
+                        reserved = eachItem[8];
+                    } else if (index == 9) {
+                        blockCount = eachItem[9];
+                    } else if (index == 10) {
+                        blockSites = eachItem[10];
+                    } else if (index == 11) {
+                        chromStarts = eachItem[11];
+                    } else if (index == 14) {
+                        uniqueness = eachItem[14];
+                    } else if (index == 15) {
+                        genomeReferenceVersion = eachItem[15];
+                    } else if (index == 17) {
+                        fdr = eachItem[17];
+                    } else if (index == 23) {
+                        datasetID = eachItem[23];
+                    } else if (index == 24) {
+                        uri = eachItem[24];
+                    }
                 }
-            }
 
-            utilitiesModifications = new ArrayList<>();
+                peptide = getPeptide(proteinAccesion, peptideSequence);
 
-            if (!modifications.equals(".")) {
+                peptideAssumption = new PeptideAssumption(peptide, Integer.valueOf(rank), 0, new Charge(1, charge), (calMassToCharge - expMassToCharge));
 
-                for (String eachMod : modifications.split(", ")) {
+                spectrumList = getSpectrumList(proteinAccesion, peptideSequence);
 
-                    Integer position = Integer.valueOf(eachMod.split("-")[0]);
-                    String modName = eachMod.split("-")[1];
+                for (String[] fileAndSpectrumIndexAndSpectrumID : spectrumList) {
 
-                    String ptmName = modificationMap.get(modName);
+                    psmIndexList.add(String.valueOf(countAll));
 
-                    if (!allModifications.contains(ptmName)){
-                        allModifications.add(ptmName);
+                    if (count == 0) {
+                        preparedStatement = connection.prepareStatement(addDataIntoTable);
                     }
 
-                    utilitiesModifications.add(new ModificationMatch(ptmName, true, position));
-                }
-            }
+                    currentSpectrumFile = fileAndSpectrumIndexAndSpectrumID[0];
+                    spectrumIndex = fileAndSpectrumIndexAndSpectrumID[1];
+                    spectrumID = fileAndSpectrumIndexAndSpectrumID[2];
 
-            peptide = new Peptide(peptideSequence, utilitiesModifications);
+                    currentMatch = new SpectrumMatch(Spectrum.getSpectrumKey(currentSpectrumFile, spectrumIndex));
 
-            peptideAssumption = new PeptideAssumption(peptide, Integer.valueOf(rank), 0, new Charge(1, charge), (calMassToCharge - expMassToCharge));
-
-            spectrumList = getSpectrumList(proteinAccesion, peptideSequence);
-
-            for (String[] spectrumFileAndID : spectrumList){
-
-                psmIndexList.add(String.valueOf(countAll));
-
-                if (count == 0){
-                    preparedStatement = connection.prepareStatement(addDataIntoTable);
-                }
-
-                currentMatch = new SpectrumMatch(Spectrum.getSpectrumKey(spectrumFileAndID[0], spectrumFileAndID[1]));
-
-                String spectrumTitle;
-                try {
-                    spectrumTitle = spectrumFactory.getSpectrumTitle(spectrumFileAndID[0], Integer.parseInt(spectrumFileAndID[1]) + 1);
-                }catch (Exception e){
-                    progressDialog.setRunFinished();
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(
-                            null, "The spectrum title cannot match it in proBAM",
-                            "Error Matching", JOptionPane.ERROR_MESSAGE);
-                    break;
-                }
-
-                currentMatch.setBestPeptideAssumption(peptideAssumption);
-                currentMatch.addHit(0, peptideAssumption, false);
-
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                try {
-                    ObjectOutputStream oos = new ObjectOutputStream(bos);
-                    try {
-                        oos.writeObject(currentMatch);
-                    } finally {
-                        oos.close();
-                    }
-                } finally {
-                    bos.close();
-                }
-
-                preparedStatement.setInt(1, countAll);
-                preparedStatement.setDouble(2, expMassToCharge);
-                preparedStatement.setString(3, spectrumTitle);
-                preparedStatement.setString(4, peptideSequence);
-                preparedStatement.setDouble(5, (calMassToCharge - expMassToCharge));
-                preparedStatement.setBytes(6, bos.toByteArray());
-                preparedStatement.setString(7, name);
-                preparedStatement.setString(8, score);
-                preparedStatement.setString(9, chrom);
-                preparedStatement.setInt(10, Integer.parseInt(chromStart));
-                preparedStatement.setInt(11, Integer.parseInt(chromEnd));
-                preparedStatement.setString(12, strand);
-                preparedStatement.setInt(13, Integer.parseInt(thickStart));
-                preparedStatement.setInt(14, Integer.parseInt(thickEnd));
-                preparedStatement.setString(15, reserved);
-                preparedStatement.setInt(16, Integer.parseInt(blockCount));
-                preparedStatement.setString(17, blockSites);
-                preparedStatement.setString(18, chromStarts);
-                preparedStatement.setString(19, proteinAccesion);
-                preparedStatement.setString(20, uniqueness);
-                preparedStatement.setString(21, genomeReferenceVersion);
-                preparedStatement.setString(22, fdr);
-                preparedStatement.setInt(23, Integer.parseInt(rank));
-                preparedStatement.setString(24, datasetID);
-                preparedStatement.setString(25, uri);
-
-                preparedStatement.addBatch();
-
-                count ++;
-                countAll ++;
-
-                if (count == 1000){
-                    int[] counts = preparedStatement.executeBatch();
-                    connection.commit();
-                    preparedStatement.close();
-
-                    pdvMainClass.allSpectrumIndex.add(psmIndexList);
-
-                    count = 0;
-
-                    if(countRound == 0){
-                        pdvMainClass.displayResult();
-                        pdvMainClass.pageNumJTextField.setText(1 + "/" + 1);
-                        progressDialog.setRunFinished();
-
-                        countRound ++;
-
+                    if (spectrumFileType.equals("mgf")) {
+                        currentMatch.setSpectrumNumber(Integer.valueOf(spectrumIndex));
+                        try {
+                            spectrumTitle = spectrumFactory.getSpectrumTitle(currentSpectrumFile, Integer.parseInt(spectrumIndex) + 1);
+                        } catch (Exception e) {
+                            JOptionPane.showMessageDialog(
+                                    null, "The spectrum title cannot match it in proBed",
+                                    "Error Matching", JOptionPane.ERROR_MESSAGE);
+                            progressDialog.setRunFinished();
+                            e.printStackTrace();
+                        }
+                    } else if (spectrumFileType.equals("mzml")) {
+                        currentMatch.setSpectrumNumber(spectrumIdAndNumber.get(spectrumID));
+                        spectrumTitle = spectrumIndex;
                     } else {
-                        pdvMainClass.pageNumJTextField.setText(String.valueOf(pdvMainClass.selectedPageNum) + "/" + String.valueOf(pdvMainClass.allSpectrumIndex.size()));
-                        countRound ++;
+                        currentMatch.setSpectrumNumber(Integer.valueOf(spectrumIndex));
+                        spectrumTitle = spectrumIndex;
                     }
 
-                    pdvMainClass.buttonCheck();
+                    currentMatch.setBestPeptideAssumption(peptideAssumption);
+                    currentMatch.addHit(0, peptideAssumption, false);
 
-                    psmIndexList = new ArrayList<>();
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    try {
+                        ObjectOutputStream oos = new ObjectOutputStream(bos);
+                        try {
+                            oos.writeObject(currentMatch);
+                        } finally {
+                            oos.close();
+                        }
+                    } finally {
+                        bos.close();
+                    }
+
+                    preparedStatement.setInt(1, countAll);
+                    preparedStatement.setDouble(2, expMassToCharge);
+                    preparedStatement.setString(3, spectrumTitle);
+                    preparedStatement.setString(4, peptideSequence);
+                    preparedStatement.setDouble(5, (calMassToCharge - expMassToCharge));
+                    preparedStatement.setBytes(6, bos.toByteArray());
+                    preparedStatement.setString(7, name);
+                    preparedStatement.setString(8, score);
+                    preparedStatement.setString(9, chrom);
+                    preparedStatement.setInt(10, Integer.parseInt(chromStart));
+                    preparedStatement.setInt(11, Integer.parseInt(chromEnd));
+                    preparedStatement.setString(12, strand);
+                    preparedStatement.setInt(13, Integer.parseInt(thickStart));
+                    preparedStatement.setInt(14, Integer.parseInt(thickEnd));
+                    preparedStatement.setString(15, reserved);
+                    preparedStatement.setInt(16, Integer.parseInt(blockCount));
+                    preparedStatement.setString(17, blockSites);
+                    preparedStatement.setString(18, chromStarts);
+                    preparedStatement.setString(19, proteinAccesion);
+                    preparedStatement.setString(20, uniqueness);
+                    preparedStatement.setString(21, genomeReferenceVersion);
+                    preparedStatement.setString(22, fdr);
+                    preparedStatement.setInt(23, Integer.parseInt(rank));
+                    preparedStatement.setString(24, datasetID);
+                    preparedStatement.setString(25, uri);
+
+                    preparedStatement.addBatch();
+
+                    count++;
+                    countAll++;
+
+                    if (count == 1000) {
+                        int[] counts = preparedStatement.executeBatch();
+                        connection.commit();
+                        preparedStatement.close();
+
+                        pdvMainClass.allSpectrumIndex.add(psmIndexList);
+
+                        count = 0;
+
+                        if (countRound == 0) {
+                            pdvMainClass.displayResult();
+                            pdvMainClass.pageNumJTextField.setText(1 + "/" + 1);
+                            progressDialog.setRunFinished();
+
+                            countRound++;
+
+                        } else {
+                            pdvMainClass.pageNumJTextField.setText(String.valueOf(pdvMainClass.selectedPageNum) + "/" + String.valueOf(pdvMainClass.allSpectrumIndex.size()));
+                            countRound++;
+                        }
+
+                        pdvMainClass.buttonCheck();
+
+                        psmIndexList = new ArrayList<>();
+                    }
                 }
             }
         }
@@ -431,11 +447,129 @@ public class ProBedFileImport {
      */
     private void parseMzID(){
 
-        String peptideRef;
-        ArrayList<String[]> spectrumIDList;
-        String[] fileAndID;
-        HashMap<String, String[]> spectrumRefAndIDMap = new HashMap<>();
+        String spectrumID;//Spectrum index in spectrum file;
+        String spectrumIndex;//Spectrum index in spectrum file;
+        String spectrumFileRef;
+        String currentSpectrumFile = "";
+        String peptideSequence;
+        String modificationName;
+        Peptide peptide;
+        ArrayList<ModificationMatch> utilitiesModifications;
+        ArrayList<String> residues;
+        List<ModificationType> modifications;
+        String[] fileAndSpectrumIndexAndSpectrumID;
         HashMap<String, String> spectrumFileMap = new HashMap<>();
+        HashMap<String, String> dbRefToAccession = new HashMap<>();
+        HashMap<String, String> peptideRefAndDBAccession = new HashMap<>();
+        HashMap<String, String> peptideRefAndSequence = new HashMap<>();
+        HashMap<String, Peptide> peptideRefAndPeptide = new HashMap<>();
+        HashMap<String, String> peptideIdAndSequence = new HashMap<>();
+        HashMap<String, Peptide> peptideIdAndPeptide = new HashMap<>();
+
+        List<DBSequenceType> dbSequenceTypes = mzIdentMLType.getSequenceCollection().getDBSequence();
+        String softName = getSoftName(mzIdentMLType);
+
+        for (DBSequenceType dbSequenceType : dbSequenceTypes){
+            dbRefToAccession.put(dbSequenceType.getId(), dbSequenceType.getAccession());
+        }
+
+        List<PeptideType> peptideTypes = mzIdentMLType.getSequenceCollection().getPeptide();
+
+        for (PeptideType peptideType : peptideTypes){
+
+            peptideSequence = peptideType.getPeptideSequence();
+            utilitiesModifications = new ArrayList<>();
+
+            if (peptideType.getModification() != null) {
+                modifications = peptideType.getModification();
+
+                for (ModificationType modificationType : modifications) {
+                    int location = modificationType.getLocation();
+                    double monoMassDelta = modificationType.getMonoisotopicMassDelta();
+                    String nameFromMzID;
+                    List<CVParamType> cvParamTypes  = modificationType.getCvParam();
+
+                    if (cvParamTypes != null){
+
+                        CVParamType firstType = cvParamTypes.get(0);
+                        if (firstType.getName() != null){
+                            nameFromMzID = firstType.getName();
+                        } else {
+                            nameFromMzID = String.valueOf(monoMassDelta);
+                        }
+
+                    } else {
+                        nameFromMzID = String.valueOf(monoMassDelta);
+                    }
+
+
+                    if (location == 0) {
+
+                        modificationName = nameFromMzID + " of N-term";
+
+                        if (!ptmFactory.containsPTM(modificationName)){
+                            PTM ptm = new PTM(PTM.MODNP, modificationName, monoMassDelta, null);
+                            ptm.setShortName(nameFromMzID);
+                            ptmFactory.addUserPTM(ptm);
+                        }
+
+                        location = 1;
+
+                    } else if (location == peptideSequence.length() + 1) {
+                        modificationName = nameFromMzID + " of C-term";
+
+                        if (!ptmFactory.containsPTM(modificationName)){
+                            PTM ptm = new PTM(PTM.MODCP, modificationName, monoMassDelta, null);
+                            ptm.setShortName(nameFromMzID);
+                            ptmFactory.addUserPTM(ptm);
+                        }
+
+                        location = peptideSequence.length();
+
+                    } else {
+                        residues = new ArrayList<>();
+                        String aa = String.valueOf(peptideSequence.charAt(location - 1));
+                        residues.add(aa);
+
+                        modificationName = nameFromMzID + " of " + aa;
+
+                        if (!ptmFactory.containsPTM(modificationName)){
+                            PTM ptm = new PTM(PTM.MODAA, modificationName, monoMassDelta, residues);
+                            ptm.setShortName(nameFromMzID);
+                            ptmFactory.addUserPTM(ptm);
+                        }
+                    }
+
+                    if (!allModifications.contains(modificationName)) {
+                        allModifications.add(modificationName);
+                    }
+
+                    utilitiesModifications.add(new ModificationMatch(modificationName, true, location));
+                }
+            }
+
+            peptide = new Peptide(peptideSequence, utilitiesModifications);
+
+            peptideIdAndPeptide.put(peptideType.getId(), peptide);
+            peptideIdAndSequence.put(peptideType.getId(), peptideSequence);
+        }
+
+        List<PeptideEvidenceType> PeptideEvidenceTypeList = mzIdentMLType.getSequenceCollection().getPeptideEvidence();
+
+        for (PeptideEvidenceType peptideEvidenceType : PeptideEvidenceTypeList) {
+
+            String peptideEvidenceTypeId = peptideEvidenceType.getId();
+
+            peptideRefAndDBAccession.put(peptideEvidenceTypeId, dbRefToAccession.get(peptideEvidenceType.getDBSequenceRef()));
+            peptideRefAndSequence.put(peptideEvidenceTypeId, peptideIdAndSequence.get(peptideEvidenceType.getPeptideRef()));
+            peptideRefAndPeptide.put(peptideEvidenceTypeId, peptideIdAndPeptide.get(peptideEvidenceType.getPeptideRef()));
+        }
+
+        for (String peptideEvidenceID : peptideRefAndDBAccession.keySet()){
+            String dbAndSequence = peptideRefAndDBAccession.get(peptideEvidenceID) + "_pdvSplit_" + peptideRefAndSequence.get(peptideEvidenceID);
+            proteinAndSpectrumMap.put(dbAndSequence, new ArrayList<>());
+            proteinAndPeptide.put(dbAndSequence, peptideRefAndPeptide.get(peptideEvidenceID));
+        }
 
         List<SpectraDataType> spectraDataTypeList = mzIdentMLType.getDataCollection().getInputs().getSpectraData();
         for (SpectraDataType spectraDataType : spectraDataTypeList) {
@@ -453,36 +587,55 @@ public class ProBedFileImport {
 
             for (SpectrumIdentificationResultType spectrumIdentificationResultType : spectrumIdentificationResults) {
 
-                fileAndID = new String[2];
-                fileAndID[0] = spectrumFileMap.get(spectrumIdentificationResultType.getSpectraDataRef());
+                fileAndSpectrumIndexAndSpectrumID = new String[3];
 
-                String spectrumIndex;
-                if(spectrumIdentificationResultType.getSpectrumID().contains(" ")){
-                    String [] eachBig = spectrumIdentificationResultType.getSpectrumID().split(" ");
+                spectrumID = spectrumIdentificationResultType.getSpectrumID();
+
+                if(spectrumID.contains(" ")){
+                    String [] eachBig = spectrumID.split(" ");
                     spectrumIndex = eachBig[eachBig.length-1].split("=")[1];
-                }else {
-                    spectrumIndex = spectrumIdentificationResultType.getSpectrumID().split("=")[1];
-                }
-                fileAndID[1] = spectrumIndex;
-                for (SpectrumIdentificationItemType spectrumIdentificationItemType : spectrumIdentificationResultType.getSpectrumIdentificationItem()){
-                    spectrumRefAndIDMap.put(spectrumIdentificationItemType.getId(), fileAndID);
-                }
-            }
-        }
-        
-        for (ProteinAmbiguityGroupType proteinAmbiguityGroupType : mzIdentMLType.getDataCollection().getAnalysisData().getProteinDetectionList().getProteinAmbiguityGroup()){
-            for (ProteinDetectionHypothesisType proteinDetectionHypothesisType : proteinAmbiguityGroupType.getProteinDetectionHypothesis()){
-                for (PeptideHypothesisType peptideHypothesisType : proteinDetectionHypothesisType.getPeptideHypothesis()){
 
-                    peptideRef = peptideHypothesisType.getPeptideEvidenceRef();
-                    spectrumIDList = new ArrayList<>();
-
-                    for (SpectrumIdentificationItemRefType spectrumIdRef : peptideHypothesisType.getSpectrumIdentificationItemRef()){
-
-                        spectrumIDList.add(spectrumRefAndIDMap.get(spectrumIdRef.getSpectrumIdentificationItemRef()));
+                    if (softName.toLowerCase().contains("mascot")){ // Soft: MASCOT spectrumID="mzMLid=controllerType=0 controllerNumber=1 scan=0"
+                        spectrumID = spectrumID.split("mzMLid=")[1];
                     }
+                }else {
+                    if (spectrumID.contains("=")) {
+                        spectrumIndex = spectrumID.split("=")[1];
 
-                    proteinAndSpectrumMap.put(peptideRef, spectrumIDList);
+                        if (softName.toLowerCase().contains("metamorpheus")){ // soft: MetaMorpheus Scan=000
+                            spectrumID = "controllerType=0 controllerNumber=1 scan="+spectrumIndex;
+                        }
+
+                    } else { // soft:Crux
+                        spectrumIndex = spectrumID.split("-")[0];
+                        if (spectrumFileType.equals("mgf")){
+                            spectrumIndex = String.valueOf(Integer.valueOf(spectrumID.split("-")[0]) - 1);
+                        }
+                        spectrumID = "controllerType=0 controllerNumber=1 scan="+spectrumIndex;
+                    }
+                }
+
+                spectrumFileRef = spectrumIdentificationResultType.getSpectraDataRef();
+                if (spectrumFileRef == null){
+                    for (String key : spectrumFileMap.keySet()){
+                        currentSpectrumFile = spectrumFileMap.get(key);
+                    }
+                } else {
+                    currentSpectrumFile = spectrumFileMap.get(spectrumFileRef);
+                }
+
+                fileAndSpectrumIndexAndSpectrumID[0] = currentSpectrumFile;
+                fileAndSpectrumIndexAndSpectrumID[1] = spectrumIndex;
+                fileAndSpectrumIndexAndSpectrumID[2] = spectrumID;
+
+                for (SpectrumIdentificationItemType spectrumIdentificationItemType : spectrumIdentificationResultType.getSpectrumIdentificationItem()){
+
+                    for (PeptideEvidenceRefType peptideEvidenceRefType : spectrumIdentificationItemType.getPeptideEvidenceRef()){
+
+                        String mainID = peptideRefAndDBAccession.get(peptideEvidenceRefType.getPeptideEvidenceRef()) + "_pdvSplit_" + peptideRefAndSequence.get(peptideEvidenceRefType.getPeptideEvidenceRef());
+
+                        proteinAndSpectrumMap.get(mainID).add(fileAndSpectrumIndexAndSpectrumID);
+                    }
                 }
             }
         }
@@ -498,16 +651,54 @@ public class ProBedFileImport {
 
         ArrayList<String[]> spectrumList = new ArrayList<>();
 
+        String dbAccession;
+        String sequence;
+
         for (String protein : proteinAndSpectrumMap.keySet()){
-            if (protein.contains(proteinRef) && protein.contains(peptideSequence)){
 
-                spectrumList = proteinAndSpectrumMap.get(protein);
+            if (protein.contains(proteinRef) && protein.contains(peptideSequence)) {
+                dbAccession = protein.split("_pdvSplit_")[0];
+                sequence = protein.split("_pdvSplit_")[1];
+                if (dbAccession.contains(proteinRef) && sequence.equals(peptideSequence)) {
 
-                break;
+                    spectrumList = proteinAndSpectrumMap.get(protein);
+
+                    break;
+                }
             }
         }
 
         return spectrumList;
+    }
+
+    /**
+     * Get corresponding peptide according to the protein accession and peptide sequence.
+     * @param proteinRef Protein accession
+     * @param peptideSequence Peptide sequence
+     * @return Peptide
+     */
+    private Peptide getPeptide(String proteinRef, String peptideSequence){
+
+        Peptide peptide = new Peptide();
+
+        String dbAccession;
+        String sequence;
+
+        for (String protein : proteinAndPeptide.keySet()){
+
+            if (protein.contains(proteinRef) && protein.contains(peptideSequence)) {
+                dbAccession = protein.split("_pdvSplit_")[0];
+                sequence = protein.split("_pdvSplit_")[1];
+                if (dbAccession.contains(proteinRef) && sequence.equals(peptideSequence)) {
+
+                    peptide = proteinAndPeptide.get(protein);
+
+                    break;
+                }
+            }
+        }
+
+        return peptide;
     }
 
     /**
@@ -523,12 +714,36 @@ public class ProBedFileImport {
             PTM ptm = ptmFactory.getPTM(modName);
 
             if (ptm.getCvTerm() != null){
-                modificationMap.put(ptm.getCvTerm().getAccession(), ptm.getName());
+                modificationMap.put(ptm.getCvTerm().getAccession(), ptm.getCvTerm().getName());
             }
 
         }
 
         return modificationMap;
+    }
+
+    /**
+     * Return original information
+     */
+    private String getSoftName(MzIdentMLType mzIdentMLType){
+
+        String softName = "";
+
+        if (mzIdentMLType.getAnalysisSoftwareList() != null) {
+            for (AnalysisSoftwareType analysisSoftwareType : mzIdentMLType.getAnalysisSoftwareList().getAnalysisSoftware()) {
+
+                if (analysisSoftwareType.getName() == null && analysisSoftwareType.getSoftwareName() != null){
+                    if (analysisSoftwareType.getSoftwareName().getCvParam() != null){
+                        softName = analysisSoftwareType.getSoftwareName().getCvParam().getName();
+                    }
+                } else {
+                    softName = analysisSoftwareType.getName();
+                }
+
+            }
+        }
+
+        return softName;
     }
 
     /**

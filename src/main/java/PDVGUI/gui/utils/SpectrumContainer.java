@@ -21,8 +21,9 @@ public class SpectrumContainer extends SpectrumPanel {
      * @param aMSLevel ms level
      * @param aProfileMode profile mode
      */
-    public SpectrumContainer(double[] aXAxisData, double[] aYAxisData, double aPrecursorMZ, String aPrecursorCharge, String aFileName, int aMaxPadding, boolean aShowFileName, boolean aShowPrecursorDetails, boolean aShowResolution, int aMSLevel, boolean aProfileMode) {
+    public SpectrumContainer(double[] aXAxisData, double[] aYAxisData, double aPrecursorMZ, String aPrecursorCharge, String aFileName, int aMaxPadding, boolean aShowFileName, boolean aShowPrecursorDetails, boolean aShowResolution, int aMSLevel, boolean aProfileMode, boolean isDenovo) {
         super(aXAxisData, aYAxisData, aPrecursorMZ, aPrecursorCharge, aFileName, aMaxPadding, aShowFileName, aShowPrecursorDetails, aShowResolution, aMSLevel, aProfileMode);
+        this.isDenovo = isDenovo;
         this.iYAxisLabel = "Int (%)";
     }
 }

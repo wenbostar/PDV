@@ -90,6 +90,7 @@ public class MzIDImport {
     private void parseMzID() throws FileParsingException {
 
         MzIdentMLType mzIdentMLType = MzIdentMLParser.parse(Paths.get(idFile.getAbsolutePath()));
+        String softName = getSoftName(mzIdentMLType);
 
         HashMap<String, Object[]> peptideMap = new HashMap<>();
 
@@ -130,9 +131,9 @@ public class MzIDImport {
         }
 
         String spectrumIndex;
-        String spectrumTitle;
+        String spectrumTitle = "";
         String spectrumFileRef;
-        String currentSpectrumFile;
+        String currentSpectrumFile = "";
         String peptideRef;
         int rank;
         double massError;
@@ -161,23 +162,56 @@ public class MzIDImport {
                 if(spectrumID.contains(" ")){
                     String [] eachBig = spectrumID.split(" ");
                     spectrumIndex = eachBig[eachBig.length-1].split("=")[1];
+
+                    if (softName.toLowerCase().contains("mascot")){ // Soft: MASCOT spectrumID="mzMLid=controllerType=0 controllerNumber=1 scan=0"
+                        spectrumID = spectrumID.split("mzMLid=")[1];
+                    }
                 }else {
-                    spectrumIndex = spectrumID.split("=")[1];
+                    if (spectrumID.contains("=")) {
+                        spectrumIndex = spectrumID.split("=")[1];
+
+                        if (softName.toLowerCase().contains("metamorpheus")){ // soft: MetaMorpheus Scan=000
+                            spectrumID = "controllerType=0 controllerNumber=1 scan="+spectrumIndex;
+                        }
+
+                    } else { // soft:Crux
+                        spectrumIndex = spectrumID.split("-")[0];
+                        if (spectrumFileType == 1){
+                            spectrumIndex = String.valueOf(Integer.valueOf(spectrumID.split("-")[0]) - 1);
+                        }
+                        spectrumID = "controllerType=0 controllerNumber=1 scan="+spectrumIndex;
+                    }
                 }
 
                 spectrumFileRef = spectrumIdentificationResultType.getSpectraDataRef();
-                currentSpectrumFile = spectrumFileMap.get(spectrumFileRef);
-
-                currentMatch = new SpectrumMatch(Spectrum.getSpectrumKey(currentSpectrumFile, spectrumIndex));
-
-                if (spectrumFileType == 1){
-                    spectrumTitle = spectrumFactory.getSpectrumTitle(currentSpectrumFile, Integer.parseInt(spectrumIndex) + 1);
-                } else if (spectrumFileType == 2) {
-                    currentMatch.setSpectrumNumber(spectrumIdAndNumber.get(spectrumID));
-                    spectrumTitle = spectrumIndex;
+                if (spectrumFileRef == null){
+                    for (String key : spectrumFileMap.keySet()){
+                        currentSpectrumFile = spectrumFileMap.get(key);
+                    }
                 } else {
+                    currentSpectrumFile = spectrumFileMap.get(spectrumFileRef);
+                }
+
+                if (currentSpectrumFile.contains("/")){
+                    currentSpectrumFile = currentSpectrumFile.substring(currentSpectrumFile.lastIndexOf("/") + 1, currentSpectrumFile.length());
+                }
+
+                if (spectrumFileType == 1) {
+                    try {
+                        spectrumTitle = spectrumFactory.getSpectrumTitle(currentSpectrumFile, Integer.parseInt(spectrumIndex) + 1);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    currentMatch = new SpectrumMatch(Spectrum.getSpectrumKey(currentSpectrumFile, spectrumTitle));
                     currentMatch.setSpectrumNumber(Integer.valueOf(spectrumIndex));
+                } else if (spectrumFileType == 2) {
                     spectrumTitle = spectrumIndex;
+                    currentMatch = new SpectrumMatch(Spectrum.getSpectrumKey(currentSpectrumFile, spectrumTitle));
+                    currentMatch.setSpectrumNumber(spectrumIdAndNumber.get(spectrumID));
+                } else {
+                    spectrumTitle = spectrumIndex;
+                    currentMatch = new SpectrumMatch(Spectrum.getSpectrumKey(currentSpectrumFile, spectrumTitle));
+                    currentMatch.setSpectrumNumber(Integer.valueOf(spectrumIndex));
                 }
 
                 spectrumIdentificationItems = spectrumIdentificationResultType.getSpectrumIdentificationItem();
@@ -316,6 +350,30 @@ public class MzIDImport {
         for(String variableModification:modification){
             ptmSettings.addVariableModification(ptmFactory.getPTM(variableModification));
         }
+    }
+
+    /**
+     * Return original information
+     */
+    private String getSoftName(MzIdentMLType mzIdentMLType){
+
+        String softName = "";
+
+        if (mzIdentMLType.getAnalysisSoftwareList() != null) {
+            for (AnalysisSoftwareType analysisSoftwareType : mzIdentMLType.getAnalysisSoftwareList().getAnalysisSoftware()) {
+
+                if (analysisSoftwareType.getName() == null && analysisSoftwareType.getSoftwareName() != null){
+                    if (analysisSoftwareType.getSoftwareName().getCvParam() != null){
+                        softName = analysisSoftwareType.getSoftwareName().getCvParam().getName();
+                    }
+                } else {
+                   softName = analysisSoftwareType.getName();
+                }
+
+            }
+        }
+
+        return softName;
     }
 
     /**

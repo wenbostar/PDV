@@ -18,8 +18,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
+import java.util.List;
 
 /**
  * Import maxQUANT result file
@@ -75,6 +75,10 @@ public class MaxQuantFileImport {
      * All modification files
      */
     private ArrayList<File> modificationFiles = new ArrayList<>();
+    /**
+     * All varied modifications
+     */
+    private ArrayList<String> variedModifications = new ArrayList<>();
     /**
      * Modification map
      */
@@ -207,6 +211,8 @@ public class MaxQuantFileImport {
                             parametersFile = eachFileInTxt;
                         } else if (eachFileInTxt.getName().contains("Sites")){
                             modificationFiles.add(eachFileInTxt);
+
+                            variedModifications.add(eachFileInTxt.getName().split("Sites")[0].replace("-_", "->"));
                         } else if (eachFileInTxt.getName().equals("modificationSpecificPeptides.txt")){
                             modificationSpecificPeptidesFile = eachFileInTxt;
                         }
@@ -525,7 +531,7 @@ public class MaxQuantFileImport {
 
                                         }
                                     } else {
-                                        System.out.println("It can not find this file ");
+                                        System.err.println("It can not find this file ");
                                         isFirstMentioned = false;
                                     }
 
@@ -596,7 +602,7 @@ public class MaxQuantFileImport {
                                             fileWriter.write("RTINSECONDS=" + Double.valueOf(fileToTitleToRTMap.get(spectrumFileName).get(spectrumTitle)) * 60 + "\n");
                                         }
                                     } else {
-                                        System.out.println("It can not find this file ");
+                                        System.err.println("It can not find this file ");
                                         isFirstMentioned = false;
                                     }
 
@@ -800,10 +806,12 @@ public class MaxQuantFileImport {
 
                 while ((line = bufferedReader.readLine()) != null) {
                     values = line.split("\t");
-                    if(values.length == 2){
-                        detailsList.add(values[0] +"/t/"+values[1]);
-                    } else {
-                        detailsList.add(values[0] +"/t/ ");
+                    if (!values[0].equals("Parameter")) {
+                        if (values.length == 2) {
+                            detailsList.add(values[0] + "/t/" + values[1]);
+                        } else {
+                            detailsList.add(values[0] + "/t/ ");
+                        }
                     }
                 }
             } catch (FileNotFoundException e) {
@@ -862,6 +870,9 @@ public class MaxQuantFileImport {
         PeptideAssumption peptideAssumption;
         Peptide peptide;
         Charge charge;
+        HashMap<String, Integer> modificationNumIndex = new HashMap<>();
+        HashMap<String, Integer> modificationPosIndex = new HashMap<>();
+        HashMap<Integer, Double> modIndexToPos;
 
         ArrayList<String> spectrumList = new ArrayList<>();
         HashMap<String, ArrayList<String>> fileNameToIDs;
@@ -899,6 +910,10 @@ public class MaxQuantFileImport {
                         scoreIndex = index;
                     } else if(values[index].equals("Charge")){
                         chargeIndex = index;
+                    } else if (variedModifications.contains(values[index])){
+                        modificationNumIndex.put(values[index], index);
+                    } else if (values[index].contains("Probabilities")){
+                        modificationPosIndex.put(values[index].split(" Probabilities")[0], index);
                     }
                 }
             } else {
@@ -941,6 +956,7 @@ public class MaxQuantFileImport {
 
                 try {
                     if (!modificationName.equals("Unmodified")) {
+                        /*
                         for (ArrayList<String> eachList : msIDSToModificationFileToEachSite.keySet()){
                             if (eachList.contains(String.valueOf(lineCount - 1))){
                                 fileNameToIDs = msIDSToModificationFileToEachSite.get(eachList);
@@ -995,6 +1011,57 @@ public class MaxQuantFileImport {
                                     }
                                 }
                             }
+                        } */
+
+                        for (String modName : modificationNumIndex.keySet()){
+
+                            Integer modNumIndex = modificationNumIndex.get(modName);
+
+                            Integer modNum = Integer.valueOf(values[modNumIndex]);
+
+                            Integer modPosIndex = modificationPosIndex.get(modName);
+
+                            String modPosSequence = values[modPosIndex];
+
+                            modIndexToPos = new HashMap<>();
+
+                            if (modNum != 0){
+
+                                String[] firstSplitList = modPosSequence.split("\\)");
+
+                                Integer accumPosition = 0;
+                                String splitSequence;
+                                Double splitPos;
+
+                                for (String firstSplit : firstSplitList){
+
+                                    if (firstSplit.contains("(")){
+                                        splitSequence = firstSplit.split("\\(")[0];
+                                        splitPos = Double.valueOf(firstSplit.split("\\(")[1]);
+
+                                        accumPosition += splitSequence.length();
+
+                                        modIndexToPos.put(accumPosition, splitPos);
+                                    }
+                                }
+
+                                List<Map.Entry<Integer, Double>> list = new ArrayList<>(modIndexToPos.entrySet());
+                                Collections.sort(list, Comparator.comparing(Map.Entry::getKey));
+
+                                Collections.sort(list, (o1, o2) -> o2.getValue().compareTo(o1.getValue()));
+
+                                for (int i = 0; i < modNum; i ++){
+
+                                    Integer position = list.get(i).getKey();
+                                    utilitiesModificationName = modName.split(" \\(")[0].replace(">","&gt;") + " of " + sequence.charAt(position - 1);
+
+                                    utilitiesModifications.add(new ModificationMatch(utilitiesModificationName, true, position));
+                                    if (!allModifications.contains(utilitiesModificationName)) {
+                                        allModifications.add(utilitiesModificationName);
+                                    }
+                                }
+
+                            }
                         }
 
                         aAToModification = new HashMap<>();
@@ -1047,7 +1114,7 @@ public class MaxQuantFileImport {
                 } catch (Exception e){
                     progressDialog.setRunFinished();
                     JOptionPane.showMessageDialog(
-                            null, "Modification format not support.",
+                            null, "Modification format not support.\n" + e.toString(),
                             "Error Modification", JOptionPane.ERROR_MESSAGE);
                 }
 
@@ -1109,7 +1176,6 @@ public class MaxQuantFileImport {
                         count = 0;
 
                         if(countRound == 0){
-                            System.out.println("The lineCount round is "+countRound);
 
                             pdvMainClass.displayResult();
                             pdvMainClass.pageNumJTextField.setText(1 + "/" + 1);

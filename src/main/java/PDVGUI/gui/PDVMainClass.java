@@ -45,6 +45,7 @@ import java.net.URLDecoder;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
+import java.util.regex.Pattern;
 
 /**
  * Main class to start soft and show dataBase results
@@ -181,6 +182,10 @@ public class PDVMainClass extends JFrame {
      * Boolean indicate if pepXML or not
      */
     private Boolean isPepXML = false;
+    /**
+     * Boolean indicate if MS Amanda or not
+     */
+    private Boolean isMSAmanda = false;
     /**
      * Original information hash
      */
@@ -394,9 +399,11 @@ public class PDVMainClass extends JFrame {
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column){
                 Component c = null;
 
+                Pattern pattern = Pattern.compile("[0-9]+");
+
                 String s = String.valueOf(value);
 
-                if (!s.contains(",")){
+                if (pattern.matcher(s).matches()){
                     Double d = (Double)value;
                     s = String.valueOf(d);
                 }
@@ -729,7 +736,7 @@ public class PDVMainClass extends JFrame {
         settingColorJButton.setToolTipText("Set PTM colors");
         settingColorJButton.addActionListener(this::settingColorJButtonActionPerform);
 
-        settingJPanel.setBackground(new Color(217, 248, 255));
+        settingJPanel.setBackground(new Color(255, 255, 255));
         settingJPanel.setMinimumSize(new Dimension(20, 0));
         settingJPanel.setOpaque(false);
 
@@ -743,7 +750,6 @@ public class PDVMainClass extends JFrame {
         settingJPanel.add(fragmentIonAccuracyJLabel);
         settingJPanel.add(fragmentIonAccuracyTxt);
         settingJPanel.add(splitJLabel2);
-        //settingJPanel.add(fragmentIonType1Lbl);
         settingJPanel.add(precursorIonUnit);
         settingJPanel.add(setButton);
         settingJPanel.add(splitJLabel3);
@@ -822,7 +828,7 @@ public class PDVMainClass extends JFrame {
         spectrumJTable.getAccessibleContext().setAccessibleName("spectrumJTable");
 
         psmsJPanel.setOpaque(false);
-        TitledBorder titledBorder = BorderFactory.createTitledBorder("Spectrums Table" + " \t ");
+        TitledBorder titledBorder = BorderFactory.createTitledBorder("PSM Table" + " \t ");
         titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
         psmsJPanel.setBorder(titledBorder);
 
@@ -1044,7 +1050,7 @@ public class PDVMainClass extends JFrame {
      * @param evt Mouse click event
      */
     private void setButtonActionPerform(ActionEvent evt){
-        Double fragmentIonMZTolerance = 0.5;
+        Double fragmentIonMZTolerance = 0.05;
         if(fragmentIonAccuracyTxt.getText() != "" && fragmentIonAccuracyTxt.getText() != null){
             fragmentIonMZTolerance = Double.valueOf(fragmentIonAccuracyTxt.getText());
         }
@@ -1429,7 +1435,7 @@ public class PDVMainClass extends JFrame {
                 TextFileImport textFileImport;
 
                 try {
-                    textFileImport = new TextFileImport(PDVMainClass.this, textFile, spectrumFile, getModificationMass(), progressDialog);
+                    textFileImport = new TextFileImport(PDVMainClass.this, textFile, spectrumFile, progressDialog);
 
                     sqliteConnection = textFileImport.getSqLiteConnection();
                     allModifications = textFileImport.getAllModifications();
@@ -1441,7 +1447,6 @@ public class PDVMainClass extends JFrame {
                     orderName.add("PSMIndex");
                     orderName.add("MZ");
                     orderName.add("Sequence");
-                    orderName.add("MassError");
                     orderName.addAll(scoreName);
                     setUpTableHeaderToolTips();
 
@@ -1454,6 +1459,88 @@ public class PDVMainClass extends JFrame {
                 }
             }
         }.start();
+    }
+
+    /**
+     * Import MSAmanda identification result file
+     * @param spectrumFile
+     * @param spectrumsFileFactory
+     * @param textFile
+     * @param spectrumFileType
+     * @param spectrumIdAndNumber
+     */
+    public void importMSAmandaResults(File spectrumFile, Object spectrumsFileFactory, File textFile, String spectrumFileType, HashMap<String, Integer> spectrumIdAndNumber){
+
+        this.isNewSoft = true;
+        this.spectrumsFileFactory = spectrumsFileFactory;
+        this.spectrumFileType = spectrumFileType;
+
+        switch (spectrumFileType) {
+            case "mzml":
+
+                scans = (ScanCollectionDefault) spectrumsFileFactory;
+                break;
+
+            case "mgf":
+
+                spectrumFactory = (SpectrumFactory) spectrumsFileFactory;
+                break;
+
+            case "mzxml":
+
+                scans = (ScanCollectionDefault) spectrumsFileFactory;
+                break;
+        }
+
+        databasePath = textFile.getAbsolutePath()+".db";
+
+        ProgressDialogX progressDialog = new ProgressDialogX(this,
+                Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMass.png")),
+                Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMassWait.png")),
+                true);
+        progressDialog.setPrimaryProgressCounterIndeterminate(true);
+        progressDialog.setTitle("Loading Results. Please Wait...");
+
+        new Thread(() -> {
+            try {
+                progressDialog.setVisible(true);
+            } catch (IndexOutOfBoundsException ignored) {
+            }
+        }, "ProgressDialog").start();
+        new Thread("DisplayThread") {
+            @Override
+            public void run() {
+
+                MSAmandaImport msAmandaImport;
+
+                try {
+                    msAmandaImport = new MSAmandaImport(PDVMainClass.this, textFile, spectrumFileType, progressDialog, spectrumIdAndNumber);
+
+                    sqliteConnection = msAmandaImport.getSqLiteConnection();
+                    allModifications = msAmandaImport.getAllModifications();
+                    originalInfor = new HashMap<>();
+
+                    ArrayList<String> orderName = new ArrayList<>();
+                    orderName.add("PSMIndex");
+                    orderName.add("MZ");
+                    orderName.add("Sequence");
+                    orderName.add("AmandaScore");
+                    orderName.add("WeightedProbability");
+                    scoreName = new ArrayList<>();
+                    scoreName.add("AmandaScore");
+                    scoreName.add("WeightedProbability");
+                    setUpTableHeaderToolTips();
+
+                    buttonCheck();
+
+                    sortColumnJCombox.setModel(new DefaultComboBoxModel(orderName.toArray()));
+
+                } catch (SQLException | ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
+
     }
 
     /**
@@ -1503,9 +1590,9 @@ public class PDVMainClass extends JFrame {
                     ArrayList<String> orderName = new ArrayList<>();
                     orderName.add("PSMIndex");
                     orderName.add("Sequence");
-                    orderName.add("predicted_position_score");
+                    orderName.add("PositionScore");
                     scoreName = new ArrayList<>();
-                    scoreName.add("predicted_position_score");
+                    scoreName.add("PositionScore");
                     setUpTableHeaderToolTips();
 
                     buttonCheck();
@@ -1517,6 +1604,101 @@ public class PDVMainClass extends JFrame {
                 }
             }
         }.start();
+    }
+
+    /**
+     * Import pNovo results
+     * @param pNovoResultFile pNovoResultFile
+     * @param spectrumFile spectrum file
+     * @param spectrumFactory spectrum factory
+     */
+    public void importPNovoResults(File pNovoResultFile, File spectrumFile, SpectrumFactory spectrumFactory){
+
+        this.spectrumFileType = "mgf";
+
+        isMaxQuant = true;
+        isNewSoft = false;
+        isDenovo = true;
+
+        File parentFolder = pNovoResultFile.getParentFile();
+        File[] firstLayer = parentFolder.listFiles();
+        File paramFile = null;
+        File resultFile = null;
+
+        for (File firstFile : firstLayer){
+            if (firstFile.getName().equals("param")){
+                File[] secondLayer = firstFile.listFiles();
+
+                for (File secondFile : secondLayer){
+                    if (secondFile.getName().equals("pNovo.param")){
+                        paramFile = secondFile;
+                    }
+                }
+            } else if (firstFile.getName().equals("result")){
+                File[] secondLayer = firstFile.listFiles();
+
+                for (File secondFile : secondLayer){
+                    if (secondFile.getName().equals("results.res")){
+                        resultFile = secondFile;
+                    }
+                }
+            }
+        }
+
+        if (paramFile != null && resultFile != null){
+            databasePath = resultFile.getAbsolutePath()+".db";
+
+            ProgressDialogX progressDialog = new ProgressDialogX(this,
+                    Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMass.png")),
+                    Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMassWait.png")),
+                    true);
+            progressDialog.setPrimaryProgressCounterIndeterminate(true);
+            progressDialog.setTitle("Loading Results. Please Wait...");
+
+            new Thread(() -> {
+                try {
+                    progressDialog.setVisible(true);
+                } catch (IndexOutOfBoundsException ignored) {
+                }
+            }, "ProgressDialog").start();
+            File finalParamFile = paramFile;
+            File finalResultFile = resultFile;
+            new Thread("DisplayThread") {
+                @Override
+                public void run() {
+
+                    PNovoImport pNovoImport;
+
+                    try {
+
+                        pNovoImport = new PNovoImport(PDVMainClass.this, finalParamFile, finalResultFile, spectrumFile, spectrumFactory, progressDialog);
+
+                        sqliteConnection = pNovoImport.getSqLiteConnection();
+                        allModifications = pNovoImport.getAllModifications();
+
+                        ArrayList<String> orderName = new ArrayList<>();
+                        orderName.add("PSMIndex");
+                        orderName.add("Sequence");
+                        orderName.add("Score");
+                        scoreName = new ArrayList<>();
+                        scoreName.add("Score");
+                        setUpTableHeaderToolTips();
+
+                        buttonCheck();
+
+                        sortColumnJCombox.setModel(new DefaultComboBoxModel(orderName.toArray()));
+
+                    } catch (SQLException | ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }.start();
+        } else {
+            JOptionPane.showMessageDialog(
+                    this, "Failed to parse pNovo result, please check your file.",
+                    "Error Parsing File", JOptionPane.ERROR_MESSAGE);
+        }
+
     }
 
     /**
@@ -1565,6 +1747,9 @@ public class PDVMainClass extends JFrame {
                     ArrayList<String> orderName = new ArrayList<>();
                     orderName.add("PSMIndex");
                     orderName.add("Sequence");
+                    orderName.add("Score");
+                    scoreName = new ArrayList<>();
+                    scoreName.add("Score");
                     setUpTableHeaderToolTips();
 
                     buttonCheck();
@@ -1745,7 +1930,7 @@ public class PDVMainClass extends JFrame {
      * @param spectrumFileType  Spectrum file type
      * @param spectrumsFileFactory Object saving spectrum
      */
-    public void importProBedFile(File proBedFile, String spectrumFileType, Object spectrumsFileFactory, MzIdentMLType mzIdentMLType){
+    public void importProBedFile(File proBedFile, String spectrumFileType, Object spectrumsFileFactory, MzIdentMLType mzIdentMLType, HashMap<String, Integer> spectrumIdAndNumber){
 
         this.spectrumsFileFactory = spectrumsFileFactory;
         this.spectrumFileType = spectrumFileType;
@@ -1785,7 +1970,7 @@ public class PDVMainClass extends JFrame {
                 ProBedFileImport proBedFileImport;
 
                 try {
-                    proBedFileImport = new ProBedFileImport(PDVMainClass.this, spectrumFactory, proBedFile, mzIdentMLType, progressDialog);
+                    proBedFileImport = new ProBedFileImport(PDVMainClass.this, spectrumFactory, proBedFile, mzIdentMLType, progressDialog, spectrumFileType, spectrumIdAndNumber);
 
                     sqliteConnection = proBedFileImport.getSqLiteConnection();
                     allModifications = proBedFileImport.getAllModifications();
@@ -1928,9 +2113,9 @@ public class PDVMainClass extends JFrame {
      */
     public void displayDenovo(){
         msAndTableJSplitPane.setDividerLocation(0);
-        sortColumnJCombox.setEnabled(false);
-        downSortJButton.setVisible(false);
-        upSortJButton.setVisible(false);
+        sortColumnJCombox.setEnabled(true);
+        downSortJButton.setVisible(true);
+        upSortJButton.setVisible(true);
 
         if (originalInfor.size() == 0){
             if(detailsJPanel.isVisible()){
