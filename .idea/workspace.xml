@@ -6,49 +6,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0b0cca48-ec31-481b-94db-b982afc0e540" name="Default" comment="CLI mode debug.">
-      <change beforePath="" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MSAmandaImport.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/PNovoImport.java" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/resources/icons/background.png" afterPath="$PROJECT_DIR$/resources/icons/background.png" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVCLI/MaxQuantImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVCLI/MaxQuantImport.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVCLI/MzIDImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVCLI/MzIDImport.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVCLI/PDVCLIMainClass.java" afterPath="$PROJECT_DIR$/src/main/java/PDVCLI/PDVCLIMainClass.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVCLI/PepXMLImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVCLI/PepXMLImport.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/DeNovoFileImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/DeNovoFileImport.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MSOneImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MSOneImport.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MaxQuantFileImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MaxQuantFileImport.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MzIDFileImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MzIDFileImport.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/PepXMLFileImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/PepXMLFileImport.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/ProBamFileImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/ProBamFileImport.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/ProBedFileImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/ProBedFileImport.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/SpectrumLibrarySplibImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/SpectrumLibrarySplibImport.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/TextFileImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/TextFileImport.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/MSDataDisplay.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/MSDataDisplay.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVStart.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVStart.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PrideXMLDisplay.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PrideXMLDisplay.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/SinglePeptideDisplay.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/SinglePeptideDisplay.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/SpectrumLibDisplay.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/SpectrumLibDisplay.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/CheckPeptideJDialog.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/CheckPeptideJDialog.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/ExportBatchDialog.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/ExportBatchDialog.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/ExportExpectedSizeDialog.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/ExportExpectedSizeDialog.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/ExportTICDialog.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/ExportTICDialog.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/RealTimeExportJDialog.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/RealTimeExportJDialog.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/DatabaseImportDialog.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/DatabaseImportDialog.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/DeNovoImportDialog.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/DeNovoImportDialog.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/MSDataImportDialog.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/MSDataImportDialog.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/MaxQuantImportDialog.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/MaxQuantImportDialog.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/PrideXMLImportDialog.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/PrideXMLImportDialog.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/ProBamImportDialog.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/ProBamImportDialog.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/ProteoQCParaJDialog.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/ProteoQCParaJDialog.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/SpectrumLibImportDialog.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/SpectrumLibImportDialog.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/LineChart.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/LineChart.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/PTMColorDialog.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/PTMColorDialog.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumContainer.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumContainer.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TICPanel.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TICPanel.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TableModel/DatabaseTableModel.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TableModel/DatabaseTableModel.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/icons/background.png" afterPath="$PROJECT_DIR$/src/main/resources/icons/background.png" />
+      <change beforePath="$PROJECT_DIR$/resources/icons/proteoqc.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/icons/proteoqc.png" afterPath="" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -682,6 +642,7 @@
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3295099" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32766616" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -692,7 +653,7 @@
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.29829985" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24481659" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.22089314" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24720894" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24960127" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -703,7 +664,6 @@
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="combo" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32766616" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3295099" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
