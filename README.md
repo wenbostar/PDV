@@ -79,7 +79,7 @@ The PDV package can be downloaded at [https://github.com/wenbostar/PDV/releases]
 
 Please find an example in this tutorial: [QC analysis](http://bioconductor.org/packages/devel/bioc/vignettes/proteoQC/inst/doc/proteoQC.html). 
 
-#### Command line
+#### Command line:
 
 PDV provides a command line module to produce figures of annotated spectra or TIC in batch mode. It can be used to generate figures according to a list of peptide sequences or a list of spectrum indexes.
 
