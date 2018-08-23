@@ -79,7 +79,61 @@ The PDV package can be downloaded at [https://github.com/wenbostar/PDV/releases]
 
 Please find an example in this tutorial: [QC analysis](http://bioconductor.org/packages/devel/bioc/vignettes/proteoQC/inst/doc/proteoQC.html). 
 
+#### Command line
 
+PDV provides a command line module to produce figures of annotated spectra or TIC in batch mode. It can be used to generate figures according to a list of peptide sequences or a list of spectrum indexes.
+
+```sh
+ $ java -jar PDV-1.1.0/PDV-1.1.0.jar -h
+```
+
+```
+usage: Options
+ -a <arg>    Error window for MS/MS fragment ion mass values. Unit is Da.
+             The default value is 0.5.
+ -ah         Whether or not to consider neutral loss of H2O.
+ -an         Whether or not to consider neutral loss of NH3.
+ -c <arg>    The intensity percentile to consider for annotation. Default
+             is 3 (3%), it means that the peaks with intensities >= (3% *
+             max intensity) will be annotated.
+ -fh <arg>   Figure height. Default is 400
+ -ft <arg>   Figure type. Can be png, pdf or tiff.
+ -fu <arg>   The units in which ‘height’(fh) and ‘width’(fw) are given.
+             Can be cm, mm or px. Default is px
+ -fw <arg>   Figure width. Default is 800
+ -h          Help
+ -help       Help
+ -i <arg>    A file containing peptide sequences or spectrum IDs. PDV will
+             generate figures for these peptides or spectra.
+ -k <arg>    The input data type for parameter -i (Spectrum ID: s, peptide
+             sequence: p).
+ -o <arg>    Output directory.
+ -pw <arg>   Peak width. Default is 1
+ -r <arg>    Identification file.
+ -rt <arg>   Identification file format (mzIdentML: 1, pepXML: 2, proBAM:
+             3, txt: 4, maxQuant: 5, TIC: 6).
+ -s <arg>    MS/MS data file
+ -st <arg>   MS/MS data format (mgf: 1, mzML: 2, mzXML: 3).
+```
+
+Please find a few examples below. Please download the example data here: [input_data.tar.gz](http://pdv.zhang-lab.org/data/download/test_data/cmd/input_data.tar.gz)
+
+(1) Input: mgf and mzID
+```bash
+java -jar PDV-1.1.0/PDV-1.1.0.jar -r input_data/SF_200217_U2OS_TiO2_HCD_OT_rep1_myrimatch_mgf.mzid -rt 1 -s input_data/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf -st 1 -i input_data/spectrum_title.txt -k s -o output -a 0.05 -c 3 -pw 1 -fw 800 -fh 400 -fu px -ft pdf
+```
+(2) Input: mzML and mzID
+```
+java -jar PDV-1.1.0/PDV-1.1.0.jar -r input_data/SF_200217_U2OS_TiO2_HCD_OT_rep1_myrimatch_mzML.mzid -rt 1 -s input_data/SF_200217_U2OS_TiO2_HCD_OT_rep1.mzML -st 2 -i input_data/spectrum_scan_number.txt -k s -o output -a 0.05 -c 3 -pw 1 -fw 800 -fh 400 -fu px -ft pdf
+```
+(3) Input: mgf and pepXML
+```
+java -jar PDV-1.1.0/PDV-1.1.0.jar -r input_data/SF_200217_U2OS_TiO2_HCD_OT_rep1_myrimatch_mgf.pepXML -rt 2 -s input_data/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf -st 1 -i input_data/spectrum_title.txt -k s -o output -a 0.05 -c 3 -pw 1 -fw 800 -fh 400 -fu px -ft pdf
+```
+(4) Input mzML and pepXML
+```
+java -jar PDV-1.1.0/PDV-1.1.0.jar -r input_data/SF_200217_U2OS_TiO2_HCD_OT_rep1_myrimatch_mzML.pepXML -rt 2 -s input_data/SF_200217_U2OS_TiO2_HCD_OT_rep1.mzML -st 2 -i input_data/spectrum_scan_number.txt -k s -o output -a 0.05 -c 3 -pw 1 -fw 800 -fh 400 -fu px -ft pdf
+```
 ## Citation
 
 To cite the `PDV` package in publications, please use:
