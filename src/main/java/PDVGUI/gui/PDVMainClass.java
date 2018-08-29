@@ -11,6 +11,7 @@ import PDVGUI.gui.utils.FileImport.DatabaseImportDialog;
 import PDVGUI.gui.utils.FileImport.DeNovoImportDialog;
 import PDVGUI.gui.utils.TableModel.DatabaseTableModel;
 import PDVGUI.gui.utils.TableModel.DeNovoTableModel;
+import PDVGUI.gui.utils.TableModel.FrageTableModel;
 import com.compomics.util.enumeration.ImageType;
 import com.compomics.util.exceptions.exception_handlers.FrameExceptionHandler;
 import com.compomics.util.experiment.biology.*;
@@ -171,6 +172,10 @@ public class PDVMainClass extends JFrame {
      */
     private Boolean isMaxQuant = false;
     /**
+     * Boolean indicate if MSFrager or not
+     */
+    private Boolean isFrage = false;
+    /**
      * Boolean indicate if new soft or not
      */
     private Boolean isNewSoft = false;
@@ -211,6 +216,10 @@ public class PDVMainClass extends JFrame {
      */
     private DeNovoTableModel deNovoTableModel;
     /**
+     * Frage table model
+     */
+    private FrageTableModel frageTableModel;
+    /**
      * Spectrum match
      */
     private SpectrumMatch spectrumMatch;
@@ -241,7 +250,7 @@ public class PDVMainClass extends JFrame {
     /**
      * Version
      */
-    private static final String VERSION = "1.1.0";
+    private static final String VERSION = "1.2.0";
 
     /**
      * Main class
@@ -1544,6 +1553,62 @@ public class PDVMainClass extends JFrame {
     }
 
     /**
+     * Import MSFragger result file
+     * @param fileToType File to file type
+     * @param idFile Result file
+     */
+    public void importFragPipe(HashMap<File, String> fileToType, File idFile){
+
+        this.isFrage = true;
+
+        databasePath = idFile.getAbsolutePath()+".db";
+
+        ProgressDialogX progressDialog = new ProgressDialogX(this,
+                Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMass.png")),
+                Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMassWait.png")),
+                true);
+        progressDialog.setPrimaryProgressCounterIndeterminate(true);
+        progressDialog.setTitle("Loading Results. Please Wait...");
+
+        new Thread(() -> {
+            try {
+                progressDialog.setVisible(true);
+            } catch (IndexOutOfBoundsException ignored) {
+            }
+        }, "ProgressDialog").start();
+        new Thread("DisplayThread") {
+            @Override
+            public void run() {
+
+                FragePipeImport fragePipeImport;
+
+                try {
+
+                    fragePipeImport = new FragePipeImport(fileToType, idFile, progressDialog, PDVMainClass.this);
+
+                    sqliteConnection = fragePipeImport.getSqLiteConnection();
+                    allModifications = fragePipeImport.getAllModifications();
+
+                    scoreName = fragePipeImport.getScoreName();
+
+                    ArrayList<String> orderName = new ArrayList<>();
+                    orderName.add("PSMIndex");
+                    orderName.add("Sequence");
+                    orderName.addAll(scoreName);
+                    setUpTableHeaderToolTips();
+
+                    buttonCheck();
+
+                    sortColumnJCombox.setModel(new DefaultComboBoxModel(orderName.toArray()));
+
+                } catch (SQLException | ClassNotFoundException | IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
+    }
+
+    /**
      * Import deep novo results
      * @param resultFile Result file
      * @param spectrumFile spectrum file
@@ -1698,7 +1763,6 @@ public class PDVMainClass extends JFrame {
                     this, "Failed to parse pNovo result, please check your file.",
                     "Error Parsing File", JOptionPane.ERROR_MESSAGE);
         }
-
     }
 
     /**
@@ -2147,6 +2211,42 @@ public class PDVMainClass extends JFrame {
         updateTable();
     }
 
+    public void displayFrage(){
+        msAndTableJSplitPane.setDividerLocation(0);
+        sortColumnJCombox.setEnabled(true);
+        downSortJButton.setVisible(true);
+        upSortJButton.setVisible(true);
+
+        if (originalInfor.size() == 0){
+            if(detailsJPanel.isVisible()){
+                openSidebarJButton.setIcon(new ImageIcon(getClass().getResource("/icons/unfold.png")));
+
+                detailsJPanel.setVisible(false);
+
+                msAndTableJSplitPane.setDividerSize(0);
+
+                msAndTableJSplitPane.revalidate();
+                msAndTableJSplitPane.repaint();
+            }
+        }
+
+        if (searchParameters.getFragmentAccuracyType() == SearchParameters.MassAccuracyType.DA){
+
+            precursorIonUnit.setSelectedIndex(0);
+
+        } else if (searchParameters.getFragmentAccuracyType() == SearchParameters.MassAccuracyType.PPM){
+
+            precursorIonUnit.setSelectedIndex(1);
+
+        }
+
+        fragmentIonAccuracyTxt.setText(String.valueOf(annotationSettings.getFragmentIonAccuracy()));
+        frageTableModel = new FrageTableModel(searchParameters, spectrumKeyToSelected, scoreName);
+        spectrumJTable.setModel(frageTableModel);
+
+        updateTable();
+    }
+
     /**
      * Update table
      */
@@ -2174,23 +2274,48 @@ public class PDVMainClass extends JFrame {
 
                 ArrayList<ArrayList<Object>> selectedItem = new ArrayList<>();
 
-                for (String spectrumIndex : selectPageSpectrumIndex) {
-                    try {
-                        selectedItem.add(sqliteConnection.getOneSpectrumItem(spectrumIndex));
-                    } catch (Exception e) {
-                        progressDialogX.setRunFinished();
-                        e.printStackTrace();
-                        break;
-                    }
-                }
-
                 spectrumJTable.removeAll();
 
                 try {
-                    if (!isDenovo) {
-                        databaseTableModel.updateTable(selectedItem, selectPageSpectrumIndex, spectrumKeyToSelected);
-                    } else {
+                    if (isDenovo) {
+                        for (String spectrumIndex : selectPageSpectrumIndex) {
+                            try {
+                                selectedItem.add(sqliteConnection.getOneSpectrumItem(spectrumIndex));
+                            } catch (Exception e) {
+                                progressDialogX.setRunFinished();
+                                e.printStackTrace();
+                                break;
+                            }
+                        }
+
                         deNovoTableModel.updateTable(selectedItem, selectPageSpectrumIndex, spectrumKeyToSelected);
+
+                    } else if (isFrage){
+
+                        for (String spectrumIndex : selectPageSpectrumIndex) {
+
+                            try {
+                                selectedItem.add(sqliteConnection.getOneFrageSpectrumItem(spectrumIndex));
+                            } catch (Exception e) {
+                                progressDialogX.setRunFinished();
+                                e.printStackTrace();
+                                break;
+                            }
+                        }
+
+                        frageTableModel.updateTabel(selectedItem, selectPageSpectrumIndex, spectrumKeyToSelected);
+                    } else {
+                        for (String spectrumIndex : selectPageSpectrumIndex) {
+                            try {
+                                selectedItem.add(sqliteConnection.getOneSpectrumItem(spectrumIndex));
+                            } catch (Exception e) {
+                                progressDialogX.setRunFinished();
+                                e.printStackTrace();
+                                break;
+                            }
+                        }
+
+                        databaseTableModel.updateTable(selectedItem, selectPageSpectrumIndex, spectrumKeyToSelected);
                     }
                 }catch (Exception e){
                     progressDialogX.setRunFinished();
@@ -2228,17 +2353,47 @@ public class PDVMainClass extends JFrame {
                 selectedItem.add(sqliteConnection.getOneSpectrumItem(spectrumIndex));
             } catch (SQLException e) {
                 e.printStackTrace();
+                break;
             }
         }
 
         spectrumJTable.removeAll();
 
-        if (!isDenovo){
-            databaseTableModel.updateTable(selectedItem, searchIDs, spectrumKeyToSelected);
-        } else {
-            deNovoTableModel.updateTable(selectedItem, searchIDs, spectrumKeyToSelected);
-        }
+        if (isDenovo){
+            for (String spectrumIndex : searchIDs){
+                try {
+                    selectedItem.add(sqliteConnection.getOneSpectrumItem(spectrumIndex));
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    break;
+                }
+            }
 
+            deNovoTableModel.updateTable(selectedItem, searchIDs, spectrumKeyToSelected);
+        } else if (isFrage){
+            for (String spectrumIndex : selectPageSpectrumIndex) {
+                try {
+                    selectedItem.add(sqliteConnection.getOneFrageSpectrumItem(spectrumIndex));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    break;
+                }
+            }
+
+            frageTableModel.updateTabel(selectedItem, selectPageSpectrumIndex, spectrumKeyToSelected);
+        }
+        else {
+            for (String spectrumIndex : searchIDs){
+                try {
+                    selectedItem.add(sqliteConnection.getOneSpectrumItem(spectrumIndex));
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    break;
+                }
+            }
+
+            databaseTableModel.updateTable(selectedItem, searchIDs, spectrumKeyToSelected);
+        }
 
         setTableProperties();
 
@@ -2624,7 +2779,11 @@ public class PDVMainClass extends JFrame {
                 e.printStackTrace();
             }
 
-            updateSpectrum(getSpectrum(spectrumMatch), spectrumMatch);
+            if (isFrage){
+                updateSpectrum(getFragSpectrum(selectedPsmKey), spectrumMatch);
+            } else {
+                updateSpectrum(getSpectrum(spectrumMatch), spectrumMatch);
+            }
 
             if (column == spectrumJTable.getColumn("Selected").getModelIndex()) {
                 if(!spectrumKeyToSelected.containsKey(selectedPsmKey)){
@@ -2670,7 +2829,11 @@ public class PDVMainClass extends JFrame {
                     e.printStackTrace();
                 }
 
-                updateSpectrum(getSpectrum(spectrumMatch), spectrumMatch);
+                if (isFrage){
+                    updateSpectrum(getFragSpectrum(selectedPsmKey), spectrumMatch);
+                } else {
+                    updateSpectrum(getSpectrum(spectrumMatch), spectrumMatch);
+                }
 
             }
         }
@@ -2904,6 +3067,30 @@ public class PDVMainClass extends JFrame {
 
         String spectrumKey = matchKey.split("_cus_")[1];
 
+        return getSpectrum(spectrumKey, spectrumFileName);
+    }
+
+    public MSnSpectrum getFragSpectrum(String selectedPsmKey){
+
+        MSnSpectrum selectedSpectrum = null;
+
+        try {
+            selectedSpectrum = sqliteConnection.getFragSpectrum(selectedPsmKey);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return selectedSpectrum;
+    }
+
+    /**
+     * Get spectrum
+     * @param spectrumKey
+     * @param spectrumFileName
+     * @return
+     */
+    private MSnSpectrum getSpectrum(String spectrumKey, String spectrumFileName){
+
         if(spectrumFileType.equals("mgf")){
 
             String spectrumTitle = null;
@@ -2971,6 +3158,7 @@ public class PDVMainClass extends JFrame {
         } else{
             return null;
         }
+
     }
 
     /**
@@ -3156,68 +3344,13 @@ public class PDVMainClass extends JFrame {
 
             String spectrumKey = matchKey.split("_cus_")[1];
 
-            if (spectrumFileType.equals("mgf")) {
-                String spectrumTitle = null;
-                if(!isMaxQuant && !isNewSoft && !isPepXML){
-                    spectrumTitle = spectrumFactory.getSpectrumTitle(spectrumFileName, Integer.parseInt(spectrumKey)+1);
-                }else if(isMaxQuant || isPepXML) {
-                    spectrumTitle = spectrumKey;
-                } else if(isNewSoft){
-                    spectrumTitle = spectrumKey.split("_rank_")[0];
-                }
-
-                return (MSnSpectrum) spectrumFactory.getSpectrum(spectrumFileName, spectrumTitle);
-
-            } else if (spectrumFileType.equals("mzml")) {
-
-                int scanKey = selectedMatch.getSpectrumNumber();
-
-                IScan iScan = scans.getScanByNum(scanKey);
-                ISpectrum spectrum = iScan.getSpectrum();
-
-                Charge charge = selectedMatch.getBestPeptideAssumption().getIdentificationCharge();
-                ArrayList<Charge> charges = new ArrayList<>();
-                charges.add(charge);
-                Precursor precursor = new Precursor(scans.getScanByNum(iScan.getPrecursor().getParentScanNum()).getRt(), iScan.getPrecursor().getMzTarget(),
-                        iScan.getPrecursor().getIntensity(), charges);
-
-                double[] mzs = spectrum.getMZs();
-                double[] ins = spectrum.getIntensities();
-                HashMap<Double, Peak> peakMap = new HashMap<>();
-                for (int i = 0; i < mzs.length; i++) {
-                    Peak peak = new Peak(mzs[i], ins[i]);
-                    peakMap.put(mzs[i], peak);
-                }
-
-                return new MSnSpectrum(2, precursor, spectrumKey, peakMap, spectrumFileName);
-
-            } else if (spectrumFileType.equals("mzxml")){
-                int scanKey = selectedMatch.getSpectrumNumber();
-
-                IScan iScan = scans.getScanByNum(scanKey);
-                ISpectrum spectrum = iScan.getSpectrum();
-
-                Charge charge = selectedMatch.getBestPeptideAssumption().getIdentificationCharge();
-                ArrayList<Charge> charges = new ArrayList<>();
-                charges.add(charge);
-                Precursor precursor = new Precursor(iScan.getRt(), iScan.getPrecursor().getMzTarget(),
-                        iScan.getPrecursor().getIntensity(), charges);
-
-                double[] mzs = spectrum.getMZs();
-                double[] ins = spectrum.getIntensities();
-                HashMap<Double, Peak> peakMap = new HashMap<>();
-                for (int i = 0; i < mzs.length; i++) {
-                    Peak peak = new Peak(mzs[i], ins[i]);
-                    peakMap.put(mzs[i], peak);
-                }
-
-                return new MSnSpectrum(2, precursor, spectrumKey, peakMap, spectrumFileName);
-
+            if (isFrage){
+                return getFragSpectrum(selectedSpectrumKey);
             } else {
-                return null;
+                return getSpectrum(spectrumKey, spectrumFileName);
             }
 
-        } catch (SQLException | MzMLUnmarshallerException | IOException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             return null;
         }

@@ -208,6 +208,8 @@ public class PepXMLFileImport {
 
         Connection connection = sqLiteConnection.getConnection();
 
+        connection.setAutoCommit(false);
+
         Statement statement = connection.createStatement();
 
         PreparedStatement preparedStatement = null;
@@ -672,8 +674,10 @@ public class PepXMLFileImport {
                         }
                         spectrumIndex = spectrumIdAndNumber.get(spectrumNativeID);
                         spectrumMatch = new SpectrumMatch(Spectrum.getSpectrumKey(spectrumFileName, String.valueOf(spectrumIndex - 1)));
+                        spectrumTitle = String.valueOf(spectrumIndex - 1);
                     } else {
                         spectrumMatch = new SpectrumMatch(Spectrum.getSpectrumKey(spectrumFileName, String.valueOf(spectrumIndex - 1)));
+
                     }
 
                     spectrumMatch.setSpectrumNumber(spectrumIndex);
@@ -786,13 +790,11 @@ public class PepXMLFileImport {
 
                         preparedStatement.addBatch();
 
-                        connection.setAutoCommit(false);
-
                         count++;
 
                         if (count == 1000) {
                             int[] counts = preparedStatement.executeBatch();
-                            connection.setAutoCommit(true);
+                            connection.commit();
                             preparedStatement.close();
 
                             pdvMainClass.updatePTMSetting();
@@ -826,7 +828,7 @@ public class PepXMLFileImport {
 
             if (count != 0) {
                 int[] counts = preparedStatement.executeBatch();
-                connection.setAutoCommit(true);
+                connection.commit();
                 preparedStatement.close();
 
                 pdvMainClass.allSpectrumIndex.add(spectrumIndexList);

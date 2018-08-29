@@ -40,14 +40,16 @@ public class DatabaseImportDialog extends JDialog {
     private JLabel idFilesLabel;
     private JTextField idFilesTxt;
     private JButton startJButton;
+    private JButton browseSpectraJButton;
+    private JButton browseIdJButton;
     private JComboBox settingsComboBox;
     private JLabel spectrumFilesLabel;
     private JTextField spectrumFilesTxt;
     private JLabel fragmentIonJLable;
     private JComboBox precursorIonUnit;
+    private JComboBox fileTypeCombox;
     private JTextField fragmentIonAccuracyTxt;
     private JLabel msAmandaJLable;
-    private JCheckBox msAmandaJChekBox;
     private JPanel inputFilesPanel;
     private JPanel annotationSettingJPanel;
     private JPanel mainJPanel;
@@ -81,6 +83,10 @@ public class DatabaseImportDialog extends JDialog {
      */
     private ArrayList<File> spectrumFiles = new ArrayList<File>();
     /**
+     * Spectrum files hash
+     */
+    private HashMap<File, String> fileToType = new HashMap<>();
+    /**
      * LastSelectedFolder for opening easily
      */
     private String lastSelectedFolder;
@@ -108,6 +114,10 @@ public class DatabaseImportDialog extends JDialog {
      * Spectrum ID to spectrum number
      */
     private HashMap<String, Integer> spectrumIdAndNumber = new HashMap<>();
+    /**
+     * Boolean indicate txt file
+     */
+    private Boolean isText = false;
 
     /**
      * Creates a new open dialog.
@@ -175,12 +185,12 @@ public class DatabaseImportDialog extends JDialog {
         idFilesLabel = new JLabel();
         idFilesTxt = new JTextField();
         msAmandaJLable = new JLabel("Is MS Amanda? ");
-        msAmandaJChekBox = new JCheckBox();
         annotationSettingJPanel = new JPanel();
         inputFilesPanel = new JPanel();
         mainJPanel = new JPanel();
-        JButton browseIdJButton = new JButton();
-        JButton browseSpectraJButton = new JButton();
+        fileTypeCombox = new JComboBox();
+        browseIdJButton = new JButton();
+        browseSpectraJButton = new JButton();
 
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("PDV - Database Result Display");
@@ -264,6 +274,10 @@ public class DatabaseImportDialog extends JDialog {
         browseIdJButton.setBorderPainted(false);
         browseIdJButton.setContentAreaFilled(false);
         browseIdJButton.addActionListener(this::browseIdJButtonActionPerformed);
+
+        fileTypeCombox.setModel(new DefaultComboBoxModel(new String[]{"PDV format", "MSAmanda", "Philosopher (FragPipe)"}));
+        fileTypeCombox.setOpaque(true);
+        fileTypeCombox.setBackground(Color.WHITE);
 
         spectrumFilesLabel.setForeground(new Color(255, 0, 0));
         spectrumFilesLabel.setFont(new Font("Console", Font.PLAIN, 12));
@@ -362,7 +376,7 @@ public class DatabaseImportDialog extends JDialog {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addComponent(mainJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+            .addComponent(mainJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
@@ -424,7 +438,7 @@ public class DatabaseImportDialog extends JDialog {
                     searchParameters.setFragmentAccuracyType(SearchParameters.MassAccuracyType.PPM);
                 }
                 searchParameters.setFragmentIonAccuracy(fragmentIonMZTolerance);
-                
+
                 AnnotationSettings annotationPreferences = new AnnotationSettings();
                 annotationPreferences.setPreferencesFromSearchParameters(searchParameters);
                 annotationPreferences.setFragmentIonAccuracy(fragmentIonMZTolerance);
@@ -438,7 +452,16 @@ public class DatabaseImportDialog extends JDialog {
                 }
                 pdvMainClass.setFragmentAccuracyType(fragmentAccuracyType);
 
-                if (idFile != null) {
+                if (idFile != null && isText && fileTypeCombox.getSelectedIndex() == 2){
+
+                    if (fileToType != null){
+                        progressDialog.setRunFinished();
+                        importIdentificationFiles();
+                    } else {
+                        System.err.println("No spectrum file!");
+                    }
+
+                } else if (idFile != null && fileTypeCombox.getSelectedIndex() != 2) {
 
                     if(spectrumFileType.equals("mgf")){
                         SpectrumFactory spectrumFactory = SpectrumFactory.getInstance();
@@ -480,21 +503,22 @@ public class DatabaseImportDialog extends JDialog {
 
                         Map<String, MZMLIndexElement> idMap = mzmlFile.getIndex().getMapById();
 
-                        for (String id : idMap.keySet()){
+                        for (String id : idMap.keySet()) {
                             MZMLIndexElement mzmlIndexElement = idMap.get(id);
 
                             spectrumIdAndNumber.put(id, mzmlIndexElement.getNumber());
                         }
 
                         spectrumsFileFactory = scans;
-                    }else if(spectrumFileType.equals("mzxml")){
 
+                    }else if(spectrumFileType.equals("mzxml")){
                         MzXMLScanImport mzXMLScanImport = new MzXMLScanImport(spectrumFiles.get(0).getAbsolutePath());
 
                         spectrumsFileFactory = mzXMLScanImport.getScans();
+
                     }
 
-                    for (int i = 0;i<300;i++){
+                    for (int i = 0;i<3000;i++){
                         if (mzIdentMLCheck ==1){
 
                             progressDialog.setRunFinished();
@@ -539,7 +563,7 @@ public class DatabaseImportDialog extends JDialog {
 
         JFileChooser fileChooser = new JFileChooser(lastSelectedFolder);
         fileChooser.setDialogTitle("Select Spectrum File(s)");
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         fileChooser.setMultiSelectionEnabled(true);
 
         FileFilter filter = new FileFilter() {
@@ -565,20 +589,37 @@ public class DatabaseImportDialog extends JDialog {
             for (File newFile : fileChooser.getSelectedFiles()) {
                 if (newFile.isDirectory()) {
                     File[] selectedFiles = newFile.listFiles();
-                    for (File file : selectedFiles) {
-                        if (file.getName().toLowerCase().endsWith(".mgf")) {
-                            spectrumFiles.add(file);
+
+                    if (selectedFiles != null) {
+
+                        for (File singleFile : selectedFiles){
+                            if (singleFile.getName().toLowerCase().endsWith(".mgf")){
+                                spectrumFileType = "mgf";
+                                spectrumFiles.add(singleFile);
+                            } else if (singleFile.getName().toLowerCase().endsWith(".mzml")){
+                                fileToType.put(singleFile, "mzml");
+                                spectrumFiles.add(singleFile);
+                            } else if (singleFile.getName().toLowerCase().endsWith(".mzxml")){
+                                fileToType.put(singleFile, "mzxml");
+                                spectrumFiles.add(singleFile);
+                            }
                         }
+                    } else {
+                        System.err.println("No spectrum files in your directory!");
                     }
                 } else {
                     if(newFile.getName().toLowerCase().endsWith(".mgf")){
                         spectrumFileType = "mgf";
+                        spectrumFiles.add(newFile);
                     }else if(newFile.getName().toLowerCase().endsWith(".mzml")){
                         spectrumFileType = "mzml";
-                    }else {
+                        spectrumFiles.add(newFile);
+                        fileToType.put(newFile, "mzml");
+                    }else if(newFile.getName().toLowerCase().endsWith(".mzxml")){
                         spectrumFileType = "mzxml";
+                        spectrumFiles.add(newFile);
+                        fileToType.put(newFile, "mzxml");
                     }
-                    spectrumFiles.add(newFile);
                 }
             }
 
@@ -606,12 +647,13 @@ public class DatabaseImportDialog extends JDialog {
                         ||myFile.getName().toLowerCase().endsWith(".txt")
                         ||myFile.getName().toLowerCase().endsWith(".xml")
                         ||myFile.getName().toLowerCase().endsWith(".csv")
+                        ||myFile.getName().toLowerCase().endsWith(".tsv")
                         || myFile.isDirectory();
             }
 
             @Override
             public String getDescription() {
-                return "mzIdentML (.mzid), PepXML (.pepxml), Text File (.txt), MS Amanda (.csv, .txt)";
+                return "mzIdentML (.mzid), PepXML (.pepxml), Text File (.txt), MS Amanda (.csv, .txt), MSfrage (.tsv)";
             }
         };
 
@@ -628,34 +670,57 @@ public class DatabaseImportDialog extends JDialog {
             idFilesTxt.setText(idFile.getName() + " selected");
 
             if(idFile.getName().toLowerCase().endsWith(".mzid")) {
-                mainJPanel.removeAll();
-                GroupLayout mainJPanelLayout = new GroupLayout(mainJPanel);
-                mainJPanel.setLayout(mainJPanelLayout);
-                mainJPanelLayout.setHorizontalGroup(
-                        mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addGroup(mainJPanelLayout.createSequentialGroup()
+
+                isText = false;
+
+                inputFilesPanel.removeAll();
+
+                GroupLayout inputFilesPanelLayout = new GroupLayout(inputFilesPanel);
+                inputFilesPanel.setLayout(inputFilesPanelLayout);
+                inputFilesPanelLayout.setHorizontalGroup(
+                        inputFilesPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                .addGroup(inputFilesPanelLayout.createSequentialGroup()
                                         .addContainerGap()
-                                        .addGroup(mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                                .addGroup(mainJPanelLayout.createSequentialGroup()
-                                                        .addGap(150, 220, 500)
-                                                        .addComponent(startJButton, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
-                                                        .addGap(15, 15, 15))
-                                                .addComponent(inputFilesPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addComponent(annotationSettingJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addGroup(inputFilesPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                                .addGroup(GroupLayout.Alignment.TRAILING, inputFilesPanelLayout.createSequentialGroup()
+                                                        .addComponent(idFilesLabel, GroupLayout.PREFERRED_SIZE, 160, GroupLayout.PREFERRED_SIZE)
+                                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                        .addComponent(idFilesTxt,GroupLayout.PREFERRED_SIZE,260, GroupLayout.PREFERRED_SIZE)
+                                                        .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                                        .addComponent(browseIdJButton))
+                                                .addGroup(inputFilesPanelLayout.createSequentialGroup()
+                                                        .addComponent(spectrumFilesLabel, GroupLayout.PREFERRED_SIZE, 160, GroupLayout.PREFERRED_SIZE)
+                                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                        .addComponent(spectrumFilesTxt,GroupLayout.PREFERRED_SIZE, 260, GroupLayout.PREFERRED_SIZE)
+                                                        .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                                        .addComponent(browseSpectraJButton)))
                                         .addContainerGap())
                 );
-                mainJPanelLayout.setVerticalGroup(
-                        mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addGroup(mainJPanelLayout.createSequentialGroup()
+
+                inputFilesPanelLayout.linkSize(SwingConstants.HORIZONTAL, new Component[] {browseIdJButton});
+
+                inputFilesPanelLayout.linkSize(SwingConstants.HORIZONTAL, new Component[] {browseSpectraJButton});
+
+                inputFilesPanelLayout.setVerticalGroup(
+                        inputFilesPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                .addGroup(inputFilesPanelLayout.createSequentialGroup()
                                         .addContainerGap()
-                                        .addComponent(inputFilesPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addGroup(inputFilesPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                                .addComponent(idFilesTxt, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(idFilesLabel)
+                                                .addComponent(browseIdJButton))
                                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(annotationSettingJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addGroup(inputFilesPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                                .addComponent(spectrumFilesLabel)
+                                                .addComponent(browseSpectraJButton)
+                                                .addComponent(spectrumFilesTxt, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                        .addGroup(mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
-                                                .addComponent(startJButton, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
-                                        .addContainerGap())
+                                        .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 );
+
+                inputFilesPanel.repaint();
+
+                pack();
 
                 Thread importIDThread = new Thread(new Runnable() {
                     public void run() {
@@ -675,83 +740,125 @@ public class DatabaseImportDialog extends JDialog {
 
                 importIDThread.start();
             }else {
-                if (idFile.getName().toLowerCase().endsWith(".txt") || idFile.getName().toLowerCase().endsWith(".csv")){
+                if (idFile.getName().toLowerCase().endsWith(".txt") || idFile.getName().toLowerCase().endsWith(".csv") || idFile.getName().toLowerCase().endsWith(".tsv")){
 
-                    int value = JOptionPane.showConfirmDialog(this,
-                            "Is this file MS Amanda result file? ",
-                            "Kind of result file",
-                            JOptionPane.YES_NO_OPTION,
-                            JOptionPane.QUESTION_MESSAGE);
+                    isText = true;
+                    inputFilesPanel.removeAll();
 
-                    if (value == JOptionPane.YES_OPTION){
-                        msAmandaJChekBox.setSelected(true);
-                    } else if (value == JOptionPane.NO_OPTION){
-                        msAmandaJChekBox.setSelected(false);
-                    }
+                    JLabel fileTypeJLabel = new JLabel();
+                    fileTypeJLabel.setFont(new Font("Console", Font.PLAIN, 12));
+                    fileTypeJLabel.setText("File Type");
+                    fileTypeJLabel.setToolTipText("Please select the result file type!");
+                    JLabel blankJLabel = new JLabel("");
 
-                    GroupLayout mainJPanelLayout = new GroupLayout(mainJPanel);
-                    mainJPanel.setLayout(mainJPanelLayout);
-                    mainJPanelLayout.setHorizontalGroup(
-                            mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                    .addGroup(mainJPanelLayout.createSequentialGroup()
+                    GroupLayout inputFilesPanelLayout = new GroupLayout(inputFilesPanel);
+                    inputFilesPanel.setLayout(inputFilesPanelLayout);
+                    inputFilesPanelLayout.setHorizontalGroup(
+                            inputFilesPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                    .addGroup(inputFilesPanelLayout.createSequentialGroup()
                                             .addContainerGap()
-                                            .addGroup(mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                                    .addGroup(mainJPanelLayout.createSequentialGroup()
-                                                            .addGap(5,8,10)
-                                                            .addComponent(msAmandaJLable)
-                                                            .addGap(5,8,10)
-                                                            .addComponent(msAmandaJChekBox)
-                                                            .addGap(100, 220, 500)
-                                                            .addComponent(startJButton, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
-                                                            .addGap(15, 15, 15))
-                                                    .addComponent(inputFilesPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                    .addComponent(annotationSettingJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                            .addGroup(inputFilesPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                                    .addGroup(GroupLayout.Alignment.TRAILING, inputFilesPanelLayout.createSequentialGroup()
+                                                            .addComponent(idFilesLabel, GroupLayout.PREFERRED_SIZE, 160, GroupLayout.PREFERRED_SIZE)
+                                                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                            .addComponent(idFilesTxt,GroupLayout.PREFERRED_SIZE,260, GroupLayout.PREFERRED_SIZE)
+                                                            .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                                            .addComponent(browseIdJButton))
+                                                    .addGroup(GroupLayout.Alignment.TRAILING, inputFilesPanelLayout.createSequentialGroup()
+                                                            .addComponent(fileTypeJLabel, GroupLayout.PREFERRED_SIZE, 160, Short.MAX_VALUE)
+                                                            .addComponent(fileTypeCombox,GroupLayout.PREFERRED_SIZE, 260, GroupLayout.PREFERRED_SIZE)
+                                                            .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                                            .addComponent(blankJLabel))
+                                                    .addGroup(inputFilesPanelLayout.createSequentialGroup()
+                                                            .addComponent(spectrumFilesLabel, GroupLayout.PREFERRED_SIZE, 160, GroupLayout.PREFERRED_SIZE)
+                                                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                            .addComponent(spectrumFilesTxt,GroupLayout.PREFERRED_SIZE, 260, GroupLayout.PREFERRED_SIZE)
+                                                            .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                                            .addComponent(browseSpectraJButton)))
                                             .addContainerGap())
                     );
-                    mainJPanelLayout.setVerticalGroup(
-                            mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                    .addGroup(mainJPanelLayout.createSequentialGroup()
+
+                    inputFilesPanelLayout.linkSize(SwingConstants.HORIZONTAL, new Component[] {browseIdJButton, browseSpectraJButton, blankJLabel});
+
+                    //inputFilesPanelLayout.linkSize(SwingConstants.HORIZONTAL, new Component[] {browseSpectraJButton});
+
+                    inputFilesPanelLayout.setVerticalGroup(
+                            inputFilesPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                    .addGroup(inputFilesPanelLayout.createSequentialGroup()
                                             .addContainerGap()
-                                            .addComponent(inputFilesPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                            .addGroup(inputFilesPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                                    .addComponent(idFilesTxt, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                    .addComponent(idFilesLabel)
+                                                    .addComponent(browseIdJButton))
                                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                            .addComponent(annotationSettingJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                            .addGroup(inputFilesPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                                    .addComponent(fileTypeCombox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                    .addComponent(fileTypeJLabel)
+                                                    .addComponent(blankJLabel))
                                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                            .addGroup(mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
-                                                    .addComponent(startJButton, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
-                                                    .addComponent(msAmandaJLable)
-                                                    .addComponent(msAmandaJChekBox))
-                                            .addContainerGap())
+                                            .addGroup(inputFilesPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                                    .addComponent(spectrumFilesLabel)
+                                                    .addComponent(browseSpectraJButton)
+                                                    .addComponent(spectrumFilesTxt, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                            .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     );
+
+                    inputFilesPanel.repaint();
+
+                    pack();
 
                 } else {
-                    mainJPanel.removeAll();
-                    GroupLayout mainJPanelLayout = new GroupLayout(mainJPanel);
-                    mainJPanel.setLayout(mainJPanelLayout);
-                    mainJPanelLayout.setHorizontalGroup(
-                            mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                    .addGroup(mainJPanelLayout.createSequentialGroup()
+                    inputFilesPanel.removeAll();
+
+                    isText = false;
+
+                    GroupLayout inputFilesPanelLayout = new GroupLayout(inputFilesPanel);
+                    inputFilesPanel.setLayout(inputFilesPanelLayout);
+                    inputFilesPanelLayout.setHorizontalGroup(
+                            inputFilesPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                    .addGroup(inputFilesPanelLayout.createSequentialGroup()
                                             .addContainerGap()
-                                            .addGroup(mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                                    .addGroup(mainJPanelLayout.createSequentialGroup()
-                                                            .addGap(150, 220, 500)
-                                                            .addComponent(startJButton, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
-                                                            .addGap(15, 15, 15))
-                                                    .addComponent(inputFilesPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                    .addComponent(annotationSettingJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                            .addGroup(inputFilesPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                                    .addGroup(GroupLayout.Alignment.TRAILING, inputFilesPanelLayout.createSequentialGroup()
+                                                            .addComponent(idFilesLabel, GroupLayout.PREFERRED_SIZE, 160, GroupLayout.PREFERRED_SIZE)
+                                                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                            .addComponent(idFilesTxt,GroupLayout.PREFERRED_SIZE,260, GroupLayout.PREFERRED_SIZE)
+                                                            .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                                            .addComponent(browseIdJButton))
+                                                    .addGroup(inputFilesPanelLayout.createSequentialGroup()
+                                                            .addComponent(spectrumFilesLabel, GroupLayout.PREFERRED_SIZE, 160, GroupLayout.PREFERRED_SIZE)
+                                                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                            .addComponent(spectrumFilesTxt,GroupLayout.PREFERRED_SIZE, 260, GroupLayout.PREFERRED_SIZE)
+                                                            .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                                            .addComponent(browseSpectraJButton)))
                                             .addContainerGap())
                     );
-                    mainJPanelLayout.setVerticalGroup(
-                            mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                    .addGroup(mainJPanelLayout.createSequentialGroup()
+
+                    inputFilesPanelLayout.linkSize(SwingConstants.HORIZONTAL, new Component[] {browseIdJButton});
+
+                    inputFilesPanelLayout.linkSize(SwingConstants.HORIZONTAL, new Component[] {browseSpectraJButton});
+
+                    inputFilesPanelLayout.setVerticalGroup(
+                            inputFilesPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                    .addGroup(inputFilesPanelLayout.createSequentialGroup()
                                             .addContainerGap()
-                                            .addComponent(inputFilesPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                            .addGroup(inputFilesPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                                    .addComponent(idFilesTxt, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                    .addComponent(idFilesLabel)
+                                                    .addComponent(browseIdJButton))
                                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                            .addComponent(annotationSettingJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                            .addGroup(inputFilesPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                                    .addComponent(spectrumFilesLabel)
+                                                    .addComponent(browseSpectraJButton)
+                                                    .addComponent(spectrumFilesTxt, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                            .addGroup(mainJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
-                                                    .addComponent(startJButton, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
-                                            .addContainerGap())
+                                            .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     );
+
+                    inputFilesPanel.repaint();
+
+                    pack();
                 }
                 mzIdentMLCheck = 1;
             }
@@ -769,6 +876,13 @@ public class DatabaseImportDialog extends JDialog {
             FileDisplayDialog fileDisplayDialog = new FileDisplayDialog(this, spectrumFiles, true);
             if (!fileDisplayDialog.canceled()) {
                 spectrumFiles = fileDisplayDialog.getSelectedFiles();
+
+                for (File file : fileToType.keySet()){
+                    if (!spectrumFiles.contains(file)){
+                        fileToType.remove(file);
+                    }
+                }
+
                 spectrumFilesTxt.setText(spectrumFiles.size() + " file(s) selected");
                 validateInput();
             }
@@ -841,12 +955,16 @@ public class DatabaseImportDialog extends JDialog {
         }else if(idFile.getName().toLowerCase().endsWith("xml")){
             pdvMainClass.importFilePep(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType, spectrumIdAndNumber);
             idFile = null;
-        } else if(idFile.getName().toLowerCase().endsWith(".txt") || idFile.getName().toLowerCase().endsWith(".csv")){
+        } else if(idFile.getName().toLowerCase().endsWith(".txt") || idFile.getName().toLowerCase().endsWith(".csv") || idFile.getName().toLowerCase().endsWith(".tsv")){
 
-            if (msAmandaJChekBox.isSelected()){
+            Integer selectedIndex = fileTypeCombox.getSelectedIndex();
+
+            if (selectedIndex == 1){
                 pdvMainClass.importMSAmandaResults(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType, spectrumIdAndNumber);
-            } else{
+            } else if (selectedIndex == 0){
                 pdvMainClass.importTextResults(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType);
+            } else {
+                pdvMainClass.importFragPipe(fileToType, idFile);
             }
             idFile = null;
         } else {

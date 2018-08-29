@@ -1,6 +1,7 @@
 package PDVGUI.DB;
 
 import com.compomics.util.experiment.identification.matches.SpectrumMatch;
+import com.compomics.util.experiment.massspectrometry.MSnSpectrum;
 import com.compomics.util.experiment.massspectrometry.Spectrum;
 
 import javax.sql.rowset.serial.SerialBlob;
@@ -239,6 +240,111 @@ public class SQLiteConnection {
         }
 
         return oneItem;
+    }
+
+    /**
+     * Get one record including spectrum
+     * @param spectrumID Spectrum ID
+     * @return ArrayList
+     * @throws SQLException
+     */
+    public ArrayList<Object> getOneFrageSpectrumItem(String spectrumID) throws SQLException {
+
+        ArrayList<Object> oneItem = new ArrayList<>();
+
+        Statement statement = connection.createStatement();
+        String query1 = "SELECT * FROM SpectrumMatch WHERE PSMIndex = '" + spectrumID + "'";
+        ResultSet rs1 = statement.executeQuery(query1);
+        SpectrumMatch spectrumMatch = null;
+        Spectrum spectrum = null;
+
+        byte[] bytes;
+        Blob tempBlob;
+
+        while (rs1.next()){
+            bytes = rs1.getBytes(6);
+            tempBlob = new SerialBlob(bytes);
+            BufferedInputStream bis = new BufferedInputStream(tempBlob.getBinaryStream());
+            try {
+                ObjectInputStream in = new ObjectInputStream(bis);
+                try {
+                    spectrumMatch = (SpectrumMatch) in.readObject();
+                } finally {
+                    in.close();
+                }
+            } catch (ClassNotFoundException | IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    bis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            oneItem.add(spectrumMatch);
+
+            Blob scoreBlob;
+            byte[] scoreBytes = rs1.getBytes(7);
+            scoreBlob = new SerialBlob(scoreBytes);
+            BufferedInputStream scoreBis = new BufferedInputStream(scoreBlob.getBinaryStream());
+            try {
+                ObjectInputStream in = new ObjectInputStream(scoreBis);
+                try {
+                    spectrum = (Spectrum) in.readObject();
+                } finally {
+                    in.close();
+                }
+            } catch (ClassNotFoundException | IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    scoreBis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            oneItem.add(spectrum);
+
+            for (int i = 0; i<scoreNum; i++){
+                oneItem.add(rs1.getObject(8+i));
+            }
+        }
+
+        return oneItem;
+    }
+
+    public MSnSpectrum getFragSpectrum(String spectrumID) throws SQLException {
+        MSnSpectrum spectrum = null;
+
+        Statement statement = connection.createStatement();
+        String query1 = "SELECT Spectrum FROM SpectrumMatch WHERE PSMIndex = '" + spectrumID + "'";
+        ResultSet rs1 = statement.executeQuery(query1);
+
+        while (rs1.next()){
+            Blob tempBlob;
+            byte[] bytes = rs1.getBytes(1);
+            tempBlob = new SerialBlob(bytes);
+            BufferedInputStream bis = new BufferedInputStream(tempBlob.getBinaryStream());
+            try {
+                ObjectInputStream in = new ObjectInputStream(bis);
+                try {
+                    spectrum = (MSnSpectrum) in.readObject();
+                } finally {
+                    in.close();
+                }
+            } catch (ClassNotFoundException | IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    bis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return spectrum;
     }
 
     /**

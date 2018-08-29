@@ -253,7 +253,7 @@ public class MSAmandaImport {
                             PTM ptm = new PTM(PTM.MODNPAA, singleModificationName, modMass, residues);
                             ptm.setShortName(modName);
                             ptmFactory.addUserPTM(ptm);
-                        } else if (site.equalsIgnoreCase("n-term")) {
+                        } else if (site.equalsIgnoreCase("c-term")) {
                             residues.add(site);
                             PTM ptm = new PTM(PTM.MODCP, singleModificationName, modMass, residues);
                             ptm.setShortName(modName);

@@ -1,6 +1,7 @@
 package PDVGUI.gui;
 
 import PDVGUI.DB.SQLiteConnection;
+import PDVGUI.fileimport.FragePipeImport;
 import PDVGUI.fileimport.SpectrumLibrarySplibImport;
 import PDVGUI.gui.utils.Export.ExportBatchDialog;
 import PDVGUI.gui.utils.Export.RealTimeExportJDialog;
@@ -67,10 +68,6 @@ public class SpectrumLibDisplay extends JFrame {
      */
     public SearchParameters searchParameters;
     /**
-     * Spectrum library file path
-     */
-    private String spectrumLibFilePath;
-    /**
      * Database name
      */
     private String dbName;
@@ -134,7 +131,6 @@ public class SpectrumLibDisplay extends JFrame {
      */
     public SpectrumLibDisplay(String spectrumLibFilePath, SearchParameters searchParameters, AnnotationSettings annotationSettings){
 
-        this.spectrumLibFilePath = spectrumLibFilePath;
         this.searchParameters = searchParameters;
         this.annotationSettings = annotationSettings;
 
@@ -146,7 +142,7 @@ public class SpectrumLibDisplay extends JFrame {
 
         setVisible(true);
 
-        importSpectrumLib();
+        importSpectrumLib(spectrumLibFilePath);
     }
 
     /**
@@ -914,7 +910,6 @@ public class SpectrumLibDisplay extends JFrame {
                 psmJTable.repaint();
             }
 
-
             updateSpectrum(currentSpectrum, currentSpectrumMatch);
 
             this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
@@ -949,7 +944,7 @@ public class SpectrumLibDisplay extends JFrame {
     /**
      * Import spectrum library
      */
-    private void importSpectrumLib(){
+    private void importSpectrumLib(String spectrumLibFilePath){
 
         ProgressDialogX progressDialog = new ProgressDialogX(this,
                 Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMass.png")),

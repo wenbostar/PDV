@@ -211,6 +211,8 @@ public class MzIDFileImport {
 
         Connection connection = sqLiteConnection.getConnection();
 
+        connection.setAutoCommit(false);
+
         Statement statement = connection.createStatement();
 
         StringBuilder addQuery = new StringBuilder();
@@ -650,13 +652,11 @@ public class MzIDFileImport {
 
                 preparedStatement.addBatch();
 
-                connection.setAutoCommit(false);
-
                 count++;
 
                 if (count == 1000){
                     int[] counts = preparedStatement.executeBatch();
-                    connection.setAutoCommit(true);
+                    connection.commit();
                     preparedStatement.close();
 
                     pdvMainClass.updatePTMSetting();
@@ -683,7 +683,7 @@ public class MzIDFileImport {
 
             if (count != 0){
                 int[] counts = preparedStatement.executeBatch();
-                connection.setAutoCommit(true);
+                connection.commit();
                 preparedStatement.close();
 
                 pdvMainClass.updatePTMSetting();

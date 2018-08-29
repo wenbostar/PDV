@@ -37,7 +37,7 @@ public class DatabaseTableModel extends DefaultTableModel {
      */
     private SearchParameters searchParameters;
     /**
-     * Extral parameters
+     * Extra parameters
      */
     private ArrayList<String> scoreName;
     /**
@@ -123,7 +123,7 @@ public class DatabaseTableModel extends DefaultTableModel {
         if(scoreName != null) {
             return scoreName.size()+10;
         } else {
-            return 0;
+            return 10;
         }
     }
 

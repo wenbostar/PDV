@@ -118,6 +118,8 @@ public class SpectrumLibrarySplibImport {
 
         Connection connection = sqLiteConnection.getConnection();
 
+        connection.setAutoCommit(false);
+
         Statement statement = connection.createStatement();
         String matchTableQuery = "CREATE TABLE SpectrumMatch (LibID INT(8), MZ DOUBLE, Charge INT(2), NumPeaks INT(4), MassError DOUBLE, Match Object, Spectrum Object, ProteinList Object, PRIMARY KEY(LibID))";
 
@@ -234,11 +236,10 @@ public class SpectrumLibrarySplibImport {
                 preparedStatement.setBytes(8, bos2.toByteArray());
 
                 preparedStatement.addBatch();
-                connection.setAutoCommit(false);
 
                 if(countRound == 1000){
                     int[] counts = preparedStatement.executeBatch();
-                    connection.setAutoCommit(true);
+                    connection.commit();
                     preparedStatement.close();
 
                     spectrumLibDisplay.allLibIDList.add(libIDList);
@@ -267,7 +268,7 @@ public class SpectrumLibrarySplibImport {
 
         if(countRound != 0){
             int[] counts = preparedStatement.executeBatch();
-            connection.setAutoCommit(true);
+            connection.commit();
             preparedStatement.close();
 
             spectrumLibDisplay.allLibIDList.add(libIDList);
