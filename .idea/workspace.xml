@@ -6,19 +6,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0b0cca48-ec31-481b-94db-b982afc0e540" name="Default" comment="CLI mode debug.">
-      <change beforePath="" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/FragePipeImport.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TableModel/FrageTableModel.java" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" afterPath="$PROJECT_DIR$/pom.xml" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/DB/SQLiteConnection.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/DB/SQLiteConnection.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MSAmandaImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MSAmandaImport.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MzIDFileImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MzIDFileImport.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/PepXMLFileImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/PepXMLFileImport.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/SpectrumLibrarySplibImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/SpectrumLibrarySplibImport.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/SpectrumLibDisplay.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/SpectrumLibDisplay.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/DatabaseImportDialog.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/DatabaseImportDialog.java" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TableModel/DatabaseTableModel.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TableModel/DatabaseTableModel.java" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/FragePipeImport.java" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/FragePipeImport.java" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -60,14 +49,14 @@
       <file leaf-file-name="FragePipeImport.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/FragePipeImport.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="578" column="0" lean-forward="true" selection-start-line="578" selection-start-column="0" selection-end-line="578" selection-end-column="0" />
+            <state relative-caret-position="294">
+              <caret line="558" column="67" lean-forward="false" selection-start-line="558" selection-start-column="67" selection-end-line="558" selection-end-column="67" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#20216#20217#0" expanded="true" />
-                <element signature="e#20255#20256#0" expanded="true" />
-                <element signature="e#22335#22336#0" expanded="true" />
-                <element signature="e#22374#22375#0" expanded="true" />
+                <element signature="e#20272#20273#0" expanded="true" />
+                <element signature="e#20311#20312#0" expanded="true" />
+                <element signature="e#22459#22460#0" expanded="true" />
+                <element signature="e#22498#22499#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -252,11 +241,11 @@
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/SpectrumLibrarySplibImport.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TableModel/DatabaseTableModel.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/DatabaseImportDialog.java" />
-        <option value="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/FragePipeImport.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/SpectrumLibDisplay.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TableModel/FrageTableModel.java" />
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java" />
+        <option value="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/FragePipeImport.java" />
       </list>
     </option>
   </component>
@@ -693,12 +682,12 @@
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24608968" sideWeight="0.50193477" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1687898" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.26275116" sideWeight="0.49806523" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.26275116" sideWeight="0.49806523" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25104168" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.29829985" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24601911" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24601911" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24720894" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24960127" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -1173,14 +1162,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/FragePipeImport.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="578" column="0" lean-forward="true" selection-start-line="578" selection-start-column="0" selection-end-line="578" selection-end-column="0" />
+        <state relative-caret-position="294">
+          <caret line="558" column="67" lean-forward="false" selection-start-line="558" selection-start-column="67" selection-end-line="558" selection-end-column="67" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#20216#20217#0" expanded="true" />
-            <element signature="e#20255#20256#0" expanded="true" />
-            <element signature="e#22335#22336#0" expanded="true" />
-            <element signature="e#22374#22375#0" expanded="true" />
+            <element signature="e#20272#20273#0" expanded="true" />
+            <element signature="e#20311#20312#0" expanded="true" />
+            <element signature="e#22459#22460#0" expanded="true" />
+            <element signature="e#22498#22499#0" expanded="true" />
           </folding>
         </state>
       </provider>

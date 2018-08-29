@@ -556,6 +556,7 @@ public class FragePipeImport {
             } else if (header.equalsIgnoreCase("Observed M/Z")) {
                 observedMZIndex = i;
             } else if (header.equalsIgnoreCase("Assigned Modifications")) {
+                indexToName.put(i, header.trim().replace(" ", ""));
                 assignenModIndex = i;
             } else {
                 indexToName.put(i, header.trim().replace(" ", ""));
