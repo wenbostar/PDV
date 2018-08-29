@@ -157,7 +157,7 @@ public class FragePipeImport {
             }.start();
         } else {
             JOptionPane.showMessageDialog(
-                    pdvMainClass, "Follow files can not find in your input path:\n" + outPutError + "Please close PDV and check it. ",
+                    pdvMainClass, "The following MS/MS file(s) can not be found in the input MS/MS file folder or input MS/MS file list:\n" + outPutError + "Please close PDV and check it. ",
                     "No match spectrum file", JOptionPane.ERROR_MESSAGE);
             progressDialog.setRunFinished();
         }
