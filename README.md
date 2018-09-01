@@ -138,7 +138,7 @@ java -jar PDV-1.1.0/PDV-1.1.0.jar -r input_data/SF_200217_U2OS_TiO2_HCD_OT_rep1_
 
 To cite the `PDV` package in publications, please use:
 
-Coming soon.
+Li, K., et al. (2018). "PDV: an integrative proteomics data viewer." Bioinformatics, 2018. [doi: 10.1093/bioinformatics/bty770](https://academic.oup.com/bioinformatics/advance-article/doi/10.1093/bioinformatics/bty770/5087714)
 
 ## List of citations
 
