@@ -431,9 +431,22 @@ public class MaxQuantImportDialog extends JDialog {
 
             maxQuantResultPath = selectedFile.getAbsolutePath();
 
-            lastSelectedFolder = selectedFile.getParent();
+            if (!selectedFile.exists()){ // Avoid bug in Mac
+                maxQuantResultPath = maxQuantResultPath.substring(0, maxQuantResultPath.lastIndexOf("/"));
+                if (!new File(maxQuantResultPath).exists()){
+                    JOptionPane.showMessageDialog(null, "Please check your input path.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    lastSelectedFolder = maxQuantResultPath;
 
-            maxQuantResultTxt.setText(" File selected");
+                    maxQuantResultTxt.setText(lastSelectedFolder + "selected");
+                }
+            } else {
+                lastSelectedFolder = maxQuantResultPath;
+
+                maxQuantResultTxt.setText(lastSelectedFolder + "selected");
+            }
+
             validateInput();
         }
     }

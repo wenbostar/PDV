@@ -29,7 +29,7 @@ public class ExportBatchDialog extends JDialog {
     /**
      * Picture type
      */
-    private String[] picType = new String[]{"PNG (Portable Network Graphics)", "TIFF (Tagged Image File Format)", "PDF (Portable Document Format)"};
+    private String[] picType = new String[]{"PNG", "TIFF", "PDF"};
     /**
      * Selection size
      */
@@ -115,6 +115,9 @@ public class ExportBatchDialog extends JDialog {
         initComponents();
         validateInput();
 
+        picHeightJText.setText(String.valueOf(500));
+        picWidthJText.setText(String.valueOf(900));
+
         typeJComboBox.setEnabled(true);
         typeJComboBox.setRenderer(new AlignedListCellRenderer(0));
         pathJText.setText("No Selection");
@@ -194,7 +197,7 @@ public class ExportBatchDialog extends JDialog {
         picHeightJLabel.setFont(new Font("Console", Font.PLAIN, 12));
         picWidthJlabel.setFont(new Font("Console", Font.PLAIN, 12));
 
-        unitJCombox.setModel(new DefaultComboBoxModel(new String[]{"mm", "cm", "in", "px"}));
+        unitJCombox.setModel(new DefaultComboBoxModel(new String[]{"px", "mm", "cm", "in"}));
 
         GroupLayout detailJPanelLayout = new GroupLayout(detailJPanel);
         detailJPanel.setLayout(detailJPanelLayout);;
@@ -351,7 +354,7 @@ public class ExportBatchDialog extends JDialog {
         JFileChooser fileChooser = new JFileChooser(lastFolder);
         fileChooser.setDialogTitle("Select Output Directory");
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        fileChooser.setMultiSelectionEnabled(true);
+        fileChooser.setMultiSelectionEnabled(false);
 
         int returnValue = fileChooser.showDialog(this, "Ok");
 
@@ -361,13 +364,30 @@ public class ExportBatchDialog extends JDialog {
 
             outputFolder = selectedFile.getAbsolutePath();
 
-            if (pdvMainClass != null){
-                PDVMainClass.lastSelectedFolder.setLastSelectedFolder(outputFolder);
-            } else if(spectrumLibDisplay != null){
-                spectrumLibDisplay.lastSelectedFolder.setLastSelectedFolder(outputFolder);
+            if (!selectedFile.exists()){ // Avoid bug in Mac
+                outputFolder = outputFolder.substring(0, outputFolder.lastIndexOf("/"));
+                if (!new File(outputFolder).exists()){
+                    JOptionPane.showMessageDialog(null, "Please check your output path.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    if (pdvMainClass != null){
+                        PDVMainClass.lastSelectedFolder.setLastSelectedFolder(outputFolder);
+                    } else if(spectrumLibDisplay != null){
+                        spectrumLibDisplay.lastSelectedFolder.setLastSelectedFolder(outputFolder);
+                    }
+
+                    pathJText.setText(outputFolder + " selected");
+                }
+            } else {
+                if (pdvMainClass != null){
+                    PDVMainClass.lastSelectedFolder.setLastSelectedFolder(outputFolder);
+                } else if(spectrumLibDisplay != null){
+                    spectrumLibDisplay.lastSelectedFolder.setLastSelectedFolder(outputFolder);
+                }
+
+                pathJText.setText(outputFolder + " selected");
             }
 
-            pathJText.setText(outputFolder+" selected");
             validateInput();
         }
     }
@@ -382,7 +402,7 @@ public class ExportBatchDialog extends JDialog {
         if(selectIndex == 2){
             unitJCombox.setModel(new DefaultComboBoxModel(new String[]{"mm", "cm", "in"}));
         } else {
-            unitJCombox.setModel(new DefaultComboBoxModel(new String[]{"mm", "cm", "in", "px"}));
+            unitJCombox.setModel(new DefaultComboBoxModel(new String[]{"px", "mm", "cm", "in"}));
         }
     }
 

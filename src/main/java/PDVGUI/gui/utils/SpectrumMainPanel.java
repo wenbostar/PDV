@@ -45,7 +45,7 @@ import static com.compomics.util.experiment.biology.Ion.IonType.REPORTER_ION;
  */
 public class SpectrumMainPanel extends JPanel {
 
-    private JPanel spectrumMainPanel;
+    public JPanel spectrumShowPanel;
     private JPanel mainShowJPanel;
     private JPanel fragmentIonJPanel;
     private JScrollPane ionFragmentsJScrollPane;
@@ -390,7 +390,7 @@ public class SpectrumMainPanel extends JPanel {
 
         Font menuFont = new Font("Arial", Font.PLAIN, 12);
 
-        spectrumMainPanel = new JPanel();
+        spectrumShowPanel = new JPanel();
         mainShowJPanel = new JPanel();
         fragmentIonJPanel = new JPanel();
         ionFragmentsJScrollPane = new JScrollPane();
@@ -430,7 +430,7 @@ public class SpectrumMainPanel extends JPanel {
         bIonNumJLabel = new JLabel();
         yIonNumJLabel = new JLabel();
         matchNumJLabel = new JLabel();
-        spectrumMainPanel.setOpaque(false);
+        spectrumShowPanel.setOpaque(false);
 
         annotationMenuBar.setBorder(javax.swing.BorderFactory.createRaisedBevelBorder());
         annotationMenuBar.setOpaque(false);
@@ -747,11 +747,11 @@ public class SpectrumMainPanel extends JPanel {
         matchIonNumJLabel.setText("by pairs: ");
         matchIonNumJLabel.setToolTipText("The number of all by pairs in same charge state.");
 
-        spectrumMainPanel.setOpaque(false);
-        spectrumMainPanel.setBackground(Color.white);
+        spectrumShowPanel.setOpaque(false);
+        spectrumShowPanel.setBackground(Color.white);
 
-        GroupLayout spectrumMainPanelLayout = new GroupLayout(spectrumMainPanel);
-        spectrumMainPanel.setLayout(spectrumMainPanelLayout);
+        GroupLayout spectrumMainPanelLayout = new GroupLayout(spectrumShowPanel);
+        spectrumShowPanel.setLayout(spectrumMainPanelLayout);
         spectrumMainPanelLayout.setHorizontalGroup(
                 spectrumMainPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(spectrumMainPanelLayout.createSequentialGroup()
@@ -792,12 +792,12 @@ public class SpectrumMainPanel extends JPanel {
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 
                         .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addComponent(spectrumMainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
+                                .addComponent(spectrumShowPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addComponent(spectrumMainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
+                                .addComponent(spectrumShowPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
         );
     }
 
@@ -980,7 +980,7 @@ public class SpectrumMainPanel extends JPanel {
             e.printStackTrace();
         }
 
-        new AnnotationSettingsDialog(this);
+        new AnnotationSettingsDialog(this, searchParameters.getPtmSettings());
     }
 
     /**
@@ -1025,8 +1025,6 @@ public class SpectrumMainPanel extends JPanel {
         spectrumSetAction.setExportDialog(exportExpectedSizeDialog);
 
         exportExpectedSizeDialog.setVisible(true);
-
-        lastSelectedFolder.setLastSelectedFolder(exportExpectedSizeDialog.getLastFolder());
     }
 
     /**
@@ -1039,8 +1037,6 @@ public class SpectrumMainPanel extends JPanel {
         mirrorSetAction.setExportDialog(exportExpectedSizeDialog);
 
         exportExpectedSizeDialog.setVisible(true);
-
-        lastSelectedFolder.setLastSelectedFolder(exportExpectedSizeDialog.getLastFolder());
     }
 
     /**
@@ -1053,8 +1049,6 @@ public class SpectrumMainPanel extends JPanel {
         checkSetAction.setExportDialog(exportExpectedSizeDialog);
 
         exportExpectedSizeDialog.setVisible(true);
-
-        lastSelectedFolder.setLastSelectedFolder(exportExpectedSizeDialog.getLastFolder());
     }
 
     /**
@@ -1288,10 +1282,10 @@ public class SpectrumMainPanel extends JPanel {
                     spectrumPanel.setYAxisZoomExcludesBackgroundPeaks(false);
 
                     spectrumJLayeredPane.add(spectrumPanel);
-                    spectrumPanel.setBounds(0, 0, spectrumMainPanel.getWidth(), spectrumMainPanel.getHeight() - 25);
+                    spectrumPanel.setBounds(0, 0, spectrumShowPanel.getWidth(), spectrumShowPanel.getHeight() - 25);
 
-                    spectrumMainPanel.revalidate();
-                    spectrumMainPanel.repaint();
+                    spectrumShowPanel.revalidate();
+                    spectrumShowPanel.repaint();
 
                 }
             }
@@ -1378,7 +1372,9 @@ public class SpectrumMainPanel extends JPanel {
                         currentPeptideSequence = currentPeptide.getSequence();
                         modSequence = currentPeptide.getTaggedModifiedSequence(searchParameters.getPtmSettings(), false, false, false, false);
 
-                        annotations = peptideSpectrumAnnotator.getSpectrumAnnotationFiter(annotationSettings, specificAnnotationSettings, currentSpectrum, peptideAssumption.getPeptide(), null, true);
+                        allModifications = currentPeptide.getModificationMatches();
+
+                        annotations = peptideSpectrumAnnotator.getSpectrumAnnotationFiter(annotationSettings, specificAnnotationSettings, currentSpectrum, currentPeptide, null, true);
                     } else {
                         throw new UnsupportedOperationException("Operation not supported for spectrumIdentificationAssumption of type " + spectrumIdentificationAssumption.getClass() + ".");
                     }
@@ -1508,13 +1504,14 @@ public class SpectrumMainPanel extends JPanel {
                     sequenceFragmentationPanel.setBackground(Color.WHITE);
 
                     spectrumJLayeredPane.add(spectrumPanel);
-                    spectrumPanel.setBounds(0, 75,spectrumMainPanel.getWidth(),spectrumMainPanel.getHeight()-85);
+
+                    spectrumPanel.setBounds(0, 75, spectrumShowPanel.getWidth(),spectrumShowPanel.getHeight()-85);
 
                     spectrumJLayeredPane.setLayer(sequenceFragmentationPanel, JLayeredPane.DRAG_LAYER);
                     spectrumJLayeredPane.add(sequenceFragmentationPanel);
                     zoomAction(sequenceFragmentationPanel, modSequence, false);
 
-                    spectrumSetAction = new SetAction(this, spectrumJLayeredPane, sequenceFragmentationPanel, null, spectrumPanel, 0, 0, spectrumMainPanel);
+                    spectrumSetAction = new SetAction(this, spectrumJLayeredPane, sequenceFragmentationPanel, null, spectrumPanel, 0, 0, spectrumShowPanel);
 
                     mirrorSpectrumPanel = new SpectrumContainer(
                             currentSpectrum.getMzValuesAsArray(), intensitiesAsArray,
@@ -1600,13 +1597,13 @@ public class SpectrumMainPanel extends JPanel {
                     }
 
                     mirrorJLayeredPane.add(mirrorSpectrumPanel);
-                    mirrorSpectrumPanel.setBounds(0,75,spectrumMainPanel.getWidth(),spectrumMainPanel.getHeight()-85);
+                    mirrorSpectrumPanel.setBounds(0,75,spectrumShowPanel.getWidth(),spectrumShowPanel.getHeight()-85);
 
                     mirrorJLayeredPane.setLayer(sequenceFragmentationPanelMirror, JLayeredPane.DRAG_LAYER);
                     mirrorJLayeredPane.add(sequenceFragmentationPanelMirror);
                     zoomAction(sequenceFragmentationPanelMirror, modSequence, false);
 
-                    mirrorSetAction = new SetAction(this, mirrorJLayeredPane, sequenceFragmentationPanelMirror, mirrorFragmentPanel, mirrorSpectrumPanel, 0, 0, spectrumMainPanel);
+                    mirrorSetAction = new SetAction(this, mirrorJLayeredPane, sequenceFragmentationPanelMirror, mirrorFragmentPanel, mirrorSpectrumPanel, 0, 0, spectrumShowPanel);
 
                     checkPeptideSpectrumPanel = new SpectrumContainer(
                             currentSpectrum.getMzValuesAsArray(), intensitiesAsArray,
@@ -1622,6 +1619,15 @@ public class SpectrumMainPanel extends JPanel {
 
                     if(checkPeptideMap.containsKey(selectedPsmKey)){
                         Peptide peptide = checkPeptideMap.get(selectedPsmKey);
+
+                        ArrayList<ModificationMatch> checkModifications = peptide.getModificationMatches();
+
+                        for (ModificationMatch modificationMatch : checkModifications){
+                            if (!allModifications.contains(modificationMatch)){
+                                allModifications.add(modificationMatch);
+                            }
+                        }
+
                         String checkModSequence = peptide.getTaggedModifiedSequence(searchParameters.getPtmSettings(), false, false, false, false);
 
                         checkPeptideSpectrumPanel.addMirroredSpectrum(currentSpectrum.getMzValuesAsArray(), intensitiesAsArray, precursor.getMz(),
@@ -1681,13 +1687,13 @@ public class SpectrumMainPanel extends JPanel {
                     }
 
                     checkPeptideJLayeredPane.add(checkPeptideSpectrumPanel);
-                    checkPeptideSpectrumPanel.setBounds(0,75,spectrumMainPanel.getWidth(),spectrumMainPanel.getHeight()-85);
+                    checkPeptideSpectrumPanel.setBounds(0,75,spectrumShowPanel.getWidth(),spectrumShowPanel.getHeight()-85);
 
                     checkPeptideJLayeredPane.setLayer(sequenceFragmentationPanelCheck, JLayeredPane.DRAG_LAYER);
                     checkPeptideJLayeredPane.add(sequenceFragmentationPanelCheck);
                     zoomAction(sequenceFragmentationPanelCheck, modSequence, false);
 
-                    checkSetAction = new SetAction(this, checkPeptideJLayeredPane, sequenceFragmentationPanelCheck, checkFragmentPanel, checkPeptideSpectrumPanel, 0, 0, spectrumMainPanel);
+                    checkSetAction = new SetAction(this, checkPeptideJLayeredPane, sequenceFragmentationPanelCheck, checkFragmentPanel, checkPeptideSpectrumPanel, 0, 0, spectrumShowPanel);
 
                     ArrayList<ArrayList<IonMatch>> allAnnotations = new ArrayList<>();
                     allAnnotations.add(annotations);
@@ -1700,8 +1706,8 @@ public class SpectrumMainPanel extends JPanel {
                                 specificAnnotationSettings.getSelectedCharges().contains(2)));
                     }
 
-                    spectrumMainPanel.revalidate();
-                    spectrumMainPanel.repaint();
+                    spectrumShowPanel.revalidate();
+                    spectrumShowPanel.repaint();
 
                     updateAnnotationMenus(maxCharge, allModifications);
                 }
@@ -1743,7 +1749,7 @@ public class SpectrumMainPanel extends JPanel {
         if (!isDown){
             sequenceFragmentationPanel.setBounds(40,10, peptideLength*fontHeight*2 ,fontHeight * 5);
         } else {
-            sequenceFragmentationPanel.setBounds(40,spectrumMainPanel.getHeight()/2, peptideLength*fontHeight*2 ,fontHeight * 5);
+            sequenceFragmentationPanel.setBounds(40,spectrumShowPanel.getHeight()/2, peptideLength*fontHeight*2 ,fontHeight * 5);
         }
 
         sequenceFragmentationPanel.addMouseWheelListener(e -> {
@@ -1920,6 +1926,7 @@ public class SpectrumMainPanel extends JPanel {
      * @param modificationMatches Modification matches list
      */
     private void updateAnnotationMenus(int precursorCharge, ArrayList<ModificationMatch> modificationMatches) {
+
         forwardAIonCheckBoxMenuItem.setSelected(false);
         forwardBIonCheckBoxMenuItem.setSelected(false);
         forwardCIonCheckBoxMenuItem.setSelected(false);
@@ -1946,8 +1953,10 @@ public class SpectrumMainPanel extends JPanel {
         }
 
         for (ModificationMatch modificationMatch : modificationMatches) {
-            PTM ptm = ptmFactory.getPTM(modificationMatch.getTheoreticPtm());
-            for (NeutralLoss neutralLoss : ptm.getNeutralLosses()) {
+
+            NeutralLoss neutralLoss = getPhosphyNeutralLoss(modificationMatch);
+
+            if (neutralLoss != null){
                 neutralLossHashMap.put(neutralLoss.name, neutralLoss);
             }
         }
@@ -2086,6 +2095,22 @@ public class SpectrumMainPanel extends JPanel {
         }
 
         showAllPeaksMenuItem.setSelected(annotationSettings.showAllPeaks());
+    }
+
+    private NeutralLoss getPhosphyNeutralLoss(ModificationMatch modificationMatch){
+
+        String name = modificationMatch.getTheoreticPtm();
+        String aa = name.split("of ")[1];
+
+        if (aa.equals("T") || aa.equals("S")){
+            Double mass = ptmFactory.getPTM(name).getMass();
+
+            if (mass < 80.01 && mass > 79.9){
+                return NeutralLoss.H3PO4;
+            }
+        }
+        return null;
+
     }
 
     /**

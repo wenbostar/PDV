@@ -1,5 +1,6 @@
 package PDVGUI.gui.utils;
 
+import com.compomics.util.experiment.biology.PTM;
 import com.compomics.util.experiment.biology.PTMFactory;
 import com.compomics.util.experiment.biology.Peptide;
 import com.compomics.util.experiment.identification.matches.ModificationMatch;
@@ -347,18 +348,55 @@ public class CheckPeptideJDialog extends JDialog {
      * @param singleModification Modification
      * @param aAJButton JButton
      */
-    public void setSingleModification(String singleModification, JButton aAJButton){
+    public void setSingleModification(String singleModification, JButton aAJButton, Boolean userInput){
         Integer aASite = allButtons.indexOf(aAJButton);
 
         String aAName = aAJButton.getText();
 
-        if(singleModification != "null"){
+        if(!singleModification.equals("null")){
 
             ModificationMatch modificationMatch;
 
-            if(aAName == "NH-"){
+            if (userInput){
+
+                String modificationName;
+                PTM ptm;
+
+                ArrayList<String> residues = new ArrayList<>();
+                residues.add(aAName);
+
+                if(aAName.equals("NH-")){
+                    modificationName = singleModification + " of N-term";
+                    if (!ptmFactory.containsPTM(modificationName)){
+                        ptm = new PTM(PTM.MODNP, modificationName, Double.valueOf(singleModification), null);
+                        ptm.setShortName(singleModification);
+                        ptmFactory.addUserPTM(ptm);
+                    }
+
+                } else if(aAName.equals("-COOH")){
+                    modificationName = singleModification + " of C-term";
+                    if (!ptmFactory.containsPTM(modificationName)){
+                        ptm = new PTM(PTM.MODCP, modificationName, Double.valueOf(singleModification), null);
+                        ptm.setShortName(singleModification);
+                        ptmFactory.addUserPTM(ptm);
+                    }
+
+                } else {
+                    modificationName = singleModification + " of " + aAName;
+                    if (!ptmFactory.containsPTM(modificationName)){
+                        ptm = new PTM(PTM.MODAA, modificationName, Double.valueOf(singleModification), residues);
+                        ptm.setShortName(singleModification);
+                        ptmFactory.addUserPTM(ptm);
+                    }
+
+                }
+
+                singleModification = modificationName;
+            }
+
+            if(aAName.equals("NH-")){
                 modificationMatch = new ModificationMatch(singleModification, false, 1);
-            }else if(aAName == "-COOH"){
+            }else if(aAName.equals("-COOH")){
                 modificationMatch = new ModificationMatch(singleModification, false, aASite - 1);
             }else {
                 modificationMatch = new ModificationMatch(singleModification, false, aASite);

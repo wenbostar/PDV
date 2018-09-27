@@ -2,6 +2,8 @@ package PDVGUI.fileimport;
 
 import PDVGUI.DB.SQLiteConnection;
 import PDVGUI.gui.PDVMainClass;
+import com.compomics.util.experiment.biology.NeutralLoss;
+import com.compomics.util.experiment.biology.PTM;
 import com.compomics.util.experiment.biology.Peptide;
 import com.compomics.util.experiment.identification.matches.ModificationMatch;
 import com.compomics.util.experiment.identification.matches.SpectrumMatch;

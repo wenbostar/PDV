@@ -419,7 +419,7 @@ public class DatabaseImportDialog extends JDialog {
 
                 Integer threads = Runtime.getRuntime().availableProcessors();
 
-                ArrayList<String> modification =  ptmFactory.getPTMs();
+                ArrayList<String> modification = ptmFactory.getPTMs();
                 PtmSettings ptmSettings = new PtmSettings();
 
                 for(String fixedModification:modification){

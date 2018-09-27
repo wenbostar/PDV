@@ -2,6 +2,7 @@ package PDVGUI.fileimport;
 
 import PDVGUI.DB.SQLiteConnection;
 import PDVGUI.gui.PDVMainClass;
+import com.compomics.util.experiment.biology.NeutralLoss;
 import com.compomics.util.experiment.biology.PTM;
 import com.compomics.util.experiment.biology.PTMFactory;
 import com.compomics.util.experiment.biology.Peptide;
@@ -254,6 +255,13 @@ public class TextFileImport {
                                 ptmFactory.addUserPTM(ptm);
                             } else {
                                 PTM ptm = new PTM(PTM.MODAA, singleModificationName, modificationMass, residues);
+
+                                if (singleModificationName.split(" of ")[1].equals("T") || singleModificationName.split(" of ")[1].equals("S")){
+                                    if (modificationMass < 80.01 && modificationMass > 79.9){
+                                        ptm.addNeutralLoss(NeutralLoss.H3PO4);
+                                    }
+                                }
+
                                 ptm.setShortName(modificationName);
                                 ptmFactory.addUserPTM(ptm);
                             }

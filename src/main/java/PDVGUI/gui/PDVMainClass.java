@@ -33,7 +33,6 @@ import umich.ms.datatypes.scancollection.impl.ScanCollectionDefault;
 import umich.ms.datatypes.spectrum.ISpectrum;
 import umich.ms.fileio.filetypes.mzidentml.jaxb.standard.MzIdentMLType;
 import org.xmlpull.v1.XmlPullParserException;
-import uk.ac.ebi.jmzml.xml.io.MzMLUnmarshallerException;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -250,7 +249,7 @@ public class PDVMainClass extends JFrame {
     /**
      * Version
      */
-    private static final String VERSION = "1.2.0";
+    private static final String VERSION = "1.3.0";
 
     /**
      * Main class
@@ -408,7 +407,7 @@ public class PDVMainClass extends JFrame {
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column){
                 Component c = null;
 
-                Pattern pattern = Pattern.compile("[0-9]+");
+                Pattern pattern = Pattern.compile("-?[0-9]+\\.?[0-9]*");
 
                 String s = String.valueOf(value);
 
@@ -659,7 +658,7 @@ public class PDVMainClass extends JFrame {
         backJButton.setBorder(null);
         backJButton.setBorderPainted(false);
         backJButton.setContentAreaFilled(false);
-        backJButton.setToolTipText("Data read unfinished!");
+        backJButton.setToolTipText("Refresh");
         backJButton.addActionListener(this::backJButtonActionPerformed);
 
         GroupLayout searchJPanelLayout = new GroupLayout(searchJPanel);
@@ -1016,18 +1015,10 @@ public class PDVMainClass extends JFrame {
                         .addComponent(mainJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
-        String motif;
-        String os = System.getProperty("os.name");
-        if(os.toLowerCase().startsWith("win")){
-            motif="com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
-        } else if (os.toLowerCase().startsWith("mac")){
-            motif="com.sun.java.swing.plaf.mac.MacLookAndFeel";
-        } else {
-            motif=UIManager.getSystemLookAndFeelClassName();
-        }
-
         try {
-            UIManager.setLookAndFeel(motif);
+            String lookAndFeel = UIManager.getSystemLookAndFeelClassName();
+            UIManager.setLookAndFeel(lookAndFeel);
+            //UIManager.setLookAndFeel(motif);
         } catch (ClassNotFoundException | InstantiationException | UnsupportedLookAndFeelException | IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -1070,6 +1061,8 @@ public class PDVMainClass extends JFrame {
             searchParameters.setFragmentAccuracyType(SearchParameters.MassAccuracyType.PPM);
         }
         searchParameters.setFragmentIonAccuracy(fragmentIonMZTolerance);
+
+        annotationSettings.setPreferencesFromSearchParameters(searchParameters);
 
         spectrumMainPanel.setFragmentIonAccuracy(searchParameters.getFragmentAccuracyType(), fragmentIonMZTolerance);
     }
@@ -1364,7 +1357,7 @@ public class PDVMainClass extends JFrame {
                 MzIDFileImport mzIDFileImport;
 
                 try {
-                    mzIDFileImport = new MzIDFileImport(PDVMainClass.this, mzIdentMLFile, mzIdentMLType, getModificationMass(),
+                    mzIDFileImport = new MzIDFileImport(PDVMainClass.this, mzIdentMLFile, mzIdentMLType,
                             spectrumFactory, spectrumFileType, progressDialog, spectrumIdAndNumber);
 
                     sqliteConnection = mzIDFileImport.getSqLiteConnection();
@@ -1384,6 +1377,7 @@ public class PDVMainClass extends JFrame {
                     buttonCheck();
 
                     sortColumnJCombox.setModel(new DefaultComboBoxModel(orderName.toArray()));
+                    fragmentIonAccuracyTxt.setText("  "+String.valueOf(annotationSettings.getFragmentIonAccuracy())+"  ");
 
                 } catch (SQLException | ClassNotFoundException e) {
                     e.printStackTrace();
@@ -2211,6 +2205,9 @@ public class PDVMainClass extends JFrame {
         updateTable();
     }
 
+    /**
+     * Display frage results
+     */
     public void displayFrage(){
         msAndTableJSplitPane.setDividerLocation(0);
         sortColumnJCombox.setEnabled(true);
@@ -3306,7 +3303,7 @@ public class PDVMainClass extends JFrame {
      * Update ptmSetting
      */
     public void updatePTMSetting(){
-        ArrayList<String> modification =  ptmFactory.getPTMs();
+        ArrayList<String> modification = ptmFactory.getPTMs();
         PtmSettings ptmSettings = new PtmSettings();
 
         for(String fixedModification:modification){

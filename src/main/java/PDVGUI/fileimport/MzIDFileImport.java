@@ -3,8 +3,12 @@ package PDVGUI.fileimport;
 import PDVGUI.DB.SQLiteConnection;
 import PDVGUI.gui.PDVMainClass;
 import com.compomics.util.experiment.biology.AminoAcidSequence;
+import com.compomics.util.experiment.biology.NeutralLoss;
 import com.compomics.util.experiment.biology.PTM;
 import com.compomics.util.experiment.biology.PTMFactory;
+import com.compomics.util.experiment.identification.SpectrumIdentificationAssumption;
+import com.compomics.util.experiment.identification.identification_parameters.PtmSettings;
+import com.compomics.util.experiment.identification.identification_parameters.SearchParameters;
 import com.compomics.util.experiment.identification.matches.ModificationMatch;
 import com.compomics.util.experiment.identification.matches.SpectrumMatch;
 import com.compomics.util.experiment.identification.spectrum_assumptions.PeptideAssumption;
@@ -109,8 +113,8 @@ public class MzIDFileImport {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public MzIDFileImport(PDVMainClass pdvMainClass, File mzIDFile, MzIdentMLType mzIdentMLType, HashMap<String,HashMap<Double, String >> modificationMass,
-                          SpectrumFactory spectrumFactory, String spectrumFileType, ProgressDialogX progressDialog, HashMap<String, Integer> spectrumIdAndNumber) throws SQLException, ClassNotFoundException {
+    public MzIDFileImport(PDVMainClass pdvMainClass, File mzIDFile, MzIdentMLType mzIdentMLType, SpectrumFactory spectrumFactory,
+                          String spectrumFileType, ProgressDialogX progressDialog, HashMap<String, Integer> spectrumIdAndNumber) throws SQLException, ClassNotFoundException {
 
         this.pdvMainClass = pdvMainClass;
         this.mzIDName = mzIDFile.getName();
@@ -347,7 +351,7 @@ public class MzIDFileImport {
         List<SpectrumIdentificationItemType> spectrumIdentificationItems;
         ArrayList<String> countParam;
 
-        Pattern pattern = Pattern.compile("-?[0-9]+.?[0-9]+");
+        Pattern pattern = Pattern.compile("-?[0-9]+\\.?[0-9]*");
 
         for (SpectrumIdentificationListType spectrumIdentificationListType : mzIdentMLType.getDataCollection().getAnalysisData().getSpectrumIdentificationList()) {
 
@@ -519,6 +523,13 @@ public class MzIDFileImport {
 
                                 if (!ptmFactory.containsPTM(modificationName)){
                                     PTM ptm = new PTM(PTM.MODAA, modificationName, monoMassDelta, residues);
+
+                                    if (aa.equals("T") || aa.equals("S")){
+                                        if (monoMassDelta < 80.01 && monoMassDelta > 79.9){
+                                            ptm.addNeutralLoss(NeutralLoss.H3PO4);
+                                        }
+                                    }
+
                                     ptm.setShortName(nameFromMzID);
                                     ptmFactory.addUserPTM(ptm);
                                 }

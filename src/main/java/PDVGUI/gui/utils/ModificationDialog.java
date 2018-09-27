@@ -6,7 +6,11 @@ import PDVGUI.gui.SinglePeptideDisplay;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ItemEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.regex.Pattern;
 
 /**
  * Modification dialog in single peptide part
@@ -20,6 +24,9 @@ public class ModificationDialog extends JDialog {
     private SinglePeptideDisplay singlePeptideDisplay;
     private CheckPeptideJDialog checkPeptideJDialog;
     private JButton aAJButton;
+    private Pattern pattern = Pattern.compile("-?[0-9]+\\.?[0-9]*");
+    private Boolean userInput = false;
+    private Boolean modValidation = false;
 
     /**
      * Constructor.
@@ -76,6 +83,7 @@ public class ModificationDialog extends JDialog {
 
         aAModificationComBox.setModel(new DefaultComboBoxModel(singleModificationsArray));
         aAModificationComBox.addItemListener(this::aAModificationComBoxdMouseClicked);
+        aAModificationComBox.setEditable(true);
 
         backgroundJPanel.add(aAModificationComBox);
 
@@ -95,11 +103,27 @@ public class ModificationDialog extends JDialog {
 
     /**
      * Modification selections
-     * @param event Item event
+     * @param evt Item event
      */
-    private void aAModificationComBoxdMouseClicked(ItemEvent event) {
+    private void aAModificationComBoxdMouseClicked(ItemEvent evt) {
+
         selectedModification = String.valueOf(aAModificationComBox.getSelectedItem()).replace(">","&gt;");
-        formWindowClosing(null);
+
+        if (aAModificationComBox.getSelectedIndex() == -1){
+            if (selectedModification.equals("null") || pattern.matcher(selectedModification).matches()) {
+                userInput = true;
+                modValidation = true;
+                formWindowClosing(null);
+            } else {
+                modValidation = false;
+                JOptionPane.showMessageDialog(null, "Please input modification mass.",
+                        "Warning", JOptionPane.WARNING_MESSAGE);
+            }
+        } else {
+            modValidation = true;
+            userInput = false;
+            formWindowClosing(null);
+        }
     }
 
     /**
@@ -108,10 +132,12 @@ public class ModificationDialog extends JDialog {
      */
     private void formWindowClosing(WindowEvent evt) {
 
-        if(singlePeptideDisplay != null){
-            singlePeptideDisplay.setSingleModification(selectedModification, aAJButton);
-        } else if (checkPeptideJDialog != null){
-            checkPeptideJDialog.setSingleModification(selectedModification, aAJButton);
+        if (modValidation) {
+            if (singlePeptideDisplay != null) {
+                singlePeptideDisplay.setSingleModification(selectedModification, aAJButton, userInput);
+            } else if (checkPeptideJDialog != null) {
+                checkPeptideJDialog.setSingleModification(selectedModification, aAJButton, userInput);
+            }
         }
         this.dispose();
     }

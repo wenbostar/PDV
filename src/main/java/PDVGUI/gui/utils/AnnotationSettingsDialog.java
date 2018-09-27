@@ -59,14 +59,13 @@ public class AnnotationSettingsDialog extends JDialog {
      * Creates a new AnnotationSettingsDialog
      * @param spectrumMainPanel spectrumMainPanel parent
      */
-    public AnnotationSettingsDialog(SpectrumMainPanel spectrumMainPanel) {
+    public AnnotationSettingsDialog(SpectrumMainPanel spectrumMainPanel, PtmSettings ptmSettings) {
         super(spectrumMainPanel.parentFrame, true);
         this.spectrumMainPanel = spectrumMainPanel;
 
         annotationSettings = spectrumMainPanel.getAnnotationSettings();
         utilitiesUserPreferences = spectrumMainPanel.utilitiesUserPreferences;
         ionTypeMap = annotationSettings.getIonTypes();
-        PtmSettings ptmSettings = new PtmSettings();
         neutralLossList = IonFactory.getNeutralLosses(ptmSettings);
         initComponents();
         setUpGUI();

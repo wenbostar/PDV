@@ -170,7 +170,7 @@ public class FragePipeImport {
      */
     private void parseResult() throws IOException, SQLException {
 
-        Pattern pattern = Pattern.compile("-?[0-9]+.?[0-9]+");
+        Pattern pattern = Pattern.compile("-?[0-9]+\\.?[0-9]*");
 
         Connection connection = sqLiteConnection.getConnection();
 

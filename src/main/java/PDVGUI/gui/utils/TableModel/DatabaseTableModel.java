@@ -14,6 +14,7 @@ import umich.ms.datatypes.scan.IScan;
 import umich.ms.datatypes.scan.props.PrecursorInfo;
 import umich.ms.datatypes.scancollection.impl.ScanCollectionDefault;
 
+import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -386,13 +387,32 @@ public class DatabaseTableModel extends DefaultTableModel {
                                 int rank1num = 0;
                                 for(SpectrumIdentificationAssumption tempAssumption : spectrumMatch.getAllAssumptions()){
 
-                                    if(tempAssumption.getRank() == 1 && rank1num>0){
-
-                                        PeptideAssumption tempPeptideAssumption = (PeptideAssumption) tempAssumption;
-                                        return "<html>"+" Rank:"+"&nbsp<html>"+tempPeptideAssumption.getRank() + "&nbsp" +tempPeptideAssumption.getPeptide().getTaggedModifiedSequence(searchParameters.getPtmSettings(), true, true, false, false)+" </html>";
-                                    }
+                                    PeptideAssumption tempPeptideAssumption = (PeptideAssumption) tempAssumption;
 
                                     if(tempAssumption.getRank() == 1){
+
+                                        Peptide currentPeptide = tempPeptideAssumption.getPeptide();
+
+                                        if (!peptide.getSequence().equals(currentPeptide.getSequence())){
+                                            return "<html>"+" Rank:"+"&nbsp<html>"+tempPeptideAssumption.getRank() + "&nbsp" +tempPeptideAssumption.getPeptide().getTaggedModifiedSequence(searchParameters.getPtmSettings(), true, true, false, false)+" </html>";
+                                        } else {
+                                            ArrayList<ModificationMatch> bestModifications = peptide.getModificationMatches();
+                                            ArrayList<ModificationMatch> currentModifications = currentPeptide.getModificationMatches();
+
+                                            if (bestModifications.size() != currentModifications.size()){
+                                                return "<html>"+" Rank:"+"&nbsp<html>"+tempPeptideAssumption.getRank() + "&nbsp" +tempPeptideAssumption.getPeptide().getTaggedModifiedSequence(searchParameters.getPtmSettings(), true, true, false, false)+" </html>";
+                                            } else {
+                                                if (currentModifications.size() == 0){
+                                                    return "<html>"+" Rank:"+"&nbsp<html>"+tempPeptideAssumption.getRank() + "&nbsp" +tempPeptideAssumption.getPeptide().getTaggedModifiedSequence(searchParameters.getPtmSettings(), true, true, false, false)+" </html>";
+                                                }
+                                                for (ModificationMatch currentModification : currentModifications){
+                                                    if (!bestModifications.contains(currentModification)){
+                                                        return "<html>"+" Rank:"+"&nbsp<html>"+tempPeptideAssumption.getRank() + "&nbsp" +tempPeptideAssumption.getPeptide().getTaggedModifiedSequence(searchParameters.getPtmSettings(), true, true, false, false)+" </html>";
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        //PeptideAssumption tempPeptideAssumption = (PeptideAssumption) tempAssumption;
                                         rank1num ++;
                                     }
                                 }
@@ -433,12 +453,11 @@ public class DatabaseTableModel extends DefaultTableModel {
             } else {
                 return null;
             }
-
-
         } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Table not instantiated.\nError: "+e.toString(),
+                    "Display Error", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
             throw new IllegalArgumentException("Table not instantiated.");
-
         }
         return "";
     }

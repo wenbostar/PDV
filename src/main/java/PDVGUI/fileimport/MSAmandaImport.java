@@ -2,6 +2,7 @@ package PDVGUI.fileimport;
 
 import PDVGUI.DB.SQLiteConnection;
 import PDVGUI.gui.PDVMainClass;
+import com.compomics.util.experiment.biology.NeutralLoss;
 import com.compomics.util.experiment.biology.PTM;
 import com.compomics.util.experiment.biology.PTMFactory;
 import com.compomics.util.experiment.biology.Peptide;
@@ -261,6 +262,13 @@ public class MSAmandaImport {
                         } else {
                             residues.add(site);
                             PTM ptm = new PTM(PTM.MODAA, singleModificationName, modMass, residues);
+
+                            if (site.equals("T") || site.equals("S")){
+                                if (modMass < 80.01 && modMass > 79.9){
+                                    ptm.addNeutralLoss(NeutralLoss.H3PO4);
+                                }
+                            }
+
                             ptm.setShortName(modName);
                             ptmFactory.addUserPTM(ptm);
                         }

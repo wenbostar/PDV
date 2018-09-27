@@ -1,14 +1,13 @@
 package PDVGUI.gui.utils.Export;
 
 import PDVGUI.gui.PDVMainClass;
-import PDVGUI.gui.utils.SetAction;
+import PDVGUI.gui.utils.SpectrumContainer;
 import PDVGUI.gui.utils.SpectrumMainPanel;
 import PDVGUI.utils.Export;
 import com.compomics.util.enumeration.ImageType;
 import com.compomics.util.gui.spectrum.SequenceFragmentationPanel;
-import com.compomics.util.gui.spectrum.SpectrumPanel;
-import com.compomics.util.gui.waiting.waitinghandlers.ProgressDialogX;
 import com.jgoodies.forms.layout.FormLayout;
+import org.apache.batik.transcoder.TranscoderException;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -17,6 +16,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.regex.Pattern;
 
 /**
@@ -34,6 +34,7 @@ public class ExportExpectedSizeDialog extends JDialog {
     private JPanel viewerJPanel;
     private JComboBox unitJCombox;
     private JPanel resizeJPanel = new JPanel();
+    private JPanel mainJPanel;
     private JLayeredPane jLayeredPane;
     private JPanel mirrorSequenceFragmentationPanel;
 
@@ -44,7 +45,7 @@ public class ExportExpectedSizeDialog extends JDialog {
     /**
      * Spectrum panel
      */
-    private SpectrumPanel spectrumJPanel;
+    private SpectrumContainer spectrumJPanel;
     /**
      * Peptide size
      */
@@ -52,7 +53,7 @@ public class ExportExpectedSizeDialog extends JDialog {
     /**
      * Picture type
      */
-    private String[] picType = new String[]{"PNG (Portable Network Graphics)", "TIFF (Tagged Image File Format)", "PDF (Portable Document Format)"};
+    private String[] picType = new String[]{"PNG", "TIFF", "PDF"};
     /**
      * Output folder path
      */
@@ -78,6 +79,13 @@ public class ExportExpectedSizeDialog extends JDialog {
      */
     private static Pattern FilePattern = Pattern.compile("[\\\\/:*?\"<>|]");
 
+    private Integer oldHeight;
+
+    private Integer oldWidth;
+
+    public Integer resizeJPanelWidth;
+    public Integer resizeJPanelHeight;
+
     /**
      * Constructor
      * @param spectrumMainPanel Parent class
@@ -89,7 +97,7 @@ public class ExportExpectedSizeDialog extends JDialog {
      * @param spectrumKey Spectrum Key
      */
     public ExportExpectedSizeDialog(SpectrumMainPanel spectrumMainPanel, JLayeredPane jLayeredPane, SequenceFragmentationPanel secondarySpectrumPlotsJPanel, JPanel mirrorSequenceFragmentationPanel,
-                                    SpectrumPanel spectrumJPanel, Integer peptideSize, String spectrumKey, Boolean isCheckPeptide){
+                                    SpectrumContainer spectrumJPanel, Integer peptideSize, String spectrumKey, Boolean isCheckPeptide){
         super(spectrumMainPanel.parentFrame, true);
 
         this.jLayeredPane = jLayeredPane;
@@ -101,6 +109,8 @@ public class ExportExpectedSizeDialog extends JDialog {
         this.parentJFrame = spectrumMainPanel.parentFrame;
         this.peptideSize = peptideSize;
         this.spectrumKey = spectrumKey;
+        this.oldHeight = spectrumMainPanel.getHeight();
+        this.oldWidth = spectrumMainPanel.getWidth();
 
         outputFolder = spectrumMainPanel.lastSelectedFolder.getLastSelectedFolder();
 
@@ -116,8 +126,10 @@ public class ExportExpectedSizeDialog extends JDialog {
     private void setupGUI(){
         initComponents();
 
-        picHeightJText.setText(String.valueOf(spectrumJPanel.getHeight()));
-        picWidthJText.setText(String.valueOf(spectrumJPanel.getWidth()));
+        picHeightJText.setText(String.valueOf(500));
+        picWidthJText.setText(String.valueOf(900));
+
+        previewJButtonActionPerformed(null);
 
         validateInput();
     }
@@ -126,7 +138,6 @@ public class ExportExpectedSizeDialog extends JDialog {
      * Init all GUI components
      */
     private void initComponents(){
-        JPanel mainJPanel = new JPanel();
         JPanel detailJPanel = new JPanel();
         JButton pathBrowseJButton = new JButton();
         JLabel typeJLabel = new JLabel();
@@ -135,6 +146,7 @@ public class ExportExpectedSizeDialog extends JDialog {
         JLabel picWidthJLabel = new JLabel("Width");
         JButton previewJButton = new JButton("Preview");
 
+        mainJPanel = new JPanel();
         exportJButton = new JButton();
         typeJComboBox = new JComboBox();
         pathJLabel = new JLabel();
@@ -152,7 +164,8 @@ public class ExportExpectedSizeDialog extends JDialog {
             }
         });
 
-        setResizable(false);
+        setMinimumSize(new Dimension(93, 679));
+        setResizable(true);
 
         mainJPanel.setBackground(Color.white);
 
@@ -201,7 +214,8 @@ public class ExportExpectedSizeDialog extends JDialog {
         exportJButton.setEnabled(false);
         exportJButton.addActionListener(this::exportJButtonActionPerformed);
 
-        unitJCombox.setModel(new DefaultComboBoxModel(new String[]{"mm", "cm", "in", "px"}));
+        unitJCombox.setModel(new DefaultComboBoxModel(new String[]{"px", "mm", "cm", "in"}));
+        unitJCombox.addItemListener(this::unitJComboxdMouseClicked);
 
         GroupLayout detailJPanelLayout = new GroupLayout(detailJPanel);
         detailJPanel.setLayout(detailJPanelLayout);
@@ -214,20 +228,20 @@ public class ExportExpectedSizeDialog extends JDialog {
                                 .addComponent(pathJText, GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(pathBrowseJButton)
-                                .addGap(20,40,80)
+                                .addGap(10,40,80)
                                 .addComponent(typeJLabel)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(typeJComboBox, GroupLayout.DEFAULT_SIZE, 200, 300)
-                                .addGap(10, 20, 400)
+                                .addComponent(typeJComboBox, GroupLayout.DEFAULT_SIZE, 50, 80)
+                                .addGap(10, 20, 380)
                                 .addComponent(picHeightJLabel)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(picHeightJText, GroupLayout.DEFAULT_SIZE, 20, 40)
+                                .addComponent(picHeightJText, 40, 40, 60)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(picWidthJLabel)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(picWidthJText, GroupLayout.DEFAULT_SIZE, 20, 40)
+                                .addComponent(picWidthJText, 40, 40, 60)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(unitJCombox, GroupLayout.DEFAULT_SIZE, 20, 40)
+                                .addComponent(unitJCombox, 80, 80, 90)
                                 .addGap(10, 20,100)
                                 .addComponent(previewJButton))
         );
@@ -292,7 +306,7 @@ public class ExportExpectedSizeDialog extends JDialog {
                         .addComponent(detailJPanel)
                         .addComponent(viewerJPanel, GroupLayout.DEFAULT_SIZE, 600, Short.MAX_VALUE)
                         .addGroup(mainJPanelLayout.createSequentialGroup()
-                                .addComponent(exportJButton, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(exportJButton, GroupLayout.PREFERRED_SIZE, 130, GroupLayout.PREFERRED_SIZE)
                                 .addContainerGap())
         );
 
@@ -311,11 +325,11 @@ public class ExportExpectedSizeDialog extends JDialog {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(mainJPanel, GroupLayout.DEFAULT_SIZE, (int) (spectrumMainPanel.parentFrame.getWidth() * 0.8), Short.MAX_VALUE)
+                        .addComponent(mainJPanel, 915, 915, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(mainJPanel, GroupLayout.DEFAULT_SIZE, (int) (spectrumMainPanel.parentFrame.getHeight() * 0.8), Short.MAX_VALUE)
+                        .addComponent(mainJPanel, 640, 640, Short.MAX_VALUE)
         );
 
         pack();
@@ -328,12 +342,13 @@ public class ExportExpectedSizeDialog extends JDialog {
     private void formWindowClosing(WindowEvent evt) {
         if(mirrorSequenceFragmentationPanel != null){
             spectrumMainPanel.showMirrorJMenuItemActionPerformed(null);
-
         } else if(isCheckPeptide){
             spectrumMainPanel.showCheckPeptideJMenuItemActionPerformed(null);
         } else {
             spectrumMainPanel.showSpectrumJMenuItemAction(null);
         }
+        spectrumMainPanel.setBounds(0, 0, oldWidth, oldHeight);
+        spectrumMainPanel.spectrumShowPanel.setBounds(0, 0, oldWidth, oldHeight);
         spectrumMainPanel.updateSpectrum();
         this.dispose();
     }
@@ -346,32 +361,37 @@ public class ExportExpectedSizeDialog extends JDialog {
         Integer selectIndex = typeJComboBox.getSelectedIndex();
 
         if(selectIndex == 2){
+
             unitJCombox.setModel(new DefaultComboBoxModel(new String[]{"mm", "cm", "in"}));
         } else {
-            unitJCombox.setModel(new DefaultComboBoxModel(new String[]{"mm", "cm", "in", "px"}));
+            unitJCombox.setModel(new DefaultComboBoxModel(new String[]{"px", "mm", "cm", "in"}));
         }
+    }
+
+    private void unitJComboxdMouseClicked(ItemEvent evt){
+
     }
 
     /**
      * Preview the output image.
      * @param evt Mouse click event
      */
-    private void previewJButtonActionPerformed(ActionEvent evt){
+    public void previewJButtonActionPerformed(ActionEvent evt){
 
         String unitName = (String) unitJCombox.getSelectedItem();
 
         if(!picHeightJText.getText().equals("") && !picWidthJText.getText().equals("")){
-            Integer height = (Integer.valueOf(picHeightJText.getText()));
-            Integer width = (Integer.valueOf(picWidthJText.getText()));
+            Integer currentHeight = (Integer.valueOf(picHeightJText.getText()));
+            Integer currentWidth = (Integer.valueOf(picWidthJText.getText()));
 
-            FormLayout layout = new FormLayout(width+unitName, height+unitName);
+            FormLayout layout = new FormLayout(currentWidth + unitName, currentHeight + unitName);
 
             resizeJPanel.setLayout(layout);
             resizeJPanel.revalidate();
             resizeJPanel.repaint();
 
-            Integer resizeJPanelWidth = Math.toIntExact(Math.round(resizeJPanel.getPreferredSize().getWidth()));
-            Integer resizeJPanelHeight = Math.toIntExact(Math.round(resizeJPanel.getPreferredSize().getHeight()));
+            resizeJPanelWidth = Math.toIntExact(Math.round(resizeJPanel.getPreferredSize().getWidth()));
+            resizeJPanelHeight = Math.toIntExact(Math.round(resizeJPanel.getPreferredSize().getHeight()));
 
             if(resizeJPanelWidth <= 200 || resizeJPanelHeight<= 200){
                 JOptionPane.showMessageDialog(null, "Please set a bigger size.", "Warning", JOptionPane.WARNING_MESSAGE);
@@ -380,10 +400,10 @@ public class ExportExpectedSizeDialog extends JDialog {
 
                 spectrumJPanel.setBounds(0,75, resizeJPanelWidth, resizeJPanelHeight - 85);
 
-                /*
-                if(mirrorSequenceFragmentationPanel != null){
-                    mirrorSequenceFragmentationPanel.setBounds(40, resizeJPanelHeight -40,(peptideSize+4)*20,100);
-                }*/
+                //spectrumMainPanel.setBounds(0, 0, resizeJPanelWidth, resizeJPanelHeight);
+                spectrumMainPanel.spectrumShowPanel.setBounds(0, 0, resizeJPanelWidth, resizeJPanelHeight);
+
+                spectrumJPanel.requestFocus();
 
                 jLayeredPane.setBounds(0,0, resizeJPanelWidth, resizeJPanelHeight);
                 jLayeredPane.setPreferredSize(new Dimension(resizeJPanelWidth, resizeJPanelHeight));
@@ -391,9 +411,6 @@ public class ExportExpectedSizeDialog extends JDialog {
                 viewerJPanel.revalidate();
                 viewerJPanel.repaint();
 
-                new SetAction(jLayeredPane, secondarySpectrumPlotsJPanel, mirrorSequenceFragmentationPanel, spectrumJPanel, resizeJPanelHeight, resizeJPanelWidth);
-
-                spectrumJPanel.requestFocus(true);
             }
         }
     }
@@ -416,7 +433,22 @@ public class ExportExpectedSizeDialog extends JDialog {
 
             outputFolder = selectedFile.getAbsolutePath();
 
-            pathJText.setText(outputFolder+" selected");
+            if (!selectedFile.exists()){ // Avoid bug in Mac
+                outputFolder = outputFolder.substring(0, outputFolder.lastIndexOf("/"));
+                if (!new File(outputFolder).exists()){
+                    JOptionPane.showMessageDialog(null, "Please check your output path.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    spectrumMainPanel.lastSelectedFolder.setLastSelectedFolder(outputFolder);
+
+                    pathJText.setText(outputFolder + " selected");
+                }
+            } else {
+                spectrumMainPanel.lastSelectedFolder.setLastSelectedFolder(outputFolder);
+
+                pathJText.setText(outputFolder + " selected");
+            }
+
             validateInput();
         }
     }
@@ -463,13 +495,6 @@ public class ExportExpectedSizeDialog extends JDialog {
 
         File imageFile = new File(outputFolder + PDVMainClass.FILE_SEPARATOR + FilePattern.matcher(spectrumKey).replaceAll("")+ finalImageType.getExtension());
 
-        ProgressDialogX progressDialog = new ProgressDialogX(parentJFrame,
-                Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMass.png")),
-                Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMassWait.png")),
-                true);
-        progressDialog.setPrimaryProgressCounterIndeterminate(false);
-        progressDialog.setTitle("Export Selected spectrum. Please Wait...");
-
         if(imageFile.exists()){
             int value = JOptionPane.showConfirmDialog(this,
                     "The file have exist. Overwrite it?",
@@ -478,68 +503,40 @@ public class ExportExpectedSizeDialog extends JDialog {
 
             if (value == JOptionPane.YES_OPTION) {
 
-                new Thread(new Runnable() {
+                try {
 
-                    public void run() {
-                        progressDialog.setVisible(true);
-                    }
-                }, "ProgressDialog").start();
+                    Thread.sleep(200);
 
-                ImageType finalImageType1 = finalImageType;
-                new Thread("Export") {
+                    Export.exportPic(jLayeredPane, jLayeredPane.getBounds(), imageFile, finalImageType);
 
-                    @Override
-                    public void run() {
+                    JOptionPane.showMessageDialog(this, "The spectrum has been exported.\nFile name: "+imageFile.getName(),
+                            "Export Finished", JOptionPane.PLAIN_MESSAGE);
 
-                        try {
-
-                            Export.exportPic(jLayeredPane, jLayeredPane.getBounds(), imageFile, finalImageType1);
-
-                        } catch (Exception e) {
-                            progressDialog.setRunFinished();
-                            e.printStackTrace();
-                        }
-                        progressDialog.setRunFinished();
-                    }
-                }.start();
+                } catch (IOException | TranscoderException | InterruptedException e) {
+                    JOptionPane.showMessageDialog(this, "Spectrum export error Please contact developer.\nError: "+e.toString(),
+                            "Export Error", JOptionPane.ERROR_MESSAGE);
+                    e.printStackTrace();
+                }
 
             } else if (value == JOptionPane.NO_OPTION) {
+
             }
         } else {
 
-            new Thread(new Runnable() {
+            try {
 
-                public void run() {
-                    progressDialog.setVisible(true);
-                }
-            }, "ProgressDialog").start();
+                Thread.sleep(200);
 
-            ImageType finalImageType2 = finalImageType;
-            new Thread("Export") {
+                Export.exportPic(jLayeredPane, jLayeredPane.getBounds(), imageFile, finalImageType);
 
-                @Override
-                public void run() {
-
-                    try {
-
-                        Export.exportPic(jLayeredPane, jLayeredPane.getBounds(), imageFile, finalImageType2);
-
-                    } catch (Exception e) {
-                        progressDialog.setRunFinished();
-                        e.printStackTrace();
-                    }
-                    progressDialog.setRunFinished();
-                }
-            }.start();
+                JOptionPane.showMessageDialog(this, "The spectrum has been exported.\nFile name: "+imageFile.getName(),
+                        "Export Finished", JOptionPane.PLAIN_MESSAGE);
+            } catch (IOException | TranscoderException | InterruptedException e) {
+                JOptionPane.showMessageDialog(this, "Spectrum export error Please contact developer.\nError: "+e.toString(),
+                        "Export Error", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
         }
-    }
 
-    /**
-     * Return last folder
-     * @return String
-     */
-    public String getLastFolder(){
-
-        return outputFolder;
     }
 }

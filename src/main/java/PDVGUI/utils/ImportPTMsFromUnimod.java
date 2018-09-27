@@ -1,6 +1,7 @@
 package PDVGUI.utils;
 
 import com.compomics.util.experiment.biology.*;
+import com.compomics.util.experiment.biology.NeutralLoss;
 import com.compomics.util.pride.CvTerm;
 import uk.ac.ebi.pride.utilities.pridemod.io.unimod.model.*;
 import uk.ac.ebi.pride.utilities.pridemod.io.unimod.xml.UnimodReader;
@@ -139,8 +140,16 @@ public class ImportPTMsFromUnimod {
                             }
                             ptm.setShortName(modificationTitle);
                         }else {
+
                             ptmName = modificationTitle + " of " + site;
                             ptm = new PTM(PTM.MODAA, ptmName, monoMass, residues);
+
+                            if (site.equals("T") || site.equals("S")){
+                                if (monoMass < 80.01 && monoMass > 79.9){
+                                    ptm.addNeutralLoss(NeutralLoss.H3PO4);
+                                }
+                            }
+
                             if(modificationTitle.contains(">")){
                                 modificationTitle = modificationTitle.replace(">","&gt;");
                             }

@@ -251,7 +251,7 @@ public class PepXMLFileImport {
 
         int count = 0;
         int countRound = 0;
-        Pattern pattern = Pattern.compile("-?[0-9]+.?[0-9]+");
+        Pattern pattern = Pattern.compile("-?[0-9]+\\.?[0-9]*");
 
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(pepXMLFile))) {
             xmlPullParser.setInput(bufferedReader);
@@ -389,6 +389,13 @@ public class PepXMLFileImport {
                                         residues.add(String.valueOf(aminoAcid));
 
                                         PTM ptm = new PTM(PTM.MODAA, ptmName, massDiff, residues);
+
+                                        if (String.valueOf(aminoAcid).equals("T") || String.valueOf(aminoAcid).equals("S")){
+                                            if (massDiff < 80.01 && massDiff > 79.9){
+                                                ptm.addNeutralLoss(NeutralLoss.H3PO4);
+                                            }
+                                        }
+
                                         ptm.setShortName(description);
 
                                         ptmFactory.addUserPTM(ptm);
