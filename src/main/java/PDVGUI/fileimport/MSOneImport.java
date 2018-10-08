@@ -78,16 +78,19 @@ public class MSOneImport {
 
             try {
                 mzMLFileImportMethod.execute();
-            } catch (MSDKException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
             MzMLRawDataFile mzMLRawDataFile = (MzMLRawDataFile) mzMLFileImportMethod.getResult();
 
+            List<MsScan> msScans = mzMLRawDataFile.getScans();
+
             if (spectrumFile.length() > 524288000) {
 
                 for (Chromatogram chromatogram : mzMLRawDataFile.getChromatograms()) {
                     rtToItem = new ArrayList<>();
+
                     float[] rtArray = chromatogram.getRetentionTimes();
                     float[] intArray = chromatogram.getIntensityValues();
 
@@ -110,12 +113,20 @@ public class MSOneImport {
                     detailsList.add("RT/t/Start:"+rtRange.lowerEndpoint()+" End:"+rtRange.upperEndpoint());
                 }
 
+                for (MsScan msScan : msScans) {
+                    if (msScan.getMsLevel() == 1) {
+                        ms1Count++;
+                    } else if (msScan.getMsLevel() == 2) {
+                        ms2Count++;
+                    }
+                }
+
             } else {
 
                 float startRT = 10000;
                 float endRT = 0f;
 
-                for (MsScan msScan : mzMLRawDataFile.getScans()) {
+                for (MsScan msScan : msScans) {
 
                     if (msScan.getMsLevel() == 1) {
                         rtAndItem = new float[2];

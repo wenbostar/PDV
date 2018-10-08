@@ -40,7 +40,6 @@
     <orderEntry type="library" name="Maven: uk.ac.ebi.jmzml:jmzml:1.6.8" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-log4j12:1.6.1" level="project" />
     <orderEntry type="library" name="Maven: commons-collections:commons-collections:3.2.1" level="project" />
-    <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.3" level="project" />
     <orderEntry type="library" name="Maven: javax.activation:activation:1.1" level="project" />
     <orderEntry type="library" name="Maven: jfree:jfreechart:1.0.13" level="project" />
     <orderEntry type="library" name="Maven: jfree:jcommon:1.0.16" level="project" />
@@ -114,113 +113,22 @@
     <orderEntry type="library" name="Maven: net.sourceforge.owlapi:owlapi-parsers:3.5.0" level="project" />
     <orderEntry type="library" name="Maven: com.jgoodies:jgoodies-forms:1.9.0" level="project" />
     <orderEntry type="library" name="Maven: com.jgoodies:jgoodies-common:1.8.1" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-all:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-datamodel:0.0.11" level="project" />
+    <orderEntry type="library" name="Maven: io.github.msdk:msdk-datamodel:0.0.16" level="project" />
     <orderEntry type="library" name="Maven: org.openscience.cdk:cdk-formula:2.0" level="project" />
     <orderEntry type="library" name="Maven: javax.vecmath:vecmath:1.5.2" level="project" />
     <orderEntry type="library" name="Maven: org.openscience.cdk:cdk-core:2.0" level="project" />
     <orderEntry type="library" name="Maven: org.openscience.cdk:cdk-interfaces:2.0" level="project" />
     <orderEntry type="library" name="Maven: org.openscience.cdk:cdk-standard:2.0" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-io-fileimport:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-io-filetypedetection:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-io-mzdata:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-io-mzml:0.0.11" level="project" />
+    <orderEntry type="library" name="Maven: com.google.code.findbugs:jsr305:3.0.2" level="project" />
+    <orderEntry type="library" name="Maven: io.github.msdk:msdk-io-mzml:0.0.16" level="project" />
+    <orderEntry type="library" name="Maven: io.github.msdk:msdk-spectra-centroidprofiledetection:0.0.16" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.commons:commons-math3:3.6.1" level="project" />
     <orderEntry type="library" name="Maven: commons-io:commons-io:2.5" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-io-mztab:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: uk.ac.ebi.pride:jmztab-modular-model:3.0.7" level="project" />
-    <orderEntry type="library" name="Maven: uk.ac.ebi.pride:jmztab-modular-util:3.0.7" level="project" />
-    <orderEntry type="library" name="Maven: org.openscience.cdk:cdk-silent:2.0" level="project" />
-    <orderEntry type="library" name="Maven: org.openscience.cdk:cdk-smiles:2.0" level="project" />
-    <orderEntry type="library" name="Maven: uk.ac.ebi.beam:beam-core:0.9.2" level="project" />
-    <orderEntry type="library" name="Maven: uk.ac.ebi.beam:beam-func:0.9.2" level="project" />
-    <orderEntry type="library" name="Maven: org.openscience.cdk:cdk-ioformats:2.0" level="project" />
-    <orderEntry type="library" name="Maven: org.openscience.cdk:cdk-io:2.0" level="project" />
-    <orderEntry type="library" name="Maven: org.openscience.cdk:cdk-atomtype:2.0" level="project" />
-    <orderEntry type="library" name="Maven: org.openscience.cdk:cdk-isomorphism:2.0" level="project" />
-    <orderEntry type="library" name="Maven: org.openscience.cdk:cdk-valencycheck:2.0" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-io-mzxml:0.0.11" level="project" />
+    <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.10" level="project" />
+    <orderEntry type="library" name="Maven: io.github.msdk:msdk-io-mzxml:0.0.16" level="project" />
     <orderEntry type="library" name="Maven: it.unimi.dsi:dsiutils:2.3.6" level="project" />
     <orderEntry type="library" name="Maven: com.martiansoftware:jsap:2.1" level="project" />
     <orderEntry type="library" name="Maven: commons-configuration:commons-configuration:1.10" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-io-nativeformats:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-io-netcdf:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: edu.ucar:netcdf4:4.5.5" level="project" />
-    <orderEntry type="library" name="Maven: edu.ucar:cdm:4.5.5" level="project" />
-    <orderEntry type="library" name="Maven: edu.ucar:udunits:4.5.5" level="project" />
-    <orderEntry type="library" name="Maven: edu.ucar:httpservices:4.5.5" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpclient:4.2.6" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpmime:4.2.6" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpcore:4.2.5" level="project" />
-    <orderEntry type="library" name="Maven: joda-time:joda-time:2.2" level="project" />
-    <orderEntry type="library" name="Maven: org.jdom:jdom2:2.0.4" level="project" />
-    <orderEntry type="library" name="Maven: org.quartz-scheduler:quartz:2.2.0" level="project" />
-    <orderEntry type="library" name="Maven: c3p0:c3p0:0.9.1.1" level="project" />
-    <orderEntry type="library" name="Maven: com.google.protobuf:protobuf-java:2.5.0" level="project" />
-    <orderEntry type="library" name="Maven: net.sf.ehcache:ehcache-core:2.6.2" level="project" />
-    <orderEntry type="library" name="Maven: org.itadaki:bzip2:0.9.1" level="project" />
-    <orderEntry type="library" name="Maven: com.beust:jcommander:1.35" level="project" />
-    <orderEntry type="library" name="Maven: net.jcip:jcip-annotations:1.0" level="project" />
-    <orderEntry type="library" name="Maven: net.java.dev.jna:jna:4.1.0" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-io-txt:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-io-chromatof:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: org.openscience.cdk:cdk-data:2.0" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-io-mgf:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-io-msp:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-rawdata-filters:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-spectra-centroiding:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-rawdata-baselinecorrection:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-spectra-peakinvestigator:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: com.veritomyx:peakinvestigator-sdk:4.0" level="project" />
-    <orderEntry type="library" name="Maven: org.xeustechnologies:jtar:1.1" level="project" />
-    <orderEntry type="library" name="Maven: com.jcraft:jsch:0.1.53" level="project" />
-    <orderEntry type="library" name="Maven: com.googlecode.json-simple:json-simple:1.1.1" level="project" />
-    <orderEntry type="library" name="Maven: junit:junit:4.10" level="project" />
-    <orderEntry type="library" name="Maven: org.hamcrest:hamcrest-core:1.1" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-db-mona:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: com.eclipsesource.minimal-json:minimal-json:0.9.2" level="project" />
-    <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.4" level="project" />
-    <orderEntry type="library" name="Maven: org.glassfish.jersey.media:jersey-media-json-jackson:2.17" level="project" />
-    <orderEntry type="library" name="Maven: org.glassfish.jersey.core:jersey-common:2.17" level="project" />
-    <orderEntry type="library" name="Maven: javax.annotation:javax.annotation-api:1.2" level="project" />
-    <orderEntry type="library" name="Maven: org.glassfish.jersey.bundles.repackaged:jersey-guava:2.17" level="project" />
-    <orderEntry type="library" name="Maven: org.glassfish.hk2:osgi-resource-locator:1.0.1" level="project" />
-    <orderEntry type="library" name="Maven: org.glassfish.jersey.ext:jersey-entity-filtering:2.17" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.3.2" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.3.2" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.3.2" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.3.2" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.3.2" level="project" />
-    <orderEntry type="library" name="Maven: org.glassfish.jersey.core:jersey-client:2.17" level="project" />
-    <orderEntry type="library" name="Maven: javax.ws.rs:javax.ws.rs-api:2.0.1" level="project" />
-    <orderEntry type="library" name="Maven: org.glassfish.hk2:hk2-api:2.4.0-b10" level="project" />
-    <orderEntry type="library" name="Maven: org.glassfish.hk2:hk2-utils:2.4.0-b10" level="project" />
-    <orderEntry type="library" name="Maven: org.glassfish.hk2.external:aopalliance-repackaged:2.4.0-b10" level="project" />
-    <orderEntry type="library" name="Maven: org.glassfish.hk2.external:javax.inject:2.4.0-b10" level="project" />
-    <orderEntry type="library" name="Maven: org.glassfish.hk2:hk2-locator:2.4.0-b10" level="project" />
-    <orderEntry type="library" name="Maven: org.javassist:javassist:3.18.1-GA" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-db-kegg:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-db-gnps:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-id-sirius:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-id-metfrag:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-id-localdatabase:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-alignment-joinaligner:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-alignment-ransac:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.commons:commons-math3:3.5" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-normalization-stdcompound:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-isotopes-isotopegrouper:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-spectra-centroidprofiledetection:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-spectra-splash:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: edu.ucdavis.fiehnlab.splash:core:1.8" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-isotopes-isotopepattern:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-spectra-similarity:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-featuredetection-chromatogrambuilder:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-featuredetection-targeted:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-featuredetection-gridmass:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-featuredetection-msms:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-featuredetection-srm:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-featuredetection-openms:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: io.github.msdk:msdk-featuredetection-adap3d:0.0.11" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.commons:commons-collections4:4.1" level="project" />
-    <orderEntry type="library" name="Maven: com.google.code.findbugs:jsr305:3.0.1" level="project" />
+    <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.6" level="project" />
   </component>
 </module>
