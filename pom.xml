@@ -5,7 +5,7 @@
     <groupId>PDV</groupId>
     <artifactId>PDV</artifactId>
     <packaging>jar</packaging>
-    <version>1.3.1</version>
+    <version>1.4.0</version>
     <name>PDV</name>
     <url>https://github.com/wenbostar/PDV</url>
     <description>An integrative proteomics viewer</description>
@@ -210,6 +210,13 @@
         </dependency>
 
         <dependency>
+            <groupId>com.compomics</groupId>
+            <artifactId>mascotdatfile</artifactId>
+            <version>3.6.0</version>
+            <type>jar</type>
+        </dependency>
+
+        <dependency>
             <groupId>org.swinglabs</groupId>
             <artifactId>swing-layout</artifactId>
             <version>1.0.3</version>
@@ -265,7 +272,7 @@
 
         <dependency>
             <groupId>io.github.msdk</groupId>
-            <artifactId>msdk-io-mzml</artifactId>
+            <artifactId>msdk-io-mzml</artifactId>                                                                                        
             <version>0.0.16</version>
         </dependency>
 

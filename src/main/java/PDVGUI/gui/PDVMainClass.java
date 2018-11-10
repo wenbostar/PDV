@@ -42,6 +42,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.URLDecoder;
+import java.security.acl.Group;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
@@ -63,11 +64,13 @@ public class PDVMainClass extends JFrame {
     private JButton nextJButton;
     private JButton upJButton;
     private JButton openSidebarJButton;
+    private JButton openSearchFileJButton;
     private JTable spectrumJTable;
     private JPanel psmsJPanel;
     private JPanel spectrumShowJPanel;
     private JPanel backgroundPanel;
     private JPanel detailsJPanel;
+    private JPanel searchTextOrButtonJPanel;
     private JTextField pageSelectNumJTextField;
     private JTextField checkSpectrumJTextField;
     private JTextField fragmentIonAccuracyTxt;
@@ -76,7 +79,7 @@ public class PDVMainClass extends JFrame {
     private JComboBox precursorIonUnit;
     private JComboBox sortColumnJCombox;
     private JComboBox searchTypeComboBox;
-    private String[] searchType = new String[]{"Peptide","Spectrum"};
+    private String[] searchType = new String[]{"Peptide (String)","Spectrum (String)", "Peptide (File)", "Spectrum (File)"};
 
     /**
      * SpectrumTable tooltips list
@@ -129,7 +132,11 @@ public class PDVMainClass extends JFrame {
     /**
      * Find Type
      */
-    private String findType = "Peptide";
+    private String findType = "Peptide (String)";
+    /**
+     * Select index file
+     */
+    private File selectIndexFile;
     /**
      * All spectrum Index
      */
@@ -249,7 +256,7 @@ public class PDVMainClass extends JFrame {
     /**
      * Version
      */
-    private static final String VERSION = "1.3.1";
+    private static final String VERSION = "1.4.0";
 
     /**
      * Main class
@@ -452,10 +459,10 @@ public class PDVMainClass extends JFrame {
         JMenu fileJMenu = new JMenu();
         JMenu viewMenu = new JMenu();
         JPanel mainJPanel = new JPanel();
-        JPanel searchJPanel = new JPanel();
         JPanel sideJPanel = new JPanel();
         JPanel settingJPanel = new JPanel();
         JPanel loadingJPanel = new JPanel();
+        JPanel searchJPanel = new JPanel();
         JLabel allSelectedJLabel = new JLabel();
         JLabel splitJLabel1 = new JLabel(" | ");
         JLabel splitJLabel2 = new JLabel("  ");
@@ -478,6 +485,7 @@ public class PDVMainClass extends JFrame {
         sortColumnJCombox = new JComboBox();
         nextJButton = new JButton();
         upJButton = new JButton();
+        openSearchFileJButton = new JButton();
         pageNumJTextField = new JTextField();
         pageSelectNumJTextField = new JTextField();
         searchItemTextField = new JTextField();
@@ -487,6 +495,7 @@ public class PDVMainClass extends JFrame {
         psmsJPanel = new JPanel();
         spectrumShowJPanel = new JPanel();
         backgroundPanel = new JPanel();
+        searchTextOrButtonJPanel = new JPanel();
 
         spectrumJTable = new JTable() {
             protected JTableHeader createDefaultTableHeader() {
@@ -636,10 +645,17 @@ public class PDVMainClass extends JFrame {
         searchJPanel.setOpaque(false);
 
         searchTypeComboBox.setModel(new DefaultComboBoxModel(this.searchType));
+        searchTypeComboBox.addItemListener(this::searchTypeComboBoxMouseClicked);
 
         searchItemTextField.setEditable(true);
         searchItemTextField.setHorizontalAlignment(SwingConstants.CENTER);
         searchItemTextField.setToolTipText("Data read unfinished!");
+
+        openSearchFileJButton.setIcon(new ImageIcon(getClass().getResource("/icons/open.png")));
+        openSearchFileJButton.setBorder(null);
+        openSearchFileJButton.setBorderPainted(false);
+        openSearchFileJButton.setContentAreaFilled(false);
+        openSearchFileJButton.addActionListener(this::openSearchFileJButtonActionPerformed);
 
         searchButton.setBackground(Color.BLACK);
         searchButton.setFont(searchButton.getFont().deriveFont(searchButton.getFont().getStyle() | Font.BOLD));
@@ -661,6 +677,23 @@ public class PDVMainClass extends JFrame {
         backJButton.setToolTipText("Refresh");
         backJButton.addActionListener(this::backJButtonActionPerformed);
 
+        searchTextOrButtonJPanel.setOpaque(false);
+
+        GroupLayout searchTextOrButtonJPanelLayout = new GroupLayout(searchTextOrButtonJPanel);
+        searchTextOrButtonJPanel.setLayout(searchTextOrButtonJPanelLayout);
+
+        searchTextOrButtonJPanelLayout.setHorizontalGroup(
+                searchTextOrButtonJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addComponent(searchItemTextField, 80, 200, GroupLayout.PREFERRED_SIZE)
+        );
+
+        searchTextOrButtonJPanelLayout.setVerticalGroup(
+                searchTextOrButtonJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                        .addComponent(searchItemTextField, 10, 20, 20)
+        );
+
+        searchTextOrButtonJPanel.add(searchItemTextField);
+
         GroupLayout searchJPanelLayout = new GroupLayout(searchJPanel);
         searchJPanel.setLayout(searchJPanelLayout);
         searchJPanelLayout.setHorizontalGroup(
@@ -668,9 +701,9 @@ public class PDVMainClass extends JFrame {
                         .addGroup(searchJPanelLayout.createSequentialGroup()
                                 .addContainerGap()
                                 .addComponent(backJButton)
-                                .addComponent(searchTypeComboBox,100,100,GroupLayout.PREFERRED_SIZE)
+                                .addComponent(searchTypeComboBox,150,150,GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(searchItemTextField,50, 200, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(searchTextOrButtonJPanel,150, 250, GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(searchButton,GroupLayout.PREFERRED_SIZE,50,GroupLayout.PREFERRED_SIZE)
                                 .addContainerGap())
@@ -681,7 +714,7 @@ public class PDVMainClass extends JFrame {
                         .addGroup(searchJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
                                 .addComponent(backJButton)
                                 .addComponent(searchTypeComboBox, 10, 20, 20)
-                                .addComponent(searchItemTextField, 10, 20, 20)
+                                .addComponent(searchTextOrButtonJPanel, 10, 20, 20)
                                 .addComponent(searchButton, 10, 25, 35))
         );
 
@@ -1603,6 +1636,61 @@ public class PDVMainClass extends JFrame {
     }
 
     /**
+     * Import Mascot dat file
+     * @param datFile Result file
+     */
+    public void importDatFile(File datFile){
+
+        this.isFrage = true;
+
+        databasePath = datFile.getAbsolutePath()+".db";
+
+        ProgressDialogX progressDialog = new ProgressDialogX(this,
+                Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMass.png")),
+                Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMassWait.png")),
+                true);
+        progressDialog.setPrimaryProgressCounterIndeterminate(true);
+        progressDialog.setTitle("Loading Results. Please Wait...");
+
+        new Thread(() -> {
+            try {
+                progressDialog.setVisible(true);
+            } catch (IndexOutOfBoundsException ignored) {
+            }
+        }, "ProgressDialog").start();
+        new Thread("DisplayThread") {
+            @Override
+            public void run() {
+
+                DATFileImport datFileImport;
+
+                try {
+
+                    datFileImport = new DATFileImport(datFile, PDVMainClass.this, progressDialog);
+
+                    sqliteConnection = datFileImport.getSqLiteConnection();
+                    allModifications = datFileImport.getAllModifications();
+
+                    scoreName = datFileImport.getScoreName();
+
+                    ArrayList<String> orderName = new ArrayList<>();
+                    orderName.add("PSMIndex");
+                    orderName.add("Sequence");
+                    orderName.addAll(scoreName);
+                    setUpTableHeaderToolTips();
+
+                    buttonCheck();
+
+                    sortColumnJCombox.setModel(new DefaultComboBoxModel(orderName.toArray()));
+
+                } catch (SQLException | ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
+    }
+
+    /**
      * Import deep novo results
      * @param resultFile Result file
      * @param spectrumFile spectrum file
@@ -2345,15 +2433,6 @@ public class PDVMainClass extends JFrame {
     private void updateTable(ArrayList<String> searchIDs){
         ArrayList<ArrayList<Object>> selectedItem = new ArrayList<>();
 
-        for (String spectrumIndex : searchIDs){
-            try {
-                selectedItem.add(sqliteConnection.getOneSpectrumItem(spectrumIndex));
-            } catch (SQLException e) {
-                e.printStackTrace();
-                break;
-            }
-        }
-
         spectrumJTable.removeAll();
 
         if (isDenovo){
@@ -2368,7 +2447,7 @@ public class PDVMainClass extends JFrame {
 
             deNovoTableModel.updateTable(selectedItem, searchIDs, spectrumKeyToSelected);
         } else if (isFrage){
-            for (String spectrumIndex : selectPageSpectrumIndex) {
+            for (String spectrumIndex : searchIDs) {
                 try {
                     selectedItem.add(sqliteConnection.getOneFrageSpectrumItem(spectrumIndex));
                 } catch (Exception e) {
@@ -2377,9 +2456,8 @@ public class PDVMainClass extends JFrame {
                 }
             }
 
-            frageTableModel.updateTabel(selectedItem, selectPageSpectrumIndex, spectrumKeyToSelected);
-        }
-        else {
+            frageTableModel.updateTabel(selectedItem, searchIDs, spectrumKeyToSelected);
+        } else {
             for (String spectrumIndex : searchIDs){
                 try {
                     selectedItem.add(sqliteConnection.getOneSpectrumItem(spectrumIndex));
@@ -2582,25 +2660,9 @@ public class PDVMainClass extends JFrame {
             @Override
             public void run() {
 
-                if (searchTypeComboBox.getSelectedItem().equals("Peptide")) {
-                    findType = "Peptide";
-                } else if (searchTypeComboBox.getSelectedItem().equals("Spectrum")) {
-                    findType = "Spectrum";
-                }
-
                 try {
 
-                    ArrayList<String> searchIDs = new ArrayList<>();
-                    if (!searchItemTextField.getText().equals("")) {
-                        String findItem = searchItemTextField.getText();
-                        if (Objects.equals(findType, "Spectrum")) {
-                            searchIDs = sqliteConnection.getSelectedTitleIndex(findItem);
-
-                        } else if (Objects.equals(findType, "Peptide")) {
-                            searchItemTextField.setText(findItem.toUpperCase());
-                            searchIDs = sqliteConnection.getSelectedPeptideIndex(findItem.toUpperCase());
-                        }
-                    }
+                    ArrayList<String> searchIDs = getFoundResult();
 
                     if (searchIDs.size() > 0) {
 
@@ -2628,6 +2690,80 @@ public class PDVMainClass extends JFrame {
         }.start();
     }
 
+    private ArrayList<String> getFoundResult() throws SQLException {
+
+        ArrayList<String> searchIDs = new ArrayList<>();
+
+        if (Objects.equals(findType, "Spectrum (String)")) {
+
+            if (!searchItemTextField.getText().equals("")) {
+                String findItem = searchItemTextField.getText();
+                searchIDs = sqliteConnection.getSelectedTitleIndex(findItem);
+            }
+
+        } else if(Objects.equals(findType, "Peptide (String)")) {
+
+            if (!searchItemTextField.getText().equals("")) {
+                String findItem = searchItemTextField.getText();
+                searchIDs = sqliteConnection.getSelectedPeptideIndex(findItem.toUpperCase());
+            }
+
+        } else if(Objects.equals(findType, "Spectrum (File)")) {
+            if (!searchItemTextField.getText().equals("") && !searchItemTextField.getText().equals("null")) {
+                try {
+                    BufferedReader bufferedReader = new BufferedReader(new FileReader(selectIndexFile));
+
+                    String line;
+
+                    while ((line = bufferedReader.readLine()) != null) {
+                        if (!line.equals("")) {
+                            ArrayList<String> idInFile = sqliteConnection.getSelectedTitleIndex(line.trim());
+                            searchIDs.addAll(idInFile);
+                        }
+                    }
+
+                    if (searchIDs.size() == 0){
+                        searchItemTextField.setText("No Match!");
+                    }
+
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        } else if(Objects.equals(findType, "Peptide (File)")) {
+
+            if (!searchItemTextField.getText().equals("") && !searchItemTextField.getText().equals("null")) {
+                try {
+                    BufferedReader bufferedReader = new BufferedReader(new FileReader(selectIndexFile));
+
+                    String line;
+
+                    while ((line = bufferedReader.readLine()) != null) {
+                        if (!line.equals("")) {
+                            ArrayList<String> idInFile = sqliteConnection.getSelectedPeptideIndex(line.trim());
+                            searchIDs.addAll(idInFile);
+                        }
+                    }
+
+                    if (searchIDs.size() == 0){
+                        searchItemTextField.setText("No Match!");
+                    }
+
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+
+        return searchIDs;
+    }
+
     /**
      * backJButtonActionPerformed
      * @param evt Mouse click action
@@ -2636,6 +2772,8 @@ public class PDVMainClass extends JFrame {
         allSpectrumIndex = new ArrayList<>();
         ArrayList<String> each = new ArrayList<>();
         Integer count = 0;
+
+        searchItemTextField.setText("");
 
         try {
             for (String spectrumKey : sqliteConnection.getAllIndex()){
@@ -3050,6 +3188,140 @@ public class PDVMainClass extends JFrame {
             }
         }
         new ColumnSelectionDialog(this, spectrumJTable, columnName);
+    }
+
+    /**
+     * Search type select clicked
+     * @param evt Item event
+     */
+    private void searchTypeComboBoxMouseClicked(ItemEvent evt){
+
+        searchButton.setEnabled(false);
+
+        if (searchTypeComboBox.getSelectedIndex() == 0) {
+
+            searchItemTextField.setText("");
+            searchTextOrButtonJPanel.removeAll();
+
+            GroupLayout searchTextOrButtonJPanelLayout = new GroupLayout(searchTextOrButtonJPanel);
+            searchTextOrButtonJPanel.setLayout(searchTextOrButtonJPanelLayout);
+
+            searchTextOrButtonJPanelLayout.setHorizontalGroup(
+                    searchTextOrButtonJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                            .addComponent(searchItemTextField, 80, 200, GroupLayout.PREFERRED_SIZE)
+            );
+
+            searchTextOrButtonJPanelLayout.setVerticalGroup(
+                    searchTextOrButtonJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                            .addComponent(searchItemTextField, 10, 20, 20)
+            );
+            searchTextOrButtonJPanel.repaint();
+            searchTextOrButtonJPanel.revalidate();
+
+            searchButton.setEnabled(true);
+            searchItemTextField.setEditable(true);
+            findType = "Peptide (String)";
+        } else if (searchTypeComboBox.getSelectedIndex() == 1) {
+
+            searchItemTextField.setText("");
+            searchTextOrButtonJPanel.removeAll();
+
+            GroupLayout searchTextOrButtonJPanelLayout = new GroupLayout(searchTextOrButtonJPanel);
+            searchTextOrButtonJPanel.setLayout(searchTextOrButtonJPanelLayout);
+
+            searchTextOrButtonJPanelLayout.setHorizontalGroup(
+                    searchTextOrButtonJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                            .addComponent(searchItemTextField, 80, 200, GroupLayout.PREFERRED_SIZE)
+            );
+
+            searchTextOrButtonJPanelLayout.setVerticalGroup(
+                    searchTextOrButtonJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                            .addComponent(searchItemTextField, 10, 20, 20)
+            );
+            searchTextOrButtonJPanel.repaint();
+            searchTextOrButtonJPanel.revalidate();
+
+            searchButton.setEnabled(true);
+            searchItemTextField.setEditable(true);
+            findType = "Spectrum (String)";
+        } else if (searchTypeComboBox.getSelectedIndex() == 3) {
+            findType = "Spectrum (File)";
+
+            searchItemTextField.setText("");
+            selectIndexFile = null;
+
+            searchTextOrButtonJPanel.removeAll();
+
+            GroupLayout searchTextOrButtonJPanelLayout = new GroupLayout(searchTextOrButtonJPanel);
+            searchTextOrButtonJPanel.setLayout(searchTextOrButtonJPanelLayout);
+
+            searchTextOrButtonJPanelLayout.setHorizontalGroup(
+                    searchTextOrButtonJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                            .addGroup(searchTextOrButtonJPanelLayout.createSequentialGroup()
+                                    .addComponent(searchItemTextField, 80, 200, GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(openSearchFileJButton, 50, 50, GroupLayout.PREFERRED_SIZE))
+            );
+
+            searchTextOrButtonJPanelLayout.setVerticalGroup(
+                    searchTextOrButtonJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                            .addComponent(openSearchFileJButton, 10, 20, 20)
+                            .addComponent(searchItemTextField, 10, 20, 20)
+            );
+            searchItemTextField.setEditable(false);
+            searchTextOrButtonJPanel.repaint();
+            searchTextOrButtonJPanel.revalidate();
+
+        } else if (searchTypeComboBox.getSelectedIndex() == 2) {
+            findType = "Peptide (File)";
+
+            searchItemTextField.setText("");
+            searchTextOrButtonJPanel.removeAll();
+
+            GroupLayout searchTextOrButtonJPanelLayout = new GroupLayout(searchTextOrButtonJPanel);
+            searchTextOrButtonJPanel.setLayout(searchTextOrButtonJPanelLayout);
+
+            searchTextOrButtonJPanelLayout.setHorizontalGroup(
+                    searchTextOrButtonJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                            .addGroup(searchTextOrButtonJPanelLayout.createSequentialGroup()
+                                    .addComponent(searchItemTextField, 80, 200, GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(openSearchFileJButton, 50, 50, GroupLayout.PREFERRED_SIZE))
+            );
+
+            searchTextOrButtonJPanelLayout.setVerticalGroup(
+                    searchTextOrButtonJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                            .addComponent(openSearchFileJButton, 10, 20, 20)
+                            .addComponent(searchItemTextField, 10, 20, 20)
+            );
+            searchItemTextField.setEditable(false);
+            searchTextOrButtonJPanel.repaint();
+            searchTextOrButtonJPanel.revalidate();
+
+            selectIndexFile = null;
+        }
+
+    }
+
+    private void openSearchFileJButtonActionPerformed(ActionEvent evt){
+
+        JFileChooser fileChooser = new JFileChooser(lastSelectedFolder.getLastSelectedFolder());
+        fileChooser.setDialogTitle("Select Input File");
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+        fileChooser.setMultiSelectionEnabled(false);
+
+        int returnValue = fileChooser.showDialog(this, "OK");
+
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+
+            selectIndexFile = fileChooser.getSelectedFile();
+
+        }
+
+        if (selectIndexFile != null){
+            searchItemTextField.setText(selectIndexFile.getName());
+            lastSelectedFolder.setLastSelectedFolder(selectIndexFile.getAbsolutePath());
+            searchButton.setEnabled(true);
+        }
+
     }
 
     /**

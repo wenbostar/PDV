@@ -513,7 +513,7 @@ public class PDVStart extends JDialog {
 
         firstPartJPanel.removeAll();
 
-        JLabel databaseJLabel = new JLabel("<html>Visualize database searching result with mzIdentML/pepXML/txt format file. Accept MS/MS data in MGF/mzXML/mzML format.</html>");
+        JLabel databaseJLabel = new JLabel("<html>Visualize database searching result with mzIdentML/pepXML/dat/txt format file. Accept MS/MS data in MGF/mzXML/mzML format.</html>");
 
         databaseJLabel.setFont(new Font("simsun", Font.ITALIC, 12));
 

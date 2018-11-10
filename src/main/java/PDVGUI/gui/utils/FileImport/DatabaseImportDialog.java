@@ -118,6 +118,10 @@ public class DatabaseImportDialog extends JDialog {
      * Boolean indicate txt file
      */
     private Boolean isText = false;
+    /**
+     * Boolean indicate mascot file
+     */
+    private Boolean isDAT = false;
 
     /**
      * Creates a new open dialog.
@@ -463,76 +467,85 @@ public class DatabaseImportDialog extends JDialog {
 
                 } else if (idFile != null && fileTypeCombox.getSelectedIndex() != 2) {
 
-                    if(spectrumFileType.equals("mgf")){
-                        SpectrumFactory spectrumFactory = SpectrumFactory.getInstance();
-                        try {
                             for(File spectrumFile: spectrumFiles){
-                                spectrumFactory.addSpectra(spectrumFile);
-                            }
-                        } catch (Exception e) {
-                            JOptionPane.showMessageDialog(DatabaseImportDialog.this, "Failed to pares Spectrum file. Please check your spectrum file!", "File Error", JOptionPane.WARNING_MESSAGE);
-                            progressDialog.setRunFinished();
-                            e.printStackTrace();
-                            System.exit(1);
-                        }
+                    if (idFile.getName().toLowerCase().endsWith(".dat")){
 
-                        spectrumsFileFactory = spectrumFactory;
+                        progressDialog.setRunFinished();
+                        importIdentificationFiles();
 
-                    }else if(spectrumFileType.equals("mzml")){
+                    } else {
 
-                        MZMLFile mzmlFile = new MZMLFile(spectrumFiles.get(0).getAbsolutePath());
-
-                        ScanCollectionDefault scans = new ScanCollectionDefault();
-
-                        scans.setDefaultStorageStrategy(StorageStrategy.SOFT);
-
-                        scans.isAutoloadSpectra(true);
-
-                        scans.setDataSource(mzmlFile);
-
-                        mzmlFile.setNumThreadsForParsing(threads);
-
-                        try {
-                            scans.loadData(LCMSDataSubset.MS2_WITH_SPECTRA);
-                        } catch (FileParsingException e) {
-                            JOptionPane.showMessageDialog(DatabaseImportDialog.this, "Failed to pares Spectrum file. Please check your spectrum file!", "File Error", JOptionPane.WARNING_MESSAGE);
-                            progressDialog.setRunFinished();
-                            e.printStackTrace();
-                            System.exit(1);
-                        }
-
-                        Map<String, MZMLIndexElement> idMap = mzmlFile.getIndex().getMapById();
-
-                        for (String id : idMap.keySet()) {
-                            MZMLIndexElement mzmlIndexElement = idMap.get(id);
-
-                            spectrumIdAndNumber.put(id, mzmlIndexElement.getNumber());
-                        }
-
-                        spectrumsFileFactory = scans;
-
-                    }else if(spectrumFileType.equals("mzxml")){
-                        MzXMLScanImport mzXMLScanImport = new MzXMLScanImport(spectrumFiles.get(0).getAbsolutePath());
-
-                        spectrumsFileFactory = mzXMLScanImport.getScans();
-
-                    }
-
-                    for (int i = 0;i<3000;i++){
-                        if (mzIdentMLCheck ==1){
-
-                            progressDialog.setRunFinished();
-
-                            importIdentificationFiles();
-
-                            break;
-                        }else{
-                            try {Thread.sleep(1000);
-                            } catch (InterruptedException e) {
+                        if(spectrumFileType.equals("mgf")){
+                            SpectrumFactory spectrumFactory = SpectrumFactory.getInstance();
+                            try {
+                                for(File spectrumFile: spectrumFiles){
+                                    spectrumFactory.addSpectra(spectrumFile);
+                                }
+                            } catch (Exception e) {
+                                JOptionPane.showMessageDialog(DatabaseImportDialog.this, "Failed to pares Spectrum file. Please check your spectrum file!", "File Error", JOptionPane.WARNING_MESSAGE);
+                                progressDialog.setRunFinished();
                                 e.printStackTrace();
+                                System.exit(1);
                             }
+
+                            spectrumsFileFactory = spectrumFactory;
+
+                        }else if(spectrumFileType.equals("mzml")){
+
+                            MZMLFile mzmlFile = new MZMLFile(spectrumFiles.get(0).getAbsolutePath());
+
+                            ScanCollectionDefault scans = new ScanCollectionDefault();
+
+                            scans.setDefaultStorageStrategy(StorageStrategy.SOFT);
+
+                            scans.isAutoloadSpectra(true);
+
+                            scans.setDataSource(mzmlFile);
+
+                            mzmlFile.setNumThreadsForParsing(threads);
+
+                            try {
+                                scans.loadData(LCMSDataSubset.MS2_WITH_SPECTRA);
+                            } catch (FileParsingException e) {
+                                JOptionPane.showMessageDialog(DatabaseImportDialog.this, "Failed to pares Spectrum file. Please check your spectrum file!", "File Error", JOptionPane.WARNING_MESSAGE);
+                                progressDialog.setRunFinished();
+                                e.printStackTrace();
+                                System.exit(1);
+                            }
+
+                            Map<String, MZMLIndexElement> idMap = mzmlFile.getIndex().getMapById();
+
+                            for (String id : idMap.keySet()) {
+                                MZMLIndexElement mzmlIndexElement = idMap.get(id);
+
+                                spectrumIdAndNumber.put(id, mzmlIndexElement.getNumber());
+                            }
+
+                            spectrumsFileFactory = scans;
+
+                        }else if(spectrumFileType.equals("mzxml")){
+                            MzXMLScanImport mzXMLScanImport = new MzXMLScanImport(spectrumFiles.get(0).getAbsolutePath());
+
+                            spectrumsFileFactory = mzXMLScanImport.getScans();
+
                         }
 
+                        for (int i = 0;i<3000;i++){
+                            if (mzIdentMLCheck ==1){
+
+                                progressDialog.setRunFinished();
+
+                                importIdentificationFiles();
+
+                                break;
+                            }else{
+                                try {Thread.sleep(1000);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                        }
                     }
                 }
 
@@ -643,17 +656,18 @@ public class DatabaseImportDialog extends JDialog {
             @Override
             public boolean accept(File myFile) {
                 return myFile.getName().toLowerCase().endsWith(".mzid")
-                        ||myFile.getName().toLowerCase().endsWith(".pepxml")
-                        ||myFile.getName().toLowerCase().endsWith(".txt")
-                        ||myFile.getName().toLowerCase().endsWith(".xml")
-                        ||myFile.getName().toLowerCase().endsWith(".csv")
-                        ||myFile.getName().toLowerCase().endsWith(".tsv")
+                        || myFile.getName().toLowerCase().endsWith(".pepxml")
+                        || myFile.getName().toLowerCase().endsWith(".txt")
+                        || myFile.getName().toLowerCase().endsWith(".xml")
+                        || myFile.getName().toLowerCase().endsWith(".csv")
+                        || myFile.getName().toLowerCase().endsWith(".tsv")
+                        || myFile.getName().toLowerCase().endsWith(".dat")
                         || myFile.isDirectory();
             }
 
             @Override
             public String getDescription() {
-                return "mzIdentML (.mzid), PepXML (.pepxml), Text File (.txt), MS Amanda (.csv, .txt), MSfrage (.tsv)";
+                return "mzIdentML (.mzid), PepXML (.pepxml), Text File (.txt), MS Amanda (.csv, .txt), MSfrage (.tsv), Mascot (,dat)";
             }
         };
 
@@ -672,6 +686,7 @@ public class DatabaseImportDialog extends JDialog {
             if(idFile.getName().toLowerCase().endsWith(".mzid")) {
 
                 isText = false;
+                isDAT = false;
 
                 inputFilesPanel.removeAll();
 
@@ -739,7 +754,49 @@ public class DatabaseImportDialog extends JDialog {
                 }, "importThread");
 
                 importIDThread.start();
-            }else {
+            } else if (idFile.getName().toLowerCase().endsWith(".dat")){
+
+                isDAT = true;
+                isText = false;
+
+                inputFilesPanel.removeAll();
+
+                GroupLayout inputFilesPanelLayout = new GroupLayout(inputFilesPanel);
+                inputFilesPanel.setLayout(inputFilesPanelLayout);
+                inputFilesPanelLayout.setHorizontalGroup(
+                        inputFilesPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                .addGroup(inputFilesPanelLayout.createSequentialGroup()
+                                        .addContainerGap()
+                                        .addGroup(inputFilesPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                                .addGroup(GroupLayout.Alignment.TRAILING, inputFilesPanelLayout.createSequentialGroup()
+                                                        .addComponent(idFilesLabel, GroupLayout.PREFERRED_SIZE, 160, GroupLayout.PREFERRED_SIZE)
+                                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                        .addComponent(idFilesTxt,GroupLayout.PREFERRED_SIZE,260, GroupLayout.PREFERRED_SIZE)
+                                                        .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                                        .addComponent(browseIdJButton)))
+                                        .addContainerGap())
+                );
+
+                inputFilesPanelLayout.linkSize(SwingConstants.HORIZONTAL, new Component[] {browseIdJButton});
+
+                inputFilesPanelLayout.setVerticalGroup(
+                        inputFilesPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                .addGroup(inputFilesPanelLayout.createSequentialGroup()
+                                        .addContainerGap()
+                                        .addGroup(inputFilesPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                                .addComponent(idFilesTxt, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(idFilesLabel)
+                                                .addComponent(browseIdJButton))
+                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                        .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                );
+
+                inputFilesPanel.repaint();
+
+                pack();
+
+            } else {
+                isDAT = false;
                 if (idFile.getName().toLowerCase().endsWith(".txt") || idFile.getName().toLowerCase().endsWith(".csv") || idFile.getName().toLowerCase().endsWith(".tsv")){
 
                     isText = true;
@@ -914,18 +971,22 @@ public class DatabaseImportDialog extends JDialog {
             allValid = false;
         }
 
-        if (spectrumFiles.size() != 0) {
-            spectrumFilesLabel.setForeground(Color.BLACK);
-            spectrumFilesLabel.setToolTipText(null);
-            spectrumFilesTxt.setToolTipText("Click to see the selected files");
-            spectrumFilesTxt.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        } else {
-            spectrumFilesLabel.setForeground(Color.RED);
-            spectrumFilesLabel.setToolTipText("Please select the spectrum file(s) for the identification file");
-            spectrumFilesTxt.setToolTipText("Please select the spectrum file(s) for the identification file");
-            spectrumFilesTxt.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-            allValid = false;
+        if (!isDAT) {
+
+            if (spectrumFiles.size() != 0) {
+                spectrumFilesLabel.setForeground(Color.BLACK);
+                spectrumFilesLabel.setToolTipText(null);
+                spectrumFilesTxt.setToolTipText("Click to see the selected files");
+                spectrumFilesTxt.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            } else {
+                spectrumFilesLabel.setForeground(Color.RED);
+                spectrumFilesLabel.setToolTipText("Please select the spectrum file(s) for the identification file");
+                spectrumFilesTxt.setToolTipText("Please select the spectrum file(s) for the identification file");
+                spectrumFilesTxt.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                allValid = false;
+            }
         }
+
 
         if (fragmentIonMZTolerance != null) {
             fragmentIonJLable.setForeground(Color.BLACK);
@@ -967,6 +1028,9 @@ public class DatabaseImportDialog extends JDialog {
                 pdvMainClass.importFragPipe(fileToType, idFile);
             }
             idFile = null;
+        } else if (idFile.getName().toLowerCase().endsWith(".dat")){
+            pdvMainClass.importDatFile(idFile);
+
         } else {
             JOptionPane.showMessageDialog(pdvMainClass, JOptionEditorPane.getJOptionEditorPane(
                     "No support ID file format, please check your file."),
