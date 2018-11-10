@@ -467,7 +467,6 @@ public class DatabaseImportDialog extends JDialog {
 
                 } else if (idFile != null && fileTypeCombox.getSelectedIndex() != 2) {
 
-                            for(File spectrumFile: spectrumFiles){
                     if (idFile.getName().toLowerCase().endsWith(".dat")){
 
                         progressDialog.setRunFinished();
