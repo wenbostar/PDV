@@ -565,7 +565,12 @@ public class FragePipeImport {
                 indexToName.put(i, header.trim().replace(" ", ""));
                 assignenModIndex = i;
             } else {
-                indexToName.put(i, header.trim().replace(" ", ""));
+                String columnName = header.trim().replace(" ", "");
+                if (columnName.matches(".*\\d+.*")){
+
+                    columnName = "'" + columnName + "'";
+                }
+                indexToName.put(i, columnName);
             }
         }
 
