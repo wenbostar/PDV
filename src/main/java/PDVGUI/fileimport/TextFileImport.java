@@ -70,6 +70,10 @@ public class TextFileImport {
      */
     private Integer chargeIndex = 0;
     /**
+     * MZ column index
+     */
+    private Integer mzIndex = -1;
+    /**
      * ALl modification
      */
     private ArrayList<String> allModifications = new ArrayList<>();
@@ -163,7 +167,7 @@ public class TextFileImport {
 
         int countFirst = 0;
         for (Integer index : indexToName.keySet()){
-            if (!indexToName.get(index).equals("mz")){
+            if (!indexToName.get(index).equalsIgnoreCase("mz")){
                 countFirst ++;
                 addQuery.append(", ").append(indexToName.get(index)).append(" OBJECT(50)");
                 addValuesQuery.append(",?");
@@ -200,6 +204,7 @@ public class TextFileImport {
         String sequence;
         Integer modificationSite;
         Double modificationMass;
+        Double pepMz;
         Integer peptideCharge;
         String rankString;
         Peptide peptide;
@@ -298,6 +303,12 @@ public class TextFileImport {
 
                 peptideAssumption = new PeptideAssumption(peptide, 1, 0, new Charge(+1, peptideCharge), 0, "*");
 
+                if (mzIndex != -1){
+                    pepMz = Double.valueOf(values[mzIndex]);
+                } else {
+                    pepMz = peptideAssumption.getTheoreticMz();
+                }
+
                 currentMatch.addHit(0, peptideAssumption, false);
                 currentMatch.setBestPeptideAssumption(peptideAssumption);
 
@@ -316,7 +327,7 @@ public class TextFileImport {
                 }
 
                 preparedStatement.setInt(1, lineCount);
-                preparedStatement.setDouble(2, peptide.getMass()/peptideCharge);
+                preparedStatement.setDouble(2, pepMz);
                 preparedStatement.setString(3, spectrumTitle);
                 preparedStatement.setString(4, sequence);
                 preparedStatement.setDouble(5, -1);
@@ -326,7 +337,9 @@ public class TextFileImport {
                 for (Integer index : indexToName.keySet()){
                     String name = indexToName.get(index);
                     String value = values[index];
-                    preparedStatement.setString(nameToDBIndex.get(name), value);
+                    if (!name.equalsIgnoreCase("mz")) {
+                        preparedStatement.setString(nameToDBIndex.get(name), value);
+                    }
                 }
 
                 preparedStatement.addBatch();
@@ -420,6 +433,10 @@ public class TextFileImport {
                         case "charge":
                             chargeIndex = index;
                             break;
+                        case "mz":
+                            mzIndex = index;
+                            break;
+                            //Do nothing
                         default:
                             indexToName.put(index, values[index]);
                             break;
