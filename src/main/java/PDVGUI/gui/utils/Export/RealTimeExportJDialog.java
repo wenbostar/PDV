@@ -355,8 +355,8 @@ public class RealTimeExportJDialog extends JDialog {
                                         mSnSpectrum = spectrumLibDisplay.getSpectrum(Integer.valueOf(spectrumKey));
                                         spectrumIdentificationAssumption = spectrumLibDisplay.getSpectrumIdentificationAssumption();
                                     }
-                                    updateSpectrum(spectrumKey, mSnSpectrum, spectrumIdentificationAssumption);
                                     Thread.sleep(100);
+                                    updateSpectrum(spectrumKey, mSnSpectrum, spectrumIdentificationAssumption);
 
                                     String outputPathName = outputPath + PDVMainClass.FILE_SEPARATOR + FilePattern.matcher(mSnSpectrum.getSpectrumTitle()).replaceAll("") + imageType.getExtension();
                                     exportFigure(outputPathName);

@@ -256,7 +256,7 @@ public class PDVMainClass extends JFrame {
     /**
      * Version
      */
-    private static final String VERSION = "1.4.2";
+    private static final String VERSION = "1.4.3";
 
     /**
      * Main class
@@ -3517,6 +3517,7 @@ public class PDVMainClass extends JFrame {
      * @return AnnotationSettings
      */
     public AnnotationSettings getAnnotationSettings() {
+        this.annotationSettings = spectrumMainPanel.getAnnotationSettings();
         return annotationSettings;
     }
 

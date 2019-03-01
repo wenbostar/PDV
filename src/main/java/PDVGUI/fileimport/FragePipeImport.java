@@ -30,6 +30,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
@@ -279,55 +280,60 @@ public class FragePipeImport {
 
                         for (String eachMod : assignedMod.split(",")) {
 
-                            residues = new ArrayList<>();
-
-                            modMass = Double.valueOf(eachMod.substring(eachMod.lastIndexOf("(") + 1, eachMod.lastIndexOf(")")));
-
-                            if (eachMod.contains("n")) {
-                                modAA = "N-term";
-                                position = 1;
-
-                            } else if (eachMod.contains("c")) {
-                                modAA = "C-term";
-                                position = peptideSequence.length();
-
+                            if (eachMod.contains(":")) { //15.9949:Oxidation (Oxidation or Hydroxylation)
+                                //Do nothing
                             } else {
-                                modAA = eachMod.substring(eachMod.lastIndexOf("(") - 1, eachMod.lastIndexOf("("));
 
-                                position = Integer.valueOf(eachMod.substring(0, eachMod.lastIndexOf("(") - 1).trim());
-                            }
+                                residues = new ArrayList<>();
 
-                            singleModificationName = modMass + " of " + modAA;
+                                modMass = Double.valueOf(eachMod.substring(eachMod.lastIndexOf("(") + 1, eachMod.lastIndexOf(")")));
 
-                            if (!ptmFactory.containsPTM(singleModificationName)) {
-                                if (modAA.equalsIgnoreCase("n-term")) {
-                                    residues.add(modAA);
-                                    PTM ptm = new PTM(PTM.MODNPAA, singleModificationName, modMass, residues);
-                                    ptm.setShortName(String.valueOf(modMass));
-                                    ptmFactory.addUserPTM(ptm);
-                                } else if (modAA.equalsIgnoreCase("c-term")) {
-                                    residues.add(modAA);
-                                    PTM ptm = new PTM(PTM.MODCP, singleModificationName, modMass, residues);
-                                    ptm.setShortName(String.valueOf(modMass));
-                                    ptmFactory.addUserPTM(ptm);
+                                if (eachMod.contains("n")) { //n(42.0106)
+                                    modAA = "N-term";
+                                    position = 1;
+
+                                } else if (eachMod.contains("c")) { //c(42.0106)
+                                    modAA = "C-term";
+                                    position = peptideSequence.length();
+
                                 } else {
-                                    residues.add(modAA);
-                                    PTM ptm = new PTM(PTM.MODAA, singleModificationName, modMass, residues);
-                                    ptm.setShortName(String.valueOf(modMass));
-                                    if (modAA.equals("T") || modAA.equals("S")){
-                                        if (modMass < 80.01 && modMass > 79.9){
-                                            ptm.addNeutralLoss(NeutralLoss.H3PO4);
-                                        }
-                                    }
-                                    ptmFactory.addUserPTM(ptm);
+                                    modAA = eachMod.substring(eachMod.lastIndexOf("(") - 1, eachMod.lastIndexOf("("));
+
+                                    position = Integer.valueOf(eachMod.substring(0, eachMod.lastIndexOf("(") - 1).trim());
                                 }
-                            }
 
-                            if (!allModifications.contains(singleModificationName)) {
-                                allModifications.add(singleModificationName);
-                            }
+                                singleModificationName = modMass + " of " + modAA;
 
-                            utilitiesModifications.add(new ModificationMatch(singleModificationName, true, position));
+                                if (!ptmFactory.containsPTM(singleModificationName)) {
+                                    if (modAA.equalsIgnoreCase("n-term")) {
+                                        residues.add(modAA);
+                                        PTM ptm = new PTM(PTM.MODNPAA, singleModificationName, modMass, residues);
+                                        ptm.setShortName(String.valueOf(modMass));
+                                        ptmFactory.addUserPTM(ptm);
+                                    } else if (modAA.equalsIgnoreCase("c-term")) {
+                                        residues.add(modAA);
+                                        PTM ptm = new PTM(PTM.MODCP, singleModificationName, modMass, residues);
+                                        ptm.setShortName(String.valueOf(modMass));
+                                        ptmFactory.addUserPTM(ptm);
+                                    } else {
+                                        residues.add(modAA);
+                                        PTM ptm = new PTM(PTM.MODAA, singleModificationName, modMass, residues);
+                                        ptm.setShortName(String.valueOf(modMass));
+                                        if (modAA.equals("T") || modAA.equals("S")){
+                                            if (modMass < 80.01 && modMass > 79.9){
+                                                ptm.addNeutralLoss(NeutralLoss.H3PO4);
+                                            }
+                                        }
+                                        ptmFactory.addUserPTM(ptm);
+                                    }
+                                }
+
+                                if (!allModifications.contains(singleModificationName)) {
+                                    allModifications.add(singleModificationName);
+                                }
+
+                                utilitiesModifications.add(new ModificationMatch(singleModificationName, true, position));
+                            }
                         }
                     }
 
@@ -380,7 +386,7 @@ public class FragePipeImport {
                     for (Integer index : indexToName.keySet()){
                         String name = indexToName.get(index);
                         String value;
-                        if (index == lineSplit.length){
+                        if (index >= lineSplit.length){
                             value = "";
                         } else {
                             value = lineSplit[index];

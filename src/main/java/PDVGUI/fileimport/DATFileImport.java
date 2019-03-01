@@ -63,6 +63,10 @@ public class DATFileImport {
      */
     private HashMap<Integer, String> modIDToModNam = new HashMap<>();
     /**
+     * Fixed modification AA and name
+     */
+    private HashMap<String, String> fixedModAAAndName = new HashMap<>();
+    /**
      * PTM factory
      */
     private PTMFactory ptmFactory = PTMFactory.getInstance();
@@ -144,7 +148,7 @@ public class DATFileImport {
         PreparedStatement preparedStatement = null;
 
         MascotDatfileInf iMascotDatfile = null;
-        iMascotDatfile = MascotDatfileFactory.create(datFile.getAbsolutePath(), MascotDatfileType.MEMORY);
+        iMascotDatfile = MascotDatfileFactory.create(datFile.getAbsolutePath(), MascotDatfileType.INDEX);
 
         for (Object object : iMascotDatfile.getModificationList().getVariableModifications()) {
             Modification modification = (Modification) object;
@@ -235,9 +239,26 @@ public class DATFileImport {
                 }
             }
 
+            for (String aa : fixedModAAAndName.keySet()){
+                String modName = fixedModAAAndName.get(aa);
+
+                if (aa.equals("N-term")){
+                    utilitiesModifications.add(new ModificationMatch(modName, true, 1));
+                } else if (aa.equals("C-term")){
+                    utilitiesModifications.add(new ModificationMatch(modName, true, peptideSeq.length()));
+                } else {
+                    for (int modIndex = 0; modIndex < peptideSeq.length(); modIndex ++){
+                        String modAA = String.valueOf(peptideSeq.charAt(modIndex));
+                        if (modAA.equals(aa)){
+                            utilitiesModifications.add(new ModificationMatch(modName, true, modIndex + 1));
+                        }
+                    }
+                }
+            }
+
             peptide = new Peptide(peptideSeq, utilitiesModifications);
 
-            Integer charge = Integer.valueOf(query.getChargeString().split("\\+")[0]);
+            int charge = Integer.parseInt(query.getChargeString().split("\\+")[0]);
 
             peptideAssumption = new PeptideAssumption(peptide, 1, 0, new Charge(+1, charge), peptideHit.getDeltaMass(), "*");
 
@@ -383,6 +404,9 @@ public class DATFileImport {
             if (!allModifications.contains(modName)) {
                 allModifications.add(modName);
             }
+            if (!isVariable){
+                fixedModAAAndName.put(location, modName);
+            }
 
         } else if (location.contains("C-term")){
 
@@ -394,6 +418,9 @@ public class DATFileImport {
 
             if (!allModifications.contains(modName)) {
                 allModifications.add(modName);
+            }
+            if (!isVariable){
+                fixedModAAAndName.put(location, modName);
             }
 
         } else {
@@ -411,6 +438,9 @@ public class DATFileImport {
 
                 if (!allModifications.contains(modName)) {
                     allModifications.add(modName);
+                }
+                if (!isVariable){
+                    fixedModAAAndName.put(singleAA, modName);
                 }
             }
         }

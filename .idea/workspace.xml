@@ -6,10 +6,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0b0cca48-ec31-481b-94db-b982afc0e540" name="Default" comment="CLI mode debug.">
+      <change afterPath="$PROJECT_DIR$/src/main/java/PDVCLI/utils/AddInformationPanel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PDV.iml" beforeDir="false" afterPath="$PROJECT_DIR$/PDV.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/TextFileImport.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/TextFileImport.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/PDVCLI/PDVCLIMainClass.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/PDVCLI/PDVCLIMainClass.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/DATFileImport.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/DATFileImport.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/FragePipeImport.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/FragePipeImport.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/RealTimeExportJDialog.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/RealTimeExportJDialog.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -21,15 +26,16 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="73">
+            <state relative-caret-position="410">
               <caret line="258" column="48" selection-start-line="258" selection-start-column="48" selection-end-line="258" selection-end-column="48" />
               <folding>
                 <element signature="imports" expanded="true" />
+                <element signature="e#13086#13821#0" expanded="true" />
+                <element signature="e#13820#13821#0" expanded="true" />
                 <element signature="e#44173#44698#0" />
-                <element signature="e#45637#48117#0" />
                 <element signature="e#108938#108939#0" expanded="true" />
                 <element signature="e#109003#109004#0" expanded="true" />
                 <element signature="e#115847#115848#0" expanded="true" />
@@ -38,39 +44,43 @@
                 <element signature="e#116086#116087#0" expanded="true" />
                 <element signature="e#130290#130291#0" expanded="true" />
                 <element signature="e#130340#130341#0" expanded="true" />
-                <element signature="e#130715#130716#0" expanded="true" />
-                <element signature="e#130756#130757#0" expanded="true" />
-                <element signature="e#136846#136847#0" expanded="true" />
-                <element signature="e#136885#136886#0" expanded="true" />
-                <element signature="e#136998#136999#0" expanded="true" />
-                <element signature="e#137030#137031#0" expanded="true" />
-                <element signature="e#137161#137162#0" expanded="true" />
-                <element signature="e#137200#137201#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java">
+        <entry file="file://$PROJECT_DIR$/src/main/java/PDVCLI/PDVCLIMainClass.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="323">
-              <caret line="1337" column="57" selection-start-line="1337" selection-start-column="42" selection-end-line="1337" selection-end-column="57" />
+            <state relative-caret-position="415">
+              <caret line="444" selection-start-line="444" selection-end-line="444" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/TextFileImport.java">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/FragePipeImport.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="199">
-              <caret line="307" column="47" selection-start-line="307" selection-start-column="47" selection-end-line="307" selection-end-column="47" />
-              <folding>
-                <element signature="e#16457#16458#0" expanded="true" />
-                <element signature="e#16496#16497#0" expanded="true" />
-                <element signature="e#16988#16989#0" expanded="true" />
-                <element signature="e#17027#17028#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="595">
+              <caret line="259" selection-start-line="259" selection-end-line="259" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/DATFileImport.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="715">
+              <caret line="252" column="104" selection-start-line="252" selection-start-column="104" selection-end-line="252" selection-end-column="104" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/RealTimeExportJDialog.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1552">
+              <caret line="183" column="25" selection-start-line="183" selection-start-column="25" selection-end-line="183" selection-end-column="25" />
             </state>
           </provider>
         </entry>
@@ -85,62 +95,37 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TableModel/DatabaseTableModel.java">
+        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1875">
-              <caret line="143" column="30" selection-start-line="143" selection-start-column="30" selection-end-line="143" selection-end-column="30" />
+            <state relative-caret-position="4125">
+              <caret line="312" column="19" selection-start-line="312" selection-start-column="19" selection-end-line="312" selection-end-column="19" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/DATFileImport.java">
+        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumContainer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="5415">
-              <caret line="395" column="46" selection-start-line="395" selection-start-column="46" selection-end-line="395" selection-end-column="46" />
-              <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="e#17705#17706#0" expanded="true" />
-                <element signature="e#17744#17745#0" expanded="true" />
-                <element signature="e#18307#18308#0" expanded="true" />
-                <element signature="e#18346#18347#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="105">
+              <caret line="14" column="13" selection-start-line="14" selection-start-column="13" selection-end-line="14" selection-end-column="13" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/FragePipeImport.java">
+        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/ExportBatchDialog.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="322">
-              <caret line="568" column="52" selection-start-line="568" selection-start-column="52" selection-end-line="568" selection-end-column="52" />
+            <state relative-caret-position="6000">
+              <caret line="415" column="32" selection-start-line="415" selection-start-column="32" selection-end-line="415" selection-end-column="32" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MaxQuantFileImport.java">
+        <entry file="file://$PROJECT_DIR$/src/main/java/PDVCLI/TextImport.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1276">
-              <caret line="772" column="52" selection-start-line="772" selection-start-column="32" selection-end-line="772" selection-end-column="52" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/DatabaseImportDialog.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="573">
-              <caret line="1028" column="26" selection-start-line="1028" selection-start-column="26" selection-end-line="1028" selection-end-column="26" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/DB/SQLiteConnection.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-683">
-              <caret line="236" column="38" selection-start-line="236" selection-start-column="30" selection-end-line="236" selection-end-column="38" />
+            <state relative-caret-position="120">
+              <caret line="23" column="13" selection-start-line="23" selection-start-column="13" selection-end-line="23" selection-end-column="13" />
             </state>
           </provider>
         </entry>
@@ -156,17 +141,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>searchParameters</find>
-      <find>searchParamete</find>
-      <find>isFrage</find>
-      <find>ptmsetting</find>
-      <find>isfrage</find>
-      <find>rank</find>
-      <find>decoyString</find>
-      <find>accStringBuilder</find>
-      <find>pepPosInProString</find>
-      <find>lineCount</find>
-      <find>ptm</find>
       <find>variedModifications</find>
       <find>STY</find>
       <find>search</find>
@@ -185,7 +159,18 @@
       <find>fixedModificationMap</find>
       <find>spectrumTitleIndex</find>
       <find>nameToDBIndex</find>
+      <find>indexesFromFile</find>
+      <find>slee</find>
+      <find>0.03</find>
+      <find>spectrumMainPanel</find>
+      <find>annotationSettings</find>
+      <find>modIDToModNam</find>
+      <find>allJSplitPane</find>
+      <find>secondarySpectrumPlotsSplitPanel</find>
+      <find>secondarySpectrumPlotsJPanel</find>
+      <find>infoSpectrumSplitPane</find>
       <find>indexToName</find>
+      <find>png</find>
     </findStrings>
     <replaceStrings>
       <replace>termModMassToTerm</replace>
@@ -200,6 +185,7 @@
       <replace>termModification</replace>
       <replace>spectrumShowPanel</replace>
       <replace>lineCount</replace>
+      <replace>secondarySpectrumPlotsJPanel</replace>
     </replaceStrings>
     <dirStrings>
       <dir>E:\Work\PsmViewer\PDV</dir>
@@ -211,7 +197,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TICPanel.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/PrideXMLImportDialog.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/DeNovoImportDialog.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVCLI/MaxQuantImport.java" />
@@ -240,10 +225,7 @@
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MaxQuantFileImport.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/utils/png.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/LineChart.java" />
-        <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumContainer.java" />
-        <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/RealTimeExportJDialog.java" />
-        <option value="$PROJECT_DIR$/src/main/java/PDVCLI/PDVCLIMainClass.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/utils/Export.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/ExportBatchDialog.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/ExportExpectedSizeDialog.java" />
@@ -254,14 +236,18 @@
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/DATTest.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/DB/SQLiteConnection.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVStart.java" />
-        <option value="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/DATFileImport.java" />
-        <option value="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/FragePipeImport.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/thanks.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/App.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/ComplexNumber.java" />
+        <option value="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/TextFileImport.java" />
+        <option value="$PROJECT_DIR$/src/main/java/PDVCLI/utils/AddInformationPanel.java" />
+        <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java" />
+        <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/RealTimeExportJDialog.java" />
+        <option value="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/DATFileImport.java" />
+        <option value="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/FragePipeImport.java" />
+        <option value="$PROJECT_DIR$/src/main/java/PDVCLI/PDVCLIMainClass.java" />
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java" />
-        <option value="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/TextFileImport.java" />
       </list>
     </option>
   </component>
@@ -320,6 +306,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="PackagesPane" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -344,6 +332,23 @@
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="462c0819:PsiDirectoryNode" />
               <item name="java" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="PDV" type="b2602c69:ProjectViewProjectNode" />
+              <item name="PDV" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="PDVCLI" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="PDV" type="b2602c69:ProjectViewProjectNode" />
+              <item name="PDV" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="PDVCLI" type="462c0819:PsiDirectoryNode" />
+              <item name="utils" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="PDV" type="b2602c69:ProjectViewProjectNode" />
@@ -386,6 +391,17 @@
               <item name="PDV" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="PDVGUI" type="462c0819:PsiDirectoryNode" />
+              <item name="gui" type="462c0819:PsiDirectoryNode" />
+              <item name="utils" type="462c0819:PsiDirectoryNode" />
+              <item name="Export" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="PDV" type="b2602c69:ProjectViewProjectNode" />
+              <item name="PDV" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
               <item name="resources" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -396,18 +412,16 @@
           <select />
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="slf4j&#9;PSI&#9;JAVA://javolution.osgi.internal.SLF4jLogServiceImpl" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1548541007804" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1551462321787" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.4145854" />
-    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+    <property name="settings.editor.selected.configurable" value="reference.settings.project.maven.importing" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -426,23 +440,16 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Application.PDVMainClass">
+  <component name="RunManager" selected="Application.PDVGUI">
     <configuration default="true" type="Applet">
       <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="DATTest" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="PDVGUI.fileimport.DATTest" />
+    <configuration name="PDVGUI" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="PDVGUI.gui.PDVMainClass" />
       <module name="PDV" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="PDVGUI.fileimport.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -450,8 +457,8 @@
     <configuration name="PDVMainClass" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="PDVGUI.gui.PDVMainClass" />
       <module name="PDV" />
+      <option name="PROGRAM_PARAMETERS" value="-i $PROJECT_DIR$/../test_data/add_infor_test_data/pep_index.txt -k p -r $PROJECT_DIR$/../test_data/add_infor_test_data/psm_rank.txt -rt 4 -s $PROJECT_DIR$/../test_data/add_infor_test_data/psm_rank.mgf -st 1 -o $PROJECT_DIR$/../test_data/add_infor_test_data/ -ft pdf" />
       <option name="VM_PARAMETERS" value="-Xmx6G" />
-      <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="PDVGUI.gui.*" />
@@ -464,20 +471,6 @@
     </configuration>
     <configuration default="true" type="Application" factoryName="Application">
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="thanks" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="PDVGUI.thanks" />
-      <module name="PDV" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="PDVGUI.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -506,15 +499,12 @@
       </method>
     </configuration>
     <list>
-      <item itemvalue="Application.DATTest" />
+      <item itemvalue="Application.PDVGUI" />
       <item itemvalue="Application.PDVMainClass" />
-      <item itemvalue="Application.thanks" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Application.PDVMainClass" />
-        <item itemvalue="Application.thanks" />
-        <item itemvalue="Application.DATTest" />
       </list>
     </recent_temporary>
   </component>
@@ -566,7 +556,7 @@
     <frame x="0" y="0" width="1920" height="1080" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25239617" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17891374" />
       <window_info id="Structure" order="1" weight="0.2468153" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Capture Tool" order="3" />
@@ -575,7 +565,7 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32921174" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49806523" visible="true" weight="0.38019803" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49806523" visible="true" weight="0.21584159" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -586,7 +576,7 @@
       <window_info anchor="bottom" id="Messages" order="10" weight="0.32277226" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Maven Projects" order="1" weight="0.23389022" />
-      <window_info anchor="right" id="Maven" order="2" weight="0.32960597" />
+      <window_info anchor="right" id="Maven" order="2" weight="0.24334398" />
       <window_info anchor="right" id="Ant Build" order="3" weight="0.24920128" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="4" weight="0.25" />
       <window_info anchor="right" id="Palette" order="5" />
@@ -632,19 +622,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar://$MAVEN_REPOSITORY$/batik/batik-all/1.6/batik-all-1.6.jar!/org/apache/batik/transcoder/Transcoder.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="15" column="9" selection-start-line="15" selection-start-column="9" selection-end-line="15" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://D:/Java/jdk1.8.0_92/src.zip!/com/sun/image/codec/jpeg/JPEGEncodeParam.java" />
-    <entry file="jar://D:/Java/jdk1.8.0_92/src.zip!/com/sun/image/codec/jpeg/JPEGImageEncoder.java" />
-    <entry file="jar://D:/Java/jdk1.8.0_92/src.zip!/java/awt/Toolkit.java" />
-    <entry file="jar://D:/Java/jdk1.8.0_92/src.zip!/javax/imageio/metadata/IIOMetadataNode.java" />
-    <entry file="jar://D:/Java/jdk1.8.0_92/src.zip!/com/sun/imageio/plugins/jpeg/MarkerSegment.java" />
-    <entry file="jar://D:/Java/jdk1.8.0_92/src.zip!/javax/imageio/ImageIO.java" />
     <entry file="jar://$MAVEN_REPOSITORY$/com/twelvemonkeys/imageio/imageio-tiff/3.4.1/imageio-tiff-3.4.1.jar!/com/twelvemonkeys/imageio/plugins/tiff/TIFFImageWriter.class">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="460">
@@ -675,39 +652,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/RealTimeExportJDialog.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="9690">
-          <caret line="616" column="99" selection-start-line="616" selection-start-column="99" selection-end-line="616" selection-end-column="99" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/ExportBatchDialog.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6613">
-          <caret line="404" column="93" selection-start-line="404" selection-start-column="93" selection-end-line="404" selection-end-column="93" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/SpectrumLibDisplay.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="20315">
           <caret line="1257" column="71" selection-start-line="1257" selection-start-column="71" selection-end-line="1257" selection-end-column="71" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVCLI/PDVCLIMainClass.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="16235">
-          <caret line="996" column="105" selection-start-line="996" selection-start-column="105" selection-end-line="996" selection-end-column="105" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/ExportExpectedSizeDialog.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="51">
-          <caret line="3" selection-start-line="3" selection-end-line="3" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -783,7 +731,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/com/compomics/mascotdatfile/3.6.0/mascotdatfile-3.6.0.jar!/com/compomics/mascotdatfile/util/interfaces/MascotDatfileInf.class" />
     <entry file="jar://$MAVEN_REPOSITORY$/com/compomics/mascotdatfile/3.6.0/mascotdatfile-3.6.0.jar!/com/compomics/mascotdatfile/util/interfaces/QueryToPeptideMapInf.class" />
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MascotParser.java" />
     <entry file="jar://D:/Java/jdk1.8.0_92/src.zip!/javax/swing/JComboBox.java" />
@@ -809,58 +756,8 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TableModel/DatabaseTableModel.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1875">
-          <caret line="143" column="30" selection-start-line="143" selection-start-column="30" selection-end-line="143" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/DATFileImport.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5415">
-          <caret line="395" column="46" selection-start-line="395" selection-start-column="46" selection-end-line="395" selection-end-column="46" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#17705#17706#0" expanded="true" />
-            <element signature="e#17744#17745#0" expanded="true" />
-            <element signature="e#18307#18308#0" expanded="true" />
-            <element signature="e#18346#18347#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/FragePipeImport.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="322">
-          <caret line="568" column="52" selection-start-line="568" selection-start-column="52" selection-end-line="568" selection-end-column="52" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/App.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="14" lean-forward="true" selection-start-line="14" selection-end-line="14" />
-          <folding>
-            <element signature="e#82#83#0" expanded="true" />
-            <element signature="e#102#103#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/ComplexNumber.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="540">
-          <caret line="36" column="39" lean-forward="true" selection-start-line="36" selection-start-column="39" selection-end-line="36" selection-end-column="39" />
-          <folding>
-            <element signature="e#591#592#0" expanded="true" />
-            <element signature="e#632#633#0" expanded="true" />
-            <element signature="e#1752#1753#0" expanded="true" />
-            <element signature="e#1776#1777#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/App.java" />
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/ComplexNumber.java" />
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/thanks.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="30">
@@ -889,6 +786,137 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/TextFileImport.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="198">
+          <caret line="329" column="54" selection-start-line="329" selection-start-column="54" selection-end-line="329" selection-end-column="54" />
+          <folding>
+            <element signature="e#16457#16458#0" expanded="true" />
+            <element signature="e#16496#16497#0" expanded="true" />
+            <element signature="e#16988#16989#0" expanded="true" />
+            <element signature="e#17027#17028#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TableModel/DatabaseTableModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1875">
+          <caret line="143" column="30" selection-start-line="143" selection-start-column="30" selection-end-line="143" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/ExportExpectedSizeDialog.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="512">
+          <caret line="507" column="31" selection-start-line="507" selection-start-column="27" selection-end-line="507" selection-end-column="31" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_191.jdk/Contents/Home/src.zip!/javax/swing/SpinnerNumberModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="200">
+          <caret line="118" column="11" selection-start-line="118" selection-start-column="11" selection-end-line="118" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/AnnotationSettingsDialog.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7275">
+          <caret line="523" column="45" selection-start-line="523" selection-start-column="27" selection-end-line="523" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/com/compomics/mascotdatfile/3.6.0/mascotdatfile-3.6.0.jar!/com/compomics/mascotdatfile/util/interfaces/MascotDatfileInf.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="21" column="17" selection-start-line="21" selection-start-column="17" selection-end-line="21" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/com/compomics/mascotdatfile/3.6.0/mascotdatfile-3.6.0.jar!/com/compomics/mascotdatfile/util/mascot/enumeration/MascotDatfileType.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="9" column="9" selection-start-line="9" selection-start-column="4" selection-end-line="9" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/DeepNovoImport.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="248">
+          <caret line="216" column="65" lean-forward="true" selection-start-line="216" selection-start-column="65" selection-end-line="216" selection-end-column="65" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVCLI/utils/AddInformationPanel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="18" column="25" selection-start-line="18" selection-start-column="13" selection-end-line="18" selection-end-column="25" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4125">
+          <caret line="312" column="19" selection-start-line="312" selection-start-column="19" selection-end-line="312" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumContainer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="105">
+          <caret line="14" column="13" selection-start-line="14" selection-start-column="13" selection-end-line="14" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/ExportBatchDialog.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="6000">
+          <caret line="415" column="32" selection-start-line="415" selection-start-column="32" selection-end-line="415" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVCLI/TextImport.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="23" column="13" selection-start-line="23" selection-start-column="13" selection-end-line="23" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVCLI/PDVCLIMainClass.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="415">
+          <caret line="444" selection-start-line="444" selection-end-line="444" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/DATFileImport.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="715">
+          <caret line="252" column="104" selection-start-line="252" selection-start-column="104" selection-end-line="252" selection-end-column="104" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/FragePipeImport.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="595">
+          <caret line="259" selection-start-line="259" selection-end-line="259" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/RealTimeExportJDialog.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1552">
+          <caret line="183" column="25" selection-start-line="183" selection-start-column="25" selection-end-line="183" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/pom.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="105">
@@ -898,12 +926,13 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="73">
+        <state relative-caret-position="410">
           <caret line="258" column="48" selection-start-line="258" selection-start-column="48" selection-end-line="258" selection-end-column="48" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="e#13086#13821#0" expanded="true" />
+            <element signature="e#13820#13821#0" expanded="true" />
             <element signature="e#44173#44698#0" />
-            <element signature="e#45637#48117#0" />
             <element signature="e#108938#108939#0" expanded="true" />
             <element signature="e#109003#109004#0" expanded="true" />
             <element signature="e#115847#115848#0" expanded="true" />
@@ -912,34 +941,6 @@
             <element signature="e#116086#116087#0" expanded="true" />
             <element signature="e#130290#130291#0" expanded="true" />
             <element signature="e#130340#130341#0" expanded="true" />
-            <element signature="e#130715#130716#0" expanded="true" />
-            <element signature="e#130756#130757#0" expanded="true" />
-            <element signature="e#136846#136847#0" expanded="true" />
-            <element signature="e#136885#136886#0" expanded="true" />
-            <element signature="e#136998#136999#0" expanded="true" />
-            <element signature="e#137030#137031#0" expanded="true" />
-            <element signature="e#137161#137162#0" expanded="true" />
-            <element signature="e#137200#137201#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="323">
-          <caret line="1337" column="57" selection-start-line="1337" selection-start-column="42" selection-end-line="1337" selection-end-column="57" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/TextFileImport.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="199">
-          <caret line="307" column="47" selection-start-line="307" selection-start-column="47" selection-end-line="307" selection-end-column="47" />
-          <folding>
-            <element signature="e#16457#16458#0" expanded="true" />
-            <element signature="e#16496#16497#0" expanded="true" />
-            <element signature="e#16988#16989#0" expanded="true" />
-            <element signature="e#17027#17028#0" expanded="true" />
           </folding>
         </state>
       </provider>

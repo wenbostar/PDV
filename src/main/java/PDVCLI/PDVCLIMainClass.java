@@ -1,5 +1,6 @@
 package PDVCLI;
 
+import PDVCLI.utils.AddInformationPanel;
 import PDVGUI.fileimport.MSOneImport;
 import PDVGUI.fileimport.MzXMLScanImport;
 import PDVGUI.gui.utils.TICPanel;
@@ -45,8 +46,10 @@ import java.util.regex.Pattern;
 public class PDVCLIMainClass extends JFrame {
 
     private JSplitPane spectrumSplitPane;
+    private JSplitPane infoSpectrumSplitPane;
     private JPanel secondarySpectrumPlotsJPanel;
     private JPanel spectrumOuterJPanel;
+    private JPanel infoJPanel;
     private JPanel spectrumJPanel;
     private JPanel resizeJPanel;
 
@@ -85,7 +88,7 @@ public class PDVCLIMainClass extends JFrame {
     /**
      * Selected items from file
      */
-    private ArrayList<String> indexesFromFile = new ArrayList<>();
+    private HashMap<String, ArrayList> indexesFromFile = new HashMap<>();
     /**
      * Modification setting
      */
@@ -147,6 +150,10 @@ public class PDVCLIMainClass extends JFrame {
      */
     private String unit;
     /**
+     * The annotation font size
+     */
+    private Integer afSize;
+    /**
      * The pics' format
      */
     private ImageType imageType = ImageType.PNG;
@@ -196,6 +203,7 @@ public class PDVCLIMainClass extends JFrame {
         options.addOption("pw", true, "Peak width. Default is 1");
         options.addOption("ah", false, "Whether or not to consider neutral loss of H2O.");
         options.addOption("an", false, "Whether or not to consider neutral loss of NH3.");
+        options.addOption("as", true, "Annotation information font size. Default is 12");
         options.addOption("h", false, "Help");
         options.addOption("help", false, "Help");
 
@@ -280,6 +288,11 @@ public class PDVCLIMainClass extends JFrame {
             this.unit = "px";
         } else {
             this.unit = commandLine.getOptionValue("fu");
+        }
+        if (commandLine.getOptionValue("as") == null){
+            this.afSize = 12;
+        } else {
+            this.afSize = Integer.valueOf(commandLine.getOptionValue("as"));
         }
 
         this.errorFile = new File(outPutPath+"/error.txt");
@@ -373,7 +386,9 @@ public class PDVCLIMainClass extends JFrame {
 
         spectrumJPanel = new JPanel();
         spectrumSplitPane = new JSplitPane();
+        infoSpectrumSplitPane = new JSplitPane();
         secondarySpectrumPlotsJPanel = new JPanel();
+        infoJPanel = new JPanel();
         spectrumOuterJPanel = new JPanel();
         resizeJPanel = new JPanel();
 
@@ -416,7 +431,17 @@ public class PDVCLIMainClass extends JFrame {
 
         spectrumSplitPane.setRightComponent(spectrumOuterJPanel);
 
-        resizeJPanel.add(spectrumSplitPane);
+        infoJPanel.setOpaque(false);
+        infoJPanel.setLayout(new BoxLayout(infoJPanel, BoxLayout.LINE_AXIS));
+
+        infoSpectrumSplitPane.setLeftComponent(infoJPanel);
+        infoSpectrumSplitPane.setRightComponent(spectrumSplitPane);
+        infoSpectrumSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
+        infoSpectrumSplitPane.setDividerSize(0);
+        infoSpectrumSplitPane.setBorder(null);
+        infoSpectrumSplitPane.setBackground(new Color(255, 255, 255));
+
+        resizeJPanel.add(infoSpectrumSplitPane);
 
         GroupLayout layout = new GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -455,10 +480,18 @@ public class PDVCLIMainClass extends JFrame {
         BufferedReader bufferedReader = new BufferedReader(new FileReader(indexFile));
         while ((readLine = bufferedReader.readLine())!=null) {
 
+            String[] keyAndInfo = readLine.split("\t");
+            ArrayList<String> addInforList = new ArrayList<>();
+            if (keyAndInfo.length >= 2){
+                for (Integer index = 1; index < keyAndInfo.length; index ++){
+                    addInforList.add(keyAndInfo[index]);
+                }
+            }
+
             if(isSpectrumKey){
-                indexesFromFile.add(readLine);
+                indexesFromFile.put(keyAndInfo[0], addInforList);
             }else {
-                indexesFromFile.add(readLine.toLowerCase());
+                indexesFromFile.put(keyAndInfo[0].toLowerCase(), addInforList);
             }
         }
 
@@ -525,15 +558,15 @@ public class PDVCLIMainClass extends JFrame {
 
             ticPanel.updatePanel(nameToKeyToRtAndInt, 0, topNum);
 
-            spectrumSplitPane.setDividerLocation(0);
+            infoSpectrumSplitPane.setDividerLocation(0);
 
             spectrumJPanel.removeAll();
             spectrumJPanel.add(ticPanel);
             spectrumJPanel.revalidate();
             spectrumJPanel.repaint();
 
-            spectrumSplitPane.revalidate();
-            spectrumSplitPane.repaint();
+            infoSpectrumSplitPane.revalidate();
+            infoSpectrumSplitPane.repaint();
 
             resizeJPanel.revalidate();
             resizeJPanel.repaint();
@@ -562,8 +595,8 @@ public class PDVCLIMainClass extends JFrame {
             System.err.println("WARNING!\n Please set bigger size!" );
         } else {
 
-            spectrumSplitPane.setBounds(0, 0, resizeJPanelWidth, resizeJPanelHeight);
-            spectrumSplitPane.setPreferredSize(new Dimension(resizeJPanelWidth, resizeJPanelHeight));
+            infoSpectrumSplitPane.setBounds(0, 0, resizeJPanelWidth, resizeJPanelHeight);
+            infoSpectrumSplitPane.setPreferredSize(new Dimension(resizeJPanelWidth, resizeJPanelHeight));
 
             try {
                 Thread.sleep(100);
@@ -780,15 +813,15 @@ public class PDVCLIMainClass extends JFrame {
             System.err.println("WARNING!\n Please set bigger size!" );
         } else {
 
-            spectrumSplitPane.setBounds(0, 0, resizeJPanelWidth, resizeJPanelHeight);
-            spectrumSplitPane.setPreferredSize(new Dimension(resizeJPanelWidth, resizeJPanelHeight));
+            infoSpectrumSplitPane.setBounds(0, 0, resizeJPanelWidth, resizeJPanelHeight);
+            infoSpectrumSplitPane.setPreferredSize(new Dimension(resizeJPanelWidth, resizeJPanelHeight));
             for (String spectrumIndex : spectrumMatchesMap.keySet()) {
                 SpectrumMatch spectrumMatch = spectrumMatchesMap.get(spectrumIndex);
 
                 String spectrumKey = spectrumIndex.split("_rank_")[0];
 
                 if (isSpectrumKey) {
-                    if (indexesFromFile.contains(spectrumKey)){
+                    if (indexesFromFile.containsKey(spectrumKey)){
                         existItem.add(spectrumKey);
 
                         PeptideAssumption peptideAssumption = spectrumMatch.getBestPeptideAssumption();
@@ -802,14 +835,18 @@ public class PDVCLIMainClass extends JFrame {
 
                         if (mSnSpectrum != null) {
 
-                            updateSpectrum(spectrumIndex, mSnSpectrum, peptideAssumption);
+                            ArrayList infoList = indexesFromFile.get(spectrumKey);
+                            int infoSize = infoList.size();
+                            //modifyInfoPanelSize(infoSize);
+
+                            updateSpectrum(spectrumIndex, mSnSpectrum, peptideAssumption, infoList);
                             try {
                                 Thread.sleep(100);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
                             String outputFigurePath = outPutPath + FILE_SEPARATOR + peptideAssumption.getPeptide().getSequence() + FilePattern.matcher(spectrumIndex).replaceAll("").replace("rank_", "") + imageType.getExtension();
-                            exportFigure(spectrumSplitPane, outputFigurePath);
+                            exportFigure(infoSpectrumSplitPane, outputFigurePath);
                         } else {
 
                             fileWriter.write(spectrumMatch.getKey() + "\t No spectrum" + "\n");
@@ -820,7 +857,7 @@ public class PDVCLIMainClass extends JFrame {
 
                     PeptideAssumption peptideAssumption = spectrumMatch.getBestPeptideAssumption();
 
-                    if (indexesFromFile.contains(peptideAssumption.getPeptide().getSequence().toLowerCase())) {
+                    if (indexesFromFile.containsKey(peptideAssumption.getPeptide().getSequence().toLowerCase())) {
                         existItem.add(peptideAssumption.getPeptide().getSequence().toLowerCase());
 
                         MSnSpectrum mSnSpectrum;
@@ -831,14 +868,19 @@ public class PDVCLIMainClass extends JFrame {
                         }
 
                         if (mSnSpectrum != null) {
-                            updateSpectrum(spectrumIndex, mSnSpectrum, peptideAssumption);
+
+                            ArrayList infoList = indexesFromFile.get(peptideAssumption.getPeptide().getSequence().toLowerCase());
+                            int infoSize = infoList.size();
+                            //modifyInfoPanelSize(infoSize);
+
+                            updateSpectrum(spectrumIndex, mSnSpectrum, peptideAssumption, indexesFromFile.get(peptideAssumption.getPeptide().getSequence().toLowerCase()));
                             try {
                                 Thread.sleep(100);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
                             String outputFigurePath = outPutPath + FILE_SEPARATOR + peptideAssumption.getPeptide().getSequence() + FilePattern.matcher(spectrumIndex).replaceAll("").replace("rank_", "") + imageType.getExtension();
-                            exportFigure(spectrumSplitPane, outputFigurePath);
+                            exportFigure(infoSpectrumSplitPane, outputFigurePath);
                         } else {
 
                             fileWriter.write(spectrumMatch.getKey() + "\t No spectrum" + "\n");
@@ -849,7 +891,7 @@ public class PDVCLIMainClass extends JFrame {
             }
         }
 
-        for (String errorItem : indexesFromFile){
+        for (String errorItem : indexesFromFile.keySet()){
             if (!existItem.contains(errorItem)){
                 fileWriter.write(errorItem + "\t No result" + "\n");
             }
@@ -865,7 +907,7 @@ public class PDVCLIMainClass extends JFrame {
      * @param mSnSpectrum MSN spectrum
      * @param tempPeptideAssumption peptide assumption
      */
-    private void updateSpectrum(String spectrumKey, MSnSpectrum mSnSpectrum, PeptideAssumption tempPeptideAssumption){
+    private void updateSpectrum(String spectrumKey, MSnSpectrum mSnSpectrum, PeptideAssumption tempPeptideAssumption, ArrayList addInforList){
 
         try {
             if (mSnSpectrum != null) {
@@ -951,6 +993,13 @@ public class PDVCLIMainClass extends JFrame {
                     sequenceFragmentationPanel.setOpaque(false);
                     sequenceFragmentationPanel.setBackground(Color.WHITE);
                     sequenceFragmentationPanel.setFont(new Font("Arial", Font.PLAIN, 13));
+
+                    //AddInformationPanel addInformationPanel = new AddInformationPanel(addInforList, resizeJPanelWidth, );
+
+                    infoJPanel.removeAll();
+                    //infoJPanel.add(addInformationPanel);
+                    infoJPanel.revalidate();
+                    infoJPanel.repaint();
 
                     secondarySpectrumPlotsJPanel.removeAll();
                     secondarySpectrumPlotsJPanel.add(sequenceFragmentationPanel);
@@ -1059,6 +1108,24 @@ public class PDVCLIMainClass extends JFrame {
         }
 
         return currentMassDeltaMap;
+    }
+
+    private void modifyInfoPanelSize(Integer infoSize){
+        int singleMaxHeight = resizeJPanelHeight/15;
+        int totalMaxHeight;
+
+        if (infoSize == 0){
+            totalMaxHeight = 0;
+        } else if (infoSize > 0 && infoSize <= 3){
+            totalMaxHeight = singleMaxHeight * infoSize;
+        } else {
+            totalMaxHeight = singleMaxHeight * 3;
+        }
+
+        System.out.println("Max height is "+totalMaxHeight);
+        infoJPanel.setMaximumSize(new Dimension(resizeJPanelWidth, totalMaxHeight));
+        infoSpectrumSplitPane.setDividerLocation(totalMaxHeight);
+
     }
 
 }
