@@ -29,7 +29,7 @@ public class ExportBatchDialog extends JDialog {
     /**
      * Picture type
      */
-    private String[] picType = new String[]{"PNG", "TIFF", "PDF"};
+    private String[] picType = new String[]{"PNG", "TIFF", "PDF", "SVG"};
     /**
      * Selection size
      */
@@ -397,9 +397,9 @@ public class ExportBatchDialog extends JDialog {
      * @param evt Mouse click event
      */
     private void typeJComboBoxdMouseClicked(ItemEvent evt){
-        Integer selectIndex = typeJComboBox.getSelectedIndex();
+        int selectIndex = typeJComboBox.getSelectedIndex();
 
-        if(selectIndex == 2){
+        if(selectIndex == 2 || selectIndex == 3){
             unitJCombox.setModel(new DefaultComboBoxModel(new String[]{"mm", "cm", "in"}));
         } else {
             unitJCombox.setModel(new DefaultComboBoxModel(new String[]{"px", "mm", "cm", "in"}));
@@ -427,6 +427,9 @@ public class ExportBatchDialog extends JDialog {
                 break;
             case 2:
                 finalImageType = ImageType.PDF;
+                break;
+            case 3:
+                finalImageType = ImageType.SVG;
                 break;
         }
 

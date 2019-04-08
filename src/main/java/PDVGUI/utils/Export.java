@@ -52,6 +52,8 @@ public class Export {
             exportPNG(component, bounds, exportFile);
         } else if (imageType == ImageType.TIFF){
             exportTIFF(component, bounds, exportFile);
+        } else if (imageType == ImageType.SVG){
+            exportSVG(component, bounds, exportFile);
         }
     }
 
@@ -92,7 +94,11 @@ public class Export {
             new File(exportFile.getAbsolutePath() + ".temp").delete();
         }
 
-        File svgFile = new File(exportFile.getAbsolutePath() + ".temp");
+        File svgFile = exportFile;
+
+        if (imageType != ImageType.SVG) {
+            svgFile = new File(exportFile.getAbsolutePath() + ".temp");
+        }
 
         OutputStream outputStream = new FileOutputStream(svgFile);
         BufferedOutputStream bos = new BufferedOutputStream(outputStream);
@@ -101,43 +107,47 @@ public class Export {
         svgGraphics2D.stream(out, true);
         outputStream.flush();
         outputStream.close();
-        out.close();
+        //out.close();
         bos.close();
 
-        String svgURI = svgFile.toURI().toString();
-        TranscoderInput svgInputFile = new TranscoderInput(svgURI);
+        if (imageType != ImageType.SVG) {
+            String svgURI = svgFile.toURI().toString();
+            TranscoderInput svgInputFile = new TranscoderInput(svgURI);
 
-        OutputStream outstream = new FileOutputStream(exportFile);
-        bos = new BufferedOutputStream(outstream);
-        TranscoderOutput output = new TranscoderOutput(bos);
+            OutputStream outstream = new FileOutputStream(exportFile);
+            bos = new BufferedOutputStream(outstream);
+            TranscoderOutput output = new TranscoderOutput(bos);
 
-        if (imageType == ImageType.PDF) {
+            if (imageType == ImageType.PDF) {
 
-            Transcoder pdfTranscoder = new PDFTranscoder();
-            pdfTranscoder.addTranscodingHint(PDFTranscoder.KEY_DEVICE_RESOLUTION, (float) Toolkit.getDefaultToolkit().getScreenResolution());
-            pdfTranscoder.transcode(svgInputFile, output);
+                Transcoder pdfTranscoder = new PDFTranscoder();
+                pdfTranscoder.addTranscodingHint(PDFTranscoder.KEY_DEVICE_RESOLUTION, (float) Toolkit.getDefaultToolkit().getScreenResolution());
+                pdfTranscoder.transcode(svgInputFile, output);
 
-        }  else if (imageType == ImageType.JPEG) {
+            } else if (imageType == ImageType.JPEG) {
 
-            Transcoder tiffTranscoder = new TIFFTranscoder();
-            tiffTranscoder.addTranscodingHint(TIFFTranscoder.KEY_PIXEL_UNIT_TO_MILLIMETER, new Float(df.format(25.4 / Toolkit.getDefaultToolkit().getScreenResolution())));
-            tiffTranscoder.addTranscodingHint(TIFFTranscoder.KEY_FORCE_TRANSPARENT_WHITE, true);
-            tiffTranscoder.transcode(svgInputFile, output);
+                Transcoder tiffTranscoder = new TIFFTranscoder();
+                tiffTranscoder.addTranscodingHint(TIFFTranscoder.KEY_PIXEL_UNIT_TO_MILLIMETER, new Float(df.format(25.4 / Toolkit.getDefaultToolkit().getScreenResolution())));
+                tiffTranscoder.addTranscodingHint(TIFFTranscoder.KEY_FORCE_TRANSPARENT_WHITE, true);
+                tiffTranscoder.transcode(svgInputFile, output);
 
-        } else if (imageType == ImageType.PNG) {
+            } else if (imageType == ImageType.PNG) {
 
-            Transcoder pngTranscoder = new PNGTranscoder();
-            pngTranscoder.addTranscodingHint(PNGTranscoder.KEY_PIXEL_UNIT_TO_MILLIMETER, new Float(df.format(25.4 / Toolkit.getDefaultToolkit().getScreenResolution())));
-            pngTranscoder.transcode(svgInputFile, output);
+                Transcoder pngTranscoder = new PNGTranscoder();
+                pngTranscoder.addTranscodingHint(PNGTranscoder.KEY_PIXEL_UNIT_TO_MILLIMETER, new Float(df.format(25.4 / Toolkit.getDefaultToolkit().getScreenResolution())));
+                pngTranscoder.transcode(svgInputFile, output);
 
-        }
+            } else if (imageType == ImageType.SVG) {
 
-        outstream.flush();
-        outstream.close();
-        bos.close();
+            }
 
-        if (svgFile.exists()) {
-            svgFile.delete();
+            outstream.flush();
+            outstream.close();
+            bos.close();
+
+            if (svgFile.exists()) {
+                svgFile.delete();
+            }
         }
     }
 
@@ -195,6 +205,40 @@ public class Export {
             svgFile.delete();
         }
 
+    }
+
+    /**
+     * Export component to pdf format
+     * @param component Component
+     * @param bounds Rectangle
+     * @param exportFile Export file
+     * @throws IOException
+     * @throws TranscoderException
+     */
+    private static void exportSVG(Component component, Rectangle bounds, File exportFile) throws IOException, TranscoderException {
+
+        DOMImplementation domImplementation = SVGDOMImplementation.getDOMImplementation();
+        String svgNS = "http://www.w3.org/2000/svg";
+        SVGDocument svgDocument = (SVGDocument) domImplementation.createDocument(svgNS, "svg", null);
+
+        SVGGraphics2D svgGraphics2D = new SVGGraphics2D(svgDocument);
+        svgGraphics2D.setSVGCanvasSize(bounds.getSize());
+
+        component.paintAll(svgGraphics2D);
+
+        if (new File(exportFile.getAbsolutePath() + ".temp").exists()) {
+            new File(exportFile.getAbsolutePath() + ".temp").delete();
+        }
+
+        OutputStream outputStream = new FileOutputStream(exportFile);
+        BufferedOutputStream bos = new BufferedOutputStream(outputStream);
+        Writer out = new OutputStreamWriter(bos, "UTF-8");
+
+        svgGraphics2D.stream(out, true);
+        outputStream.flush();
+        outputStream.close();
+        out.close();
+        bos.close();
     }
 
     /**

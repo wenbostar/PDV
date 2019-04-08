@@ -38,6 +38,7 @@ import java.util.*;
 import static com.compomics.util.experiment.biology.Ion.IonType.*;
 import static com.compomics.util.experiment.biology.Ion.IonType.RELATED_ION;
 import static com.compomics.util.experiment.biology.Ion.IonType.REPORTER_ION;
+import static com.compomics.util.experiment.biology.NeutralLoss.H3PO4;
 
 /**
  * Spectrum main panel
@@ -243,6 +244,10 @@ public class SpectrumMainPanel extends JPanel {
 
         SpectrumPanel.setIonColor(Ion.getGenericIon(Ion.IonType.PEPTIDE_FRAGMENT_ION, 1), new Color(0, 153, 0));
         SpectrumPanel.setIonColor(Ion.getGenericIon(Ion.IonType.PEPTIDE_FRAGMENT_ION, 4), new Color(255, 102, 0));
+        NeutralLoss[] h3po4 = new NeutralLoss[1];
+        h3po4[0] = H3PO4;
+        SpectrumPanel.setIonColor(Ion.getGenericIon(PEPTIDE_FRAGMENT_ION, 1, h3po4), new Color(0, 153, 0));
+        SpectrumPanel.setIonColor(Ion.getGenericIon(PEPTIDE_FRAGMENT_ION, 4, h3po4), new Color(255, 102, 0));
 
         loadUserPreferences();
 
@@ -269,6 +274,10 @@ public class SpectrumMainPanel extends JPanel {
 
         SpectrumPanel.setIonColor(Ion.getGenericIon(Ion.IonType.PEPTIDE_FRAGMENT_ION, 1), new Color(0, 153, 0));
         SpectrumPanel.setIonColor(Ion.getGenericIon(Ion.IonType.PEPTIDE_FRAGMENT_ION, 4), new Color(255, 102, 0));
+        NeutralLoss[] h3po4 = new NeutralLoss[1];
+        h3po4[0] = H3PO4;
+        SpectrumPanel.setIonColor(Ion.getGenericIon(PEPTIDE_FRAGMENT_ION, 1, h3po4), new Color(0, 153, 0));
+        SpectrumPanel.setIonColor(Ion.getGenericIon(PEPTIDE_FRAGMENT_ION, 4, h3po4), new Color(255, 102, 0));
 
         loadUserPreferences();
 
@@ -294,6 +303,10 @@ public class SpectrumMainPanel extends JPanel {
 
         SpectrumPanel.setIonColor(Ion.getGenericIon(Ion.IonType.PEPTIDE_FRAGMENT_ION, 1), new Color(0, 153, 0));
         SpectrumPanel.setIonColor(Ion.getGenericIon(Ion.IonType.PEPTIDE_FRAGMENT_ION, 4), new Color(255, 102, 0));
+        NeutralLoss[] h3po4 = new NeutralLoss[1];
+        h3po4[0] = H3PO4;
+        SpectrumPanel.setIonColor(Ion.getGenericIon(PEPTIDE_FRAGMENT_ION, 1, h3po4), new Color(0, 153, 0));
+        SpectrumPanel.setIonColor(Ion.getGenericIon(PEPTIDE_FRAGMENT_ION, 4, h3po4), new Color(255, 102, 0));
 
         loadUserPreferences();
 
@@ -319,6 +332,10 @@ public class SpectrumMainPanel extends JPanel {
 
         SpectrumPanel.setIonColor(Ion.getGenericIon(Ion.IonType.PEPTIDE_FRAGMENT_ION, 1), new Color(0, 153, 0));
         SpectrumPanel.setIonColor(Ion.getGenericIon(Ion.IonType.PEPTIDE_FRAGMENT_ION, 4), new Color(255, 102, 0));
+        NeutralLoss[] h3po4 = new NeutralLoss[1];
+        h3po4[0] = H3PO4;
+        SpectrumPanel.setIonColor(Ion.getGenericIon(PEPTIDE_FRAGMENT_ION, 1, h3po4), new Color(0, 153, 0));
+        SpectrumPanel.setIonColor(Ion.getGenericIon(PEPTIDE_FRAGMENT_ION, 4, h3po4), new Color(255, 102, 0));
 
         loadUserPreferences();
 
@@ -2103,10 +2120,10 @@ public class SpectrumMainPanel extends JPanel {
         String aa = name.split("of ")[1];
 
         if (aa.equals("T") || aa.equals("S")){
-            Double mass = ptmFactory.getPTM(name).getMass();
+            double mass = ptmFactory.getPTM(name).getMass();
 
             if (mass < 80.01 && mass > 79.9){
-                return NeutralLoss.H3PO4;
+                return H3PO4;
             }
         }
         return null;

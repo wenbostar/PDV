@@ -661,12 +661,13 @@ public class DatabaseImportDialog extends JDialog {
                         || myFile.getName().toLowerCase().endsWith(".csv")
                         || myFile.getName().toLowerCase().endsWith(".tsv")
                         || myFile.getName().toLowerCase().endsWith(".dat")
+                        || myFile.getName().toLowerCase().endsWith(".tsk")
                         || myFile.isDirectory();
             }
 
             @Override
             public String getDescription() {
-                return "mzIdentML (.mzid), PepXML (.pepxml), Text File (.txt), MS Amanda (.csv, .txt), MSfrage (.tsv), Mascot (,dat)";
+                return "mzIdentML (.mzid), PepXML (.pepxml), Text File (.txt), MS Amanda (.csv, .txt), MSfrage (.tsv), Mascot (.dat), pFind (.tsk)";
             }
         };
 
@@ -1015,21 +1016,24 @@ public class DatabaseImportDialog extends JDialog {
         }else if(idFile.getName().toLowerCase().endsWith("xml")){
             pdvMainClass.importFilePep(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType, spectrumIdAndNumber);
             idFile = null;
-        } else if(idFile.getName().toLowerCase().endsWith(".txt") || idFile.getName().toLowerCase().endsWith(".csv") || idFile.getName().toLowerCase().endsWith(".tsv")){
+        } else if(idFile.getName().toLowerCase().endsWith(".txt") || idFile.getName().toLowerCase().endsWith(".csv") ||
+                idFile.getName().toLowerCase().endsWith(".tsv")){
 
-            Integer selectedIndex = fileTypeCombox.getSelectedIndex();
+            int selectedIndex = fileTypeCombox.getSelectedIndex();
 
             if (selectedIndex == 1){
                 pdvMainClass.importMSAmandaResults(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType, spectrumIdAndNumber);
             } else if (selectedIndex == 0){
                 pdvMainClass.importTextResults(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType);
-            } else {
+            } else if (selectedIndex == 2){
                 pdvMainClass.importFragPipe(fileToType, idFile);
             }
             idFile = null;
         } else if (idFile.getName().toLowerCase().endsWith(".dat")){
             pdvMainClass.importDatFile(idFile);
 
+        } else if (idFile.getName().toLowerCase().endsWith(".tsk")){
+            pdvMainClass.importPFindResults(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType);
         } else {
             JOptionPane.showMessageDialog(pdvMainClass, JOptionEditorPane.getJOptionEditorPane(
                     "No support ID file format, please check your file."),

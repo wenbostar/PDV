@@ -238,7 +238,7 @@ public class TextFileImport {
                 modificationNames = values[modificationIndex];
                 peptideCharge = Integer.valueOf(values[chargeIndex]);
 
-                ArrayList<String> residues = new ArrayList<>();
+                ArrayList<String> residues;
 
                 if(!modificationNames.equals("-")){
                     for (String singleModification: modificationNames.split(";")){
@@ -248,10 +248,11 @@ public class TextFileImport {
 
                         if (!ptmFactory.containsPTM(singleModificationName)){
                             String modificationName = singleModificationName.split(" of ")[0];
+                            residues = new ArrayList<>();
                             residues.add(singleModificationName.split(" of ")[1]);
 
                             if (singleModificationName.toLowerCase().contains("n-term")){
-                                PTM ptm = new PTM(PTM.MODNPAA, singleModificationName, modificationMass, residues);
+                                PTM ptm = new PTM(PTM.MODNP, singleModificationName, modificationMass, residues);
                                 ptm.setShortName(modificationName);
                                 ptmFactory.addUserPTM(ptm);
                             } else if (singleModificationName.toLowerCase().contains("c-term")){

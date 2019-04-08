@@ -135,6 +135,10 @@ public class RealTimeExportJDialog extends JDialog {
      * Parent jFrame
      */
     private JFrame parentFrame;
+    /**
+     * Current peptide sequence
+     */
+    private String currentPeptide;
 
     /**
      * Constructor
@@ -358,7 +362,7 @@ public class RealTimeExportJDialog extends JDialog {
                                     Thread.sleep(100);
                                     updateSpectrum(spectrumKey, mSnSpectrum, spectrumIdentificationAssumption);
 
-                                    String outputPathName = outputPath + PDVMainClass.FILE_SEPARATOR + FilePattern.matcher(mSnSpectrum.getSpectrumTitle()).replaceAll("") + imageType.getExtension();
+                                    String outputPathName = outputPath + PDVMainClass.FILE_SEPARATOR + FilePattern.matcher(mSnSpectrum.getSpectrumTitle()).replaceAll("") + "_" + currentPeptide + imageType.getExtension();
                                     exportFigure(outputPathName);
 
                                     progressDialog.increasePrimaryProgressCounter();
@@ -448,7 +452,7 @@ public class RealTimeExportJDialog extends JDialog {
                                 }
                                 Thread.sleep(100);
 
-                                String outputPathName = outputPath + PDVMainClass.FILE_SEPARATOR + FilePattern.matcher(mSnSpectrum.getSpectrumTitle()).replaceAll("") + imageType.getExtension();
+                                String outputPathName = outputPath + PDVMainClass.FILE_SEPARATOR + FilePattern.matcher(mSnSpectrum.getSpectrumTitle()).replaceAll("") + "_" + currentPeptide + imageType.getExtension();
                                 exportFigure(outputPathName);
 
                                 progressDialog.increasePrimaryProgressCounter();
@@ -562,6 +566,7 @@ public class RealTimeExportJDialog extends JDialog {
 
                     if (spectrumIdentificationAssumption instanceof TagAssumption) {
                         TagAssumption tagAssumption = (TagAssumption) spectrumIdentificationAssumption;
+                        currentPeptide = tagAssumption.getTag().asSequence();
                         spectrumPanel.addAutomaticDeNovoSequencing(tagAssumption.getTag(), annotations,
                                 TagFragmentIon.B_ION,
                                 TagFragmentIon.Y_ION,
@@ -570,6 +575,7 @@ public class RealTimeExportJDialog extends JDialog {
                                 annotationSettings.showRewindIonDeNovoTags(), false);
                     } else if (spectrumIdentificationAssumption instanceof PeptideAssumption) {
                         PeptideAssumption peptideAssumption = (PeptideAssumption) spectrumIdentificationAssumption;
+                        currentPeptide = peptideAssumption.getPeptide().getSequence();
                         spectrumPanel.addAutomaticDeNovoSequencing(peptideAssumption.getPeptide(), annotations,
                                 PeptideFragmentIon.B_ION,
                                 PeptideFragmentIon.Y_ION,

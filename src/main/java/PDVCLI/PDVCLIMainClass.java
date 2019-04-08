@@ -42,6 +42,9 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import static com.compomics.util.experiment.biology.Ion.IonType.PEPTIDE_FRAGMENT_ION;
+import static com.compomics.util.experiment.biology.NeutralLoss.H3PO4;
+
 
 public class PDVCLIMainClass extends JFrame {
 
@@ -142,6 +145,10 @@ public class PDVCLIMainClass extends JFrame {
      */
     private Boolean isNH3 = false;
     /**
+     * Remove precursor peak or not
+     */
+    private Boolean isRP = false;
+    /**
      * Spectrum peak width
      */
     private Float peakWidth;
@@ -202,6 +209,7 @@ public class PDVCLIMainClass extends JFrame {
         options.addOption("ft", true, "Figure type. Can be png, pdf or tiff.");
         options.addOption("pw", true, "Peak width. Default is 1");
         options.addOption("ah", false, "Whether or not to consider neutral loss of H2O.");
+        options.addOption("rp", false, "Whether or not to remove precursor peak.");
         options.addOption("an", false, "Whether or not to consider neutral loss of NH3.");
         options.addOption("as", true, "Annotation information font size. Default is 12");
         options.addOption("h", false, "Help");
@@ -345,6 +353,9 @@ public class PDVCLIMainClass extends JFrame {
             if (commandLine.getOptionValue("an") != null){
                 this.isNH3 = true;
             }
+            if (commandLine.getOptionValue("rp") != null){
+                this.isRP = true;
+            }
 
             Double ionAccurracy;
             if (commandLine.getOptionValue("a") == null){
@@ -483,7 +494,7 @@ public class PDVCLIMainClass extends JFrame {
             String[] keyAndInfo = readLine.split("\t");
             ArrayList<String> addInforList = new ArrayList<>();
             if (keyAndInfo.length >= 2){
-                for (Integer index = 1; index < keyAndInfo.length; index ++){
+                for (int index = 1; index < keyAndInfo.length; index ++){
                     addInforList.add(keyAndInfo[index]);
                 }
             }
@@ -795,8 +806,12 @@ public class PDVCLIMainClass extends JFrame {
      * Display the results
      */
     private void displayResults() throws IOException {
-        SpectrumPanel.setIonColor(Ion.getGenericIon(Ion.IonType.PEPTIDE_FRAGMENT_ION, 1), new Color(0, 153, 0));
-        SpectrumPanel.setIonColor(Ion.getGenericIon(Ion.IonType.PEPTIDE_FRAGMENT_ION, 4), new Color(255, 102, 0));
+        SpectrumPanel.setIonColor(Ion.getGenericIon(PEPTIDE_FRAGMENT_ION, 1), new Color(0, 153, 0));
+        SpectrumPanel.setIonColor(Ion.getGenericIon(PEPTIDE_FRAGMENT_ION, 4), new Color(255, 102, 0));
+        NeutralLoss[] h3po4 = new NeutralLoss[1];
+        h3po4[0] = H3PO4;
+        SpectrumPanel.setIonColor(Ion.getGenericIon(PEPTIDE_FRAGMENT_ION, 1, h3po4), new Color(0, 153, 0));
+        SpectrumPanel.setIonColor(Ion.getGenericIon(PEPTIDE_FRAGMENT_ION, 4, h3po4), new Color(255, 102, 0));
 
         FileWriter fileWriter = new FileWriter(errorFile);
 
@@ -837,7 +852,7 @@ public class PDVCLIMainClass extends JFrame {
 
                             ArrayList infoList = indexesFromFile.get(spectrumKey);
                             int infoSize = infoList.size();
-                            //modifyInfoPanelSize(infoSize);
+                            modifyInfoPanelSize(infoSize);
 
                             updateSpectrum(spectrumIndex, mSnSpectrum, peptideAssumption, infoList);
                             try {
@@ -871,9 +886,9 @@ public class PDVCLIMainClass extends JFrame {
 
                             ArrayList infoList = indexesFromFile.get(peptideAssumption.getPeptide().getSequence().toLowerCase());
                             int infoSize = infoList.size();
-                            //modifyInfoPanelSize(infoSize);
+                            modifyInfoPanelSize(infoSize);
 
-                            updateSpectrum(spectrumIndex, mSnSpectrum, peptideAssumption, indexesFromFile.get(peptideAssumption.getPeptide().getSequence().toLowerCase()));
+                            updateSpectrum(spectrumIndex, mSnSpectrum, peptideAssumption, infoList);
                             try {
                                 Thread.sleep(100);
                             } catch (InterruptedException e) {
@@ -937,8 +952,29 @@ public class PDVCLIMainClass extends JFrame {
                     }
 
                     Precursor precursor = mSnSpectrum.getPrecursor();
+                    System.out.println("Precursor mz is "+precursor.getMz());
+                    MSnSpectrum newMSnSpectrum;
+                    if (isRP){
+                        HashMap<Double, Peak> peakMap = new HashMap<>();
+                        double[] mzValuesAsArray = mSnSpectrum.getMzValuesAsArray();
+                        double[] intensityValuesAsArray = mSnSpectrum.getIntensityValuesAsArray();
+                        for (int index = 0; index < mzValuesAsArray.length; index ++){
+                            double currentMZ = mzValuesAsArray[index];
+                            double currentInt = intensityValuesAsArray[index];
+                            if (Math.abs(currentMZ - precursor.getMz()) < annotationPreferences.getFragmentIonAccuracy()){
+                                currentInt = 0;
+                                System.out.println(currentMZ);
+                            }
+                            Peak peak = new Peak(currentMZ, currentInt);
+                            peakMap.put(currentMZ, peak);
+                        }
+                        newMSnSpectrum = new MSnSpectrum(2, precursor, spectrumKey, peakMap, spectrumFile.getName());
+                    } else {
+                        newMSnSpectrum = mSnSpectrum;
+                    }
+
                     spectrumPanel = new SpectrumPanel(
-                            mSnSpectrum.getMzValuesAsArray(), mSnSpectrum.getIntensityValuesNormalizedAsArray(),
+                            newMSnSpectrum.getMzValuesAsArray(), newMSnSpectrum.getIntensityValuesNormalizedAsArray(),
                             precursor.getMz(), tempPeptideAssumption.getIdentificationCharge().toString(),
                             "", 40, false, false, false, 2, false);
                     spectrumPanel.setKnownMassDeltas(getCurrentMassDeltas());
@@ -968,8 +1004,9 @@ public class PDVCLIMainClass extends JFrame {
                     if (isNH3){
                         specificAnnotationPreferences.addNeutralLoss(NeutralLoss.NH3);
                     }
+                    specificAnnotationPreferences.addNeutralLoss(NeutralLoss.H3PO4);
 
-                    ArrayList<IonMatch> annotations = spectrumAnnotator.getSpectrumAnnotationFiter(annotationPreferences, specificAnnotationPreferences, mSnSpectrum, currentPeptide, null, true);//在此计算匹配
+                    ArrayList<IonMatch> annotations = spectrumAnnotator.getSpectrumAnnotationFiter(annotationPreferences, specificAnnotationPreferences, newMSnSpectrum, currentPeptide, null, true);//在此计算匹配
 
                     spectrumPanel.setAnnotations(SpectrumAnnotator.getSpectrumAnnotation(annotations), annotationPreferences.getTiesResolution() == SpectrumAnnotator.TiesResolution.mostAccurateMz);
                     spectrumPanel.rescale(lowerMzZoomRange, upperMzZoomRange);
@@ -985,26 +1022,35 @@ public class PDVCLIMainClass extends JFrame {
                     spectrumJPanel.repaint();
 
                     Integer forwardIon = PeptideFragmentIon.B_ION;
-
                     Integer rewindIon = PeptideFragmentIon.Y_ION;
+
+                    String modSequence = currentPeptide.getTaggedModifiedSequence(ptmSettings, false, false, false, false);
                     SequenceFragmentationPanel sequenceFragmentationPanel = new SequenceFragmentationPanel(
-                            currentPeptide.getTaggedModifiedSequence(ptmSettings, false, false, false, false),
-                            annotations, true, ptmSettings, forwardIon, rewindIon);
+                            modSequence, annotations, true, ptmSettings, forwardIon, rewindIon);
+
+                    FontMetrics fm = sequenceFragmentationPanel.getFontMetrics(new Font("Arial", Font.PLAIN, 16));
+
+                    if (fm.stringWidth(modSequence) + 45 > width){
+                        sequenceFragmentationPanel.updateFontSize(-2);
+                    }
+
                     sequenceFragmentationPanel.setOpaque(false);
                     sequenceFragmentationPanel.setBackground(Color.WHITE);
                     sequenceFragmentationPanel.setFont(new Font("Arial", Font.PLAIN, 13));
-
-                    //AddInformationPanel addInformationPanel = new AddInformationPanel(addInforList, resizeJPanelWidth, );
-
-                    infoJPanel.removeAll();
-                    //infoJPanel.add(addInformationPanel);
-                    infoJPanel.revalidate();
-                    infoJPanel.repaint();
 
                     secondarySpectrumPlotsJPanel.removeAll();
                     secondarySpectrumPlotsJPanel.add(sequenceFragmentationPanel);
                     secondarySpectrumPlotsJPanel.revalidate();
                     secondarySpectrumPlotsJPanel.repaint();
+
+                    AddInformationPanel addInformationPanel = new AddInformationPanel(addInforList, resizeJPanelWidth);
+                    addInformationPanel.setOpaque(false);
+                    addInformationPanel.setBackground(Color.WHITE);
+
+                    infoJPanel.removeAll();
+                    infoJPanel.add(addInformationPanel);
+                    infoJPanel.revalidate();
+                    infoJPanel.repaint();
 
                     spectrumSplitPane.revalidate();
                     spectrumSplitPane.repaint();
@@ -1122,7 +1168,6 @@ public class PDVCLIMainClass extends JFrame {
             totalMaxHeight = singleMaxHeight * 3;
         }
 
-        System.out.println("Max height is "+totalMaxHeight);
         infoJPanel.setMaximumSize(new Dimension(resizeJPanelWidth, totalMaxHeight));
         infoSpectrumSplitPane.setDividerLocation(totalMaxHeight);
 

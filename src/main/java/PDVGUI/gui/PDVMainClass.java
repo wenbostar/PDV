@@ -256,7 +256,7 @@ public class PDVMainClass extends JFrame {
     /**
      * Version
      */
-    private static final String VERSION = "1.4.3";
+    private static final String VERSION = "1.5.0";
 
     /**
      * Main class
@@ -1478,6 +1478,84 @@ public class PDVMainClass extends JFrame {
                     originalInfor = new HashMap<>();
 
                     scoreName = textFileImport.getScoreName();
+
+                    ArrayList<String> orderName = new ArrayList<>();
+                    orderName.add("PSMIndex");
+                    orderName.add("MZ");
+                    orderName.add("Sequence");
+                    orderName.addAll(scoreName);
+                    setUpTableHeaderToolTips();
+
+                    buttonCheck();
+
+                    sortColumnJCombox.setModel(new DefaultComboBoxModel(orderName.toArray()));
+
+                } catch (SQLException | ClassNotFoundException | IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
+    }
+
+    /**
+     * Import pFind results
+     * @param spectrumFile Spectrum file
+     * @param spectrumsFileFactory Spectrum factory
+     * @param cnfFile pFind configure file
+     */
+    public void importPFindResults(File spectrumFile, Object spectrumsFileFactory, File cnfFile, String spectrumFileType) {
+
+        this.isNewSoft = true;
+
+        this.spectrumsFileFactory = spectrumsFileFactory;
+        this.spectrumFileType = spectrumFileType;
+
+        switch (spectrumFileType) {
+            case "mzml":
+
+                scans = (ScanCollectionDefault) spectrumsFileFactory;
+                break;
+
+            case "mgf":
+
+                spectrumFactory = (SpectrumFactory) spectrumsFileFactory;
+                break;
+
+            case "mzxml":
+
+                scans = (ScanCollectionDefault) spectrumsFileFactory;
+                break;
+        }
+
+        databasePath = cnfFile.getAbsolutePath()+".db";
+
+        ProgressDialogX progressDialog = new ProgressDialogX(this,
+                Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMass.png")),
+                Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMassWait.png")),
+                true);
+        progressDialog.setPrimaryProgressCounterIndeterminate(true);
+        progressDialog.setTitle("Loading Results. Please Wait...");
+
+        new Thread(() -> {
+            try {
+                progressDialog.setVisible(true);
+            } catch (IndexOutOfBoundsException ignored) {
+            }
+        }, "ProgressDialog").start();
+        new Thread("DisplayThread") {
+            @Override
+            public void run() {
+
+                PFindImport findImport;
+
+                try {
+                    findImport = new PFindImport(PDVMainClass.this, cnfFile, spectrumFile, progressDialog);
+
+                    sqliteConnection = findImport.getSqLiteConnection();
+                    allModifications = findImport.getAllModifications();
+                    originalInfor = new HashMap<>();
+
+                    scoreName = findImport.getScoreName();
 
                     ArrayList<String> orderName = new ArrayList<>();
                     orderName.add("PSMIndex");

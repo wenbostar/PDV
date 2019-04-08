@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.sql.*;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -100,13 +101,16 @@ public class MzIDFileImport {
      * Soft name
      */
     private String softName;
+    /**
+     * Decimal
+     */
+    DecimalFormat df = new DecimalFormat("####0.000");
 
     /**
      * Constructor
      * @param pdvMainClass Parent class
      * @param mzIDFile MzIdentML file
      * @param mzIdentMLType Object saving result
-     * @param modificationMass Modification and mass
      * @param spectrumFactory Object saving spectrum
      * @param spectrumFileType Spectrum file type
      * @param progressDialog Progress dialog
@@ -196,7 +200,7 @@ public class MzIDFileImport {
                     }
                 }
             }
-            sqLiteConnection.setScoreNum(scoreName.size());
+            sqLiteConnection.setScoreNum(scoreName.size() + 1);
         } catch (Exception e){
             JOptionPane.showMessageDialog(
                     null, "Failed to get score name from mzIdentML. Please check your file.",
@@ -220,7 +224,7 @@ public class MzIDFileImport {
         Statement statement = connection.createStatement();
 
         StringBuilder addQuery = new StringBuilder();
-        StringBuilder addValuesQuery = new StringBuilder("VALUES(?,?,?,?,?,?");
+        StringBuilder addValuesQuery = new StringBuilder("VALUES(?,?,?,?,?,?,?");
 
         for (String name : scoreName){
             addQuery.append(", ").append(name).append(" OBJECT(50)");
@@ -228,7 +232,7 @@ public class MzIDFileImport {
         }
         addValuesQuery.append(")");
 
-        String addTableQuery = "CREATE TABLE SpectrumMatch" + " (PSMIndex Char, MZ DOUBLE, Title Char, Sequence Char, MassError DOUBLE, Match Object" + addQuery +", PRIMARY KEY(PSMIndex))";
+        String addTableQuery = "CREATE TABLE SpectrumMatch" + " (PSMIndex Char, MZ DOUBLE, Title Char, Sequence Char, MassError DOUBLE, Match Object, Modification Char" + addQuery +", PRIMARY KEY(PSMIndex))";
         try {
             statement.execute(addTableQuery);
         }catch (SQLException e){
@@ -444,6 +448,7 @@ public class MzIDFileImport {
 
                 spectrumIdentificationItems = spectrumIdentificationResultType.getSpectrumIdentificationItem();
 
+                String allModificationString = "";
                 for (SpectrumIdentificationItemType spectrumIdentificationItemType : spectrumIdentificationItems) {
 
                     rankNum++;
@@ -467,6 +472,7 @@ public class MzIDFileImport {
                     // get the modifications
                     utilitiesModifications = new ArrayList<>();
                     ArrayList<String> residues;
+                    allModificationString = "";
 
                     if (peptideMap.get(peptideRef)[1] != null) {
                         modifications = (List<ModificationType>) peptideMap.get(peptideRef)[1];
@@ -490,6 +496,9 @@ public class MzIDFileImport {
                                 nameFromMzID = String.valueOf(monoMassDelta);
                             }
 
+                            if(nameFromMzID.contains(">")){
+                                nameFromMzID = nameFromMzID.replace(">","&gt;");
+                            }
 
                             if (location == 0) {
 
@@ -540,7 +549,13 @@ public class MzIDFileImport {
                             }
 
                             utilitiesModifications.add(new ModificationMatch(modificationName, true, location));
+
+                            String wholeName = modificationName + "@" + location + "[" + df.format(monoMassDelta) + "]";
+                            allModificationString += wholeName + ";";
                         }
+                    }
+                    if (allModificationString.equals("")){
+                        allModificationString = "-";
                     }
 
                     // create the peptide
@@ -601,6 +616,7 @@ public class MzIDFileImport {
                 preparedStatement.setString(4, sequenceSaved);
                 preparedStatement.setDouble(5, Math.abs(massError));
                 preparedStatement.setBytes(6, bos.toByteArray());
+                preparedStatement.setString(7, allModificationString);
 
                 countParam = new ArrayList<>();
 
@@ -614,7 +630,7 @@ public class MzIDFileImport {
 
                         if (scoreName.contains(name)) {
 
-                            Integer index = scoreName.indexOf(name) + 7;
+                            Integer index = scoreName.indexOf(name) + 8;
                             countParam.add(name);
 
                             String value = abstractParamType.getValue();
@@ -636,7 +652,7 @@ public class MzIDFileImport {
                         }
 
                         if (scoreName.contains(name)) {
-                            Integer index = scoreName.indexOf(name) + 7;
+                            Integer index = scoreName.indexOf(name) + 8;
                             countParam.add(name);
 
                             String value = abstractParamType.getValue();
@@ -656,7 +672,7 @@ public class MzIDFileImport {
                 if (countParam.size() != scoreName.size()){
                     for (String name : scoreName){
                         if (!countParam.contains(name)){
-                            preparedStatement.setDouble(scoreName.indexOf(name) + 7, 0);// TODO: 8/14/2018   Risk
+                            preparedStatement.setDouble(scoreName.indexOf(name) + 8, 0);// TODO: 8/14/2018   Risk
                         }
                     }
                 }
