@@ -10,6 +10,7 @@ PDV is a JAVA tool for proteomics data visualization.
 ## Usage
 
 A user's manual is available at [http://pdv.zhang-lab.org](http://pdv.zhang-lab.org).
+You can find some visualization examples in the [user's manual](http://pdv.zhang-lab.org/data/download/PDV-Manual.pdf) or the [manuscript of PDV](https://doi.org/10.1093/bioinformatics/bty770).
 
 ## Installation
 
