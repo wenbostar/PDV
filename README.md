@@ -37,6 +37,7 @@ The PDV package can be downloaded at [https://github.com/wenbostar/PDV/releases]
 | [Proteome Discoverer](https://www.thermofisher.com/order/catalog/product/OPTON-30809?SID=srch-srp-OPTON-30809)| TODO |
 | [ProteinPilot](https://sciex.com/products/software/proteinpilot-software) | TODO |
 | [PEAKS](http://www.bioinfor.com/peaks-studio/) | TODO |
+| [pFind](http://pfind.net/) (>=v3.1.5) | Only supported MGF file search result |
 | [TPP](http://tools.proteomecenter.org/wiki/index.php?title=Software:TPP) (v5.1.0) | [mzML](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mzML.gz):[pepXML](http://pdv.zhang-lab.org/data/download/test_data/tpp/tpp_comet.tar.gz) (Comet + PeptideProphet + iProphet + PTMProphet) |
 
 
