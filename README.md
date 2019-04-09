@@ -5,7 +5,7 @@
 
 PDV is a JAVA tool for proteomics data visualization.
 
-[<img src="https://github.com/wenbostar/PDV/blob/master/resources/PDV_main_panel.png" width=600 class="center">](http://pdv.zhang-lab.org/)
+[<img src="https://github.com/wenbostar/PDV/blob/master/resources/PDV_main_panel.png" width=600 class="center">](https://doi.org/10.1093/bioinformatics/bty770)
 
 ## Usage
 
