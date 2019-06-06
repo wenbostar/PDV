@@ -12,6 +12,7 @@ import com.compomics.util.gui.waiting.waitinghandlers.ProgressDialogX;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
@@ -28,8 +29,10 @@ import java.util.Objects;
 public class MaxQuantImportDialog extends JDialog {
 
     private JLabel maxQuantResultLabel;
+    private JLabel parXMLLabel;
     private JLabel fragmentIonJLable;
     private JTextField maxQuantResultTxt;
+    private JTextField parXMLTxt;
     private JButton startJButton;
     private JComboBox settingsComboBox;
     private JComboBox precursorIonUnit;
@@ -60,6 +63,10 @@ public class MaxQuantImportDialog extends JDialog {
      * MaxQuant directory
      */
     private String maxQuantResultPath;
+    /**
+     * MaxQuant parameters XML file
+     */
+    private String parXMLPath;
     /**
      * LastSelectedFolder for opening easily
      */
@@ -108,12 +115,15 @@ public class MaxQuantImportDialog extends JDialog {
         settingsComboBox = new JComboBox();
         maxQuantResultLabel = new JLabel();
         maxQuantResultTxt = new JTextField();
+        parXMLTxt = new JTextField();
         existMGFJCheckBox = new JCheckBox();
         fragmentIonJLable = new JLabel();
+        parXMLLabel = new JLabel();
         JPanel mainJPanel = new JPanel();
         JPanel annotationSettingJPanel = new JPanel();
         JPanel inputFilesPanel = new JPanel();
         JButton browseIdJButton = new JButton();
+        JButton browseParJButton = new JButton();
         JLabel existMGFJLabel = new JLabel("Exist mgf");
 
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -191,12 +201,26 @@ public class MaxQuantImportDialog extends JDialog {
         maxQuantResultLabel.setText("MaxQuant result *");
 
         maxQuantResultTxt.setHorizontalAlignment(JTextField.CENTER);
+        maxQuantResultTxt.setEditable(false);
 
         browseIdJButton.setIcon(new ImageIcon(getClass().getResource("/icons/open.png")));
         browseIdJButton.setBorder(null);
         browseIdJButton.setBorderPainted(false);
         browseIdJButton.setContentAreaFilled(false);
         browseIdJButton.addActionListener(this::browseIdJButtonActionPerformed);
+
+        parXMLLabel.setForeground(new Color(255, 0, 0));
+        parXMLLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        parXMLLabel.setText("MaxQuant par XML *");
+
+        parXMLTxt.setHorizontalAlignment(JTextField.CENTER);
+        parXMLTxt.setEditable(false);
+
+        browseParJButton.setIcon(new ImageIcon(getClass().getResource("/icons/open.png")));
+        browseParJButton.setBorder(null);
+        browseParJButton.setBorderPainted(false);
+        browseParJButton.setContentAreaFilled(false);
+        browseParJButton.addActionListener(this::browseParJButtonActionPerformed);
 
         existMGFJLabel.setFont(new Font("Arial", Font.ITALIC, 12));
         existMGFJLabel.setToolTipText("If you converted mgf files and had generatesMGF folder, select it.");
@@ -215,7 +239,13 @@ public class MaxQuantImportDialog extends JDialog {
                                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(maxQuantResultTxt,GroupLayout.PREFERRED_SIZE,260, GroupLayout.PREFERRED_SIZE)
                                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                                .addComponent(browseIdJButton)))
+                                                .addComponent(browseIdJButton))
+                                        .addGroup(GroupLayout.Alignment.TRAILING, inputFilesPanelLayout.createSequentialGroup()
+                                                .addComponent(parXMLLabel, GroupLayout.PREFERRED_SIZE, 160, GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(parXMLTxt,GroupLayout.PREFERRED_SIZE,260, GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(browseParJButton)))
                                 .addContainerGap())
         );
 
@@ -229,7 +259,12 @@ public class MaxQuantImportDialog extends JDialog {
                                         .addComponent(maxQuantResultTxt, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                         .addComponent(maxQuantResultLabel)
                                         .addComponent(browseIdJButton))
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(inputFilesPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(parXMLTxt, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(parXMLLabel)
+                                        .addComponent(browseParJButton))
+                                .addContainerGap()
                                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -393,7 +428,7 @@ public class MaxQuantImportDialog extends JDialog {
 
                 progressDialog.setRunFinished();
 
-                pdvMainClass.importMaxQuantResults(maxQuantResultPath, existMGF);
+                pdvMainClass.importMaxQuantResults(maxQuantResultPath, existMGF, parXMLPath);
 
             }
         }.start();
@@ -413,7 +448,7 @@ public class MaxQuantImportDialog extends JDialog {
     }
 
     /**
-     * Select all spectrum files
+     * Select combined folder path
      * @param evt mouse click event
      */
     private void browseIdJButtonActionPerformed(ActionEvent evt) {
@@ -452,6 +487,49 @@ public class MaxQuantImportDialog extends JDialog {
     }
 
     /**
+     * Select parameter xml file
+     * @param evt mouse click event
+     */
+    private void browseParJButtonActionPerformed(ActionEvent evt) {
+
+        JFileChooser fileChooser = new JFileChooser(lastSelectedFolder);
+        fileChooser.setDialogTitle("Select Parameter XMl file");
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setMultiSelectionEnabled(true);
+
+        FileFilter mzidFilter = new FileFilter() {
+            @Override
+            public boolean accept(File myFile) {
+                return myFile.getName().toLowerCase().endsWith(".XML")
+                        ||myFile.getName().toLowerCase().endsWith(".xml")
+                        || myFile.isDirectory();
+            }
+
+            @Override
+            public String getDescription() {
+                return "parameter (.xml)";
+            }
+        };
+
+        fileChooser.setFileFilter(mzidFilter);
+
+        int returnValue = fileChooser.showDialog(this, "Add");
+
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+
+            File selectedFile = fileChooser.getSelectedFile();
+
+            parXMLPath = selectedFile.getAbsolutePath();
+
+            lastSelectedFolder = selectedFile.getParent();
+
+            parXMLTxt.setText(lastSelectedFolder + "selected");
+
+            validateInput();
+        }
+    }
+
+    /**
      * Validates input information and enable start button
      */
     private void validateInput() {
@@ -465,6 +543,16 @@ public class MaxQuantImportDialog extends JDialog {
             maxQuantResultLabel.setForeground(Color.RED);
             maxQuantResultLabel.setToolTipText("Please select at least one identification file");
             maxQuantResultTxt.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            allValid = false;
+        }
+
+        if (parXMLPath != null) {
+            parXMLLabel.setForeground(Color.BLACK);
+            parXMLLabel.setToolTipText(null);
+        } else {
+            parXMLLabel.setForeground(Color.RED);
+            parXMLLabel.setToolTipText("Please select parameter file");
+            parXMLTxt.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
             allValid = false;
         }
 

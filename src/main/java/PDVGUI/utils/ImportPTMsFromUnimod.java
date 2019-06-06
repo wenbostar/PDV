@@ -30,6 +30,7 @@ public class ImportPTMsFromUnimod {
     public ImportPTMsFromUnimod(File unimodXMLFile){
         this.unimodXMLFile = unimodXMLFile;
 
+        ptmFactory.clearFactory();
         parsingFile();
     }
 

@@ -1918,13 +1918,15 @@ public class SpectrumMainPanel extends JPanel {
 
                 String shortName = ptm.getShortName();
                 AminoAcidPattern aminoAcidPattern = ptm.getPattern();
+
                 double mass = ptm.getMass();
 
                 if (ptm.getType() == PTM.MODAA && aminoAcidPattern != null) {
                     for (Character character : aminoAcidPattern.getAminoAcidsAtTarget()) {
                         if (!currentMassDeltaMap.containsValue(character + "<" + shortName + ">")) {
                             AminoAcid aminoAcid = AminoAcid.getAminoAcid(character);
-                            currentMassDeltaMap.put(mass + aminoAcid.getMonoisotopicMass(),
+                            double aminoAcidMass = aminoAcid.getMonoisotopicMass();
+                            currentMassDeltaMap.put(mass + aminoAcidMass,
                                     character + "<" + shortName + ">");
                         }
                     }

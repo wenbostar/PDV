@@ -288,11 +288,11 @@ public class FragePipeImport {
 
                                 modMass = Double.valueOf(eachMod.substring(eachMod.lastIndexOf("(") + 1, eachMod.lastIndexOf(")")));
 
-                                if (eachMod.contains("n")) { //n(42.0106)
+                                if (eachMod.contains("n") || eachMod.toLowerCase().contains("n-term")) { //n(42.0106; new case N-term(42.0106)
                                     modAA = "N-term";
                                     position = 1;
 
-                                } else if (eachMod.contains("c")) { //c(42.0106)
+                                } else if (eachMod.contains("c") || eachMod.toLowerCase().contains("c-term")) { //c(42.0106); new case C-term(42.0106)
                                     modAA = "C-term";
                                     position = peptideSequence.length();
 

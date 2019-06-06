@@ -256,7 +256,7 @@ public class PDVMainClass extends JFrame {
     /**
      * Version
      */
-    private static final String VERSION = "1.5.0";
+    private static final String VERSION = "1.5.1";
 
     /**
      * Main class
@@ -1992,7 +1992,7 @@ public class PDVMainClass extends JFrame {
      * @param maxQuantResultPath MaxQUANT results path
      * @param existMGF Boolean
      */
-    public void importMaxQuantResults(String maxQuantResultPath, Boolean existMGF) {
+    public void importMaxQuantResults(String maxQuantResultPath, Boolean existMGF, String paraXMLPath) {
 
         this.spectrumFileType = "mgf";
 
@@ -2022,7 +2022,7 @@ public class PDVMainClass extends JFrame {
 
                 try {
 
-                    maxQuantFileImport = new MaxQuantFileImport(PDVMainClass.this, new File(maxQuantResultPath), progressDialog);
+                    maxQuantFileImport = new MaxQuantFileImport(PDVMainClass.this, new File(maxQuantResultPath), paraXMLPath, progressDialog);
 
                     originalInfor = maxQuantFileImport.getOriginalInfor();
                     detailsList = maxQuantFileImport.getDetailsList();
@@ -2050,6 +2050,7 @@ public class PDVMainClass extends JFrame {
                     orderName.add("MassError");
                     orderName.add("Score");
                     scoreName.add("Score");
+                    scoreName.add("Modification");
                     setUpTableHeaderToolTips();
 
                     buttonCheck();
@@ -2324,7 +2325,7 @@ public class PDVMainClass extends JFrame {
 
         }
 
-        fragmentIonAccuracyTxt.setText("  "+String.valueOf(annotationSettings.getFragmentIonAccuracy())+"  ");
+        fragmentIonAccuracyTxt.setText("  "+ annotationSettings.getFragmentIonAccuracy() +"  ");
 
         databaseTableModel = new DatabaseTableModel(searchParameters, scoreName, spectrumsFileFactory, spectrumFileType, spectrumKeyToSelected, isNewSoft, isMaxQuant, isPepXML);
         spectrumJTable.setModel(databaseTableModel);
@@ -2980,6 +2981,7 @@ public class PDVMainClass extends JFrame {
         spectrumJTable.requestFocus();
         int row = spectrumJTable.getSelectedRow();
         int column = spectrumJTable.getSelectedColumn();
+        //String
 
         if (row != -1) {
             this.setCursor(new Cursor(Cursor.WAIT_CURSOR));

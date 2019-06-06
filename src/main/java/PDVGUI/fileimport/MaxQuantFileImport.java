@@ -2,8 +2,10 @@ package PDVGUI.fileimport;
 
 import PDVGUI.DB.SQLiteConnection;
 import PDVGUI.gui.PDVMainClass;
+import PDVGUI.utils.ImportUserMod;
 import com.compomics.util.experiment.biology.NeutralLoss;
 import com.compomics.util.experiment.biology.PTM;
+import com.compomics.util.experiment.biology.PTMFactory;
 import com.compomics.util.experiment.biology.Peptide;
 import com.compomics.util.experiment.identification.matches.ModificationMatch;
 import com.compomics.util.experiment.identification.matches.SpectrumMatch;
@@ -12,6 +14,8 @@ import com.compomics.util.experiment.massspectrometry.Charge;
 import com.compomics.util.experiment.massspectrometry.Spectrum;
 import com.compomics.util.experiment.massspectrometry.SpectrumFactory;
 import com.compomics.util.gui.waiting.waitinghandlers.ProgressDialogX;
+import org.apache.commons.lang.StringUtils;
+import uk.ac.ebi.jmzml.xml.io.MzMLUnmarshallerException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -34,10 +38,6 @@ public class MaxQuantFileImport {
      */
     private ArrayList<File> allAPLFiles = new ArrayList<>();
     /**
-     * All silic apl files list
-     */
-    private ArrayList<File> allSilAPLFiles = new ArrayList<>();
-    /**
      * MsMsScan file
      */
     private File scansDetailFile;
@@ -45,6 +45,14 @@ public class MaxQuantFileImport {
      * Parameters File
      */
     private File parametersFile;
+    /**
+     * Parameters XMl file
+     */
+    private File parametersXMLFile;
+    /**
+     * User modification file
+     */
+    private File userModFile;
     /**
      * MsMs file
      */
@@ -72,7 +80,7 @@ public class MaxQuantFileImport {
     /**
      * Spectrum title to rank
      */
-    private HashMap<String, Integer> spectrumTitleToRank = new HashMap<>();
+    private HashMap<Integer, Integer> spectrumTitleToRank = new HashMap<>();
     /**
      * All modification files
      */
@@ -81,6 +89,14 @@ public class MaxQuantFileImport {
      * All varied modifications
      */
     private ArrayList<String> variedModifications = new ArrayList<>();
+    /**
+     * PTM factory
+     */
+    private PTMFactory ptmFactory = PTMFactory.getInstance();
+    /**
+     * Spectrum factory
+     */
+    SpectrumFactory spectrumFactory;
     /**
      * Modification map
      */
@@ -122,6 +138,10 @@ public class MaxQuantFileImport {
      */
     private int sequenceIndex = 0;
     /**
+     * Experiment Mass index
+     */
+    private int expMassIndex = 0;
+    /**
      * modification column index
      */
     private int modificationIndex = 0;
@@ -149,19 +169,29 @@ public class MaxQuantFileImport {
      * Fixed modification map
      */
     private HashMap<String, String> fixedModificationMap = new HashMap<>();
+    /**
+     * SILAC label map
+     */
+    private HashMap<String, HashMap<String, Integer>> silacLabelMap = new HashMap<>();
+    /**
+     * SILAC modification map
+     */
+    private HashMap<String,  String> silacModMap = new HashMap<>();
 
     /**
      * Constructor
      * @param pdvMainClass Parent class
      * @param maxQuantDirectory File folder path
+     * @param paraXMLPath parameter file path
      * @param progressDialog Progress dialog
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public MaxQuantFileImport(PDVMainClass pdvMainClass, File maxQuantDirectory, ProgressDialogX progressDialog) throws SQLException, ClassNotFoundException {
+    public MaxQuantFileImport(PDVMainClass pdvMainClass, File maxQuantDirectory, String paraXMLPath, ProgressDialogX progressDialog) throws SQLException, ClassNotFoundException {
 
         this.pdvMainClass = pdvMainClass;
         this.maxQuantDirectory = maxQuantDirectory;
+        this.parametersXMLFile = new File(paraXMLPath);
         this.progressDialog = progressDialog;
 
         String databasePath = maxQuantDirectory.getAbsolutePath()+"/combined.db";
@@ -177,9 +207,17 @@ public class MaxQuantFileImport {
 
         sqLiteConnection = new SQLiteConnection(databasePath);
 
-        sqLiteConnection.setScoreNum(1);
+        sqLiteConnection.setScoreNum(2);
 
         getAllFiles();
+
+        try {
+            parseParameters();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        new ImportUserMod();
     }
 
     /**
@@ -197,10 +235,8 @@ public class MaxQuantFileImport {
                     isCombine = true;
 
                     for(File eachFileInAnd : eachFileInMax.listFiles()){
-                        if(eachFileInAnd.getName().contains(".apl") && eachFileInAnd.getName().contains(".iso")){
+                        if(eachFileInAnd.getName().contains(".apl")){
                             allAPLFiles.add(eachFileInAnd);
-                        }else if (eachFileInAnd.getName().contains(".apl") && !eachFileInAnd.getName().contains(".iso")){
-                            allSilAPLFiles.add(eachFileInAnd);
                         }
                     }
                 } else if(eachFileInMax.isDirectory() && eachFileInMax.getName().equals("txt")){
@@ -464,14 +500,13 @@ public class MaxQuantFileImport {
                 ArrayList<String> currentScanNumList;
 
                 File mgfDirectory = new File(parentDictory);
-                ArrayList<String> allTitle = new ArrayList<>();
 
                 if (!mgfDirectory.exists()) {
                     mgfDirectory.mkdir();
                 }
 
                 try {
-                    progressDialog.setMaxPrimaryProgressCounter(allAPLFiles.size() + allSilAPLFiles.size());
+                    progressDialog.setMaxPrimaryProgressCounter(allAPLFiles.size());
                     for (String fileName : fileToTitleToRTMap.keySet()) {
                         BufferedWriter fileWriter = new BufferedWriter(new FileWriter(new File(parentDictory + fileName + ".mgf")));
                         fileNameToFileWriter.put(fileName, fileWriter);
@@ -481,6 +516,7 @@ public class MaxQuantFileImport {
 
                     BufferedWriter fileWriter = null;
                     String spectrumTitle;
+                    String partTitle;
                     String spectrumFileName;
                     String scanNum;
                     String mass = null;
@@ -508,34 +544,34 @@ public class MaxQuantFileImport {
                                 spectrumFileName = spectrumTitle.split(" ")[1];
                                 scanNum = spectrumTitle.split(" ")[3];
 
-                                spectrumTitle = "RawFile: " + spectrumFileName + " Index: " + scanNum;
+                                currentScanNumList = fileNameToScanNum.get(spectrumFileName);
 
-                                    currentScanNumList = fileNameToScanNum.get(spectrumFileName);
+                                if (currentScanNumList != null) {
 
-                                    if (currentScanNumList != null) {
-
-                                        if (currentScanNumList.contains(scanNum)) {
-                                            isFirstMentioned = false;
-                                        } else {
-                                            fileNameToScanNum.get(spectrumFileName).add(scanNum);
-                                            isFirstMentioned = true;
-                                        }
-
-                                        if (isFirstMentioned) {
-                                            long start2 = System.currentTimeMillis();
-                                            fileWriter = fileNameToFileWriter.get(spectrumFileName);
-
-                                            fileWriter.write("BEGIN IONS\n");
-                                            fileWriter.write("TITLE=" + spectrumTitle + "\n");
-                                            fileWriter.write("PEPMASS=" + mass + "\n");
-                                            fileWriter.write("CHARGE=" + charge + "+\n");
-                                            fileWriter.write("RTINSECONDS=" + Double.valueOf(fileToTitleToRTMap.get(spectrumFileName).get(spectrumTitle)) * 60 + "\n");
-
-                                        }
-                                    } else {
-                                        System.err.println("It can not find this file ");
+                                    if (currentScanNumList.contains(scanNum+"_"+charge)) {
                                         isFirstMentioned = false;
+                                    } else {
+                                        fileNameToScanNum.get(spectrumFileName).add(scanNum+"_"+charge);
+                                        isFirstMentioned = true;
                                     }
+
+                                    if (isFirstMentioned) {
+                                        fileWriter = fileNameToFileWriter.get(spectrumFileName);
+
+                                        spectrumTitle = "RawFile: " + spectrumFileName + " Index: " + scanNum + " Charge: " + charge;
+                                        partTitle = "RawFile: " + spectrumFileName + " Index: " + scanNum;
+
+                                        fileWriter.write("BEGIN IONS\n");
+                                        fileWriter.write("TITLE=" + spectrumTitle + "\n");
+                                        fileWriter.write("PEPMASS=" + mass + "\n");
+                                        fileWriter.write("CHARGE=" + charge + "+\n");
+                                        fileWriter.write("RTINSECONDS=" + Double.valueOf(fileToTitleToRTMap.get(spectrumFileName).get(partTitle)) * 60 + "\n");
+
+                                    }
+                                } else {
+                                    System.err.println("It can not find this file ");
+                                    isFirstMentioned = false;
+                                }
 
                             } else if (line.startsWith("mz")) {
                                 mass = line.split("=")[1];
@@ -560,81 +596,6 @@ public class MaxQuantFileImport {
 
                         progressDialog.increasePrimaryProgressCounter();
                     }
-
-                    for (File file : allSilAPLFiles){
-
-                        BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
-                        String line;
-                        boolean insideSpectrum = false;
-
-                        while ((line = bufferedReader.readLine()) != null) {
-
-                            if (line.endsWith("\r")) {
-                                line = line.replace("\r", "");
-                            }
-
-                            if (line.startsWith("peaklist start")) {
-                                insideSpectrum = true;
-
-                            } else if (line.startsWith("header")) {
-                                spectrumTitle = line.split("=")[1];
-                                spectrumFileName = spectrumTitle.split(" ")[1];
-                                scanNum = spectrumTitle.split(" ")[3];
-
-                                spectrumTitle = "RawFile: " + spectrumFileName + " Index: " + scanNum;
-
-                                    currentScanNumList = fileNameToScanNum.get(spectrumFileName);
-
-                                    if (currentScanNumList != null) {
-
-                                        if (currentScanNumList.contains(scanNum)) {
-                                            isFirstMentioned = false;
-                                        } else {
-                                            fileNameToScanNum.get(spectrumFileName).add(scanNum);
-                                            isFirstMentioned = true;
-                                        }
-
-                                        if (isFirstMentioned) {
-                                            fileWriter = fileNameToFileWriter.get(spectrumFileName);
-
-                                            fileWriter.write("BEGIN IONS\n");
-                                            fileWriter.write("TITLE=" + spectrumTitle + "\n");
-                                            fileWriter.write("PEPMASS=" + mass + "\n");
-                                            fileWriter.write("CHARGE=" + charge + "+\n");
-                                            fileWriter.write("RTINSECONDS=" + Double.valueOf(fileToTitleToRTMap.get(spectrumFileName).get(spectrumTitle)) * 60 + "\n");
-                                        }
-                                    } else {
-                                        System.err.println("It can not find this file ");
-                                        isFirstMentioned = false;
-                                    }
-
-                            } else if (line.startsWith("mz")) {
-                                mass = line.split("=")[1];
-
-                            } else if (line.startsWith("charge")) {
-                                charge = line.split("=")[1];
-
-                            } else if (line.startsWith("peaklist end")) {
-                                if (isFirstMentioned) {
-                                    fileWriter.write("END IONS\n");
-                                }
-
-                            } else if (line.startsWith("fragmentation")) {
-
-                            } else if (insideSpectrum && !line.equals("")) {
-                                if (isFirstMentioned) {
-                                    fileWriter.write(line + "\n");
-                                }
-                            }
-
-                        }
-
-                        bufferedReader.close();
-                        progressDialog.increasePrimaryProgressCounter();
-
-                    }
-
-                    fileWriter.close();
 
                     progressDialog.setRunFinished();
 
@@ -644,7 +605,6 @@ public class MaxQuantFileImport {
 
                         fileNameToFileWriter.get(fileName).close();
 
-                        System.out.println(fileName+" = "+fileNameToScanNum.get(fileName).size());
                     }
 
                     addAllSpectrumFiles();
@@ -668,7 +628,7 @@ public class MaxQuantFileImport {
      * Add mgf into spectrumFactory
      */
     public void addAllSpectrumFiles(){
-        SpectrumFactory spectrumFactory = SpectrumFactory.getInstance();
+        spectrumFactory = SpectrumFactory.getInstance();
 
         String parentDictory = maxQuantDirectory.getAbsolutePath() + PDVMainClass.FILE_SEPARATOR + "generatesMGF";
         File mgfDirectory = new File(parentDictory);
@@ -736,6 +696,8 @@ public class MaxQuantFileImport {
                         } catch (ClassNotFoundException e) {
                             e.printStackTrace();
                         } catch (SQLException e) {
+                            e.printStackTrace();
+                        } catch (MzMLUnmarshallerException e) {
                             e.printStackTrace();
                         }
 
@@ -830,13 +792,13 @@ public class MaxQuantFileImport {
      * @throws SQLException
      * @throws IOException
      */
-    private void parseResults() throws SQLException, IOException {
+    private void parseResults() throws SQLException, IOException, MzMLUnmarshallerException {
 
         Connection connection = sqLiteConnection.getConnection();
 
         connection.setAutoCommit(false);
         Statement statement = connection.createStatement();
-        String matchTableQuery = "CREATE TABLE SpectrumMatch (PSMIndex INT(10), MZ DOUBLE, Title Char, Sequence Char, MassError DOUBLE, Match Object, Score DOUBLE, PRIMARY KEY(PSMIndex))";
+        String matchTableQuery = "CREATE TABLE SpectrumMatch (PSMIndex INT(10), MZ DOUBLE, Title Char, Sequence Char, MassError DOUBLE, Match Object, Score DOUBLE, Modification Char, PRIMARY KEY(PSMIndex))";
 
         try {
             statement.execute(matchTableQuery);
@@ -848,7 +810,7 @@ public class MaxQuantFileImport {
             statement.close();
         }
 
-        String addDataIntoTable = "INSERT INTO SpectrumMatch VALUES(?,?,?,?,?,?,?)";
+        String addDataIntoTable = "INSERT INTO SpectrumMatch VALUES(?,?,?,?,?,?,?,?)";
         PreparedStatement preparedStatement = null;
 
         BufferedReader bufferedReader = new BufferedReader(new FileReader(msResultFile));
@@ -862,8 +824,12 @@ public class MaxQuantFileImport {
         String scanNumber;
         Integer scanIndex;
         String rawFileName;
-        Integer peptideCharge;
-        Double massError;
+        double expMass;
+        double theroticMass;
+        int peptideCharge;
+        double massError;
+        double spectrumMass;
+        String silacLabel = "";
         Double score;
         String utilitiesModificationName;
         String[] splitAABy;
@@ -872,12 +838,15 @@ public class MaxQuantFileImport {
         PeptideAssumption peptideAssumption;
         Peptide peptide;
         Charge charge;
+        ArrayList<String> residues;
         HashMap<String, Integer> modificationNumIndex = new HashMap<>();
         HashMap<String, Integer> modificationPosIndex = new HashMap<>();
         HashMap<Integer, Double> modIndexToPos;
+        HashMap<String, Integer> onesilacLabelMap = new HashMap<>();
 
         ArrayList<String> spectrumList = new ArrayList<>();
-        HashMap<String, ArrayList<String>> fileNameToIDs;
+        ArrayList<Integer> variableIndex;
+        ArrayList<String> variableTerm;
         HashMap<String, String> aAToModification;
         ArrayList<ModificationMatch> utilitiesModifications;
         SpectrumMatch currentMatch;
@@ -906,6 +875,8 @@ public class MaxQuantFileImport {
                         modificationIndex = index;
                     } else if(values[index].equals("Mass Error [ppm]")){
                         massErrorIndex = index;
+                    } else if(values[index].equals("Mass")){
+                        expMassIndex = index;
                     } else if(values[index].equals("Modified sequence")){
                         modificationSequenceIndex = index;
                     } else if(values[index].equals("Score")){
@@ -934,27 +905,31 @@ public class MaxQuantFileImport {
                 } else {
                     massError = 0.0;
                 }
+                expMass = Double.parseDouble(values[expMassIndex]);
                 peptideCharge = Integer.valueOf(values[chargeIndex]);
                 rawFileName = values[rawFileIndex];
                 scanNumber = values[scanNumIndex];
                 scanIndex = Integer.valueOf(values[scanIndexIndex]) + fileToCountMap.get(rawFileName);
                 score = Double.valueOf(values[scoreIndex]);
 
-                spectrumTitle = "RawFile: " + rawFileName + " Index: " + scanNumber;
+                spectrumTitle = "RawFile: " + rawFileName + " Index: " + scanNumber + " Charge: " + peptideCharge;
+                spectrumMass = spectrumFactory.getPrecursor(rawFileName + ".mgf", spectrumTitle).getMz() * peptideCharge;
 
-                if(spectrumTitleToRank.containsKey(spectrumTitle)){
-                    int rank = spectrumTitleToRank.get(spectrumTitle) + 1;
-                    spectrumTitleToRank.put(spectrumTitle, rank);
+                if(spectrumTitleToRank.containsKey(scanIndex)){
+                    int rank = spectrumTitleToRank.get(scanIndex) + 1;
+                    spectrumTitleToRank.put(scanIndex, rank);
 
                     currentMatch = allSpectrumMatches.get(scanIndex);
 
                 } else{
-                    spectrumTitleToRank.put(spectrumTitle, 1);
+                    spectrumTitleToRank.put(scanIndex, 1);
 
                     currentMatch = new SpectrumMatch(Spectrum.getSpectrumKey(rawFileName+".mgf", spectrumTitle));
                     currentMatch.setSpectrumNumber(scanIndex);
                     allSpectrumMatches.put(scanIndex, currentMatch);
                 }
+                variableIndex = new ArrayList<>();
+                variableTerm = new ArrayList<>();
 
                 try {
                     if (!modificationName.equals("Unmodified")) {
@@ -1055,9 +1030,30 @@ public class MaxQuantFileImport {
                                 for (int i = 0; i < modNum; i ++){
 
                                     Integer position = list.get(i).getKey();
-                                    utilitiesModificationName = modName.split(" \\(")[0].replace(">","&gt;") + " of " + sequence.charAt(position - 1);
+                                    variableIndex.add(position - 1);
+                                    String modAA = String.valueOf(sequence.charAt(position - 1));
+                                    utilitiesModificationName = modName.split(" \\(")[0].replace(">","&gt;") + " of " + modAA;
 
-                                    utilitiesModifications.add(new ModificationMatch(utilitiesModificationName, true, position));
+                                    if (fixedModificationMap.containsKey(modAA)){
+                                        if (Math.abs(expMass - spectrumMass) > 10) {
+                                            residues = new ArrayList<>();
+                                            residues.add(modAA);
+                                            String fixedModName = fixedModificationMap.get(modAA) + " of " + modAA;
+                                            double combinedMass = ptmFactory.getPTM(utilitiesModificationName).getMass() + ptmFactory.getPTM(fixedModName).getMass();
+                                            String combinedName = modName.split(" \\(")[0].replace(">", "&gt;") + " and " + fixedModName;
+                                            if (!ptmFactory.containsPTM(combinedName)) {
+                                                PTM ptm = new PTM(PTM.MODAA, combinedName, combinedMass, residues);
+                                                ptm.setShortName(modName.split(" \\(")[0].replace(">", "&gt;") + " and " + fixedModificationMap.get(modAA));
+                                                ptmFactory.addUserPTM(ptm);
+                                            }
+                                            if (!allModifications.contains(combinedName)) {
+                                                allModifications.add(combinedName);
+                                            }
+                                            utilitiesModifications.add(new ModificationMatch(combinedName, true, position));
+                                        }
+                                    } else {
+                                        utilitiesModifications.add(new ModificationMatch(utilitiesModificationName, true, position));
+                                    }
                                     if (!allModifications.contains(utilitiesModificationName)) {
                                         allModifications.add(utilitiesModificationName);
                                     }
@@ -1096,9 +1092,27 @@ public class MaxQuantFileImport {
                                 } else {
                                     utilitiesModificationName = aAToModification.get("N-term") + " of " + "N-term";
                                 }
+                                variableTerm.add("N");
+
+                                /*
+                                for (String key : fixedModificationMap.keySet()){
+                                    if (key.contains("N-term")){
+                                        variableTerm.add("N");
+                                        String fixedName = fixedModificationMap.get(key);
+                                        double combinedMass = ptmFactory.getPTM(utilitiesModificationName).getMass() + ptmFactory.getPTM(fixedName + " of " + key).getMass();
+                                        utilitiesModificationName = fixedName + " and " + utilitiesModificationName;
+                                        if (!ptmFactory.containsPTM(utilitiesModificationName)){
+                                            PTM ptm = new PTM(PTM.MODNP, utilitiesModificationName, combinedMass, null);
+                                            ptm.setShortName(utilitiesModificationName.split("of")[0]);
+                                            ptmFactory.addUserPTM(ptm);
+                                        }
+                                    }
+                                }*/
+
                                 if (!allModifications.contains(utilitiesModificationName)) {
                                     allModifications.add(utilitiesModificationName);
                                 }
+
                                 utilitiesModifications.add(new ModificationMatch(utilitiesModificationName, true, 1));
                             } else if (eachModificationPart == splitAABy[splitAABy.length - 1] && !eachModificationPart.contains("_")) {
                                 if (aAToModification.get("C-term") == null){
@@ -1106,6 +1120,24 @@ public class MaxQuantFileImport {
                                 } else {
                                     utilitiesModificationName = aAToModification.get("C-term") + " of " + "C-term";
                                 }
+
+                                variableTerm.add("C");
+                                /*
+                                for (String key : fixedModificationMap.keySet()){
+                                    if (key.contains("C-term")){
+                                        variableTerm.add("C");
+                                        String fixedName = fixedModificationMap.get(key);
+                                        double combinedMass = ptmFactory.getPTM(utilitiesModificationName).getMass() + ptmFactory.getPTM(fixedName + " of " + key).getMass();
+                                        utilitiesModificationName = fixedName + " and " + utilitiesModificationName;
+                                        if (!ptmFactory.containsPTM(utilitiesModificationName)){
+                                            PTM ptm = new PTM(PTM.MODCP, utilitiesModificationName, combinedMass, null);
+                                            ptm.setShortName(utilitiesModificationName.split("of")[0]);
+                                            ptmFactory.addUserPTM(ptm);
+                                        }
+                                    }
+                                }
+                                */
+
                                 if (!allModifications.contains(utilitiesModificationName)) {
                                     allModifications.add(utilitiesModificationName);
                                 }
@@ -1120,13 +1152,53 @@ public class MaxQuantFileImport {
                             "Error Modification", JOptionPane.ERROR_MESSAGE);
                 }
 
+                for (String key : fixedModificationMap.keySet()){
+                    if (key.contains("N-term")){
+                        if (!variableTerm.contains("N")){
+                            utilitiesModificationName = fixedModificationMap.get(key) + " of " + key;
+                            expMass = expMass + ptmFactory.getPTM(utilitiesModificationName).getMass();
+                            utilitiesModifications.add(new ModificationMatch(utilitiesModificationName, true, 1));
+                        }
+                    } else if (key.contains("C-term")){
+                        if (!variableTerm.contains("C")){
+                            utilitiesModificationName = fixedModificationMap.get(key) + " of " + key;
+                            expMass = expMass + ptmFactory.getPTM(utilitiesModificationName).getMass();
+                            utilitiesModifications.add(new ModificationMatch(utilitiesModificationName, true, sequence.length()));
+                        }
+                    }
+                }
+
                 String[] sequenceArray = sequence.split("");
                 int length =  sequenceArray.length;
                 for (int index = 0; index < length; index ++){
                     String aa = sequenceArray[index];
                     if (fixedModificationMap.containsKey(aa)){
-                        utilitiesModificationName = fixedModificationMap.get(aa) + " of " + aa;
-                        utilitiesModifications.add(new ModificationMatch(utilitiesModificationName, true, index + 1));
+                        if (!variableIndex.contains(index)) {
+                            utilitiesModificationName = fixedModificationMap.get(aa) + " of " + aa;
+                            utilitiesModifications.add(new ModificationMatch(utilitiesModificationName, true, index + 1));
+                        } else {
+                            if (Math.abs(expMass - spectrumMass) > 10) {
+                                residues = new ArrayList<>();
+                                residues.add(aa);
+
+                                for (ModificationMatch modificationMatch : utilitiesModifications){
+                                   if (modificationMatch.getModificationSite() == index + 1){
+                                       String fixedModName = fixedModificationMap.get(aa) + " of " + aa;
+                                       double combinedMass = ptmFactory.getPTM(modificationMatch.getTheoreticPtm()).getMass() + ptmFactory.getPTM(fixedModName).getMass();
+                                       String combinedName = modificationMatch.getTheoreticPtm().split(" \\(")[0].replace(">", "&gt;") + " and " + fixedModName;
+                                       if (!ptmFactory.containsPTM(combinedName)) {
+                                           PTM ptm = new PTM(PTM.MODAA, combinedName, combinedMass, residues);
+                                           ptm.setShortName(modificationMatch.getTheoreticPtm().split(" \\(")[0].replace(">", "&gt;") + " and " + fixedModificationMap.get(aa));
+                                           ptmFactory.addUserPTM(ptm);
+                                       }
+                                       if (!allModifications.contains(combinedName)) {
+                                           allModifications.add(combinedName);
+                                       }
+                                       utilitiesModifications.add(new ModificationMatch(combinedName, true, index + 1));
+                                   }
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -1134,12 +1206,96 @@ public class MaxQuantFileImport {
 
                 charge = new Charge(+1, peptideCharge);
 
-                peptideAssumption = new PeptideAssumption(peptide, spectrumTitleToRank.get(spectrumTitle), 0, charge, massError, "maxQuant");
+                peptideAssumption = new PeptideAssumption(peptide, spectrumTitleToRank.get(scanIndex), 0, charge, massError, "maxQuant");
                 peptideAssumption.setRawScore(score);
+                theroticMass = peptideAssumption.getTheoreticMass();
+
+                if (silacLabelMap.size() != 0){
+                    silacLabel = "";
+                    onesilacLabelMap = new HashMap<>();
+                    int deltaMass = (int) Math.round(expMass - theroticMass);
+                    //System.out.println(sequence + " Delta mass is " + deltaMass);
+                    int rCount = StringUtils.countMatches(sequence, "R");
+                    int kCount = StringUtils.countMatches(sequence, "K");
+                    int rMass = 0;
+                    int kMass = 0;
+                    if (deltaMass != 0) {
+                        if (silacLabelMap.size() == 1) {
+                            onesilacLabelMap = silacLabelMap.get("one");
+                            silacLabel = silacLabelMap.get("one").toString();
+
+                        } else {
+                            HashMap<String, Integer> oneLabel = silacLabelMap.get("one");
+                            HashMap<String, Integer> twoLabel = silacLabelMap.get("two");
+                            for (String key : oneLabel.keySet()) {
+                                if (key.equals("R")) {
+                                    rMass = rCount * oneLabel.get(key);
+                                } else if (key.equals("K")) {
+                                    kMass = kCount * oneLabel.get(key);
+                                }
+                            }
+                            if (rMass + kMass == deltaMass) {
+                                onesilacLabelMap = silacLabelMap.get("one");
+                                silacLabel = oneLabel.toString();
+                            }
+                            rMass = 0;
+                            kMass = 0;
+                            for (String key : twoLabel.keySet()) {
+                                if (key.equals("R")) {
+                                    rMass = rCount * twoLabel.get(key);
+                                } else if (key.equals("K")) {
+                                    kMass = kCount * twoLabel.get(key);
+                                }
+                            }
+                            if (rMass + kMass == deltaMass) {
+                                onesilacLabelMap = silacLabelMap.get("two");
+                                silacLabel = twoLabel.toString();
+                            }
+                        }
+                    }
+                }
+
+                if (onesilacLabelMap.size() != 0){
+
+                    HashMap<Integer, ModificationMatch> modSiteToMod = new HashMap<>();
+                    for (ModificationMatch modificationMatch : utilitiesModifications){
+                        modSiteToMod.put(modificationMatch.getModificationSite(), modificationMatch);
+                    }
+
+                    for (int index = 0; index < length; index ++) {
+                        String aa = sequenceArray[index];
+                        residues = new ArrayList<>();
+                        residues.add(aa);
+                        if (onesilacLabelMap.containsKey(aa)){
+                            String silacLabelIndex = aa + "=" + onesilacLabelMap.get(aa);
+                            if (modSiteToMod.containsKey(index + 1)){
+                                ModificationMatch modificationMatch = modSiteToMod.get(index + 1);
+                                String combinedName = modificationMatch.getTheoreticPtm().split(" of ")[0] + " + " + silacModMap.get(silacLabelIndex);
+                                double combinedMass = ptmFactory.getPTM(modificationMatch.getTheoreticPtm()).getMass() + onesilacLabelMap.get(aa);
+                                peptideAssumption.getPeptide().addModificationMatch(new ModificationMatch(combinedName, true, index + 1));
+                                if (!ptmFactory.containsPTM(combinedName)) {
+                                    PTM ptm = new PTM(PTM.MODAA, combinedName, combinedMass, residues);
+                                    ptm.setShortName(combinedName.split(" of ")[0]);
+                                    ptmFactory.addUserPTM(ptm);
+                                }
+                                if (!allModifications.contains(combinedName)) {
+                                    allModifications.add(combinedName);
+                                }
+
+                            } else {
+                                String combinedName = silacModMap.get(silacLabelIndex);
+                                peptideAssumption.getPeptide().addModificationMatch(new ModificationMatch(combinedName, true, index + 1));
+                                if (!allModifications.contains(combinedName)) {
+                                    allModifications.add(combinedName);
+                                }
+                            }
+                        }
+                    }
+                }
 
                 currentMatch.addHit(0, peptideAssumption, false);
 
-                if(spectrumTitleToRank.get(spectrumTitle) == 1){
+                if(spectrumTitleToRank.get(scanIndex) == 1){
                     currentMatch.setBestPeptideAssumption(peptideAssumption);
 
                     spectrumList.add(String.valueOf(scanIndex));
@@ -1156,6 +1312,8 @@ public class MaxQuantFileImport {
                         bos.close();
                     }
 
+                    modificationName = modificationName + silacLabel;
+
                     preparedStatement.setInt(1, scanIndex);
                     preparedStatement.setDouble(2, peptideAssumption.getTheoreticMass());
                     preparedStatement.setString(3, spectrumTitle);
@@ -1163,6 +1321,7 @@ public class MaxQuantFileImport {
                     preparedStatement.setDouble(5, Math.abs(massError));
                     preparedStatement.setBytes(6, bos.toByteArray());
                     preparedStatement.setDouble(7, score);
+                    preparedStatement.setString(8, modificationName);
                     
                     preparedStatement.addBatch();
 
@@ -1224,6 +1383,79 @@ public class MaxQuantFileImport {
         pdvMainClass.loadingJButton.setText("Import done");
         pdvMainClass.searchButton.setToolTipText("Find items");
         pdvMainClass.searchItemTextField.setToolTipText("Find items");
+    }
+
+    private void parseParameters() throws IOException {
+
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(parametersXMLFile));
+        String line;
+        int silacCount = 0;
+
+        while ((line = bufferedReader.readLine()) != null){
+            if (line.contains("fixedModifications")){
+                while (!(line = bufferedReader.readLine()).contains("fixedModifications")){
+                    String modificationName = line.split(">")[1].split("<")[0];
+                    String mod = modificationName.split(" ")[0];
+                    String aa = modificationName.split("\\(")[1].replace(")", "");
+                    fixedModificationMap.put(aa, mod);
+                    allModifications.add(mod + " of " + aa);
+                }
+            }
+            if (line.contains("<IsobaricLabelInfo")){
+                line = bufferedReader.readLine();
+                if (line.contains("TMT10plex")){
+                    fixedModificationMap.put("K", "TMT 10-plex");
+                    fixedModificationMap.put("peptide N-term", "TMT 10-plex");
+                } else if (line.contains("TMT8plex")){
+                    fixedModificationMap.put("K", "TMT 8-plex");
+                    fixedModificationMap.put("peptide N-term", "TMT 8-plex");
+                } else if (line.contains("TMT6plex")){
+                    fixedModificationMap.put("K", "TMT 6-plex");
+                    fixedModificationMap.put("peptide N-term", "TMT 6-plex");
+                } else if (line.contains("TMT2plex")){
+                    fixedModificationMap.put("K", "TMT 2-plex");
+                    fixedModificationMap.put("peptide N-term", "TMT 2-plex");
+                } else if (line.contains("iTRAQ4plex")){
+                    fixedModificationMap.put("K", "iTRAQ 4-plex");
+                    fixedModificationMap.put("peptide N-term", "iTRAQ 4-plex");
+                } else if (line.contains("iTRAQ8plex")){
+                    fixedModificationMap.put("K", "iTRAQ 8-plex");
+                    fixedModificationMap.put("peptide N-term", "iTRAQ 8-plex");
+                }
+            }
+            if (line.contains("labelMods")){
+                while (!(line = bufferedReader.readLine()).contains("labelMods")){
+                    if (line.contains("<string></string>")){
+                    } else if (line.contains("<string />")){
+                    } else{
+                        silacCount ++;
+                        HashMap<String, Integer> labelDetailMap = new HashMap<>();
+                        System.out.println("Line is " + line);
+                        String label = line.split(">")[1].split("<")[0].replace(" ", "");
+                        System.out.println("Label is "+ label);
+                        for (String each : label.split(";")){
+                            if (each.substring(0,3).equals("Arg")){
+                                labelDetailMap.put("R", Integer.valueOf(each.substring(3)));
+                            } else if (each.substring(0,3).equals("Lys")){
+                                labelDetailMap.put("K", Integer.valueOf(each.substring(3)));
+                            }
+                        }
+                        if (silacCount == 1){
+                            silacLabelMap.put("one", labelDetailMap);
+                        } else if (silacCount == 2){
+                            silacLabelMap.put("two", labelDetailMap);
+                        }
+                    }
+                }
+
+                silacModMap.put("R=6", "Label:13C(6) of R");
+                silacModMap.put("R=10", "Label:13C(6)15N(4) of R");
+                silacModMap.put("K=4", "Label:15N(4) of K");
+                silacModMap.put("K=6", "Label:13C(6) of K");
+                silacModMap.put("K=8", "Label:13C(6)15N(2) of K");
+
+            }
+        }
     }
 
     /**
