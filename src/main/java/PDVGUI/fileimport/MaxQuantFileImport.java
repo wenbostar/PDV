@@ -255,6 +255,9 @@ public class MaxQuantFileImport {
                             modificationSpecificPeptidesFile = eachFileInTxt;
                         }
                     }
+                } else if(eachFileInMax.isFile() && eachFileInMax.getName().contains(".apl")){
+                    isCombine = true;
+                    allAPLFiles.add(eachFileInMax);
                 }
             }
         } else {
@@ -1398,7 +1401,9 @@ public class MaxQuantFileImport {
                     String mod = modificationName.split(" ")[0];
                     String aa = modificationName.split("\\(")[1].replace(")", "");
                     fixedModificationMap.put(aa, mod);
-                    allModifications.add(mod + " of " + aa);
+                    if (!allModifications.contains(mod + " of " + aa)) {
+                        allModifications.add(mod + " of " + aa);
+                    }
                 }
             }
             if (line.contains("<IsobaricLabelInfo")){
