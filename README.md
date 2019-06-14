@@ -145,9 +145,12 @@ Li, K., et al. "PDV: an integrative proteomics data viewer." Bioinformatics, Vol
 
 ## List of citations
 
-`PDV` has been cited in the following manuscripts:
+`PDV` has been cited or used in the following manuscripts:
 1. Wang X, Codreanu S G, Wen B, et al. Detection of proteome diversity resulted from alternative splicing is limited by trypsin cleavage specificity. Molecular & Cellular Proteomics, 2017: mcp. RA117. 000155.
 2. Menschaert G, Wang X, Jones A R, et al. The proBAM and proBed standard formats: enabling a seamless integration of genomics and proteomics data. Genome biology, 2018, 19(1): 12.
+3. Wen, Bo, Xiaojing Wang, and Bing Zhang. "PepQuery enables fast, accurate, and convenient proteomic validation of novel genomic alterations." Genome research 29.3 (2019): 485-493.
+4. Rong, Mingqiang, et al. "PPIP: Automated Software for Identification of Bioactive Endogenous Peptides." Journal of proteome research 18.2 (2018): 721-727.
+5. Zhang X, Huang H, He Y, et al. High-throughput identification of heavy metal binding proteins from the byssus of chinese green mussel (Perna viridis) by combination of transcriptome and proteome sequencing. PloS one, 2019, 14(5): e0216605.
 ## Contribution
 
 Contributions to the package are more than welcome. 
