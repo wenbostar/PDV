@@ -151,6 +151,7 @@ Li, K., et al. "PDV: an integrative proteomics data viewer." Bioinformatics, Vol
 3. Wen, Bo, Xiaojing Wang, and Bing Zhang. "PepQuery enables fast, accurate, and convenient proteomic validation of novel genomic alterations." Genome research 29.3 (2019): 485-493.
 4. Rong, Mingqiang, et al. "PPIP: Automated Software for Identification of Bioactive Endogenous Peptides." Journal of proteome research 18.2 (2018): 721-727.
 5. Zhang X, Huang H, He Y, et al. High-throughput identification of heavy metal binding proteins from the byssus of chinese green mussel (Perna viridis) by combination of transcriptome and proteome sequencing. PloS one, 2019, 14(5): e0216605.
+6. Ren, Zhe, et al. "Improvements to the Rice Genome Annotation Through Large-Scale Analysis of RNA-Seq and Proteomics Data Sets." Molecular & Cellular Proteomics 18.1 (2019): 86-98.
 ## Contribution
 
 Contributions to the package are more than welcome. 
