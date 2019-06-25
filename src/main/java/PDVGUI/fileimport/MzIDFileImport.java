@@ -447,7 +447,7 @@ public class MzIDFileImport {
 
                 spectrumIdentificationItems = spectrumIdentificationResultType.getSpectrumIdentificationItem();
 
-                String allModificationString = "";
+                ArrayList<String> allModificationString = null;
                 for (SpectrumIdentificationItemType spectrumIdentificationItemType : spectrumIdentificationItems) {
 
                     rankNum++;
@@ -471,7 +471,7 @@ public class MzIDFileImport {
                     // get the modifications
                     utilitiesModifications = new ArrayList<>();
                     ArrayList<String> residues;
-                    allModificationString = "";
+                    allModificationString = new ArrayList<>();
 
                     if (peptideMap.get(peptideRef)[1] != null) {
                         modifications = (List<ModificationType>) peptideMap.get(peptideRef)[1];
@@ -548,17 +548,15 @@ public class MzIDFileImport {
                             }
 
                             utilitiesModifications.add(new ModificationMatch(modificationName, true, location));
-
-                            String wholeName = modificationName + "@" + location + "[" + df.format(monoMassDelta) + "]";
-                            allModificationString += wholeName + ";";
                         }
-                    }
-                    if (allModificationString.equals("")){
-                        allModificationString = "-";
                     }
 
                     // create the peptide
                     com.compomics.util.experiment.biology.Peptide peptide = new com.compomics.util.experiment.biology.Peptide(peptideSequence, utilitiesModifications);
+
+                    for (ModificationMatch modificationMatch : peptide.getModificationMatches()){
+                        allModificationString.add(modificationMatch.getTheoreticPtm());
+                    }
 
                     peptideAssumption = new PeptideAssumption(peptide, rank, 0, peptideCharge, massError, mzIDName);
 
@@ -609,13 +607,15 @@ public class MzIDFileImport {
                     bos.close();
                 }
 
+                String allModificationStringToString = allModificationString.toString().replace("[", "").replace("]","");
+
                 preparedStatement.setString(1, spectrumNumber);
                 preparedStatement.setDouble(2, experimentMZ);
                 preparedStatement.setString(3, spectrumTitle);
                 preparedStatement.setString(4, sequenceSaved);
                 preparedStatement.setDouble(5, Math.abs(massError));
                 preparedStatement.setBytes(6, bos.toByteArray());
-                preparedStatement.setString(7, allModificationString);
+                preparedStatement.setString(7, allModificationStringToString);
 
                 countParam = new ArrayList<>();
 
