@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
+import org.apache.commons.lang3.StringUtils;
+
 
 /**
  * Import mzIdentML file
@@ -552,7 +554,7 @@ public class MzIDFileImport {
 
                             utilitiesModifications.add(new ModificationMatch(modificationName, true, location));
                             if (rankNum == 1) {
-                                String wholeName = modificationName + "@" + location + "(" + df.format(monoMassDelta) + ")";
+                                String wholeName = modificationName + "@" + location + "[" + df.format(monoMassDelta) + "]";
                                 allModificationString.add(wholeName);
                             }
                         }
@@ -611,7 +613,11 @@ public class MzIDFileImport {
                     bos.close();
                 }
 
-                String allModificationStringToString = allModificationString.toString().replace("[", "").replace("]","");
+                //String allModificationStringToString = allModificationString.toString().replace("[", "").replace("]","");
+                String allModificationStringToString = "-";
+                if(allModificationString.size()>=1){
+                    allModificationStringToString = StringUtils.join(allModificationString,";");
+                }
 
                 preparedStatement.setString(1, spectrumNumber);
                 preparedStatement.setDouble(2, experimentMZ);
