@@ -676,7 +676,7 @@ public class PepXMLFileImport {
                             if (searchEngine.toLowerCase().contains("mascot")){ // scan number is wrong
                                 spectrumNativeID = spectrumTitle;
                             }   else {
-                                spectrumNativeID = "controllerType=0 controllerNumber=1 scan=" + scanNum;
+                                spectrumNativeID = "controllerType=0 controllerNumber=1 scan=" + scanNum; // Some results have different format.
                             }
                         }
                         spectrumIndex = spectrumIdAndNumber.get(spectrumNativeID);

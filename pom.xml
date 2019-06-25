@@ -5,7 +5,7 @@
     <groupId>PDV</groupId>
     <artifactId>PDV</artifactId>
     <packaging>jar</packaging>
-    <version>1.5.2</version>
+    <version>1.5.3</version>
     <name>PDV</name>
     <url>https://github.com/wenbostar/PDV</url>
     <description>An integrative proteomics viewer</description>

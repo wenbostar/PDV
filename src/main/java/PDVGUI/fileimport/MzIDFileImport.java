@@ -168,7 +168,6 @@ public class MzIDFileImport {
      */
     private ArrayList<String> getAllOtherPara(){
         ArrayList<String> scoreName = new ArrayList<>();
-
         try {
             for (SpectrumIdentificationListType spectrumIdentificationListType : mzIdentMLType.getDataCollection().getAnalysisData().getSpectrumIdentificationList()) {
 
@@ -912,6 +911,11 @@ public class MzIDFileImport {
      * @return ArrayList
      */
     public ArrayList<String> getScoreName(){
-        return scoreName;
+        ArrayList<String> newScore = new ArrayList<>();
+
+        newScore.add("Modification");
+        newScore.addAll(scoreName);
+
+        return newScore;
     }
 }
