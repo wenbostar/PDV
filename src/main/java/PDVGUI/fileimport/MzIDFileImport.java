@@ -447,7 +447,7 @@ public class MzIDFileImport {
 
                 spectrumIdentificationItems = spectrumIdentificationResultType.getSpectrumIdentificationItem();
 
-                ArrayList<String> allModificationString = null;
+                ArrayList<String> allModificationString = new ArrayList<>();
                 for (SpectrumIdentificationItemType spectrumIdentificationItemType : spectrumIdentificationItems) {
 
                     rankNum++;
@@ -471,10 +471,13 @@ public class MzIDFileImport {
                     // get the modifications
                     utilitiesModifications = new ArrayList<>();
                     ArrayList<String> residues;
-                    allModificationString = new ArrayList<>();
 
                     if (peptideMap.get(peptideRef)[1] != null) {
                         modifications = (List<ModificationType>) peptideMap.get(peptideRef)[1];
+
+                        if (rankNum == 1){
+                            allModificationString = new ArrayList<>();
+                        }
 
                         for (ModificationType modificationType : modifications) {
                             int location = modificationType.getLocation();
@@ -548,15 +551,15 @@ public class MzIDFileImport {
                             }
 
                             utilitiesModifications.add(new ModificationMatch(modificationName, true, location));
+                            if (rankNum == 1) {
+                                String wholeName = modificationName + "@" + location + "(" + df.format(monoMassDelta) + ")";
+                                allModificationString.add(wholeName);
+                            }
                         }
                     }
 
                     // create the peptide
                     com.compomics.util.experiment.biology.Peptide peptide = new com.compomics.util.experiment.biology.Peptide(peptideSequence, utilitiesModifications);
-
-                    for (ModificationMatch modificationMatch : peptide.getModificationMatches()){
-                        allModificationString.add(modificationMatch.getTheoreticPtm());
-                    }
 
                     peptideAssumption = new PeptideAssumption(peptide, rank, 0, peptideCharge, massError, mzIDName);
 
@@ -589,6 +592,7 @@ public class MzIDFileImport {
 
                         if (rankNum == 1) {
                             sequenceSaved = peptideAssumption.getPeptide().getSequence();
+
                             currentMatch.setBestPeptideAssumption(peptideAssumption);
                             abstractParamTypeList = spectrumIdentificationItemType.getParamGroup();//It is parameter of one SpectrumIdentificationItem seem as all score;
                         }

@@ -53,8 +53,18 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MzIDFileImport.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="818">
-              <caret line="549" column="95" selection-start-line="549" selection-start-column="95" selection-end-line="549" selection-end-column="95" />
+            <state relative-caret-position="294">
+              <caret line="478" column="70" selection-start-line="478" selection-start-column="70" selection-end-line="478" selection-end-column="70" />
+              <folding>
+                <element signature="e#42844#42845#0" expanded="true" />
+                <element signature="e#42883#42884#0" expanded="true" />
+                <element signature="e#43014#43015#0" expanded="true" />
+                <element signature="e#43050#43051#0" expanded="true" />
+                <element signature="e#43169#43170#0" expanded="true" />
+                <element signature="e#43203#43204#0" expanded="true" />
+                <element signature="e#43329#43330#0" expanded="true" />
+                <element signature="e#43368#43369#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -416,7 +426,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="slf4j&#9;PSI&#9;JAVA://javolution.osgi.internal.SLF4jLogServiceImpl" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1561436363324" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1561438154747" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.15" />
@@ -605,7 +615,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1920" height="1057" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.19062833" />
       <window_info id="Structure" order="1" weight="0.2468153" />
@@ -627,7 +636,7 @@
       <window_info anchor="bottom" id="Messages" order="10" weight="0.32227978" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Maven Projects" order="1" weight="0.23389022" />
-      <window_info anchor="right" id="Maven" order="2" weight="0.18051118" />
+      <window_info anchor="right" id="Maven" order="2" visible="true" weight="0.18051118" />
       <window_info anchor="right" id="Ant Build" order="3" weight="0.24920128" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="4" weight="0.25" />
       <window_info anchor="right" id="Palette" order="5" />
@@ -1119,8 +1128,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MzIDFileImport.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="818">
-          <caret line="549" column="95" selection-start-line="549" selection-start-column="95" selection-end-line="549" selection-end-column="95" />
+        <state relative-caret-position="294">
+          <caret line="478" column="70" selection-start-line="478" selection-start-column="70" selection-end-line="478" selection-end-column="70" />
+          <folding>
+            <element signature="e#42844#42845#0" expanded="true" />
+            <element signature="e#42883#42884#0" expanded="true" />
+            <element signature="e#43014#43015#0" expanded="true" />
+            <element signature="e#43050#43051#0" expanded="true" />
+            <element signature="e#43169#43170#0" expanded="true" />
+            <element signature="e#43203#43204#0" expanded="true" />
+            <element signature="e#43329#43330#0" expanded="true" />
+            <element signature="e#43368#43369#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
