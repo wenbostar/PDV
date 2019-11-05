@@ -302,25 +302,11 @@ public class MSDataDisplay extends JFrame {
                         .addComponent(mainJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
-        String motif;
-        String os = System.getProperty("os.name");
-        if(os.toLowerCase().startsWith("win")){
-            motif="com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
-        } else if (os.toLowerCase().startsWith("mac")){
-            motif="com.sun.java.swing.plaf.mac.MacLookAndFeel";
-        } else {
-            motif=UIManager.getSystemLookAndFeelClassName();
-        }
-
         try {
-            UIManager.setLookAndFeel(motif);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (UnsupportedLookAndFeelException e) {
+            String lookAndFeel = UIManager.getSystemLookAndFeelClassName();
+            UIManager.setLookAndFeel(lookAndFeel);
+            //UIManager.setLookAndFeel(motif);
+        } catch (ClassNotFoundException | InstantiationException | UnsupportedLookAndFeelException | IllegalAccessException e) {
             e.printStackTrace();
         }
         SwingUtilities.updateComponentTreeUI(this);

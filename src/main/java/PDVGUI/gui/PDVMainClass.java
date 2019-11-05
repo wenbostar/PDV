@@ -256,7 +256,7 @@ public class PDVMainClass extends JFrame {
     /**
      * Version
      */
-    private static final String VERSION = "1.5.3";
+    private static final String VERSION = "1.5.4";
 
     /**
      * Main class
@@ -2026,6 +2026,7 @@ public class PDVMainClass extends JFrame {
 
                     originalInfor = maxQuantFileImport.getOriginalInfor();
                     detailsList = maxQuantFileImport.getDetailsList();
+                    scoreName = maxQuantFileImport.getScoreName();
 
                     if (existMGF) {
                         maxQuantFileImport.getAllSpectrumRT(existMGF);
@@ -2047,10 +2048,8 @@ public class PDVMainClass extends JFrame {
                     orderName.add("PSMIndex");
                     orderName.add("MZ");
                     orderName.add("Sequence");
-                    orderName.add("MassError");
-                    orderName.add("Score");
-                    scoreName.add("Score");
-                    scoreName.add("Modification");
+                    orderName.add("MassError_ppm");
+                    orderName.addAll(scoreName);
                     setUpTableHeaderToolTips();
 
                     buttonCheck();

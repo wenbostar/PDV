@@ -166,6 +166,18 @@ public class MaxQuantFileImport {
      */
     private int scanIndexIndex =0;
     /**
+     * Index to name
+     */
+    private HashMap<Integer, String> indexToName = new HashMap<>();
+    /**
+     * Modification number index
+     */
+    HashMap<String, Integer> modificationNumIndex = new HashMap<>();
+    /**
+     * Modification position index
+     */
+    HashMap<String, Integer> modificationPosIndex = new HashMap<>();
+    /**
      * Fixed modification map
      */
     private HashMap<String, String> fixedModificationMap = new HashMap<>();
@@ -207,15 +219,16 @@ public class MaxQuantFileImport {
 
         sqLiteConnection = new SQLiteConnection(databasePath);
 
-        sqLiteConnection.setScoreNum(2);
-
         getAllFiles();
 
         try {
+            getParameters();
             parseParameters();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        sqLiteConnection.setScoreNum(1 + indexToName.size());
 
         new ImportUserMod();
     }
@@ -284,6 +297,7 @@ public class MaxQuantFileImport {
      */
     public void getAllSpectrumRT(Boolean existMGF) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new FileReader(scansDetailFile));
+        //BufferedReader bufferedReader = new BufferedReader(new FileReader(msResultFile));
 
         String line;
         String[] values;
@@ -791,6 +805,59 @@ public class MaxQuantFileImport {
     }
 
     /**
+     * Get all parameters
+     * @throws IOException
+     */
+    private void getParameters() throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(msResultFile));
+
+        int lineCount = 0;
+        String line;
+        String[] values;
+
+        while ((line = bufferedReader.readLine()) != null) {
+            values = line.split("\t");
+
+            if (lineCount == 0) {
+                for (int index = 0; index < values.length; index++) {
+                    if(values[index].equals("Raw file")){
+                        rawFileIndex = index;
+                    } else if(values[index].equals("Scan number")){
+                        scanNumIndex = index;
+                    } else if(values[index].equals("Scan index")){
+                        scanIndexIndex = index;
+                    } else if(values[index].equals("Retention time")){
+
+                    } else if(values[index].equals("Sequence")){
+                        sequenceIndex = index;
+                    } else if(values[index].equals("Modifications")){
+                        modificationIndex = index;
+                    } else if(values[index].equalsIgnoreCase("mass error [ppm]")){
+                        massErrorIndex = index;
+                    } else if(values[index].equals("Mass")){
+                        expMassIndex = index;
+                    } else if(values[index].equals("Modified sequence")){
+                        modificationSequenceIndex = index;
+                    } else if(values[index].equals("Score")){
+                        scoreIndex = index;
+                    } else if(values[index].equals("Charge")){
+                        chargeIndex = index;
+                    } else if (variedModifications.contains(values[index])){
+                        modificationNumIndex.put(values[index], index);
+                    } else if (values[index].contains("Probabilities")){
+                        modificationPosIndex.put(values[index].split(" Probabilities")[0], index);
+                    } else {
+                        indexToName.put(index, values[index].replaceAll("[^a-zA-Z]", ""));
+                    }
+                }
+            } else {
+                break;
+            }
+            lineCount ++;
+        }
+    }
+
+    /**
      * Parsing file
      * @throws SQLException
      * @throws IOException
@@ -801,7 +868,22 @@ public class MaxQuantFileImport {
 
         connection.setAutoCommit(false);
         Statement statement = connection.createStatement();
-        String matchTableQuery = "CREATE TABLE SpectrumMatch (PSMIndex INT(10), MZ DOUBLE, Title Char, Sequence Char, MassError DOUBLE, Match Object, Score DOUBLE, Modification Char, PRIMARY KEY(PSMIndex))";
+
+        HashMap<String, Integer> nameToDBIndex = new HashMap<>();
+        StringBuilder addQuery = new StringBuilder();
+        StringBuilder addValuesQuery = new StringBuilder("VALUES(?,?,?,?,?,?,?,?");
+        int countFirst = 0;
+        for (Integer index : indexToName.keySet()){
+            if (!indexToName.get(index).equalsIgnoreCase("mz")) {
+                countFirst++;
+                addQuery.append(", ").append(indexToName.get(index)).append(" OBJECT(50)");
+                addValuesQuery.append(",?");
+                nameToDBIndex.put(indexToName.get(index), 8 + countFirst);
+            }
+        }
+        addValuesQuery.append(")");
+
+        String matchTableQuery = "CREATE TABLE SpectrumMatch (PSMIndex INT(10), MZ DOUBLE, Title Char, Sequence Char, MassError_ppm DOUBLE, Match Object, Score DOUBLE, Modification Char" + addQuery + ", PRIMARY KEY(PSMIndex))";
 
         try {
             statement.execute(matchTableQuery);
@@ -813,7 +895,7 @@ public class MaxQuantFileImport {
             statement.close();
         }
 
-        String addDataIntoTable = "INSERT INTO SpectrumMatch VALUES(?,?,?,?,?,?,?,?)";
+        String addDataIntoTable = "INSERT INTO SpectrumMatch " + addValuesQuery;
         PreparedStatement preparedStatement = null;
 
         BufferedReader bufferedReader = new BufferedReader(new FileReader(msResultFile));
@@ -842,8 +924,6 @@ public class MaxQuantFileImport {
         Peptide peptide;
         Charge charge;
         ArrayList<String> residues;
-        HashMap<String, Integer> modificationNumIndex = new HashMap<>();
-        HashMap<String, Integer> modificationPosIndex = new HashMap<>();
         HashMap<Integer, Double> modIndexToPos;
         HashMap<String, Integer> onesilacLabelMap = new HashMap<>();
 
@@ -863,35 +943,6 @@ public class MaxQuantFileImport {
             values = line.split("\t");
 
             if (lineCount == 0) {
-                for (int index = 0; index < values.length; index++) {
-                    if(values[index].equals("Raw file")){
-                        rawFileIndex = index;
-                    } else if(values[index].equals("Scan number")){
-                        scanNumIndex = index;
-                    } else if(values[index].equals("Scan index")){
-                        scanIndexIndex = index;
-                    } else if(values[index].equals("Retention time")){
-
-                    } else if(values[index].equals("Sequence")){
-                        sequenceIndex = index;
-                    } else if(values[index].equals("Modifications")){
-                        modificationIndex = index;
-                    } else if(values[index].equals("Mass Error [ppm]")){
-                        massErrorIndex = index;
-                    } else if(values[index].equals("Mass")){
-                        expMassIndex = index;
-                    } else if(values[index].equals("Modified sequence")){
-                        modificationSequenceIndex = index;
-                    } else if(values[index].equals("Score")){
-                        scoreIndex = index;
-                    } else if(values[index].equals("Charge")){
-                        chargeIndex = index;
-                    } else if (variedModifications.contains(values[index])){
-                        modificationNumIndex.put(values[index], index);
-                    } else if (values[index].contains("Probabilities")){
-                        modificationPosIndex.put(values[index].split(" Probabilities")[0], index);
-                    }
-                }
             } else {
 
                 if (count == 0){
@@ -903,10 +954,10 @@ public class MaxQuantFileImport {
                 sequence = values[sequenceIndex];
                 modificationName = values[modificationIndex];
                 modificationSequence = values[modificationSequenceIndex];
-                if(values[massErrorIndex].contains(".")){
+                if(!values[massErrorIndex].toLowerCase().contains("na")){
                     massError = Double.valueOf(values[massErrorIndex]);
                 } else {
-                    massError = 0.0;
+                    massError = -1;
                 }
                 expMass = Double.parseDouble(values[expMassIndex]);
                 peptideCharge = Integer.valueOf(values[chargeIndex]);
@@ -1325,6 +1376,22 @@ public class MaxQuantFileImport {
                     preparedStatement.setBytes(6, bos.toByteArray());
                     preparedStatement.setDouble(7, score);
                     preparedStatement.setString(8, modificationName);
+
+                    int valuesLength = values.length;
+                    String value;
+                    for (Integer index : indexToName.keySet()){
+                        String name = indexToName.get(index);
+
+                        if (index >= valuesLength){
+                            value = "-";
+                        } else {
+                            value = values[index];
+                        }
+                        if (!name.equalsIgnoreCase("mz")) {
+                            preparedStatement.setString(nameToDBIndex.get(name), value);
+                        }
+
+                    }
                     
                     preparedStatement.addBatch();
 
@@ -1470,6 +1537,25 @@ public class MaxQuantFileImport {
     public SQLiteConnection getSqLiteConnection(){
         return sqLiteConnection;
     }
+
+    /**
+     * Return additional parameters
+     * @return ArrayList
+     */
+    public ArrayList<String> getScoreName(){
+
+        ArrayList<String> scoreName = new ArrayList<>();
+
+        scoreName.add("Score");
+        scoreName.add("Modification");
+
+        for (Integer index : indexToName.keySet()){
+            scoreName.add(indexToName.get(index));
+        }
+        scoreName.remove("mz");
+        return scoreName;
+    }
+
 
     /**
      * Return all modification

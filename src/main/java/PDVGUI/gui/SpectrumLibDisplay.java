@@ -2,6 +2,7 @@ package PDVGUI.gui;
 
 import PDVGUI.DB.SQLiteConnection;
 import PDVGUI.fileimport.FragePipeImport;
+import PDVGUI.fileimport.SpectrumLibraryMspImport;
 import PDVGUI.fileimport.SpectrumLibrarySplibImport;
 import PDVGUI.gui.utils.Export.ExportBatchDialog;
 import PDVGUI.gui.utils.Export.RealTimeExportJDialog;
@@ -129,7 +130,7 @@ public class SpectrumLibDisplay extends JFrame {
      * @param spectrumLibFilePath Spectrum library file path
      * @param searchParameters Search parameters
      */
-    public SpectrumLibDisplay(String spectrumLibFilePath, SearchParameters searchParameters, AnnotationSettings annotationSettings){
+    public SpectrumLibDisplay(String spectrumLibFilePath, SearchParameters searchParameters, AnnotationSettings annotationSettings, Boolean isSplib){
 
         this.searchParameters = searchParameters;
         this.annotationSettings = annotationSettings;
@@ -142,7 +143,11 @@ public class SpectrumLibDisplay extends JFrame {
 
         setVisible(true);
 
-        importSpectrumLib(spectrumLibFilePath);
+        if (isSplib) {
+            importSpectrumLib(spectrumLibFilePath);
+        } else {
+            importMsp(spectrumLibFilePath);
+        }
     }
 
     /**
@@ -159,8 +164,6 @@ public class SpectrumLibDisplay extends JFrame {
         psmJTable.getColumn("Charge").setMinWidth(50);
         psmJTable.getColumn("precursor m/z").setMaxWidth(150);
         psmJTable.getColumn("precursor m/z").setMinWidth(150);
-        psmJTable.getColumn("mass error").setMaxWidth(100);
-        psmJTable.getColumn("mass error").setMinWidth(100);
         psmJTable.getColumn("peaks num").setMaxWidth(100);
         psmJTable.getColumn("peaks num").setMinWidth(100);
         psmJTable.getColumn("Selected").setMinWidth(30);
@@ -171,9 +174,8 @@ public class SpectrumLibDisplay extends JFrame {
         psmJTableToolTips.add("Peptide sequence");
         psmJTableToolTips.add("Precursor m/z");
         psmJTableToolTips.add("Precursor charge");
-        psmJTableToolTips.add("Mass error");
         psmJTableToolTips.add("Peaks number");
-        psmJTableToolTips.add("Protein");
+        psmJTableToolTips.add("Comment");
     }
 
     /**
@@ -376,14 +378,13 @@ public class SpectrumLibDisplay extends JFrame {
         upJButton.setBorder(null);
         upJButton.setBorderPainted(false);
         upJButton.setContentAreaFilled(false);
-        buttonCheck();
+
         upJButton.addActionListener(this::upJButtonActionPerformed);
 
         nextJButton.setIcon(new ImageIcon(getClass().getResource("/icons/arrow_forward.png")));
         nextJButton.setBorder(null);
         nextJButton.setBorderPainted(false);
         nextJButton.setContentAreaFilled(false);
-        buttonCheck();
         nextJButton.addActionListener(this::nextJButtonActionPerformed);
 
         pageNumJTextField.setEditable(false);
@@ -391,6 +392,7 @@ public class SpectrumLibDisplay extends JFrame {
         pageNumJTextField.setBackground(Color.white);
         pageNumJTextField.setText(String.valueOf(selectedPageNum)+"/"+String.valueOf(allLibIDList.size()));
         pageNumJTextField.setHorizontalAlignment(SwingConstants.CENTER);
+        buttonCheck();
 
         pageSelectNumJTextField.setHorizontalAlignment(SwingConstants.CENTER);
         pageSelectNumJTextField.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -493,25 +495,11 @@ public class SpectrumLibDisplay extends JFrame {
                         .addComponent(mainJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
-        String motif;
-        String os = System.getProperty("os.name");
-        if(os.toLowerCase().startsWith("win")){
-            motif="com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
-        } else if (os.toLowerCase().startsWith("mac")){
-            motif="com.sun.java.swing.plaf.mac.MacLookAndFeel";
-        } else {
-            motif=UIManager.getSystemLookAndFeelClassName();
-        }
-
         try {
-            UIManager.setLookAndFeel(motif);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (UnsupportedLookAndFeelException e) {
+            String lookAndFeel = UIManager.getSystemLookAndFeelClassName();
+            UIManager.setLookAndFeel(lookAndFeel);
+            //UIManager.setLookAndFeel(motif);
+        } catch (ClassNotFoundException | InstantiationException | UnsupportedLookAndFeelException | IllegalAccessException e) {
             e.printStackTrace();
         }
         SwingUtilities.updateComponentTreeUI(this);
@@ -522,7 +510,7 @@ public class SpectrumLibDisplay extends JFrame {
     /**
      * Next and up button check
      */
-    private void buttonCheck(){
+    public void buttonCheck(){
 
         if (selectedPageNum == 1){
             upJButton.setEnabled(false);
@@ -530,7 +518,7 @@ public class SpectrumLibDisplay extends JFrame {
             upJButton.setEnabled(true);
         }
 
-        if(pageNumJTextField.getText().contains(String.valueOf(allLibIDList.size())+"/")){
+        if(pageNumJTextField.getText().contains(allLibIDList.size() +"/") || pageNumJTextField.getText().split("/")[0].equals(pageNumJTextField.getText().split("/")[1])){
             nextJButton.setEnabled(false);
         }else {
             nextJButton.setEnabled(true);
@@ -581,7 +569,7 @@ public class SpectrumLibDisplay extends JFrame {
                 }else {
                     pageSelectNumJTextField.setBackground(Color.WHITE);
                     selectedPageNum = Integer.parseInt(pageSelectNumJTextField.getText());
-                    pageNumJTextField.setText(String.valueOf(selectedPageNum)+"/"+String.valueOf(allLibIDList.size()));
+                    pageNumJTextField.setText(selectedPageNum +"/"+ allLibIDList.size());
                     buttonCheck();
 
                     updatePSMJTable();
@@ -614,7 +602,7 @@ public class SpectrumLibDisplay extends JFrame {
         }
 
         int value = JOptionPane.showConfirmDialog(this,
-                "Do you want to give up " + " and close PDV" + "?",
+                "Do you want to close PDV" + "?",
                 "Close PDV",
                 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 
@@ -970,6 +958,46 @@ public class SpectrumLibDisplay extends JFrame {
                     sqLiteConnection = spectrumLibrarySplibImport.getSqLiteConnection();
 
                     dbName = spectrumLibrarySplibImport.getDbName();
+                    buttonCheck();
+
+                } catch ( SQLException | ClassNotFoundException e) {
+                    progressDialog.setRunFinished();
+                    e.printStackTrace();
+                }
+            }
+        }.start();
+    }
+
+    /**
+     * Import spectrum library
+     */
+    private void importMsp(String spectrumLibFilePath){
+
+        ProgressDialogX progressDialog = new ProgressDialogX(this,
+                Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMass.png")),
+                Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMassWait.png")),
+                true);
+        progressDialog.setPrimaryProgressCounterIndeterminate(true);
+        progressDialog.setTitle("Loading Results. Please Wait...");
+
+        new Thread(() -> {
+            try {
+                progressDialog.setVisible(true);
+            } catch (IndexOutOfBoundsException ignored) {
+            }
+        }, "ProgressDialog").start();
+        new Thread("DisplayThread") {
+            @Override
+            public void run() {
+
+                SpectrumLibraryMspImport spectrumLibraryMspImport;
+                try {
+                    spectrumLibraryMspImport = new SpectrumLibraryMspImport(new File(spectrumLibFilePath), SpectrumLibDisplay.this, progressDialog);
+
+                    sqLiteConnection = spectrumLibraryMspImport.getSqLiteConnection();
+
+                    dbName = spectrumLibraryMspImport.getDbName();
+                    buttonCheck();
 
                 } catch ( SQLException | ClassNotFoundException e) {
                     progressDialog.setRunFinished();
@@ -1070,7 +1098,7 @@ public class SpectrumLibDisplay extends JFrame {
 
         @Override
         public int getColumnCount() {
-            return 8;
+            return 7;
         }
 
         @Override
@@ -1087,11 +1115,9 @@ public class SpectrumLibDisplay extends JFrame {
             }else if(column == 4){
                 return "Charge";
             }else if(column == 5){
-                return "mass error";
-            }else if(column == 6){
                 return "peaks num";
-            }else if(column == 7){
-                return "protein";
+            }else if(column == 6){
+                return "comment";
             }
 
             return "";
@@ -1107,7 +1133,7 @@ public class SpectrumLibDisplay extends JFrame {
 
                     ArrayList<Object> oneItem = selectedItem.get(row);
 
-                    SpectrumMatch spectrumMatch = (SpectrumMatch) oneItem.get(4);
+                    SpectrumMatch spectrumMatch = (SpectrumMatch) oneItem.get(3);
                     Peptide peptide = spectrumMatch.getBestPeptideAssumption().getPeptide();
 
                     switch (column){
@@ -1122,18 +1148,10 @@ public class SpectrumLibDisplay extends JFrame {
                         case 4:
                             return oneItem.get(1);
                         case 5:
-                            return oneItem.get(3);
-                        case 6:
                             return oneItem.get(2);
-                        case 7:
-                            ArrayList<String> proteinList = (ArrayList<String>) oneItem.get(6);
-                            StringBuilder allProteins = new StringBuilder();
-                            for (String protein : proteinList){
-                                 allProteins.append(protein);
-                                 allProteins.append(" ");
-                            }
+                        case 6:
+                            return oneItem.get(5);
 
-                            return allProteins.toString();
                     }
                 }
 

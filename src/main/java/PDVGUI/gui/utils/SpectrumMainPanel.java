@@ -64,6 +64,7 @@ public class SpectrumMainPanel extends JPanel {
     private JCheckBoxMenuItem immoniumIonsCheckMenuItem;
     private JCheckBoxMenuItem relatedIonsCheckMenuItem;
     private JCheckBoxMenuItem reporterIonsCheckMenuItem;
+    private JCheckBoxMenuItem glyconsCheckMenuItem;
     private JCheckBoxMenuItem defaultLossCheckBoxMenuItem;
     private JCheckBoxMenuItem showAllPeaksMenuItem;
     private JCheckBoxMenuItem forwardIonsDeNovoCheckBoxMenuItem;
@@ -432,6 +433,7 @@ public class SpectrumMainPanel extends JPanel {
         rewardYIonCheckBoxMenuItem = new JCheckBoxMenuItem();
         rewardZIonCheckBoxMenuItem = new JCheckBoxMenuItem();
         precursorCheckMenuItem = new JCheckBoxMenuItem();
+        glyconsCheckMenuItem = new JCheckBoxMenuItem();
         immoniumIonsCheckMenuItem = new JCheckBoxMenuItem();
         relatedIonsCheckMenuItem = new JCheckBoxMenuItem();
         reporterIonsCheckMenuItem = new JCheckBoxMenuItem();
@@ -524,6 +526,13 @@ public class SpectrumMainPanel extends JPanel {
         reporterIonsCheckMenuItem.setFont(menuFont);
         reporterIonsCheckMenuItem.addActionListener(this::reporterIonsCheckMenuItemAction);
         otherMenu.add(reporterIonsCheckMenuItem);
+
+        glyconsCheckMenuItem.setSelected(true);
+        glyconsCheckMenuItem.setText("Glycon");
+        glyconsCheckMenuItem.setFont(menuFont);
+        glyconsCheckMenuItem.addActionListener(this::glyconsCheckMenuItemAction);
+        otherMenu.add(glyconsCheckMenuItem);
+
 
         annotationMenuBar.add(otherMenu);
 
@@ -902,6 +911,15 @@ public class SpectrumMainPanel extends JPanel {
      * @param evt Mouse click event
      */
     private void reporterIonsCheckMenuItemAction(ActionEvent evt) {
+        noSelectDefaultAnnotationMenuItem();
+        updateSpectrum();
+    }
+
+    /**
+     * glyconsCheckMenuItemAction
+     * @param evt Mouse click event
+     */
+    private void glyconsCheckMenuItemAction(ActionEvent evt) {
         noSelectDefaultAnnotationMenuItem();
         updateSpectrum();
     }
@@ -1957,6 +1975,7 @@ public class SpectrumMainPanel extends JPanel {
         immoniumIonsCheckMenuItem.setSelected(false);
         relatedIonsCheckMenuItem.setSelected(false);
         reporterIonsCheckMenuItem.setSelected(false);
+        glyconsCheckMenuItem.setSelected(false);
 
         for (JCheckBoxMenuItem lossMenuItem : lossMenuMap.values()) {
             lossMenu.remove(lossMenuItem);
@@ -2081,6 +2100,8 @@ public class SpectrumMainPanel extends JPanel {
                     case REPORTER_ION:
                         reporterIonsCheckMenuItem.setSelected(true);
                         break;
+                    case GLYCAN:
+                        glyconsCheckMenuItem.setSelected(true);
                     case TAG_FRAGMENT_ION:
                         for (int subtype : ionTypes.get(ionType)) {
                             switch (subtype) {
@@ -2178,6 +2199,9 @@ public class SpectrumMainPanel extends JPanel {
                 for (int subtype : reporterIons) {
                     specificAnnotationSettings.addIonType(REPORTER_ION, subtype);
                 }
+            }
+            if (glyconsCheckMenuItem.isSelected()){
+                specificAnnotationSettings.addIonType(GLYCAN);
             }
 
             if (!defaultLossCheckBoxMenuItem.isSelected()) {

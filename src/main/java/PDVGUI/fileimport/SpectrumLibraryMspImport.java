@@ -6,38 +6,24 @@ import com.compomics.util.experiment.biology.Peptide;
 import com.compomics.util.experiment.identification.matches.ModificationMatch;
 import com.compomics.util.experiment.identification.matches.SpectrumMatch;
 import com.compomics.util.experiment.identification.spectrum_assumptions.PeptideAssumption;
-import com.compomics.util.experiment.massspectrometry.*;
+import com.compomics.util.experiment.massspectrometry.Charge;
+import com.compomics.util.experiment.massspectrometry.MSnSpectrum;
+import com.compomics.util.experiment.massspectrometry.Peak;
+import com.compomics.util.experiment.massspectrometry.Precursor;
 import com.compomics.util.gui.waiting.waitinghandlers.ProgressDialogX;
 
 import javax.swing.*;
 import java.io.*;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-/**
- * Import spectrum library
- * Created by Ken on 9/12/2017.
- */
-public class SpectrumLibrarySplibImport {
-    
-    /**
-     * SPTXT file
-     */
-    private File sptxtFile;
-    /**
-     * Database connection
-     */
-    private SQLiteConnection sqLiteConnection;
-    /**
-     * Mass error
-     */
-    private Double massError;
-    /**
-     * Protein list
-     */
-    private ArrayList<String> proteinList;
+public class SpectrumLibraryMspImport {
+
     /**
      * parent class
      */
@@ -47,30 +33,36 @@ public class SpectrumLibrarySplibImport {
      */
     private ProgressDialogX progressDialog;
     /**
-     * Databse name
-     */
-    private String dbName;
-    /**
      * All modifications
      */
     private ArrayList<String> allModifications = new ArrayList<>();
+    /**
+     * msp file
+     */
+    private File mspFile;
+    /**
+     * Database connection
+     */
+    private SQLiteConnection sqLiteConnection;
+    /**
+     * Databse name
+     */
+    private String dbName;
 
     /**
      * Constructor
-     * @param sptxtFile Spectrum library file path
+     * @param mspFile Spectrum library file path
      * @param spectrumLibDisplay Parent class
      * @param progressDialog Progress dialog
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public SpectrumLibrarySplibImport(File sptxtFile, SpectrumLibDisplay spectrumLibDisplay, ProgressDialogX progressDialog)
-            throws SQLException, ClassNotFoundException {
-
-        this.sptxtFile = sptxtFile;
+    public SpectrumLibraryMspImport(File mspFile, SpectrumLibDisplay spectrumLibDisplay, ProgressDialogX progressDialog) throws SQLException, ClassNotFoundException {
+        this.mspFile = mspFile;
         this.spectrumLibDisplay = spectrumLibDisplay;
         this.progressDialog = progressDialog;
-        
-        dbName = sptxtFile.getAbsolutePath() +".db";
+
+        dbName = mspFile.getAbsolutePath() + ".db";
 
         File dbFile = new File(dbName);
         File dbJournalFile = new File(dbName + "-journal");
@@ -87,7 +79,7 @@ public class SpectrumLibrarySplibImport {
             @Override
             public void run() {
                 try {
-                    pareseFile();
+                    parseFile();
                 } catch (Exception e) {
                     progressDialog.setRunFinished();
                     JOptionPane.showMessageDialog(
@@ -97,24 +89,13 @@ public class SpectrumLibrarySplibImport {
                 }
             }
         }.start();
+
     }
 
-    /**
-     * Return database name
-     * @return String
-     */
-    public String getDbName(){
-        return dbName;
-    }
-    
-    /**
-     * Parsing file
-     * @throws IOException
-     * @throws SQLException
-     */
-    private void pareseFile() throws IOException, SQLException {
+    private void parseFile() throws IOException, SQLException {
 
-        BufferedReader bufferedReader = new BufferedReader(new FileReader(sptxtFile));
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(mspFile));
+
 
         Connection connection = sqLiteConnection.getConnection();
 
@@ -135,57 +116,55 @@ public class SpectrumLibrarySplibImport {
         String readLine;
 
         String name = "";
-        Integer libID = 0;
         Integer charge;
         String mW;
         Double precursorMZ = 0.0;
-        String status;
-        String fullName;
         String comment = "";
         Integer numPeaks = 0;
         String[] peaks;
+        PreparedStatement preparedStatement = null;
 
         MSnSpectrum currentSpectrum;
         SpectrumMatch currentSpectrumMatch;
-        PreparedStatement preparedStatement = null;
-        ArrayList<String> libIDList = new ArrayList<>();
-
         ArrayList<Double> mzList = new ArrayList<>();
         ArrayList<Double> intensityList = new ArrayList<>();
+        ArrayList<String> libIDList = new ArrayList<>();
 
+        Integer libID = 0;
         Integer countRound = 0;
         Integer countImport = 0;
+        Integer peakCount = 1;
 
-        while ((readLine = bufferedReader.readLine()) != null){
+        while ((readLine=bufferedReader.readLine()) != null){
+
 
             if(countRound == 0){
                 String addDataIntoTable = "INSERT INTO SpectrumMatch VALUES(?,?,?,?,?,?,?)";
                 preparedStatement = connection.prepareStatement(addDataIntoTable);
             }
 
-            if(readLine.contains("###")){
-
-            } else if (readLine.split(": ")[0].equals("Name")){
+            if (readLine.split(": ")[0].equalsIgnoreCase("name")){
                 name = readLine.split(": ")[1];
-            } else if (readLine.split(": ")[0].equals("LibID")){
-                libID = Integer.valueOf(readLine.split(": ")[1]);
-                libIDList.add(String.valueOf(libID));
-            } else if (readLine.split(": ")[0].equals("MW")){
-                mW = readLine.split(": ")[1];
-            } else if (readLine.split(": ")[0].equals("PrecursorMZ")){
+            } else if (readLine.split(": ")[0].equalsIgnoreCase("mw")){
                 precursorMZ = Double.valueOf(readLine.split(": ")[1]);
-            } else if (readLine.split(": ")[0].equals("Status")){
-                status = readLine.split(": ")[1];
-            } else if (readLine.split(": ")[0].equals("FullName")){
-                fullName = readLine.split(": ")[1];
-            } else if (readLine.split(": ")[0].equals("Comment")){
+            } else if (readLine.split(": ")[0].equalsIgnoreCase("comment")){
                 comment = readLine.split(": ")[1];
-            } else if (readLine.split(": ")[0].equals("NumPeaks")){
-                numPeaks = Integer.valueOf(readLine.split(": ")[1]);
-            } else if (readLine.equals("")){
+            } else if (readLine.split(": ")[0].equalsIgnoreCase("num peaks")){
+                numPeaks = Integer.valueOf(readLine.split(": ")[1]) + 1;
+            } else {
+                peaks = readLine.split("\t");
+                mzList.add(Double.valueOf(peaks[0]));
+                intensityList.add(Double.valueOf(peaks[1]));
+                peakCount ++;
 
+            }
+
+            if (peakCount.equals(numPeaks)){
+                libID ++;
+                peakCount = 1;
                 countRound ++;
 
+                libIDList.add(String.valueOf(libID));
                 currentSpectrum = getSpectrum(mzList, intensityList, name, libID, precursorMZ);
                 currentSpectrumMatch = getSpectrumMatch(name, comment, precursorMZ, libID);
 
@@ -194,7 +173,7 @@ public class SpectrumLibrarySplibImport {
                 preparedStatement.setInt(1, libID);
                 preparedStatement.setDouble(2, precursorMZ);
                 preparedStatement.setInt(3, charge);
-                preparedStatement.setInt(4, numPeaks);
+                preparedStatement.setInt(4, numPeaks - 1);
 
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 try {
@@ -237,7 +216,7 @@ public class SpectrumLibrarySplibImport {
                         spectrumLibDisplay.pageNumJTextField.setText(1 + "/" + 1);
                         progressDialog.setRunFinished();
                     } else {
-                        spectrumLibDisplay.pageNumJTextField.setText(String.valueOf(spectrumLibDisplay.selectedPageNum) + "/" + String.valueOf(spectrumLibDisplay.allLibIDList.size()));
+                        spectrumLibDisplay.pageNumJTextField.setText(spectrumLibDisplay.selectedPageNum + "/" + spectrumLibDisplay.allLibIDList.size());
                         spectrumLibDisplay.buttonCheck();
                     }
 
@@ -248,12 +227,11 @@ public class SpectrumLibrarySplibImport {
 
                 mzList = new ArrayList<>();
                 intensityList = new ArrayList<>();
-            } else {
-                peaks = readLine.split("\t");
-                mzList.add(Double.valueOf(peaks[0]));
-                intensityList.add(Double.valueOf(peaks[1]));
             }
+
+
         }bufferedReader.close();
+
 
         if(countRound != 0){
             int[] counts = preparedStatement.executeBatch();
@@ -271,6 +249,8 @@ public class SpectrumLibrarySplibImport {
                 spectrumLibDisplay.buttonCheck();
             }
         }
+
+
     }
 
     /**
@@ -354,6 +334,14 @@ public class SpectrumLibrarySplibImport {
     }
 
     /**
+     * Return database name
+     * @return String
+     */
+    public String getDbName(){
+        return dbName;
+    }
+
+    /**
      * Return SQLiteConnection
      * @return SQLiteConnection
      */
@@ -368,4 +356,5 @@ public class SpectrumLibrarySplibImport {
     public ArrayList<String> getAllModifications(){
         return allModifications;
     }
+
 }

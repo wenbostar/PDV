@@ -56,6 +56,10 @@ public class SpectrumLibImportDialog extends JDialog {
      * LastSelectedFolder for opening easily
      */
     private String lastSelectedFolder;
+    /**
+     * Is sptxt or msp file
+     */
+    private Boolean isSplib = true;
 
     /**
      * Constructor
@@ -316,7 +320,7 @@ public class SpectrumLibImportDialog extends JDialog {
             pdvStart.setVisible(false);
         }
 
-        new SpectrumLibDisplay(spectrumLibResultFilePath, searchParameters, annotationPreferences);
+        new SpectrumLibDisplay(spectrumLibResultFilePath, searchParameters, annotationPreferences, isSplib);
     }
 
     /**
@@ -347,12 +351,13 @@ public class SpectrumLibImportDialog extends JDialog {
             @Override
             public boolean accept(File myFile) {
                 return myFile.getName().toLowerCase().endsWith(".sptxt")
+                        || myFile.getName().toLowerCase().endsWith(".msp")
                         || myFile.isDirectory();
             }
 
             @Override
             public String getDescription() {
-                return "spectrum library txt file .sptxt";
+                return "spectrum library txt file .sptxt, .msp";
             }
         };
 
@@ -363,6 +368,12 @@ public class SpectrumLibImportDialog extends JDialog {
         if (returnValue == JFileChooser.APPROVE_OPTION) {
 
             File selectedFile = fileChooser.getSelectedFile();
+
+            if (selectedFile.getName().toLowerCase().endsWith(".sptxt")){
+                isSplib = true;
+            } else {
+                isSplib = false;
+            }
 
             spectrumLibResultFilePath = selectedFile.getAbsolutePath();
 

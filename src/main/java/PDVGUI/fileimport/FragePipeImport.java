@@ -220,6 +220,7 @@ public class FragePipeImport {
 
         String matchTableQuery = "CREATE TABLE SpectrumMatch (PSMIndex INT(10), MZ DOUBLE, Title Char, Sequence Char, MassError DOUBLE, Match Object, Spectrum Object" + addQuery + ", PRIMARY KEY(PSMIndex))";
 
+
         try {
             statement.execute(matchTableQuery);
         }catch (SQLException e){
@@ -576,6 +577,7 @@ public class FragePipeImport {
 
                     columnName = "'" + columnName + "'";
                 }
+                columnName = columnName.replaceAll("[^a-zA-Z0-9]", "");
                 indexToName.put(i, columnName);
             }
         }

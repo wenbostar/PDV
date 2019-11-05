@@ -120,9 +120,8 @@ public class SQLiteConnection {
             oneItem.add(rs1.getDouble(2));
             oneItem.add(rs1.getInt(3));
             oneItem.add(rs1.getInt(4));
-            oneItem.add(rs1.getDouble(5));
             Blob tempBlob;
-            byte[] bytes = rs1.getBytes(6);
+            byte[] bytes = rs1.getBytes(5);
             tempBlob = new SerialBlob(bytes);
             BufferedInputStream bis = new BufferedInputStream(tempBlob.getBinaryStream());
             try {
@@ -144,7 +143,7 @@ public class SQLiteConnection {
             oneItem.add(spectrumMatch);
 
             Blob scoreBlob;
-            byte[] scoreBytes = rs1.getBytes(7);
+            byte[] scoreBytes = rs1.getBytes(6);
             scoreBlob = new SerialBlob(scoreBytes);
             BufferedInputStream scoreBis = new BufferedInputStream(scoreBlob.getBinaryStream());
             try {
@@ -165,28 +164,7 @@ public class SQLiteConnection {
             }
             oneItem.add(spectrum);
 
-            ArrayList<String> proteinList = new ArrayList<>();
-            Blob proteinBlob;
-            byte[] proteinBytes = rs1.getBytes(8);
-            proteinBlob = new SerialBlob(proteinBytes);
-            BufferedInputStream proteinBis = new BufferedInputStream(proteinBlob.getBinaryStream());
-            try {
-                ObjectInputStream in = new ObjectInputStream(proteinBis);
-                try {
-                    proteinList = (ArrayList<String>) in.readObject();
-                } finally {
-                    in.close();
-                }
-            } catch (ClassNotFoundException | IOException e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    proteinBis.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            oneItem.add(proteinList);
+            oneItem.add(rs1.getString(7));
 
 
         } rs1.close();
