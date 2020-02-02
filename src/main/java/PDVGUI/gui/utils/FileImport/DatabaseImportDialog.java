@@ -608,10 +608,13 @@ public class DatabaseImportDialog extends JDialog {
                             if (singleFile.getName().toLowerCase().endsWith(".mgf")){
                                 spectrumFileType = "mgf";
                                 spectrumFiles.add(singleFile);
+                                fileToType.put(newFile, "mgf");
                             } else if (singleFile.getName().toLowerCase().endsWith(".mzml")){
+                                spectrumFileType = "mzml";
                                 fileToType.put(singleFile, "mzml");
                                 spectrumFiles.add(singleFile);
                             } else if (singleFile.getName().toLowerCase().endsWith(".mzxml")){
+                                spectrumFileType = "mzxml";
                                 fileToType.put(singleFile, "mzxml");
                                 spectrumFiles.add(singleFile);
                             }
@@ -623,6 +626,7 @@ public class DatabaseImportDialog extends JDialog {
                     if(newFile.getName().toLowerCase().endsWith(".mgf")){
                         spectrumFileType = "mgf";
                         spectrumFiles.add(newFile);
+                        fileToType.put(newFile, "mgf");
                     }else if(newFile.getName().toLowerCase().endsWith(".mzml")){
                         spectrumFileType = "mzml";
                         spectrumFiles.add(newFile);
@@ -1026,7 +1030,7 @@ public class DatabaseImportDialog extends JDialog {
             } else if (selectedIndex == 0){
                 pdvMainClass.importTextResults(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType);
             } else if (selectedIndex == 2){
-                pdvMainClass.importFragPipe(fileToType, idFile);
+                pdvMainClass.importFragPipe(fileToType, idFile, spectrumFileType);
             }
             idFile = null;
         } else if (idFile.getName().toLowerCase().endsWith(".dat")){

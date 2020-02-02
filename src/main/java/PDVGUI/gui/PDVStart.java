@@ -705,7 +705,7 @@ public class PDVStart extends JDialog {
 
         firstPartJPanel.removeAll();
 
-        JLabel singlePeptideJLabel = new JLabel("<html>Visualize a single PSM. Import a peptide sequence and an MS/MS spectrum in MGF format.</html>");
+        JLabel singlePeptideJLabel = new JLabel("<html>Visualize a single PSM. Import a peptide sequence and a USI or an MS/MS spectrum in MGF format.</html>");
 
         singlePeptideJLabel.setFont(new Font("simsun", Font.ITALIC, 12));
 

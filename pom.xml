@@ -5,7 +5,7 @@
     <groupId>PDV</groupId>
     <artifactId>PDV</artifactId>
     <packaging>jar</packaging>
-    <version>1.5.4</version>
+    <version>1.6.0</version>
     <name>PDV</name>
     <url>https://github.com/wenbostar/PDV</url>
     <description>An integrative proteomics viewer</description>
@@ -287,6 +287,18 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.5</version>
         </dependency>
+        <dependency>
+            <groupId>org.reactome.server.tools</groupId>
+            <artifactId>analysis-core</artifactId>
+            <version>3.3.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.json/json -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20190722</version>
+        </dependency>
+
 
     </dependencies>
 

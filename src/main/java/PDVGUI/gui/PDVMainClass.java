@@ -256,7 +256,7 @@ public class PDVMainClass extends JFrame {
     /**
      * Version
      */
-    private static final String VERSION = "1.5.4";
+    private static final String VERSION = "1.6.0";
 
     /**
      * Main class
@@ -1662,7 +1662,7 @@ public class PDVMainClass extends JFrame {
      * @param fileToType File to file type
      * @param idFile Result file
      */
-    public void importFragPipe(HashMap<File, String> fileToType, File idFile){
+    public void importFragPipe(HashMap<File, String> fileToType, File idFile, String spectrumFileType){
 
         this.isFrage = true;
 
@@ -1689,7 +1689,7 @@ public class PDVMainClass extends JFrame {
 
                 try {
 
-                    fragePipeImport = new FragePipeImport(fileToType, idFile, progressDialog, PDVMainClass.this);
+                    fragePipeImport = new FragePipeImport(fileToType, idFile, progressDialog, spectrumFileType, PDVMainClass.this);
 
                     sqliteConnection = fragePipeImport.getSqLiteConnection();
                     allModifications = fragePipeImport.getAllModifications();

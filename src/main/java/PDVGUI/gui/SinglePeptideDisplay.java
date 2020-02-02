@@ -11,9 +11,7 @@ import com.compomics.util.experiment.identification.matches.ModificationMatch;
 import com.compomics.util.experiment.identification.matches.SpectrumMatch;
 import com.compomics.util.experiment.identification.spectrum_annotation.AnnotationSettings;
 import com.compomics.util.experiment.identification.spectrum_assumptions.PeptideAssumption;
-import com.compomics.util.experiment.massspectrometry.Charge;
-import com.compomics.util.experiment.massspectrometry.MSnSpectrum;
-import com.compomics.util.experiment.massspectrometry.SpectrumFactory;
+import com.compomics.util.experiment.massspectrometry.*;
 import com.compomics.util.gui.JOptionEditorPane;
 import com.compomics.util.gui.filehandling.TempFilesManager;
 import com.compomics.util.gui.renderers.AlignedListCellRenderer;
@@ -22,6 +20,7 @@ import com.compomics.util.gui.waiting.waitinghandlers.ProgressDialogX;
 import com.compomics.util.preferences.DigestionPreferences;
 import com.compomics.util.preferences.LastSelectedFolder;
 import com.compomics.util.preferences.UtilitiesUserPreferences;
+import org.json.JSONArray;
 import uk.ac.ebi.jmzml.xml.io.MzMLUnmarshallerException;
 
 import javax.swing.*;
@@ -30,7 +29,12 @@ import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.util.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import org.json.JSONObject;
 
 /**
  * Single peptide check
@@ -43,11 +47,16 @@ public class SinglePeptideDisplay extends JFrame {
     private MSnSpectrum currentSpectrum;
     private PeptideAssumption peptideAssumption;
     private JPanel inputJPanel;
+    private JPanel spectrumJPanel;
     private JPanel peptideSequenceJPanel;
     private JScrollPane peptideSequenceJScrollPane;
     private JLabel spectrumFileJLabel;
+    private JComboBox spectrumSourceBox;
     private JLabel peptideSequenceJLabel;
     private JTextField spectrumFileJText;
+    private JButton spectrumFileJButton;
+    private JTextField usiIDJText;
+    private JButton getUSIJButton;
     private JTextField peptideSequenceJText;
     private JButton startJButton;
     private JPanel spectrumAnnotationMenuPanel;
@@ -136,6 +145,8 @@ public class SinglePeptideDisplay extends JFrame {
         spectrumAnnotationMenuPanel.add(annotationMenuBar);
         this.precursorIonUnit.setEnabled(true);
         this.precursorIonUnit.setRenderer(new AlignedListCellRenderer(0));
+        this.spectrumSourceBox.setEnabled(true);
+        this.spectrumSourceBox.setRenderer(new AlignedListCellRenderer(0));
     }
 
     /**
@@ -146,20 +157,24 @@ public class SinglePeptideDisplay extends JFrame {
         peptideSequenceJPanel = new JPanel();
         peptideSequenceJScrollPane = new JScrollPane();
         spectrumAnnotationMenuPanel = new JPanel();
+        spectrumJPanel = new JPanel();
         spectrumShowJPanel = new JPanel();
         spectrumFileJLabel = new JLabel();
         peptideSequenceJLabel = new JLabel();
         spectrumFileJText = new JTextField();
         peptideSequenceJText = new JTextField();
         startJButton = new JButton();
+        usiIDJText = new JTextField();
+        getUSIJButton = new JButton();
         precursorIonUnit = new JComboBox();
+        spectrumSourceBox = new JComboBox();
         fragmentIonAccuracyTxt = new JTextField();
         annotationMenuBar = new JMenuBar();
         switchPaneMenu = new JMenu();
 
         JPanel mainJPanel = new JPanel();
         JToolBar allJToolBar = new JToolBar();
-        JButton spectrumFileJButton = new JButton();
+        spectrumFileJButton = new JButton();
         JLabel fragmentIonLbl = new JLabel();
         JMenuBar menuBar = new JMenuBar();
         JMenu fileJMenu = new JMenu();
@@ -216,9 +231,12 @@ public class SinglePeptideDisplay extends JFrame {
         inputJPanel.setOpaque(false);
         inputJPanel.setBackground(Color.white);
 
-        spectrumFileJLabel.setText("Spectrum File(s) *");
+        spectrumFileJLabel.setText("Spectrum File *");
         spectrumFileJLabel.setFont(new Font("Console", Font.PLAIN, 12));
         spectrumFileJLabel.setForeground(new Color(255, 0, 0));
+
+        spectrumSourceBox.setModel(new DefaultComboBoxModel(new String[]{"MGF", "USI"}));
+        spectrumSourceBox.addItemListener(this::spectrumSourceBoxMouseClicked);
 
         spectrumFileJText.setEditable(false);
         spectrumFileJText.setHorizontalAlignment(SwingConstants.CENTER);
@@ -228,6 +246,15 @@ public class SinglePeptideDisplay extends JFrame {
         spectrumFileJButton.setBorderPainted(false);
         spectrumFileJButton.setContentAreaFilled(false);
         spectrumFileJButton.addActionListener(this::spectrumFileJButtonActionPerformed);
+
+        usiIDJText.setEditable(true);
+        usiIDJText.setHorizontalAlignment(SwingConstants.CENTER);
+
+        getUSIJButton.setIcon(new ImageIcon(getClass().getResource("/icons/search.png")));
+        getUSIJButton.setBorder(null);
+        getUSIJButton.setBorderPainted(false);
+        getUSIJButton.setContentAreaFilled(false);
+        getUSIJButton.addActionListener(this::getUSIJButtonActionPerformed);
 
         peptideSequenceJLabel.setText("Peptide *");
         peptideSequenceJLabel.setFont(new Font("Console", Font.PLAIN, 12));
@@ -254,6 +281,33 @@ public class SinglePeptideDisplay extends JFrame {
         peptideSequenceJScrollPane.setVisible(false);
         peptideSequenceJScrollPane.setToolTipText("Click the amino acid to select modification");
 
+        spectrumJPanel.setBackground(Color.white);
+        spectrumJPanel.setOpaque(false);
+        GroupLayout spectrumJPanelLayout = new GroupLayout(spectrumJPanel);
+        spectrumJPanel.setLayout(spectrumJPanelLayout);
+
+        spectrumJPanelLayout.setHorizontalGroup(
+                spectrumJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(spectrumJPanelLayout.createSequentialGroup()
+                                .addComponent(spectrumFileJLabel, 150, 150, 150)
+                                .addGap(30, 30, 30)
+                                .addComponent(spectrumSourceBox, 90, 90, 90)
+                                .addComponent(spectrumFileJText, GroupLayout.DEFAULT_SIZE, 280, 600)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(spectrumFileJButton)
+                                .addGap(20, 50, 100))
+        );
+        spectrumJPanelLayout.setVerticalGroup(
+                spectrumJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(spectrumJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                                .addComponent(spectrumFileJLabel)
+                                .addComponent(spectrumSourceBox, 20, 30 ,30)
+                                .addComponent(spectrumFileJText, 20, 30 ,30)
+                                .addComponent(spectrumFileJButton, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))
+        );
+
+
+
         GroupLayout inputJPanelLayout  = new GroupLayout(inputJPanel);
         inputJPanel.setLayout(inputJPanelLayout);
 
@@ -261,12 +315,7 @@ public class SinglePeptideDisplay extends JFrame {
                 inputJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(inputJPanelLayout.createSequentialGroup()
                                 .addGap(21,21,21)
-                                .addGroup(inputJPanelLayout.createSequentialGroup()
-                                        .addComponent(spectrumFileJLabel, 150, 150, 200)
-                                        .addComponent(spectrumFileJText, GroupLayout.DEFAULT_SIZE, 280, 600)
-                                        .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(spectrumFileJButton)
-                                        .addGap(20, 50, 100))
+                                .addComponent(spectrumJPanel)
                                 .addGroup(inputJPanelLayout.createSequentialGroup()
                                         .addComponent(peptideSequenceJLabel, 150, 150, 200)
                                         .addComponent(peptideSequenceJText,  GroupLayout.DEFAULT_SIZE, 150, 600))
@@ -275,10 +324,11 @@ public class SinglePeptideDisplay extends JFrame {
                         .addGroup(inputJPanelLayout.createSequentialGroup()
                                 .addGap(21,21,21)
                                 .addGroup(inputJPanelLayout.createSequentialGroup()
-                                        .addComponent(fragmentIonLbl, 100, 150, 200)
-                                        .addComponent(fragmentIonAccuracyTxt, 30, 30, 50)
-                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(precursorIonUnit, GroupLayout.DEFAULT_SIZE, 50, 70))
+                                        .addComponent(fragmentIonLbl, 150, 150, 150)
+                                        .addGap(30, 30, 30)
+                                        .addComponent(precursorIonUnit, 90, 90, 90)
+                                        //.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(fragmentIonAccuracyTxt, GroupLayout.DEFAULT_SIZE, 50, 70))
                                 .addGap(10, 150, 500)
                                 .addGap(20, 50, 200)
                                 .addGroup(inputJPanelLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
@@ -288,17 +338,14 @@ public class SinglePeptideDisplay extends JFrame {
                                 .addGap(21,21,21))
         );
 
-        inputJPanelLayout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {spectrumFileJLabel, fragmentIonLbl, peptideSequenceJLabel});
+        //inputJPanelLayout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {spectrumFileJLabel, fragmentIonLbl, peptideSequenceJLabel});
 
         inputJPanelLayout.setVerticalGroup(
                 inputJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(inputJPanelLayout.createSequentialGroup()
                                 .addGap(15,15,15)
                                 .addGroup(inputJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addGroup(inputJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
-                                                .addComponent(spectrumFileJLabel)
-                                                .addComponent(spectrumFileJText, 20, 30 ,30)
-                                                .addComponent(spectrumFileJButton, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(spectrumJPanel)
                                         .addGroup(inputJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
                                                 .addComponent(peptideSequenceJLabel)
                                                 .addComponent(peptideSequenceJText, 20, 30 ,30)))
@@ -377,6 +424,184 @@ public class SinglePeptideDisplay extends JFrame {
         );
 
         pack();
+    }
+
+    /**
+     * Modification selections
+     * @param evt Item event
+     */
+    private void spectrumSourceBoxMouseClicked(ItemEvent evt) {
+
+        String selectedSource = String.valueOf(spectrumSourceBox.getSelectedItem());
+
+        if (spectrumSourceBox.getSelectedIndex() == 0){
+
+            spectrumJPanel.removeAll();
+            GroupLayout spectrumJPanelLayout = new GroupLayout(spectrumJPanel);
+            spectrumJPanel.setLayout(spectrumJPanelLayout);
+
+            spectrumJPanelLayout.setHorizontalGroup(
+                    spectrumJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                            .addGroup(spectrumJPanelLayout.createSequentialGroup()
+                                    .addComponent(spectrumFileJLabel, 150, 150, 150)
+                                    .addGap(30, 30, 30)
+                                    .addComponent(spectrumSourceBox, 90, 90, 90)
+                                    .addComponent(spectrumFileJText, GroupLayout.DEFAULT_SIZE, 280, 600)
+                                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addComponent(spectrumFileJButton)
+                                    .addGap(20, 50, 100))
+            );
+            spectrumJPanelLayout.setVerticalGroup(
+                    spectrumJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                            .addGroup(spectrumJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                                    .addComponent(spectrumFileJLabel)
+                                    .addComponent(spectrumSourceBox, 20, 30 ,30)
+                                    .addComponent(spectrumFileJText, 20, 30 ,30)
+                                    .addComponent(spectrumFileJButton, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))
+            );
+
+        } else {
+
+            spectrumJPanel.removeAll();
+            GroupLayout spectrumJPanelLayout = new GroupLayout(spectrumJPanel);
+            spectrumJPanel.setLayout(spectrumJPanelLayout);
+
+            spectrumJPanelLayout.setHorizontalGroup(
+                    spectrumJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                            .addGroup(spectrumJPanelLayout.createSequentialGroup()
+                                    .addComponent(spectrumFileJLabel, 150, 150, 150)
+                                    .addGap(30, 30, 30)
+                                    .addComponent(spectrumSourceBox, 90, 90, 90)
+                                    .addComponent(usiIDJText, GroupLayout.DEFAULT_SIZE, 280, 600)
+                                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addComponent(getUSIJButton)
+                                    .addGap(20, 50, 100))
+            );
+            spectrumJPanelLayout.setVerticalGroup(
+                    spectrumJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                            .addGroup(spectrumJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                                    .addComponent(spectrumFileJLabel)
+                                    .addComponent(spectrumSourceBox, 20, 30 ,30)
+                                    .addComponent(usiIDJText, 20, 30 ,30)
+                                    .addComponent(getUSIJButton, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))
+            );
+
+        }
+    }
+
+    private void getUSIJButtonActionPerformed(ActionEvent evt){
+
+        String usiID;
+
+        if(!usiIDJText.getText().equals("") && usiIDJText.getText() != null){
+            usiID = usiIDJText.getText();
+
+            System.out.println(usiID);
+
+            ProgressDialogX progressDialogX = new ProgressDialogX(this,
+                    Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMass.png")),
+                    Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMassWait.png")),
+                    true);
+            progressDialogX.setPrimaryProgressCounterIndeterminate(true);
+            progressDialogX.setTitle("Searching. Please Wait...");
+
+            new Thread(() -> {
+                try {
+                    progressDialogX.setVisible(true);
+                } catch (IndexOutOfBoundsException ignored) {
+                }
+            }, "searchProgressDialog").start();
+
+            new Thread("Searching") {
+                @Override
+                public void run() {
+                    try {
+                        String url = "http://proteomecentral.proteomexchange.org/api/proxi/v0.1/spectra?resultType=compact&usi=" + usiID+"&format=json";
+                        URL obj = new URL(url);
+
+                        int charge = 2;
+                        double precursorMZ = 0.0;
+
+                        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+                        // optional default is GET
+                        con.setRequestMethod("GET");
+                        //add request header
+                        con.setRequestProperty("User-Agent", "Mozilla/5.0");
+                        int responseCode = con.getResponseCode();
+
+                        if (responseCode == 200){
+                            System.out.println("\nSending 'GET' request to URL : " + url);
+                            System.out.println("Response Code : " + responseCode);
+                            BufferedReader in = new BufferedReader(
+                                    new InputStreamReader(con.getInputStream()));
+                            String inputLine;
+                            StringBuilder response = new StringBuilder();
+
+                            while ((inputLine = in.readLine()) != null) {
+                                response.append(inputLine);
+                            }
+                            response.deleteCharAt(0);
+                            response.deleteCharAt(response.length() - 1);
+                            in.close();
+
+                            JSONObject jsonObject = new JSONObject(response.toString());
+                            JSONArray mzs = jsonObject.getJSONArray("mzs");
+                            JSONArray intensities = jsonObject.getJSONArray("intensities");
+                            JSONArray attributes = jsonObject.getJSONArray("attributes");
+
+                            for (Object eachAttribute : attributes){
+                                JSONObject jsonAttribute = (JSONObject) eachAttribute;
+                                if (jsonAttribute.getString("accession").equals("MS:1000041")){
+                                    charge = Integer.parseInt(jsonAttribute.getString("value"));
+                                } else if (jsonAttribute.getString("accession").equals("MS:1000744")){
+                                    precursorMZ = Double.parseDouble((jsonAttribute.getString("value")));
+                                }
+                            }
+
+                            ArrayList<Charge> charges = new ArrayList<>();
+                            Charge charge1 = new Charge(1, charge);
+                            charges.add(charge1);
+                            Precursor precursor = new Precursor(0, precursorMZ, 0, charges);
+                            generateSpectrum(mzs, intensities, precursor);
+
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Can not find this spectrum, \n Please check your USI ID.",
+                                    "Warning", JOptionPane.WARNING_MESSAGE);
+                        }
+
+                        progressDialogX.setRunFinished();
+                        //System.out.println(response.toString());
+                    } catch (MalformedURLException e) {
+                        progressDialogX.setRunFinished();
+                        e.printStackTrace();
+                    } catch (ProtocolException e) {
+                        progressDialogX.setRunFinished();
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        progressDialogX.setRunFinished();
+                        e.printStackTrace();
+                    }
+                }
+            }.start();
+
+        } else {
+            JOptionPane.showMessageDialog(null, "Please input valid USI ID.",
+                    "Warning", JOptionPane.WARNING_MESSAGE);
+        }
+
+    }
+
+    private void generateSpectrum(JSONArray mzs, JSONArray intensities, Precursor precursor){
+
+        HashMap<Double, Peak> peakMap = new HashMap<>();
+        for(int i = 0; i<mzs.length(); i++){
+            Peak peak = new Peak(mzs.getDouble(i), intensities.getDouble(i));
+            peakMap.put(mzs.getDouble(i), peak);
+        }
+
+        currentSpectrum = new MSnSpectrum(2, precursor, "1", peakMap, "test");
+
+        validateInput();
     }
 
     /**
@@ -742,10 +967,12 @@ public class SinglePeptideDisplay extends JFrame {
         peptideAssumption = new PeptideAssumption(peptide, 1, 1, new Charge(1,1), 0, null);
 
         try {
-            spectrumFactory.addSpectra(spectrumFile);
-            spectrumTitle = spectrumFactory.getSpectrumTitles(spectrumFile.getName());
-            currentSpectrum = (MSnSpectrum) spectrumFactory.getSpectrum(spectrumFile.getName(), spectrumTitle.get(0));
+            if (spectrumSourceBox.getSelectedIndex() == 0){
+                spectrumFactory.addSpectra(spectrumFile);
+                spectrumTitle = spectrumFactory.getSpectrumTitles(spectrumFile.getName());
+                currentSpectrum = (MSnSpectrum) spectrumFactory.getSpectrum(spectrumFile.getName(), spectrumTitle.get(0));
 
+            }
             int charge = currentSpectrum.getPrecursor().getPossibleCharges().get(0).value;
 
             peptideAssumption.setIdentificationCharge(new Charge(1, charge));
@@ -797,6 +1024,10 @@ public class SinglePeptideDisplay extends JFrame {
             spectrumFileJText.setToolTipText("Please select the spectrum file");
             spectrumFileJText.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
             allValid = false;
+        }
+
+        if (currentSpectrum != null){
+            allValid = true;
         }
 
         if(peptideSequence != null && peptideSequence.length() != 0 && !peptideSequence.contains(" ")){
