@@ -1,9 +1,9 @@
-# PDV: an integrative proteomics data viewer
+# [PDV](https://doi.org/10.1093/bioinformatics/bty770): an integrative proteomics data viewer
 
 [![Join the chat at https://gitter.im/PDV-public/Lobby](https://badges.gitter.im/PDV-public/Lobby.svg)](https://gitter.im/PDV-public/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) ![Downloads](https://img.shields.io/github/downloads/wenbostar/PDV/total.svg) ![Release](https://img.shields.io/github/release/wenbostar/PDV.svg)
 
 
-PDV is a lightweight visualization tool that enables intuitive and fast exploration of diverse, large-scale proteomics datasets in different formats on standard desktop computers in both graphical user interface and command line modes. One of the most important functions of PDV is to visualize peptide identification results from different search engines and generate high quality annotated spectra for publication.
+[PDV](https://doi.org/10.1093/bioinformatics/bty770) is a lightweight visualization tool that enables intuitive and fast exploration of diverse, large-scale proteomics datasets in different formats on standard desktop computers in both graphical user interface and command line modes. One of the most important functions of [PDV](https://doi.org/10.1093/bioinformatics/bty770) is to visualize peptide identification results from different search engines and generate high quality annotated spectra for publication.
 
 
 [<img src="https://github.com/wenbostar/PDV/blob/master/resources/PDV_main_panel.png" width=600 class="center">](https://doi.org/10.1093/bioinformatics/bty770)
