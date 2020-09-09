@@ -74,14 +74,6 @@ public class MaxQuantFileImport {
      */
     private HashMap<String, Integer> fileToCountMap = new HashMap<>();
     /**
-     * All spectrum matches
-     */
-    private HashMap<Integer, SpectrumMatch> allSpectrumMatches = new HashMap<>();
-    /**
-     * Spectrum title to rank
-     */
-    private HashMap<Integer, Integer> spectrumTitleToRank = new HashMap<>();
-    /**
      * All modification files
      */
     private ArrayList<File> modificationFiles = new ArrayList<>();
@@ -557,9 +549,14 @@ public class MaxQuantFileImport {
 
                             } else if (line.startsWith("header")) {
 
-                                spectrumTitle = line.split(" Precursor")[0].split("=")[1];
-                                spectrumFileName = spectrumTitle.split(" ")[1];
-                                scanNum = spectrumTitle.split(" ")[3];
+                                if (line.contains("Precursor")){
+                                    spectrumTitle = line.split(" Precursor")[0].split("=")[1];
+                                } else {
+                                    spectrumTitle = line.split(" Silind")[0].split("=")[1];
+                                }
+
+                                spectrumFileName = spectrumTitle.split("RawFile: ")[1].split(" Index")[0];
+                                scanNum = spectrumTitle.split("RawFile: ")[1].split(" Index: ")[1];
 
                                 currentScanNumList = fileNameToScanNum.get(spectrumFileName);
 
@@ -847,7 +844,7 @@ public class MaxQuantFileImport {
                     } else if (values[index].contains("Probabilities")){
                         modificationPosIndex.put(values[index].split(" Probabilities")[0], index);
                     } else {
-                        indexToName.put(index, values[index].replaceAll("[^a-zA-Z]", ""));
+                        indexToName.put(index, values[index].replaceAll("[^a-zA-Z0-9]", ""));
                     }
                 }
             } else {
@@ -912,10 +909,12 @@ public class MaxQuantFileImport {
         double expMass;
         double theroticMass;
         int peptideCharge;
+        int rank;
         double massError;
         double spectrumMass;
         String silacLabel = "";
-        Double score;
+        double score;
+        double bestScore;
         String utilitiesModificationName;
         String[] splitAABy;
         String[] modifications;
@@ -926,6 +925,8 @@ public class MaxQuantFileImport {
         ArrayList<String> residues;
         HashMap<Integer, Double> modIndexToPos;
         HashMap<String, Integer> onesilacLabelMap = new HashMap<>();
+        HashMap<String, Double> spectrumTitleBestScore = new HashMap<>();
+        HashSet<String> spectrumTitles = new HashSet<>(); // HashSet is faster than array list
 
         ArrayList<String> spectrumList = new ArrayList<>();
         ArrayList<Integer> variableIndex;
@@ -950,6 +951,7 @@ public class MaxQuantFileImport {
                 }
 
                 utilitiesModifications = new ArrayList<>();
+                rank = 1;
 
                 sequence = values[sequenceIndex];
                 modificationName = values[modificationIndex];
@@ -969,88 +971,22 @@ public class MaxQuantFileImport {
                 spectrumTitle = "RawFile: " + rawFileName + " Index: " + scanNumber + " Charge: " + peptideCharge;
                 spectrumMass = spectrumFactory.getPrecursor(rawFileName + ".mgf", spectrumTitle).getMz() * peptideCharge;
 
-                if(spectrumTitleToRank.containsKey(scanIndex)){
-                    int rank = spectrumTitleToRank.get(scanIndex) + 1;
-                    spectrumTitleToRank.put(scanIndex, rank);
+                currentMatch = new SpectrumMatch(Spectrum.getSpectrumKey(rawFileName+".mgf", spectrumTitle));
+                currentMatch.setSpectrumNumber(scanIndex);
 
-                    currentMatch = allSpectrumMatches.get(scanIndex);
-
-                } else{
-                    spectrumTitleToRank.put(scanIndex, 1);
-
-                    currentMatch = new SpectrumMatch(Spectrum.getSpectrumKey(rawFileName+".mgf", spectrumTitle));
-                    currentMatch.setSpectrumNumber(scanIndex);
-                    allSpectrumMatches.put(scanIndex, currentMatch);
-                }
                 variableIndex = new ArrayList<>();
                 variableTerm = new ArrayList<>();
 
                 try {
                     if (!modificationName.equals("Unmodified")) {
-                        /*
-                        for (ArrayList<String> eachList : msIDSToModificationFileToEachSite.keySet()){
-                            if (eachList.contains(String.valueOf(lineCount - 1))){
-                                fileNameToIDs = msIDSToModificationFileToEachSite.get(eachList);
-
-                                for (String fileName : fileNameToIDs.keySet()) {
-                                    for (String eachID : fileNameToIDs.get(fileName)) {
-                                        Integer site = Integer.valueOf(fileNameToPositionList.get(fileName).get(Integer.parseInt(eachID)));
-                                        String modSeq = fileNameToSeqList.get(fileName).get(Integer.parseInt(eachID));
-                                        if (! modSeq.equals(sequence)) {
-                                            if (modSeq.length() > sequence.length()) {
-                                                if (modSeq.contains(sequence)){
-                                                    site = site - modSeq.split(sequence)[0].length();
-                                                } else {
-                                                    String origin = "";
-                                                    for (int i = 0; i < sequence.length(); i++) {
-                                                        for (int j = sequence.length(); j > i; j--) {
-                                                            String s3 = sequence.substring(i, j);
-                                                            if (modSeq.contains(s3)) {
-                                                                if (s3.length() > origin.length()){
-                                                                    origin = s3;
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                    site = site - modSeq.split(origin)[0].length() + sequence.split(origin)[0].length();
-                                                }
-                                            } else {
-                                                if (sequence.contains(modSeq)){
-                                                    site = site + sequence.split(modSeq)[0].length();
-                                                } else {
-                                                    String origin = "";
-                                                    for (int i = 0; i < modSeq.length(); i++) {
-                                                        for (int j = modSeq.length(); j > i; j--) {
-                                                            String s3 = modSeq.substring(i, j);
-                                                            if (sequence.contains(s3)) {
-                                                                if (s3.length() > origin.length()){
-                                                                    origin = s3;
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                    site = site - modSeq.split(origin)[0].length() + sequence.split(origin)[0].length();
-                                                }
-                                            }
-                                        }
-                                        utilitiesModificationName = fileName.split(" \\(")[0].replace(">","&gt;") + " of " + sequence.charAt(site - 1);
-
-                                        utilitiesModifications.add(new ModificationMatch(utilitiesModificationName, true, site));
-                                        if (!allModifications.contains(utilitiesModificationName)) {
-                                            allModifications.add(utilitiesModificationName);
-                                        }
-                                    }
-                                }
-                            }
-                        } */
 
                         for (String modName : modificationNumIndex.keySet()){
 
-                            Integer modNumIndex = modificationNumIndex.get(modName);
+                            int modNumIndex = modificationNumIndex.get(modName);
 
-                            Integer modNum = Integer.valueOf(values[modNumIndex]);
+                            int modNum = Integer.valueOf(values[modNumIndex]);
 
-                            Integer modPosIndex = modificationPosIndex.get(modName);
+                            int modPosIndex = modificationPosIndex.get(modName);
 
                             String modPosSequence = values[modPosIndex];
 
@@ -1060,7 +996,7 @@ public class MaxQuantFileImport {
 
                                 String[] firstSplitList = modPosSequence.split("\\)");
 
-                                Integer accumPosition = 0;
+                                int accumPosition = 0;
                                 String splitSequence;
                                 Double splitPos;
 
@@ -1230,7 +1166,7 @@ public class MaxQuantFileImport {
                         if (!variableIndex.contains(index)) {
                             utilitiesModificationName = fixedModificationMap.get(aa) + " of " + aa;
                             utilitiesModifications.add(new ModificationMatch(utilitiesModificationName, true, index + 1));
-                        } else {
+                        } /** else {
                             if (Math.abs(expMass - spectrumMass) > 10) {
                                 residues = new ArrayList<>();
                                 residues.add(aa);
@@ -1248,11 +1184,11 @@ public class MaxQuantFileImport {
                                        if (!allModifications.contains(combinedName)) {
                                            allModifications.add(combinedName);
                                        }
-                                       utilitiesModifications.add(new ModificationMatch(combinedName, true, index + 1));
+                                       addModifications.add(new ModificationMatch(combinedName, true, index + 1));
                                    }
                                 }
                             }
-                        }
+                        }**/
                     }
                 }
 
@@ -1260,7 +1196,7 @@ public class MaxQuantFileImport {
 
                 charge = new Charge(+1, peptideCharge);
 
-                peptideAssumption = new PeptideAssumption(peptide, spectrumTitleToRank.get(scanIndex), 0, charge, massError, "maxQuant");
+                peptideAssumption = new PeptideAssumption(peptide, rank, 0, charge, massError, "maxQuant");
                 peptideAssumption.setRawScore(score);
                 theroticMass = peptideAssumption.getTheoreticMass();
 
@@ -1349,10 +1285,10 @@ public class MaxQuantFileImport {
 
                 currentMatch.addHit(0, peptideAssumption, false);
 
-                if(spectrumTitleToRank.get(scanIndex) == 1){
+                if(rank == 1){
                     currentMatch.setBestPeptideAssumption(peptideAssumption);
 
-                    spectrumList.add(String.valueOf(scanIndex));
+                    spectrumList.add(String.valueOf(lineCount));
 
                     bos = new ByteArrayOutputStream();
                     try {
@@ -1368,7 +1304,7 @@ public class MaxQuantFileImport {
 
                     modificationName = modificationName + silacLabel;
 
-                    preparedStatement.setInt(1, scanIndex);
+                    preparedStatement.setInt(1, lineCount);
                     preparedStatement.setDouble(2, peptideAssumption.getTheoreticMass());
                     preparedStatement.setString(3, spectrumTitle);
                     preparedStatement.setString(4, sequence);

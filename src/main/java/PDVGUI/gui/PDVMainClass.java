@@ -256,7 +256,7 @@ public class PDVMainClass extends JFrame {
     /**
      * Version
      */
-    private static final String VERSION = "1.6.0";
+    private static final String VERSION = "1.6.1";
 
     /**
      * Main class
@@ -3251,13 +3251,13 @@ public class PDVMainClass extends JFrame {
      */
     private void columnSelectionJMenuItemActionPerformed(ActionEvent evt){
         ArrayList<String> columnName = new ArrayList<>();
-        if (!isDenovo){
-            columnName.add("Other Assumption");
-        } else {
+        if (isDenovo) {
             columnName.add("#Peaks");
             columnName.add("N-Gap");
             columnName.add("C-Gap");
             columnName.add("Score");
+        } else if(!isFrage){
+            columnName.add("Other Assumption");
         }
         columnName.addAll(scoreName);
         if(columnToSelected == null){

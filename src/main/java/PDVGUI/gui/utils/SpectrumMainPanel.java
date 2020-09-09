@@ -2,6 +2,7 @@ package PDVGUI.gui.utils;
 
 import PDVGUI.gui.*;
 import PDVGUI.gui.utils.Export.ExportExpectedSizeDialog;
+import PDVGUI.gui.utils.Export.ExportMGFDialog;
 import com.compomics.util.experiment.biology.*;
 import com.compomics.util.experiment.biology.ions.PeptideFragmentIon;
 import com.compomics.util.experiment.biology.ions.TagFragmentIon;
@@ -241,7 +242,7 @@ public class SpectrumMainPanel extends JPanel {
 
         this.parentFrame = prideXMLDisplay;
 
-        annotationSettings.setFragmentIonAccuracy(0.5);
+        annotationSettings.setFragmentIonAccuracy(0.05);
 
         SpectrumPanel.setIonColor(Ion.getGenericIon(Ion.IonType.PEPTIDE_FRAGMENT_ION, 1), new Color(0, 153, 0));
         SpectrumPanel.setIonColor(Ion.getGenericIon(Ion.IonType.PEPTIDE_FRAGMENT_ION, 4), new Color(255, 102, 0));
@@ -271,7 +272,7 @@ public class SpectrumMainPanel extends JPanel {
 
         this.parentFrame = spectrumLibDisplay;
 
-        annotationSettings.setFragmentIonAccuracy(0.5);
+        annotationSettings.setFragmentIonAccuracy(0.05);
 
         SpectrumPanel.setIonColor(Ion.getGenericIon(Ion.IonType.PEPTIDE_FRAGMENT_ION, 1), new Color(0, 153, 0));
         SpectrumPanel.setIonColor(Ion.getGenericIon(Ion.IonType.PEPTIDE_FRAGMENT_ION, 4), new Color(255, 102, 0));
@@ -300,7 +301,7 @@ public class SpectrumMainPanel extends JPanel {
 
         this.parentFrame = singlePeptideDisplay;
 
-        annotationSettings.setFragmentIonAccuracy(0.5);
+        annotationSettings.setFragmentIonAccuracy(0.05);
 
         SpectrumPanel.setIonColor(Ion.getGenericIon(Ion.IonType.PEPTIDE_FRAGMENT_ION, 1), new Color(0, 153, 0));
         SpectrumPanel.setIonColor(Ion.getGenericIon(Ion.IonType.PEPTIDE_FRAGMENT_ION, 4), new Color(255, 102, 0));
@@ -329,7 +330,7 @@ public class SpectrumMainPanel extends JPanel {
 
         this.parentFrame = pdvMainClass;
 
-        annotationSettings.setFragmentIonAccuracy(0.5);
+        annotationSettings.setFragmentIonAccuracy(0.05);
 
         SpectrumPanel.setIonColor(Ion.getGenericIon(Ion.IonType.PEPTIDE_FRAGMENT_ION, 1), new Color(0, 153, 0));
         SpectrumPanel.setIonColor(Ion.getGenericIon(Ion.IonType.PEPTIDE_FRAGMENT_ION, 4), new Color(255, 102, 0));
@@ -382,13 +383,13 @@ public class SpectrumMainPanel extends JPanel {
         JRadioButtonMenuItem deNovoChargeTwoJRadioButtonMenuItem = new JRadioButtonMenuItem();
         JMenuItem annotationSettingsJMenuItem = new JMenuItem();
         JMenuItem exportSpectrumGraphicsJMenuItem = new JMenuItem();
+        JMenuItem exportSpectrumMGFJMenuItem = new JMenuItem();
         JMenuItem showSpectrumJMenuItem = new JMenuItem();
         JMenuItem showIonTableJMenuItem = new JMenuItem();
         JMenuItem showMirrorJMenuItem = new JMenuItem();
         JMenuItem checkFileMenuItem = new JMenuItem();
         JMenuItem checkPeptideMenuItem = new JMenuItem();
         JMenuItem showCheckPeptideJMenuItem = new JMenuItem();
-        JMenu exportSpectrumMenu = new JMenu();
         JMenu splitterMenu1 = new JMenu();
         JMenu splitterMenu2 = new JMenu();
         JMenu splitterMenu3 = new JMenu();
@@ -635,15 +636,16 @@ public class SpectrumMainPanel extends JPanel {
         exportGraphicsMenu.setFont(menuFont);
         exportGraphicsMenu.setEnabled(false);
 
-        exportSpectrumMenu.setText("Figure");
-        exportSpectrumMenu.setFont(menuFont);
-
         exportSpectrumGraphicsJMenuItem.setText("Spectra");
         exportSpectrumGraphicsJMenuItem.setFont(menuFont);
         exportSpectrumGraphicsJMenuItem.addActionListener(this::exportSpectrumGraphicsJMenuItemActionPerformed);
-        exportSpectrumMenu.add(exportSpectrumGraphicsJMenuItem);
+
+        exportSpectrumMGFJMenuItem.setText("MGF");
+        exportSpectrumMGFJMenuItem.setFont(menuFont);
+        exportSpectrumMGFJMenuItem.addActionListener(this::exportSpectrumMGFJMenuItemActionPerformed);
 
         exportGraphicsMenu.add(exportSpectrumGraphicsJMenuItem);
+        exportGraphicsMenu.add(exportSpectrumMGFJMenuItem);
 
         annotationMenuBar.add(exportGraphicsMenu);
 
@@ -1038,6 +1040,27 @@ public class SpectrumMainPanel extends JPanel {
     }
 
     /**
+     * ExportSpectrumGraphicsJMenuItemActionPerformed
+     * @param evt Mouse click event
+     */
+    private void exportSpectrumMGFJMenuItemActionPerformed(ActionEvent evt) {
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if(mirrorSelected){
+            //exportMirrorSpectrumAsFigure(); @ Will do, output mirror mgf
+            exportSpectrumAsMGF();
+        } else if(peptideCheckSelected){
+            //exportCheckSpectrumAsFigure();
+            exportSpectrumAsMGF();
+        } else {
+            exportSpectrumAsMGF();
+        }
+    }
+
+    /**
      * Update the export exacted size dialog
      */
     public void updateExportJDialog(){
@@ -1048,6 +1071,22 @@ public class SpectrumMainPanel extends JPanel {
         } else {
             exportSpectrumAsFigure();
         }
+    }
+
+    /**
+     * Export current spectrum as MGF
+     */
+    private void exportSpectrumAsMGF(){
+        PeptideAssumption peptideAssumption = (PeptideAssumption) spectrumIdentificationAssumption;
+        Peptide currentPeptide = peptideAssumption.getPeptide();
+        String modSequence = currentPeptide.getTaggedModifiedSequence(searchParameters.getPtmSettings(), false, false, false, false);
+
+        String spectrumTitle = currentSpectrum.getSpectrumTitle();
+        MSnSpectrum outputSpectrum = currentSpectrum;
+        outputSpectrum.setSpectrumTitle(spectrumTitle + " " + modSequence);
+
+        ExportMGFDialog exportMGFDialog = new ExportMGFDialog(this, spectrumTitle, outputSpectrum.asMgf());
+
     }
 
     /**
@@ -1340,6 +1379,7 @@ public class SpectrumMainPanel extends JPanel {
 
         int maxCharge = 1;
         ArrayList<ModificationMatch> allModifications = new ArrayList<>();
+        ArrayList<ModificationMatch> checkPeptideModificationMatches = new ArrayList<>();
 
         try {
             if (currentSpectrum != null) {
@@ -1657,11 +1697,7 @@ public class SpectrumMainPanel extends JPanel {
 
                         ArrayList<ModificationMatch> checkModifications = peptide.getModificationMatches();
 
-                        for (ModificationMatch modificationMatch : checkModifications){
-                            if (!allModifications.contains(modificationMatch)){
-                                allModifications.add(modificationMatch);
-                            }
-                        }
+                        checkPeptideModificationMatches.addAll(checkModifications);
 
                         String checkModSequence = peptide.getTaggedModifiedSequence(searchParameters.getPtmSettings(), false, false, false, false);
 
@@ -1744,7 +1780,7 @@ public class SpectrumMainPanel extends JPanel {
                     spectrumShowPanel.revalidate();
                     spectrumShowPanel.repaint();
 
-                    updateAnnotationMenus(maxCharge, allModifications);
+                    updateAnnotationMenus(maxCharge, allModifications, checkPeptideModificationMatches);
                 }
             }
 
@@ -1962,7 +1998,7 @@ public class SpectrumMainPanel extends JPanel {
      * @param precursorCharge Precursor charges
      * @param modificationMatches Modification matches list
      */
-    private void updateAnnotationMenus(int precursorCharge, ArrayList<ModificationMatch> modificationMatches) {
+    private void updateAnnotationMenus(int precursorCharge, ArrayList<ModificationMatch> modificationMatches, ArrayList<ModificationMatch> checkPeptideModificationMatches) {
 
         forwardAIonCheckBoxMenuItem.setSelected(false);
         forwardBIonCheckBoxMenuItem.setSelected(false);
@@ -1991,6 +2027,15 @@ public class SpectrumMainPanel extends JPanel {
         }
 
         for (ModificationMatch modificationMatch : modificationMatches) {
+
+            NeutralLoss neutralLoss = getPhosphyNeutralLoss(modificationMatch);
+
+            if (neutralLoss != null){
+                neutralLossHashMap.put(neutralLoss.name, neutralLoss);
+            }
+        }
+
+        for (ModificationMatch modificationMatch : checkPeptideModificationMatches) {
 
             NeutralLoss neutralLoss = getPhosphyNeutralLoss(modificationMatch);
 

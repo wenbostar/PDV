@@ -439,7 +439,7 @@ public class TextFileImport {
                             break;
                             //Do nothing
                         default:
-                            indexToName.put(index, values[index].replaceAll("[^a-zA-Z]", ""));
+                            indexToName.put(index, values[index].replaceAll("[\\\\/:*?\"<>|]", ""));
                             break;
                     }
                 }
