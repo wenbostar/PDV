@@ -19,6 +19,10 @@ The PDV package can be downloaded at [https://github.com/wenbostar/PDV/releases]
 
 ## Example
 
+#### USI (Universal Spectrum Identifier)
+
+[<img src="http://pdv.zhang-lab.org/data/download/PDV_USI_example.jpeg" width=600 class="center">](http://www.psidev.info/usi)
+
 #### Database searching:
 
 | Software        | Example files |
@@ -157,4 +161,3 @@ Li, K., et al. "PDV: an integrative proteomics data viewer." Bioinformatics, Vol
 
 Contributions to the package are more than welcome. 
 
-[![Analytics](https://ga-beacon-nocache.appspot.com/UA-99895661-4/PDV?pixel)](https://github.com/igrigorik/ga-beacon)
