@@ -19,7 +19,7 @@ The PDV package can be downloaded at [https://github.com/wenbostar/PDV/releases]
 
 ## Example
 
-#### USI (Universal Spectrum Identifier)
+#### [USI](http://www.psidev.info/usi) (Universal Spectrum Identifier)
 
 [<img src="http://pdv.zhang-lab.org/data/download/PDV_USI_example.jpeg" width=600 class="center">](http://www.psidev.info/usi)
 
