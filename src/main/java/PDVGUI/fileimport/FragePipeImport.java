@@ -809,6 +809,13 @@ public class FragePipeImport {
             } else if (header.equalsIgnoreCase("Calculated M/Z")) {
                 caculatedMZIndex = i;
             } else if (header.equalsIgnoreCase("Observed M/Z")) {
+                String columnName = header.trim().replace(" ", "");
+                if (columnName.matches(".*\\d+.*")){
+
+                    columnName = "'" + columnName + "'";
+                }
+                columnName = columnName.replaceAll("[^a-zA-Z0-9]", "");
+                indexToName.put(i, columnName);
                 observedMZIndex = i;
             } else if (header.equalsIgnoreCase("Assigned Modifications")) {
                 indexToName.put(i, header.trim().replace(" ", ""));

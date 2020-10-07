@@ -3,8 +3,10 @@ package PDVCLI;
 import PDVCLI.utils.AddInformationPanel;
 import PDVGUI.fileimport.MSOneImport;
 import PDVGUI.fileimport.MzXMLScanImport;
+import PDVGUI.gui.PDVMainClass;
 import PDVGUI.gui.utils.TICPanel;
 import PDVGUI.utils.Export;
+import PDVGUI.utils.ImportPTMsFromUnimod;
 import com.compomics.util.enumeration.ImageType;
 import com.compomics.util.experiment.biology.*;
 import com.compomics.util.experiment.biology.ions.PeptideFragmentIon;
@@ -239,6 +241,9 @@ public class PDVCLIMainClass extends JFrame {
         this.annotationPreferences.setFragmentIonPpm(false);
 
         this.setVisible(true);
+
+        File inputFile = new File(PDVMainClass.getJarFilePath() + "/resources/conf/unimod.xml");
+        new ImportPTMsFromUnimod(inputFile);
 
         if (commandLine.getOptionValue("rt") != null){
             this.idFileType = Integer.valueOf(commandLine.getOptionValue("rt"));

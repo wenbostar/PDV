@@ -176,6 +176,14 @@ public class SpectrumMainPanel extends JPanel {
      */
     private Integer rewindIon = PeptideFragmentIon.Y_ION;
     /**
+     * Forward ions list searched for (a, b or c)
+     */
+    private ArrayList<Integer> forwardIons = new ArrayList();
+    /**
+     * Reward ions list searched for (x, y or z)
+     */
+    private ArrayList<Integer> rewindIons = new ArrayList();
+    /**
      * PTMFactory containing all modifications import from utilities
      */
     private PTMFactory ptmFactory = PTMFactory.getInstance();
@@ -528,8 +536,9 @@ public class SpectrumMainPanel extends JPanel {
         reporterIonsCheckMenuItem.addActionListener(this::reporterIonsCheckMenuItemAction);
         otherMenu.add(reporterIonsCheckMenuItem);
 
-        glyconsCheckMenuItem.setSelected(true);
-        glyconsCheckMenuItem.setText("Glycon");
+        //glyconsCheckMenuItem.setSelected(true);
+        glyconsCheckMenuItem.setEnabled(false);
+        glyconsCheckMenuItem.setText("Glycan");
         glyconsCheckMenuItem.setFont(menuFont);
         glyconsCheckMenuItem.addActionListener(this::glyconsCheckMenuItemAction);
         otherMenu.add(glyconsCheckMenuItem);
@@ -1573,8 +1582,24 @@ public class SpectrumMainPanel extends JPanel {
                         maxCharge = currentCharge;
                     }
 
-                    sequenceFragmentationPanel = new SequenceFragmentationPanel(
-                            modSequence, annotations, true, searchParameters.getPtmSettings(), forwardIon, rewindIon);
+                    if (forwardIons.size() <= 1 && rewindIons.size() <= 1) {
+                        if (forwardIons.size() != 0) {
+                            forwardIon = forwardIons.get(0);
+                        }
+
+                        if (rewindIons.size() != 0) {
+                            rewindIon = rewindIons.get(0);
+                        }
+
+                        sequenceFragmentationPanel = new SequenceFragmentationPanel(modSequence, annotations, true, searchParameters.getPtmSettings(), forwardIon, rewindIon);
+                        sequenceFragmentationPanelMirror = new SequenceFragmentationPanel(
+                                modSequence, annotations, true, searchParameters.getPtmSettings(), forwardIon, rewindIon);
+                    } else {
+                        sequenceFragmentationPanel = new SequenceFragmentationPanel(modSequence, annotations, true, searchParameters.getPtmSettings(), true);
+                        sequenceFragmentationPanelMirror = new SequenceFragmentationPanel(
+                                modSequence, annotations, true, searchParameters.getPtmSettings(), true);
+                    }
+
                     sequenceFragmentationPanel.setOpaque(false);
                     sequenceFragmentationPanel.setBackground(Color.WHITE);
 
@@ -1593,8 +1618,6 @@ public class SpectrumMainPanel extends JPanel {
                             precursor.getMz(), spectrumIdentificationAssumption.getIdentificationCharge().toString(),
                             "", 40, false, false, false, 2, false, isDenovo);
 
-                    sequenceFragmentationPanelMirror = new SequenceFragmentationPanel(
-                            modSequence, annotations, true, searchParameters.getPtmSettings(), PeptideFragmentIon.B_ION, PeptideFragmentIon.Y_ION);
                     sequenceFragmentationPanelMirror.setMinimumSize(new Dimension(sequenceFragmentationPanelMirror.getPreferredSize().width, sequenceFragmentationPanelMirror.getHeight()));
                     sequenceFragmentationPanelMirror.setOpaque(false);
                     sequenceFragmentationPanelMirror.setBackground(Color.WHITE);
@@ -1624,9 +1647,21 @@ public class SpectrumMainPanel extends JPanel {
 
                         mirrorSpectrumPanel.setAnnotationsMirrored(SpectrumAnnotator.getSpectrumAnnotation(mirroredAnnotations));
 
-                        mirrorFragmentPanel = new SequenceFragmentationPanel(
-                                modSequence,
-                                mirroredAnnotations, true, searchParameters.getPtmSettings(), forwardIon, rewindIon);
+                        if (forwardIons.size() <= 1 && rewindIons.size() <= 1) {
+                            if (forwardIons.size() != 0) {
+                                forwardIon = forwardIons.get(0);
+                            }
+
+                            if (rewindIons.size() != 0) {
+                                rewindIon = rewindIons.get(0);
+                            }
+
+                            mirrorFragmentPanel = new SequenceFragmentationPanel(
+                                    modSequence, mirroredAnnotations, true, searchParameters.getPtmSettings(), forwardIon, rewindIon);
+                        } else {
+                            mirrorFragmentPanel = new SequenceFragmentationPanel(
+                                    modSequence, mirroredAnnotations, true, searchParameters.getPtmSettings(), true);
+                        }
                         mirrorFragmentPanel.setMinimumSize(new Dimension(mirrorFragmentPanel.getPreferredSize().width, mirrorFragmentPanel.getHeight()));
                         mirrorFragmentPanel.setOpaque(false);
                         mirrorFragmentPanel.setBackground(Color.WHITE);
@@ -1709,9 +1744,21 @@ public class SpectrumMainPanel extends JPanel {
 
                         checkPeptideSpectrumPanel.setAnnotationsMirrored(SpectrumAnnotator.getSpectrumAnnotation(checkAnnotations));
 
-                        checkFragmentPanel = new SequenceFragmentationPanel(
-                                checkModSequence,
-                                checkAnnotations, true, searchParameters.getPtmSettings(), forwardIon, rewindIon);
+                        if (forwardIons.size() <= 1 && rewindIons.size() <= 1) {
+                            if (forwardIons.size() != 0) {
+                                forwardIon = forwardIons.get(0);
+                            }
+
+                            if (rewindIons.size() != 0) {
+                                rewindIon = rewindIons.get(0);
+                            }
+
+                            checkFragmentPanel = new SequenceFragmentationPanel(
+                                    checkModSequence, checkAnnotations, true, searchParameters.getPtmSettings(), forwardIon, rewindIon);
+                        } else {
+                            checkFragmentPanel = new SequenceFragmentationPanel(
+                                    checkModSequence, checkAnnotations, true, searchParameters.getPtmSettings(), true);
+                        }
                         checkFragmentPanel.setMinimumSize(new Dimension(checkFragmentPanel.getPreferredSize().width, checkFragmentPanel.getHeight()));
                         checkFragmentPanel.setOpaque(false);
                         checkFragmentPanel.setBackground(Color.WHITE);
@@ -2026,6 +2073,8 @@ public class SpectrumMainPanel extends JPanel {
             neutralLossHashMap.put(neutralLoss.name, neutralLoss);
         }
 
+        int glycanProb = 0;
+
         for (ModificationMatch modificationMatch : modificationMatches) {
 
             NeutralLoss neutralLoss = getPhosphyNeutralLoss(modificationMatch);
@@ -2033,6 +2082,20 @@ public class SpectrumMainPanel extends JPanel {
             if (neutralLoss != null){
                 neutralLossHashMap.put(neutralLoss.name, neutralLoss);
             }
+
+            String name = modificationMatch.getTheoreticPtm();
+            String aa = name.split("of ")[1];
+            double mass = ptmFactory.getPTM(name).getMass();
+            if (aa.equals("N") & mass> 203){
+                glycanProb += 1;
+            }
+        }
+
+        if (glycanProb >= 1){
+            glyconsCheckMenuItem.setEnabled(true);
+        } else {
+            glyconsCheckMenuItem.setSelected(false);
+            glyconsCheckMenuItem.setEnabled(false);
         }
 
         for (ModificationMatch modificationMatch : checkPeptideModificationMatches) {
@@ -2146,7 +2209,11 @@ public class SpectrumMainPanel extends JPanel {
                         reporterIonsCheckMenuItem.setSelected(true);
                         break;
                     case GLYCAN:
-                        glyconsCheckMenuItem.setSelected(true);
+                        if (glycanProb >= 1){
+                            glyconsCheckMenuItem.setSelected(true);
+                        } else {
+                            glyconsCheckMenuItem.setSelected(false);
+                        }
                     case TAG_FRAGMENT_ION:
                         for (int subtype : ionTypes.get(ionType)) {
                             switch (subtype) {
@@ -2203,32 +2270,41 @@ public class SpectrumMainPanel extends JPanel {
      */
     private void updateAnnotationSettings() {
 
+        forwardIons = new ArrayList();
+        rewindIons = new ArrayList();
+
         if (!defaultAnnotationCheckBoxMenuItem.isSelected()) {
 
             specificAnnotationSettings.clearIonTypes();
             if (forwardAIonCheckBoxMenuItem.isSelected()) {
                 specificAnnotationSettings.addIonType(TAG_FRAGMENT_ION, TagFragmentIon.A_ION);
                 specificAnnotationSettings.addIonType(PEPTIDE_FRAGMENT_ION, PeptideFragmentIon.A_ION);
+                this.forwardIons.add(0);
             }
             if (forwardBIonCheckBoxMenuItem.isSelected()) {
                 specificAnnotationSettings.addIonType(TAG_FRAGMENT_ION, TagFragmentIon.B_ION);
                 specificAnnotationSettings.addIonType(PEPTIDE_FRAGMENT_ION, PeptideFragmentIon.B_ION);
+                this.forwardIons.add(1);
             }
             if (forwardCIonCheckBoxMenuItem.isSelected()) {
                 specificAnnotationSettings.addIonType(TAG_FRAGMENT_ION, TagFragmentIon.C_ION);
                 specificAnnotationSettings.addIonType(PEPTIDE_FRAGMENT_ION, PeptideFragmentIon.C_ION);
+                this.forwardIons.add(2);
             }
             if (rewardXIonCheckBoxMenuItem.isSelected()) {
                 specificAnnotationSettings.addIonType(TAG_FRAGMENT_ION, TagFragmentIon.X_ION);
                 specificAnnotationSettings.addIonType(PEPTIDE_FRAGMENT_ION, PeptideFragmentIon.X_ION);
+                this.rewindIons.add(3);
             }
             if (rewardYIonCheckBoxMenuItem.isSelected()) {
                 specificAnnotationSettings.addIonType(TAG_FRAGMENT_ION, TagFragmentIon.Y_ION);
                 specificAnnotationSettings.addIonType(PEPTIDE_FRAGMENT_ION, PeptideFragmentIon.Y_ION);
+                this.rewindIons.add(4);
             }
             if (rewardZIonCheckBoxMenuItem.isSelected()) {
                 specificAnnotationSettings.addIonType(TAG_FRAGMENT_ION, TagFragmentIon.Z_ION);
                 specificAnnotationSettings.addIonType(PEPTIDE_FRAGMENT_ION, PeptideFragmentIon.Z_ION);
+                this.rewindIons.add(5);
             }
             if (precursorCheckMenuItem.isSelected()) {
                 specificAnnotationSettings.addIonType(PRECURSOR_ION);

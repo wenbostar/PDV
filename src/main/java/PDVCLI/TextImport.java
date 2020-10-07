@@ -124,7 +124,7 @@ public class TextImport {
                 ArrayList<String> residues = new ArrayList<>();
                 if(!modificationNames.equals("-")){
                     for (String singleModification: modificationNames.split(";")){
-                        singleModificationName = singleModification.split("@")[0];
+                        singleModificationName = singleModification.split("@")[0].replace(">", "&gt;");
                         modificationSite = Integer.valueOf(singleModification.split("@")[1].split("\\[")[0]);
                         modificationMass = Double.valueOf(singleModification.split("@")[1].split("\\[")[1].replace("]", ""));
 

@@ -896,7 +896,7 @@ public class MaxQuantImport {
                         if (!variableIndex.contains(index)) {
                             utilitiesModificationName = fixedModificationMap.get(aa) + " of " + aa;
                             utilitiesModifications.add(new ModificationMatch(utilitiesModificationName, true, index + 1));
-                        } else {
+                        } /**else {
                             if (Math.abs(expMass - spectrumMass) > 10) {
                                 residues = new ArrayList<>();
                                 residues.add(aa);
@@ -915,7 +915,7 @@ public class MaxQuantImport {
                                     }
                                 }
                             }
-                        }
+                        }**/
                     }
                 }
 

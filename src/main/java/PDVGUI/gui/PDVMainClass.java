@@ -47,6 +47,8 @@ import java.sql.*;
 import java.util.*;
 import java.util.Date;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Main class to start soft and show dataBase results
@@ -256,7 +258,7 @@ public class PDVMainClass extends JFrame {
     /**
      * Version
      */
-    private static final String VERSION = "1.6.1";
+    private static final String VERSION = "1.6.2";
 
     /**
      * Main class
@@ -1704,6 +1706,24 @@ public class PDVMainClass extends JFrame {
 
                     buttonCheck();
 
+                    ArrayList<String> columnName = new ArrayList<>();
+                    columnName.addAll(scoreName);
+
+                    columnToSelected = new HashMap<>();
+                    for (String eachColumn: columnName){
+                        columnToSelected.put(eachColumn, false);
+                    }
+
+                    ArrayList<String> showNames = (ArrayList<String>) Stream.of("SpectrumFile", "Peptide", "ModifiedPeptide", "Retention", "ObservedMass", "ObservedMZ", "CalculatedPeptideMass", "DeltaMass", "Expectation",
+                            "Hyperscore", "Nextscore", "PeptideProphetProbability", "Protein", "Gene").collect(Collectors.toList());
+
+                    for (String eachColumn: showNames){
+
+                        if (scoreName.contains(eachColumn)){
+                            columnToSelected.put(eachColumn, true);
+                        }
+                    }
+
                     sortColumnJCombox.setModel(new DefaultComboBoxModel(orderName.toArray()));
 
                 } catch (SQLException | ClassNotFoundException | IOException e) {
@@ -2407,7 +2427,45 @@ public class PDVMainClass extends JFrame {
         frageTableModel = new FrageTableModel(searchParameters, spectrumKeyToSelected, scoreName);
         spectrumJTable.setModel(frageTableModel);
 
+        ArrayList<String> columnName = new ArrayList<>();
+        if (isDenovo) {
+            columnName.add("#Peaks");
+            columnName.add("N-Gap");
+            columnName.add("C-Gap");
+            columnName.add("Score");
+        } else if(!isFrage){
+            columnName.add("Other Assumption");
+        }
+        columnName.addAll(scoreName);
+        if(columnToSelected == null){
+            columnToSelected = new HashMap<>();
+            for (String eachColumn: columnName){
+                columnToSelected.put(eachColumn, true);
+            }
+        }
+
         updateTable();
+
+        for (String key: columnToSelected.keySet()){
+            if(!columnToSelected.get(key)){
+                spectrumJTable.getColumn(key).setMinWidth(0);
+                spectrumJTable.getColumn(key).setMaxWidth(0);
+            } else {
+                for (int i = 0; i < 2; i++) {
+                    if (key.equals("Other Assumption")) {
+                        spectrumJTable.getColumn(key).setPreferredWidth(200);
+                        spectrumJTable.getColumn(key).setMinWidth(20);
+                        spectrumJTable.getColumn(key).setMaxWidth(400);
+                    } else {
+                        spectrumJTable.getColumn(key).setPreferredWidth(70);
+                        spectrumJTable.getColumn(key).setMinWidth(20);
+                        spectrumJTable.getColumn(key).setMaxWidth(400);
+                    }
+                }
+            }
+        }
+        spectrumJTable.revalidate();
+        spectrumJTable.repaint();
     }
 
     /**
@@ -3260,12 +3318,7 @@ public class PDVMainClass extends JFrame {
             columnName.add("Other Assumption");
         }
         columnName.addAll(scoreName);
-        if(columnToSelected == null){
-            columnToSelected = new HashMap<>();
-            for (String eachColumn: columnName){
-                columnToSelected.put(eachColumn, true);
-            }
-        }
+
         new ColumnSelectionDialog(this, spectrumJTable, columnName);
     }
 
