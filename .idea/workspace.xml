@@ -7,14 +7,8 @@
   <component name="ChangeListManager">
     <list default="true" id="0b0cca48-ec31-481b-94db-b982afc0e540" name="Default" comment="CLI mode debug.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PDV.iml" beforeDir="false" afterPath="$PROJECT_DIR$/PDV.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVCLI/MaxQuantImport.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/PDVCLI/MaxQuantImport.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVCLI/PDVCLIMainClass.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/PDVCLI/PDVCLIMainClass.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVCLI/TextImport.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/PDVCLI/TextImport.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/FragePipeImport.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/FragePipeImport.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TableModel/FrageTableModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TableModel/FrageTableModel.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -26,11 +20,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="355">
-              <caret line="1716" column="89" lean-forward="true" selection-start-line="1716" selection-start-column="89" selection-end-line="1716" selection-end-column="89" />
+            <state relative-caret-position="-787">
+              <caret line="2436" column="44" selection-start-line="2436" selection-start-column="28" selection-end-line="2436" selection-end-column="44" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#32869#32870#0" expanded="true" />
@@ -47,10 +41,45 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TableModel/DatabaseTableModel.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="236">
+              <caret line="109" column="58" selection-start-line="109" selection-start-column="37" selection-end-line="109" selection-end-column="58" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TableModel/FrageTableModel.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="341">
+              <caret line="146" column="46" selection-start-line="146" selection-start-column="46" selection-end-line="146" selection-end-column="46" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/PDVCLI/MaxQuantImport.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-532">
+              <caret line="828" column="71" selection-start-line="828" selection-start-column="71" selection-end-line="828" selection-end-column="71" />
+              <folding>
+                <element signature="e#50290#50291#0" expanded="true" />
+                <element signature="e#50328#50329#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4421">
-              <caret line="2215" selection-start-line="2215" selection-end-line="2215" />
+            <state relative-caret-position="334">
+              <caret line="1536" selection-start-line="1536" selection-end-line="1536" />
+              <folding>
+                <element signature="e#36455#36456#0" expanded="true" />
+                <element signature="e#36523#36524#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -67,17 +96,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/FragePipeImport.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1084">
-              <caret line="363" column="41" selection-start-line="363" selection-start-column="41" selection-end-line="363" selection-end-column="41" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/pom.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="105">
-              <caret line="7" column="18" selection-start-line="7" selection-start-column="18" selection-end-line="7" selection-end-column="18" />
+            <state relative-caret-position="530">
+              <caret line="761" column="39" selection-start-line="761" selection-start-column="39" selection-end-line="761" selection-end-column="39" />
             </state>
           </provider>
         </entry>
@@ -87,15 +107,6 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="3445">
               <caret line="959" column="68" selection-start-line="959" selection-start-column="54" selection-end-line="959" selection-end-column="68" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/PDVCLI/TextImport.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2312">
-              <caret line="205" column="24" selection-start-line="205" selection-start-column="24" selection-end-line="205" selection-end-column="24" />
             </state>
           </provider>
         </entry>
@@ -111,14 +122,12 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>JDialog</find>
       <find>existNoMatchFile</find>
       <find>20141208_QEp7_MiBa_SA_HLA-I-p_MM15_4_A.47023.47023.2 NH2-DVFPEGTRVGL-COOH</find>
       <find>intensityLimit</find>
       <find>spectrumMainPanel</find>
       <find>checkPeptideMap</find>
       <find>modificationMatches</find>
-      <find>allModifications</find>
       <find>spectrumTitleToRank</find>
       <find>scanIndex</find>
       <find>count</find>
@@ -138,9 +147,11 @@
       <find>scoreName</find>
       <find>spectrumKeyToSelected</find>
       <find>checkFragmentPanel</find>
-      <find>Other Assumption</find>
       <find>glyc</find>
+      <find>glycanSelected</find>
+      <find>allModifications</find>
       <find>glyconsCheckMenuItem</find>
+      <find>Other Assumption</find>
     </findStrings>
     <replaceStrings>
       <replace>termModMassToTerm</replace>
@@ -169,7 +180,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumContainer.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/ExportExpectedSizeDialog.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MSOneImport.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/FileImport/ProBamImportDialog.java" />
@@ -208,7 +218,6 @@
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVStart.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/SinglePeptideDisplay.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVCLI/PDVCLIMainClass.java" />
-        <option value="$PROJECT_DIR$/src/main/java/PDVCLI/MaxQuantImport.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/Export/ExportMGFDialog.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/PepXMLFileImport.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/TextFileImport.java" />
@@ -216,10 +225,12 @@
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/CheckPeptideJDialog.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MaxQuantFileImport.java" />
         <option value="$PROJECT_DIR$/src/main/java/PDVCLI/TextImport.java" />
-        <option value="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/FragePipeImport.java" />
-        <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java" />
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java" />
+        <option value="$PROJECT_DIR$/src/main/java/PDVCLI/MaxQuantImport.java" />
+        <option value="$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/FragePipeImport.java" />
+        <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TableModel/FrageTableModel.java" />
+        <option value="$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java" />
       </list>
     </option>
   </component>
@@ -381,6 +392,17 @@
               <item name="main" type="462c0819:PsiDirectoryNode" />
               <item name="java" type="462c0819:PsiDirectoryNode" />
               <item name="PDVGUI" type="462c0819:PsiDirectoryNode" />
+              <item name="gui" type="462c0819:PsiDirectoryNode" />
+              <item name="utils" type="462c0819:PsiDirectoryNode" />
+              <item name="TableModel" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="PDV" type="b2602c69:ProjectViewProjectNode" />
+              <item name="PDV" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="PDVGUI" type="462c0819:PsiDirectoryNode" />
               <item name="utils" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
@@ -393,7 +415,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="slf4j&#9;PSI&#9;JAVA://javolution.osgi.internal.SLF4jLogServiceImpl" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1602094899107" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1602101338832" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="project.structure.last.edited" value="Libraries" />
     <property name="project.structure.proportion" value="0.15" />
@@ -630,13 +652,13 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java</url>
-          <line>1698</line>
+          <line>1732</line>
           <properties />
           <option name="timeStamp" value="7" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java</url>
-          <line>1796</line>
+          <line>1830</line>
           <properties />
           <option name="timeStamp" value="8" />
         </line-breakpoint>
@@ -668,16 +690,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/Get_id_spectrum.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="441">
-          <caret line="56" column="33" selection-start-line="56" selection-start-column="16" selection-end-line="56" selection-end-column="33" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/GetSequence.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="55">
@@ -795,17 +807,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="12300">
           <caret line="867" column="164" selection-start-line="867" selection-start-column="151" selection-end-line="867" selection-end-column="164" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVCLI/MaxQuantImport.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="14550">
-          <caret line="987" column="28" selection-start-line="987" selection-start-column="28" selection-end-line="987" selection-end-column="28" />
-          <folding>
-            <element signature="e#50290#50291#0" expanded="true" />
-            <element signature="e#50328#50329#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -930,13 +931,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/CheckPeptideJDialog.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="888">
-          <caret line="274" selection-start-line="274" selection-end-line="274" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$MAVEN_REPOSITORY$/com/compomics/utilities/4.11.14/utilities-4.11.14-sources.jar!/com/compomics/util/gui/spectrum/SequenceFragmentationPanel.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="252">
@@ -948,13 +942,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2048">
           <caret line="205" selection-start-line="205" selection-end-line="205" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/com/compomics/utilities/4.11.14/utilities-4.11.14-sources.jar!/com/compomics/util/experiment/identification/spectrum_annotation/SpectrumAnnotator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="37" column="22" selection-start-line="37" selection-start-column="22" selection-end-line="37" selection-end-column="22" />
         </state>
       </provider>
     </entry>
@@ -990,24 +977,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/com/compomics/utilities/4.11.14/utilities-4.11.14-sources.jar!/com/compomics/util/experiment/identification/spectrum_annotation/spectrum_annotators/PeptideSpectrumAnnotator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
-          <caret line="214" column="129" selection-start-line="214" selection-start-column="103" selection-end-line="214" selection-end-column="129" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MzIDFileImport.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="478">
           <caret line="381" column="34" selection-start-line="381" selection-start-column="24" selection-end-line="381" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MaxQuantFileImport.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3445">
-          <caret line="959" column="68" selection-start-line="959" selection-start-column="54" selection-end-line="959" selection-end-column="68" />
         </state>
       </provider>
     </entry>
@@ -1025,34 +998,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TableModel/DatabaseTableModel.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="236">
-          <caret line="109" column="58" selection-start-line="109" selection-start-column="37" selection-end-line="109" selection-end-column="58" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/FragePipeImport.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1084">
-          <caret line="363" column="41" selection-start-line="363" selection-start-column="41" selection-end-line="363" selection-end-column="41" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TableModel/FrageTableModel.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-299">
-          <caret line="146" column="53" selection-start-line="146" selection-start-column="39" selection-end-line="146" selection-end-column="53" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4421">
-          <caret line="2215" selection-start-line="2215" selection-end-line="2215" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/pom.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="105">
@@ -1060,10 +1005,56 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/MaxQuantFileImport.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3445">
+          <caret line="959" column="68" selection-start-line="959" selection-start-column="54" selection-end-line="959" selection-end-column="68" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/CheckPeptideJDialog.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="888">
+          <caret line="274" selection-start-line="274" selection-end-line="274" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVCLI/MaxQuantImport.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-532">
+          <caret line="828" column="71" selection-start-line="828" selection-start-column="71" selection-end-line="828" selection-end-column="71" />
+          <folding>
+            <element signature="e#50290#50291#0" expanded="true" />
+            <element signature="e#50328#50329#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/fileimport/FragePipeImport.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="530">
+          <caret line="761" column="39" selection-start-line="761" selection-start-column="39" selection-end-line="761" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TableModel/DatabaseTableModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="236">
+          <caret line="109" column="58" selection-start-line="109" selection-start-column="37" selection-end-line="109" selection-end-column="58" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/TableModel/FrageTableModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="341">
+          <caret line="146" column="46" selection-start-line="146" selection-start-column="46" selection-end-line="146" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/PDVMainClass.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="355">
-          <caret line="1716" column="89" lean-forward="true" selection-start-line="1716" selection-start-column="89" selection-end-line="1716" selection-end-column="89" />
+        <state relative-caret-position="-787">
+          <caret line="2436" column="44" selection-start-line="2436" selection-start-column="28" selection-end-line="2436" selection-end-column="44" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#32869#32870#0" expanded="true" />
@@ -1074,6 +1065,38 @@
             <element signature="e#33327#33328#0" expanded="true" />
             <element signature="e#111729#111730#0" expanded="true" />
             <element signature="e#111794#111795#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/com/compomics/utilities/4.11.14/utilities-4.11.14-sources.jar!/com/compomics/util/experiment/identification/spectrum_annotation/SpectrumAnnotator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="62" column="88" selection-start-line="62" selection-start-column="65" selection-end-line="62" selection-end-column="88" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/com/compomics/utilities/4.11.14/utilities-4.11.14-sources.jar!/com/compomics/util/experiment/identification/spectrum_annotation/spectrum_annotators/PeptideSpectrumAnnotator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="440">
+          <caret line="79" column="67" selection-start-line="79" selection-start-column="58" selection-end-line="79" selection-end-column="73" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/com/compomics/utilities/4.11.14/utilities-4.11.14-sources.jar!/com/compomics/util/experiment/biology/IonFactory.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="480">
+          <caret line="515" column="50" selection-start-line="515" selection-start-column="50" selection-end-line="515" selection-end-column="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/PDVGUI/gui/utils/SpectrumMainPanel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="334">
+          <caret line="1536" selection-start-line="1536" selection-end-line="1536" />
+          <folding>
+            <element signature="e#36455#36456#0" expanded="true" />
+            <element signature="e#36523#36524#0" expanded="true" />
           </folding>
         </state>
       </provider>

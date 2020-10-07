@@ -239,6 +239,14 @@ public class SpectrumMainPanel extends JPanel {
      * If true, de novo function
      */
     private boolean isDenovo;
+    /**
+     * Glycan selection action event
+     */
+    private boolean glycanSelected = false;
+    /**
+     * Glycan in or not
+     */
+    private boolean glycanContain = false;
 
     /**
      * Constructor
@@ -932,6 +940,9 @@ public class SpectrumMainPanel extends JPanel {
      */
     private void glyconsCheckMenuItemAction(ActionEvent evt) {
         noSelectDefaultAnnotationMenuItem();
+        if (glyconsCheckMenuItem.isSelected()){
+            glycanSelected = true;
+        }
         updateSpectrum();
     }
 
@@ -1439,7 +1450,6 @@ public class SpectrumMainPanel extends JPanel {
                     spectrumPanel.setBackgroundPeakWidth(utilitiesUserPreferences.getSpectrumBackgroundPeakWidth());
 
                     specificAnnotationSettings = annotationSettings.getSpecificAnnotationPreferences(selectedPsmKey, spectrumIdentificationAssumption, SequenceMatchingPreferences.defaultStringMatching, SequenceMatchingPreferences.defaultStringMatching);
-                    updateAnnotationSettings();
 
                     String modSequence;
                     ArrayList<IonMatch> annotations;
@@ -1448,6 +1458,7 @@ public class SpectrumMainPanel extends JPanel {
                         TagAssumption tagAssumption = (TagAssumption) spectrumIdentificationAssumption;
                         currentPeptideSequence = tagAssumption.getTag().asSequence();
                         modSequence = tagAssumption.getTag().getTaggedModifiedSequence(searchParameters.getPtmSettings(), false, false, false, false);
+                        updateAnnotationSettings();
 
                         annotations = tagSpectrumAnnotator.getSpectrumAnnotation(annotationSettings, specificAnnotationSettings, currentSpectrum, tagAssumption.getTag());
                     } else if (spectrumIdentificationAssumption instanceof PeptideAssumption) {
@@ -1458,6 +1469,29 @@ public class SpectrumMainPanel extends JPanel {
 
                         allModifications = currentPeptide.getModificationMatches();
 
+                        int glycanProb = 0;
+
+                        for (ModificationMatch modificationMatch : allModifications) {
+
+                            String name = modificationMatch.getTheoreticPtm();
+                            String aa = name.split("of ")[1];
+                            double mass = ptmFactory.getPTM(name).getMass();
+                            if (aa.equals("N") & mass> 203){
+                                glycanProb += 1;
+                            }
+                        }
+
+                        if (glycanProb >= 1){
+                            glycanContain = true;
+                            glyconsCheckMenuItem.setSelected(glycanSelected);
+                            glyconsCheckMenuItem.setEnabled(true);
+                        } else {
+                            glycanContain = false;
+                            glyconsCheckMenuItem.setSelected(false);
+                            glyconsCheckMenuItem.setEnabled(false);
+                        }
+
+                        updateAnnotationSettings();
                         annotations = peptideSpectrumAnnotator.getSpectrumAnnotationFiter(annotationSettings, specificAnnotationSettings, currentSpectrum, currentPeptide, null, true);
                     } else {
                         throw new UnsupportedOperationException("Operation not supported for spectrumIdentificationAssumption of type " + spectrumIdentificationAssumption.getClass() + ".");
@@ -2073,8 +2107,6 @@ public class SpectrumMainPanel extends JPanel {
             neutralLossHashMap.put(neutralLoss.name, neutralLoss);
         }
 
-        int glycanProb = 0;
-
         for (ModificationMatch modificationMatch : modificationMatches) {
 
             NeutralLoss neutralLoss = getPhosphyNeutralLoss(modificationMatch);
@@ -2082,20 +2114,6 @@ public class SpectrumMainPanel extends JPanel {
             if (neutralLoss != null){
                 neutralLossHashMap.put(neutralLoss.name, neutralLoss);
             }
-
-            String name = modificationMatch.getTheoreticPtm();
-            String aa = name.split("of ")[1];
-            double mass = ptmFactory.getPTM(name).getMass();
-            if (aa.equals("N") & mass> 203){
-                glycanProb += 1;
-            }
-        }
-
-        if (glycanProb >= 1){
-            glyconsCheckMenuItem.setEnabled(true);
-        } else {
-            glyconsCheckMenuItem.setSelected(false);
-            glyconsCheckMenuItem.setEnabled(false);
         }
 
         for (ModificationMatch modificationMatch : checkPeptideModificationMatches) {
@@ -2209,7 +2227,7 @@ public class SpectrumMainPanel extends JPanel {
                         reporterIonsCheckMenuItem.setSelected(true);
                         break;
                     case GLYCAN:
-                        if (glycanProb >= 1){
+                        if (glycanContain){
                             glyconsCheckMenuItem.setSelected(true);
                         } else {
                             glyconsCheckMenuItem.setSelected(false);
@@ -2321,8 +2339,18 @@ public class SpectrumMainPanel extends JPanel {
                     specificAnnotationSettings.addIonType(REPORTER_ION, subtype);
                 }
             }
+
+            if (glycanSelected & glycanContain){
+                glyconsCheckMenuItem.setSelected(true);
+            }
+
             if (glyconsCheckMenuItem.isSelected()){
+                glycanSelected = true;
                 specificAnnotationSettings.addIonType(GLYCAN);
+            } else {
+                if (glyconsCheckMenuItem.isEnabled()){
+                    glycanSelected = false;
+                }
             }
 
             if (!defaultLossCheckBoxMenuItem.isSelected()) {

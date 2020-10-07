@@ -144,7 +144,7 @@ public class FrageTableModel extends DefaultTableModel {
                     Double rt;
 
                     try {
-                        rt = precursor.getRtInMinutes();
+                        rt = precursor.getRt();
 
                         if (rt < 0) {
                             rt = -1.0;
