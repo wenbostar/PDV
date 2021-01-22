@@ -544,8 +544,8 @@ public class SpectrumMainPanel extends JPanel {
         reporterIonsCheckMenuItem.addActionListener(this::reporterIonsCheckMenuItemAction);
         otherMenu.add(reporterIonsCheckMenuItem);
 
-        //glyconsCheckMenuItem.setSelected(true);
-        glyconsCheckMenuItem.setEnabled(false);
+        glyconsCheckMenuItem.setEnabled(true); // Just test for YC. This should be false.
+        //glyconsCheckMenuItem.setEnabled(false);
         glyconsCheckMenuItem.setText("Glycan");
         glyconsCheckMenuItem.setFont(menuFont);
         glyconsCheckMenuItem.addActionListener(this::glyconsCheckMenuItemAction);
@@ -1481,6 +1481,9 @@ public class SpectrumMainPanel extends JPanel {
                             }
                         }
 
+                        // Just for FC test. This should be deleted.
+                        glycanContain = true;
+                        /* Just for FC test. This should be enabled.
                         if (glycanProb >= 1){
                             glycanContain = true;
                             glyconsCheckMenuItem.setSelected(glycanSelected);
@@ -1489,7 +1492,7 @@ public class SpectrumMainPanel extends JPanel {
                             glycanContain = false;
                             glyconsCheckMenuItem.setSelected(false);
                             glyconsCheckMenuItem.setEnabled(false);
-                        }
+                        }*/
 
                         updateAnnotationSettings();
                         annotations = peptideSpectrumAnnotator.getSpectrumAnnotationFiter(annotationSettings, specificAnnotationSettings, currentSpectrum, currentPeptide, null, true);
@@ -2340,9 +2343,10 @@ public class SpectrumMainPanel extends JPanel {
                 }
             }
 
+            /* Just test for FC. This should be enabled.
             if (glycanSelected & glycanContain){
                 glyconsCheckMenuItem.setSelected(true);
-            }
+            }*/
 
             if (glyconsCheckMenuItem.isSelected()){
                 glycanSelected = true;

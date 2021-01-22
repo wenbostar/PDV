@@ -103,7 +103,7 @@ public class FrageTableModel extends DefaultTableModel {
         }else if(column == 7){
             return "m/z";
         }else if(column == 8){
-            return "Mass error";
+            return "m/z error";
         }
         for(int index = 0; index < scoreName.size(); index++){
             int newColumn = index + 9;
@@ -195,7 +195,7 @@ public class FrageTableModel extends DefaultTableModel {
                     if(peptideAssumption.getScore() != null){
                         return peptideAssumption.getScore();
                     } else {
-                        return 0.0;
+                        return "-";
                     }
                 }
                 for(int index = 0; index < scoreName.size(); index++){

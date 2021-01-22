@@ -258,7 +258,7 @@ public class PDVMainClass extends JFrame {
     /**
      * Version
      */
-    private static final String VERSION = "1.7.0";
+    private static final String VERSION = "1.7.1";
 
     /**
      * Main class
@@ -3318,6 +3318,13 @@ public class PDVMainClass extends JFrame {
             columnName.add("Other Assumption");
         }
         columnName.addAll(scoreName);
+
+        if(columnToSelected == null){
+            columnToSelected = new HashMap<>();
+            for (String eachColumn: columnName){
+                columnToSelected.put(eachColumn, true);
+            }
+        }
 
         new ColumnSelectionDialog(this, spectrumJTable, columnName);
     }

@@ -27,6 +27,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -92,6 +93,10 @@ public class FragePipeImport {
      * Progress dialog
      */
     private ProgressDialogX progressDialog;
+    /**
+     * Decimal
+     */
+    DecimalFormat df = new DecimalFormat("####0.000");
 
     /**
      * Main constructor
@@ -271,7 +276,7 @@ public class FragePipeImport {
                     peptideSequence = lineSplit[peptideSequenceIndex];
                     caculatedMZ = Double.valueOf(lineSplit[caculatedMZIndex]);
                     observedMZ = Double.valueOf(lineSplit[observedMZIndex]);
-                    massError = caculatedMZ - observedMZ;
+                    massError = Double.valueOf(df.format(observedMZ - caculatedMZ));
                     assignedMod = lineSplit[assignenModIndex];
 
                     if (count == 0){
@@ -499,7 +504,7 @@ public class FragePipeImport {
             peptideSequence = lineSplit[peptideSequenceIndex];
             caculatedMZ = Double.valueOf(lineSplit[caculatedMZIndex]);
             observedMZ = Double.valueOf(lineSplit[observedMZIndex]);
-            massError = caculatedMZ - observedMZ;
+            massError = observedMZ - caculatedMZ;
             assignedMod = lineSplit[assignenModIndex];
 
             if (count == 0){

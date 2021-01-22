@@ -301,8 +301,9 @@ public class MzIDFileImport {
         }
 
         ArrayList<String> fileInFactory = spectrumFactory.getMgfFileNames();
+        String spectrumFileNotInMzID = "";
 
-        Integer matchFileNum = 0;
+        int matchFileNum = 0;
 
         for(String id: spectrumFileMap.keySet()){
 
@@ -312,18 +313,27 @@ public class MzIDFileImport {
                     matchFileNum++;
                 }
 
-             } else if (spectrumFileType.equals("mzml") || spectrumFileType.equals("mzxml")){
+            } else if (spectrumFileType.equals("mzml") || spectrumFileType.equals("mzxml")){
                 matchFileNum++;
             }
         }
 
         if (matchFileNum == 0){
             System.out.println("No matching file");
-            JOptionPane.showMessageDialog(
-                    null, "The spectrum file cannot match it in mzIdentML",
-                    "Error Matching", JOptionPane.ERROR_MESSAGE);
-            Thread.currentThread().interrupt();
-            progressDialog.setRunFinished();
+            spectrumFileNotInMzID = spectrumFactory.getMgfFileNames().get(0); //No Match mgf in MzID. Select first input mgf of user input
+
+            int value = JOptionPane.showConfirmDialog(
+                    null, "The spectrum file cannot match it in mzIdentML. Do you want to continue?",
+                    "Error Matching",
+                    JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+            if (value == JOptionPane.YES_OPTION) {
+                //Nothing
+            } else if (value == JOptionPane.NO_OPTION) {
+                Thread.currentThread().interrupt();
+                progressDialog.setRunFinished();
+            }
+
         }
 
         int count = 0;
@@ -424,6 +434,10 @@ public class MzIDFileImport {
 
                 if (currentSpectrumFile.contains("/")){
                     currentSpectrumFile = currentSpectrumFile.substring(currentSpectrumFile.lastIndexOf("/") + 1, currentSpectrumFile.length());
+                }
+
+                if (matchFileNum == 0){
+                    currentSpectrumFile = spectrumFileNotInMzID;
                 }
 
                 currentMatch = new SpectrumMatch(Spectrum.getSpectrumKey(currentSpectrumFile, spectrumIndex));
