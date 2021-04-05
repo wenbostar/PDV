@@ -258,7 +258,7 @@ public class PDVMainClass extends JFrame {
     /**
      * Version
      */
-    private static final String VERSION = "1.7.1";
+    private static final String VERSION = "1.7.2";
 
     /**
      * Main class

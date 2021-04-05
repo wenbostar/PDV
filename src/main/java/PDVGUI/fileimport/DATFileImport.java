@@ -393,7 +393,7 @@ public class DATFileImport {
         Double singleMass = modification.getMass();
         ArrayList<String> residues = new ArrayList<>();
 
-        if (location.contains("N-term")){
+        if (location.contains("N-term") | location.contains("N_term")){
 
             residues.add(location);
             String modName = singleModName + " of N-term";
@@ -408,7 +408,7 @@ public class DATFileImport {
                 fixedModAAAndName.put(location, modName);
             }
 
-        } else if (location.contains("C-term")){
+        } else if (location.contains("C-term") | location.contains("C_term")){
 
             residues.add(location);
             String modName = singleModName + " of C-term";
