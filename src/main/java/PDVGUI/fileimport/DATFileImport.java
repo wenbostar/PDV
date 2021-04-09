@@ -242,9 +242,9 @@ public class DATFileImport {
             for (String aa : fixedModAAAndName.keySet()){
                 String modName = fixedModAAAndName.get(aa);
 
-                if (aa.equals("N-term")){
+                if (aa.equals("N-term") | aa.equals("N_term")){
                     utilitiesModifications.add(new ModificationMatch(modName, true, 1));
-                } else if (aa.equals("C-term")){
+                } else if (aa.equals("C-term") | aa.equals("C_term")){
                     utilitiesModifications.add(new ModificationMatch(modName, true, peptideSeq.length()));
                 } else {
                     for (int modIndex = 0; modIndex < peptideSeq.length(); modIndex ++){
@@ -398,7 +398,7 @@ public class DATFileImport {
             residues.add(location);
             String modName = singleModName + " of N-term";
             PTM ptm = new PTM(PTM.MODNPAA, modName, singleMass, residues);
-            ptm.setShortName(shortMod);
+            ptm.setShortName(singleModName);
             ptmFactory.addUserPTM(ptm);
 
             if (!allModifications.contains(modName)) {
@@ -413,7 +413,7 @@ public class DATFileImport {
             residues.add(location);
             String modName = singleModName + " of C-term";
             PTM ptm = new PTM(PTM.MODCP, modName, singleMass, residues);
-            ptm.setShortName(shortMod);
+            ptm.setShortName(singleModName);
             ptmFactory.addUserPTM(ptm);
 
             if (!allModifications.contains(modName)) {
