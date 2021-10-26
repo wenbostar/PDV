@@ -12,6 +12,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 /**
  * Export excepted spectrum in MGF format
@@ -38,6 +39,10 @@ public class ExportMGFDialog extends JDialog {
      * MGF
      */
     private String mgf;
+    /**
+     * Remove illegal pattern
+     */
+    private static Pattern FilePattern = Pattern.compile("[\\\\/:*?\"<>|]");
 
     /**
      * Constructor
@@ -49,7 +54,7 @@ public class ExportMGFDialog extends JDialog {
         super(spectrumMainPanel.parentFrame, true);
 
         this.lastFolder = PDVMainClass.lastSelectedFolder.getLastSelectedFolder();
-        this.spectrumTitle = spectrumTitle;
+        this.spectrumTitle = FilePattern.matcher(spectrumTitle).replaceAll("");
         this.mgf = mgf;
 
         setUpGui();

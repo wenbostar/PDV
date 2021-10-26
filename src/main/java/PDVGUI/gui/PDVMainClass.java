@@ -1669,6 +1669,7 @@ public class PDVMainClass extends JFrame {
         this.isFrage = true;
 
         databasePath = idFile.getAbsolutePath()+".db";
+        this.spectrumFileType = spectrumFileType;
 
         ProgressDialogX progressDialog = new ProgressDialogX(this,
                 Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMass.png")),
@@ -1740,6 +1741,7 @@ public class PDVMainClass extends JFrame {
     public void importDatFile(File datFile){
 
         this.isFrage = true;
+        spectrumFileType = "mgf";
 
         databasePath = datFile.getAbsolutePath()+".db";
 
@@ -3609,6 +3611,32 @@ public class PDVMainClass extends JFrame {
      */
     private void updateSpectrum(MSnSpectrum mSnSpectrum, SpectrumMatch spectrumMatch) {
 
+        SpectrumFactory spectrumFactory = (SpectrumFactory) spectrumsFileFactory;
+
+        String matchKey = spectrumMatch.getKey();
+        String spectrumFileName = matchKey.split("_cus_")[0];
+
+        String spectrumTitle = "";
+        if(spectrumFileType.toLowerCase().equals("mgf")) {
+            if (isNewSoft) {
+                String spectrumKey = matchKey.split("_cus_")[1];
+                spectrumTitle = spectrumKey.split("_rank_")[0];
+            } else if (isMaxQuant || isPepXML) {
+                spectrumTitle = matchKey.split("_cus_")[1];
+            } else if (isFrage) {
+                spectrumTitle = matchKey;
+            } else {
+                String spectrumKey = matchKey.split("_cus_")[1];
+                spectrumTitle = spectrumFactory.getSpectrumTitle(spectrumFileName, Integer.parseInt(spectrumKey) + 1);
+            }
+        }else if (spectrumFileType.toLowerCase().equals("mzml") || spectrumFileType.toLowerCase().equals("mzxml")) {
+            if (isFrage) {
+                spectrumTitle = matchKey;
+            } else {
+                spectrumTitle = spectrumMatch.getKey().split("_cus_")[1];
+            }
+        }
+
         String modSequence;
         SpectrumIdentificationAssumption spectrumIdentificationAssumption;
 
@@ -3628,7 +3656,7 @@ public class PDVMainClass extends JFrame {
         titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
 
         spectrumShowJPanel.setBorder(titledBorder);
-
+        mSnSpectrum.setSpectrumTitle(spectrumTitle);
         spectrumMainPanel.updateSpectrum(spectrumIdentificationAssumption, mSnSpectrum, String.valueOf(selectedPsmKey));
 
         spectrumShowJPanel.revalidate();

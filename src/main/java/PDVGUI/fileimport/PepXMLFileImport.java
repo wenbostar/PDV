@@ -977,7 +977,7 @@ public class PepXMLFileImport {
 
                             if (modifiedAaMass != null) {
 
-                                char aa = sequence.charAt(site - 1);
+                                String aa = String.valueOf(sequence.charAt(site - 1));
 
                                 location = site;
 
@@ -991,6 +991,27 @@ public class PepXMLFileImport {
                                     }
                                 } else {
                                     modificationName = modMassToName.get(modifiedAaMass);
+                                }
+
+                                if (modificationName == null){
+                                    ArrayList<String> residues = new ArrayList<>();
+                                    residues.add(aa);
+
+                                    modificationName = "[" + modifiedAaMass.toString() +"] of " +aa;
+                                    if (!ptmFactory.containsPTM(modificationName)){
+                                        PTM ptm = new PTM(PTM.MODAA, modificationName, modifiedAaMass, residues);
+
+                                        if (aa.equals("T") || aa.equals("S")){
+                                            if (modifiedAaMass < 80.01 && modifiedAaMass > 79.9){
+                                                ptm.addNeutralLoss(NeutralLoss.H3PO4);
+                                            }
+                                        }
+
+                                        ptm.setShortName(modifiedAaMass.toString());
+                                        ptmFactory.addUserPTM(ptm);
+                                    }
+                                } else {
+                                    // To do.
                                 }
 
                                 if (!allModifications.contains(modificationName)){
