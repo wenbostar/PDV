@@ -3528,9 +3528,15 @@ public class PDVMainClass extends JFrame {
             Charge charge = spectrumMatch.getBestPeptideAssumption().getIdentificationCharge();
             ArrayList<Charge> charges = new ArrayList<>();
             charges.add(charge);
+            IScan precursorScan = scans.getScanByNum(iScan.getPrecursor().getParentScanNum());
+            Double precursorInt = iScan.getPrecursor().getIntensity();
 
-            Precursor precursor = new Precursor(scans.getScanByNum(iScan.getPrecursor().getParentScanNum()).getRt(), iScan.getPrecursor().getMzTarget(),
-                    iScan.getPrecursor().getIntensity(), charges);
+            if (precursorInt == null){
+                precursorInt = precursorScan.getBasePeakIntensity();
+            }
+
+            Precursor precursor = new Precursor(precursorScan.getRt(), iScan.getPrecursor().getMzTarget(),
+                    precursorInt, charges);
 
             double[] mzs = spectrum.getMZs();
             double[] ins = spectrum.getIntensities();
@@ -3611,13 +3617,12 @@ public class PDVMainClass extends JFrame {
      */
     private void updateSpectrum(MSnSpectrum mSnSpectrum, SpectrumMatch spectrumMatch) {
 
-        SpectrumFactory spectrumFactory = (SpectrumFactory) spectrumsFileFactory;
-
         String matchKey = spectrumMatch.getKey();
         String spectrumFileName = matchKey.split("_cus_")[0];
 
         String spectrumTitle = "";
         if(spectrumFileType.toLowerCase().equals("mgf")) {
+            SpectrumFactory spectrumFactory = (SpectrumFactory) spectrumsFileFactory;
             if (isNewSoft) {
                 String spectrumKey = matchKey.split("_cus_")[1];
                 spectrumTitle = spectrumKey.split("_rank_")[0];
