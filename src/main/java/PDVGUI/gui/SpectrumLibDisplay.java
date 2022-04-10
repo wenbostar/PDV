@@ -8,6 +8,7 @@ import PDVGUI.gui.utils.Export.ExportBatchDialog;
 import PDVGUI.gui.utils.Export.RealTimeExportJDialog;
 import PDVGUI.gui.utils.SpectrumMainPanel;
 import com.compomics.util.enumeration.ImageType;
+import com.compomics.util.experiment.biology.PTMFactory;
 import com.compomics.util.experiment.biology.Peptide;
 import com.compomics.util.experiment.identification.SpectrumIdentificationAssumption;
 import com.compomics.util.experiment.identification.identification_parameters.PtmSettings;
@@ -124,6 +125,10 @@ public class SpectrumLibDisplay extends JFrame {
      * AnnotationSettings
      */
     public AnnotationSettings annotationSettings;
+    /**
+     * PTMFactory containing all modifications import from utilities
+     */
+    private PTMFactory ptmFactory = PTMFactory.getInstance();
 
     /**
      * Constructor
@@ -1275,7 +1280,7 @@ public class SpectrumLibDisplay extends JFrame {
 
         RealTimeExportJDialog realTimeExportJDialog = new RealTimeExportJDialog((Integer) allParameters[0], (Integer) allParameters[1], picHeight, picWidth, unit,
                 (PeptideSpectrumAnnotator) allParameters[2], (SpecificAnnotationSettings) allParameters[3], this, (HashMap<Double, String>)allParameters[4],
-                (PtmSettings) allParameters[5], finalImageType, outputFolder);
+                (PtmSettings) allParameters[5], finalImageType, outputFolder, ptmFactory);
 
         if (exportAll){
             realTimeExportJDialog.readAllSpectrums(allLibIDList);

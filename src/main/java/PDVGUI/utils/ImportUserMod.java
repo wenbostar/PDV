@@ -1,6 +1,7 @@
 package PDVGUI.utils;
 
 import PDVGUI.gui.PDVMainClass;
+import com.compomics.util.experiment.biology.NeutralLoss;
 import com.compomics.util.experiment.biology.PTM;
 import com.compomics.util.experiment.biology.PTMFactory;
 
@@ -52,6 +53,5 @@ public class ImportUserMod {
             }
             count ++;
         }
-
     }
 }

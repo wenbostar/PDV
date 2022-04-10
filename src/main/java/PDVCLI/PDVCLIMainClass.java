@@ -1011,7 +1011,7 @@ public class PDVCLIMainClass extends JFrame {
                     }
                     specificAnnotationPreferences.addNeutralLoss(NeutralLoss.H3PO4);
 
-                    ArrayList<IonMatch> annotations = spectrumAnnotator.getSpectrumAnnotationFiter(annotationPreferences, specificAnnotationPreferences, newMSnSpectrum, currentPeptide, null, true);//在此计算匹配
+                    ArrayList<IonMatch> annotations = spectrumAnnotator.getSpectrumAnnotationFiter(annotationPreferences, specificAnnotationPreferences, newMSnSpectrum, currentPeptide, null, ptmFactory, true);
 
                     spectrumPanel.setAnnotations(SpectrumAnnotator.getSpectrumAnnotation(annotations), annotationPreferences.getTiesResolution() == SpectrumAnnotator.TiesResolution.mostAccurateMz);
                     spectrumPanel.rescale(lowerMzZoomRange, upperMzZoomRange);

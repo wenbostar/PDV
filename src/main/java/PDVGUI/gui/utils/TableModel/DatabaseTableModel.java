@@ -230,7 +230,7 @@ public class DatabaseTableModel extends DefaultTableModel {
                     }
                     if(column == 5) {
                         if (spectrumMatch.getBestPeptideAssumption() != null) {
-                            return peptide.getTaggedModifiedSequence(searchParameters.getPtmSettings(), true, true, false, false);
+                            return peptide.getTaggedModifiedSequence(searchParameters.getPtmSettings(), true, true, false, false).replaceAll(" ", "&nbsp;");
                         } else {
                             throw new IllegalArgumentException("No best assumption found for spectrum " + matchKey + ".");
                         }

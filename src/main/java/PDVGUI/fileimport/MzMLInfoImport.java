@@ -175,6 +175,9 @@ public class MzMLInfoImport {
                 }
             }
 
+            // scan start time
+            detailsList.add("Start Time Stamp/t/" + mzmlRunInfo.getRunStartTime());
+
         } catch (RunHeaderParsingException e) {
             e.printStackTrace();
         }

@@ -1495,9 +1495,14 @@ public class SpectrumMainPanel extends JPanel {
                         }*/
 
                         updateAnnotationSettings();
-                        annotations = peptideSpectrumAnnotator.getSpectrumAnnotationFiter(annotationSettings, specificAnnotationSettings, currentSpectrum, currentPeptide, null, true);
+                        annotations = peptideSpectrumAnnotator.getSpectrumAnnotationFiter(annotationSettings, specificAnnotationSettings, currentSpectrum, currentPeptide, null, ptmFactory, true);
                     } else {
                         throw new UnsupportedOperationException("Operation not supported for spectrumIdentificationAssumption of type " + spectrumIdentificationAssumption.getClass() + ".");
+                    }
+
+                    for (IonMatch ionMatch : annotations){
+
+                        //System.out.println(ionMatch.getPeakAnnotation());
                     }
 
                     spectrumPanel.setAnnotations(SpectrumAnnotator.getSpectrumAnnotation(annotations), annotationSettings.getTiesResolution() == SpectrumAnnotator.TiesResolution.mostAccurateMz);
@@ -1677,7 +1682,7 @@ public class SpectrumMainPanel extends JPanel {
                             mirroredAnnotations = tagSpectrumAnnotator.getSpectrumAnnotation(annotationSettings, specificAnnotationSettings, mirrorSpectrum, tagAssumption.getTag());
                         } else if (spectrumIdentificationAssumption instanceof PeptideAssumption) {
                             PeptideAssumption peptideAssumption = (PeptideAssumption) spectrumIdentificationAssumption;
-                            mirroredAnnotations = peptideSpectrumAnnotator.getSpectrumAnnotationFiter(annotationSettings, specificAnnotationSettings, mirrorSpectrum, peptideAssumption.getPeptide(), null, true);
+                            mirroredAnnotations = peptideSpectrumAnnotator.getSpectrumAnnotationFiter(annotationSettings, specificAnnotationSettings, mirrorSpectrum, peptideAssumption.getPeptide(), null, ptmFactory, true);
                         } else {
                             throw new UnsupportedOperationException("Operation not supported for spectrumIdentificationAssumption of type " + spectrumIdentificationAssumption.getClass() + ".");
                         }
@@ -1777,7 +1782,7 @@ public class SpectrumMainPanel extends JPanel {
                                 "", "", false, utilitiesUserPreferences.getSpectrumAnnotatedMirroredPeakColor(),
                                 utilitiesUserPreferences.getSpectrumAnnotatedMirroredPeakColor());
 
-                        ArrayList<IonMatch> checkAnnotations =  peptideSpectrumAnnotator.getSpectrumAnnotationFiter(annotationSettings, specificAnnotationSettings, currentSpectrum, peptide, null, true);
+                        ArrayList<IonMatch> checkAnnotations =  peptideSpectrumAnnotator.getSpectrumAnnotationFiter(annotationSettings, specificAnnotationSettings, currentSpectrum, peptide, null, ptmFactory, null);
 
                         checkPeptideSpectrumPanel.setAnnotationsMirrored(SpectrumAnnotator.getSpectrumAnnotation(checkAnnotations));
 

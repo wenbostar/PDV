@@ -12,6 +12,7 @@ import com.compomics.util.experiment.massspectrometry.Spectrum;
 import com.compomics.util.experiment.massspectrometry.SpectrumFactory;
 import org.apache.commons.lang.StringUtils;
 import uk.ac.ebi.jmzml.xml.io.MzMLUnmarshallerException;
+import utils.MaxQuantGenMGF;
 
 import javax.swing.*;
 import java.io.*;
@@ -489,83 +490,7 @@ public class MaxQuantImport {
                 fileNameToScanNum.put(fileName, eachFileScanList);
             }
 
-            BufferedWriter fileWriter = null;
-            String spectrumTitle;
-            String partTitle;
-            String spectrumFileName;
-            String scanNum;
-            String mass = null;
-            String charge = null;
-            boolean isFirstMentioned = true;
-            for (File eachAPLFile : allAPLFiles) {
-
-                BufferedReader bufferedReader = new BufferedReader(new FileReader(eachAPLFile));
-                String line;
-                boolean insideSpectrum = false;
-
-                while ((line = bufferedReader.readLine()) != null) {
-
-                    if (line.endsWith("\r")) {
-                        line = line.replace("\r", "");
-                    }
-
-                    if (line.startsWith("peaklist start")) {
-                        insideSpectrum = true;
-
-                    } else if (line.startsWith("header")) {
-                        spectrumTitle = line.split("=")[1];
-                        spectrumFileName = spectrumTitle.split(" ")[1];
-                        scanNum = spectrumTitle.split(" ")[3];
-
-                        currentScanNumList = fileNameToScanNum.get(spectrumFileName);
-
-                        if (currentScanNumList != null) {
-
-                            if (currentScanNumList.contains(scanNum)) {
-                                isFirstMentioned = false;
-                            } else {
-                                fileNameToScanNum.get(spectrumFileName).add(scanNum);
-                                isFirstMentioned = true;
-                            }
-
-                            if (isFirstMentioned) {
-                                fileWriter = fileNameToFileWriter.get(spectrumFileName);
-
-                                spectrumTitle = "RawFile: " + spectrumFileName + " Index: " + scanNum + " Charge: " + charge;
-                                partTitle = "RawFile: " + spectrumFileName + " Index: " + scanNum;
-
-                                fileWriter.write("BEGIN IONS\n");
-                                fileWriter.write("TITLE=" + spectrumTitle + "\n");
-                                fileWriter.write("PEPMASS=" + mass + "\n");
-                                fileWriter.write("CHARGE=" + charge + "+\n");
-                                fileWriter.write("RTINSECONDS=" + Double.valueOf(fileToTitleToRTMap.get(spectrumFileName).get(partTitle)) * 60 + "\n");
-                            }
-                        } else {
-                            System.err.println("It can not find this file ");
-                            isFirstMentioned = false;
-                        }
-
-                    } else if (line.startsWith("mz")) {
-                        mass = line.split("=")[1];
-
-                    } else if (line.startsWith("charge")) {
-                        charge = line.split("=")[1];
-
-                    } else if (line.startsWith("peaklist end")) {
-                        if (isFirstMentioned) {
-                            fileWriter.write("END IONS\n");
-                        }
-
-                    } else if (line.startsWith("fragmentation")) {
-
-                    } else if (insideSpectrum && !line.equals("")) {
-                        if (isFirstMentioned) {
-                            fileWriter.write(line + "\n");
-                        }
-                    }
-                }
-                bufferedReader.close();
-            }
+            new MaxQuantGenMGF(allAPLFiles, fileNameToFileWriter, fileNameToScanNum, fileToTitleToRTMap);
 
             fileToTitleToRTMap.clear();
 

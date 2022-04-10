@@ -5,6 +5,7 @@ import PDVGUI.gui.SpectrumLibDisplay;
 import PDVGUI.utils.Export;
 import com.compomics.util.enumeration.ImageType;
 import com.compomics.util.experiment.biology.Ion;
+import com.compomics.util.experiment.biology.PTMFactory;
 import com.compomics.util.experiment.biology.Peptide;
 import com.compomics.util.experiment.biology.ions.PeptideFragmentIon;
 import com.compomics.util.experiment.biology.ions.TagFragmentIon;
@@ -139,6 +140,10 @@ public class RealTimeExportJDialog extends JDialog {
      * Current peptide sequence
      */
     private String currentPeptide;
+    /**
+     * PTMFactory
+     */
+    private PTMFactory ptmFactory;
 
     /**
      * Constructor
@@ -157,7 +162,7 @@ public class RealTimeExportJDialog extends JDialog {
      */
     public RealTimeExportJDialog(Integer forwardIon, Integer rewindIon, Integer height, Integer width, String unit
             , PeptideSpectrumAnnotator peptideSpectrumAnnotator, SpecificAnnotationSettings specificAnnotationSettings, PDVMainClass pdvMainClass
-            , HashMap<Double, String> deltaMassMap, PtmSettings ptmSettings, ImageType imageType, String outputPath){
+            , HashMap<Double, String> deltaMassMap, PtmSettings ptmSettings, ImageType imageType, String outputPath, PTMFactory ptmFactory){
         
         this.forwardIon = forwardIon;
         this.rewindIon = rewindIon;
@@ -174,6 +179,7 @@ public class RealTimeExportJDialog extends JDialog {
         this.height = height;
         this.width = width;
         this.unit = unit;
+        this.ptmFactory = ptmFactory;
 
         initComponent();
 
@@ -197,7 +203,7 @@ public class RealTimeExportJDialog extends JDialog {
      */
     public RealTimeExportJDialog(Integer forwardIon, Integer rewindIon, Integer height, Integer width, String unit
             , PeptideSpectrumAnnotator peptideSpectrumAnnotator, SpecificAnnotationSettings specificAnnotationSettings, SpectrumLibDisplay spectrumLibDisplay
-            , HashMap<Double, String> deltaMassMap, PtmSettings ptmSettings, ImageType imageType, String outputPath){
+            , HashMap<Double, String> deltaMassMap, PtmSettings ptmSettings, ImageType imageType, String outputPath, PTMFactory ptmFactory){
 
         this.forwardIon = forwardIon;
         this.rewindIon = rewindIon;
@@ -214,6 +220,7 @@ public class RealTimeExportJDialog extends JDialog {
         this.height = height;
         this.width = width;
         this.unit = unit;
+        this.ptmFactory = ptmFactory;
 
         initComponent();
 
@@ -553,7 +560,7 @@ public class RealTimeExportJDialog extends JDialog {
                         Peptide currentPeptide = peptideAssumption.getPeptide();
                         modSequence = currentPeptide.getTaggedModifiedSequence(ptmSettings, false, false, false, false);
 
-                        annotations = peptideSpectrumAnnotator.getSpectrumAnnotationFiter(annotationSettings, specificAnnotationSettings, mSnSpectrum, peptideAssumption.getPeptide(), null, true);
+                        annotations = peptideSpectrumAnnotator.getSpectrumAnnotationFiter(annotationSettings, specificAnnotationSettings, mSnSpectrum, peptideAssumption.getPeptide(), null, ptmFactory, true);
                     } else {
                         throw new UnsupportedOperationException("Operation not supported for spectrumIdentificationAssumption of type " + spectrumIdentificationAssumption.getClass() + ".");
                     }

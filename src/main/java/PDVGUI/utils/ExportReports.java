@@ -229,7 +229,7 @@ public class ExportReports {
                 Peptide currentPeptide = peptideAssumption.getPeptide();
                 currentPeptideSequence = currentPeptide.getSequence();
 
-                annotations = peptideSpectrumAnnotator.getSpectrumAnnotationFiter(annotationSettings, specificAnnotationSettings, mSnSpectrum, peptideAssumption.getPeptide(), null, true);
+                annotations = peptideSpectrumAnnotator.getSpectrumAnnotationFiter(annotationSettings, specificAnnotationSettings, mSnSpectrum, peptideAssumption.getPeptide(), null, pdvMainClass.ptmFactory, true);
             } else {
                 throw new UnsupportedOperationException("Operation not supported for spectrumIdentificationAssumption of type " + spectrumIdentificationAssumption.getClass() + ".");
             }

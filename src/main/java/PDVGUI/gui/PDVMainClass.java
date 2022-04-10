@@ -130,7 +130,7 @@ public class PDVMainClass extends JFrame {
     /**
      * PTMFactory containing all modifications import from utilities
      */
-    private PTMFactory ptmFactory = PTMFactory.getInstance();
+    public PTMFactory ptmFactory = PTMFactory.getInstance();
     /**
      * Find Type
      */
@@ -258,7 +258,7 @@ public class PDVMainClass extends JFrame {
     /**
      * Version
      */
-    private static final String VERSION = "1.7.4";
+    private static final String VERSION = "1.7.6";
 
     /**
      * Main class
@@ -3820,7 +3820,7 @@ public class PDVMainClass extends JFrame {
 
         RealTimeExportJDialog realTimeExportJDialog = new RealTimeExportJDialog((Integer) allParameters[0], (Integer) allParameters[1], picHeight, picWidth, unit,
                 (PeptideSpectrumAnnotator) allParameters[2], (SpecificAnnotationSettings) allParameters[3], this, (HashMap<Double, String>)allParameters[4],
-                (PtmSettings) allParameters[5], finalImageType, outputFolder);
+                (PtmSettings) allParameters[5], finalImageType, outputFolder, ptmFactory);
 
         if (exportAll){
             realTimeExportJDialog.readAllSpectrums(allSpectrumIndex);
