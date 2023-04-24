@@ -1017,7 +1017,7 @@ public class DatabaseImportDialog extends JDialog {
             pdvMainClass.importMzID(spectrumsFileFactory, idFile, mzIdentMLType, spectrumFileType, spectrumIdAndNumber);
             idFile = null;
 
-        }else if(idFile.getName().toLowerCase().endsWith("xml")){
+        } else if(idFile.getName().toLowerCase().endsWith("xml")){
             pdvMainClass.importFilePep(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType, spectrumIdAndNumber);
             idFile = null;
         } else if(idFile.getName().toLowerCase().endsWith(".txt") || idFile.getName().toLowerCase().endsWith(".csv") ||

@@ -188,6 +188,10 @@ public class PDVMainClass extends JFrame {
      */
     private Boolean isNewSoft = false;
     /**
+     * Boolean indicate if mztab or not
+     */
+    private Boolean isMztab = false;
+    /**
      * Boolean indicate if De Novo or not
      */
     private Boolean isDenovo = false;
@@ -258,7 +262,7 @@ public class PDVMainClass extends JFrame {
     /**
      * Version
      */
-    private static final String VERSION = "1.7.6";
+    private static final String VERSION = "1.8.0";
 
     /**
      * Main class
@@ -1436,17 +1440,14 @@ public class PDVMainClass extends JFrame {
 
         switch (spectrumFileType) {
             case "mzml":
-
                 scans = (ScanCollectionDefault) spectrumsFileFactory;
                 break;
 
             case "mgf":
-
                 spectrumFactory = (SpectrumFactory) spectrumsFileFactory;
                 break;
 
             case "mzxml":
-
                 scans = (ScanCollectionDefault) spectrumsFileFactory;
                 break;
         }
@@ -1487,6 +1488,90 @@ public class PDVMainClass extends JFrame {
                     orderName.add("Sequence");
                     orderName.addAll(scoreName);
                     setUpTableHeaderToolTips();
+
+                    buttonCheck();
+
+                    sortColumnJCombox.setModel(new DefaultComboBoxModel(orderName.toArray()));
+
+                } catch (SQLException | ClassNotFoundException | IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
+    }
+
+    /**
+     * Import mztab results
+     * @param spectrumFile Spectrum file
+     * @param spectrumsFileFactory Spectrum factory
+     * @param textFile Text Id file
+     */
+    public void importMztabResults(File spectrumFile, Object spectrumsFileFactory, File textFile, String spectrumFileType) {
+
+        this.isNewSoft = false;
+        this.isMztab = true;
+
+        this.spectrumsFileFactory = spectrumsFileFactory;
+        this.spectrumFileType = spectrumFileType;
+
+        if ("mgf".equals(spectrumFileType)) {
+            spectrumFactory = (SpectrumFactory) spectrumsFileFactory;
+        }
+
+        databasePath = textFile.getAbsolutePath()+".db";
+
+        ProgressDialogX progressDialog = new ProgressDialogX(this,
+                Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMass.png")),
+                Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMassWait.png")),
+                true);
+        progressDialog.setPrimaryProgressCounterIndeterminate(true);
+        progressDialog.setTitle("Loading Results. Please Wait...");
+
+        new Thread(() -> {
+            try {
+                progressDialog.setVisible(true);
+            } catch (IndexOutOfBoundsException ignored) {
+            }
+        }, "ProgressDialog").start();
+        new Thread("DisplayThread") {
+            @Override
+            public void run() {
+
+                MztabImport mztabImport;
+
+                try {
+                    mztabImport = new MztabImport(PDVMainClass.this, textFile, spectrumFile, progressDialog);
+
+                    sqliteConnection = mztabImport.getSqLiteConnection();
+                    allModifications = mztabImport.getAllModifications();
+                    detailsList = mztabImport.getDetailsList();
+                    originalInfor = mztabImport.getOriginalInfor();
+
+                    scoreName = mztabImport.getScoreName();
+
+                    ArrayList<String> orderName = new ArrayList<>();
+                    orderName.add("PSMIndex");
+                    orderName.add("MZ");
+                    orderName.add("Sequence");
+                    orderName.addAll(scoreName);
+                    setUpTableHeaderToolTips();
+
+                    columnToSelected = new HashMap<>();
+                    for (String eachColumn: scoreName){
+                        columnToSelected.put(eachColumn, false);
+                    }
+                    columnToSelected.put("Mass error", false);
+                    columnToSelected.put("m/z", false);
+                    columnToSelected.put("Other Assumption", false);
+
+                    ArrayList<String> proteinShowNames = (ArrayList<String>) Stream.of("`PSM_ID`", "`search_engine_score[1]`", "`exp_mass_to_charge`", "calc_mass_to_charge",
+                            "spectra_ref").collect(Collectors.toList());
+
+                    for (String eachColumn: proteinShowNames){
+                        if (scoreName.contains(eachColumn)){
+                            columnToSelected.put(eachColumn, true);
+                        }
+                    }
 
                     buttonCheck();
 
@@ -2352,6 +2437,42 @@ public class PDVMainClass extends JFrame {
         spectrumJTable.setModel(databaseTableModel);
 
         updateTable();
+
+        if (isMztab) {
+            String key = "Key";
+            spectrumJTable.getColumn(key).setPreferredWidth(50);
+            spectrumJTable.getColumn(key).setMinWidth(50);
+            spectrumJTable.getColumn(key).setMaxWidth(50);
+            key = "RT (min)";
+            spectrumJTable.getColumn(key).setPreferredWidth(50);
+            spectrumJTable.getColumn(key).setMinWidth(40);
+            spectrumJTable.getColumn(key).setMaxWidth(100);
+            key = "Charge";
+            spectrumJTable.getColumn(key).setPreferredWidth(50);
+            spectrumJTable.getColumn(key).setMinWidth(50);
+            spectrumJTable.getColumn(key).setMaxWidth(50);
+            key = "Title";
+            spectrumJTable.getColumn(key).setPreferredWidth(250);
+            spectrumJTable.getColumn(key).setMinWidth(10);
+            spectrumJTable.getColumn(key).setMaxWidth(500);
+            key = "Sequence";
+            spectrumJTable.getColumn(key).setPreferredWidth(250);
+            spectrumJTable.getColumn(key).setMinWidth(100);
+            spectrumJTable.getColumn(key).setMaxWidth(500);
+
+            for (String newKey : columnToSelected.keySet()) {
+                if (!columnToSelected.get(newKey)) {
+                    spectrumJTable.getColumn(newKey).setMinWidth(0);
+                    spectrumJTable.getColumn(newKey).setMaxWidth(0);
+                } else {
+                    spectrumJTable.getColumn(newKey).setPreferredWidth(150);
+                    spectrumJTable.getColumn(newKey).setMinWidth(20);
+                    spectrumJTable.getColumn(newKey).setMaxWidth(400);
+                }
+            }
+            spectrumJTable.revalidate();
+            spectrumJTable.repaint();
+        }
     }
 
     /**

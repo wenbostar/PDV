@@ -446,7 +446,9 @@ public class DeNovoImportDialog extends JDialog {
                         pdvMainClass.importDeepNovoResults(identificationFile, spectrumFile, spectrumFactory);
                     } else if (identificationFile.getName().endsWith(".tsk")){
                         pdvMainClass.importPNovoResults(identificationFile, spectrumFile, spectrumFactory);
-                    } else {
+                    } else if (identificationFile.getName().endsWith(".mztab")){
+                        pdvMainClass.importMztabResults(spectrumFile, spectrumFactory, identificationFile, "mgf");
+                    }else {
                         pdvMainClass.importDeNovoResults(identificationFile, spectrumFile, spectrumFactory);
                     }
 
@@ -529,12 +531,13 @@ public class DeNovoImportDialog extends JDialog {
                         || myFile.getName().toLowerCase().endsWith(".out")
                         || myFile.getName().toLowerCase().endsWith(".tab")
                         || myFile.getName().toLowerCase().endsWith(".tsk")
+                        || myFile.getName().toLowerCase().endsWith(".mztab")
                         || myFile.isDirectory();
             }
 
             @Override
             public String getDescription() {
-                return " pepNovo+ (.out), DirecTag (.tags), DeepNovo (.tab), pNovo (.tsk) and Novor (.novor.csv)";
+                return " pepNovo+ (.out), DirecTag (.tags), DeepNovo (.tab), pNovo (.tsk), Novor (.novor.csv), Casanovo(.mztab)";
             }
         };
 
