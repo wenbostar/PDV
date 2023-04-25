@@ -241,28 +241,44 @@ public class TextFileImport {
                 ArrayList<String> residues;
 
                 if(!modificationNames.equals("-")){
+                    // For example, TNEKVELQELNDR   Oxidation of N@2[15.9949]
                     for (String singleModification: modificationNames.split(";")){
+                        // Oxidation of N
                         singleModificationName = singleModification.split("@")[0];
+                        // 2
                         modificationSite = Integer.valueOf(singleModification.split("@")[1].split("\\[")[0]);
+                        // 15.9949
                         modificationMass = Double.valueOf(singleModification.split("@")[1].split("\\[")[1].replace("]", ""));
 
                         if (!ptmFactory.containsPTM(singleModificationName)){
                             String modificationName = singleModificationName.split(" of ")[0];
-                            residues = new ArrayList<>();
-                            residues.add(singleModificationName.split(" of ")[1]);
 
                             if (singleModificationName.toLowerCase().contains("n-term")){
+                                residues = new ArrayList<>();
+                                residues.add(singleModificationName.split(" of ")[1]);
                                 PTM ptm = new PTM(PTM.MODNP, singleModificationName, modificationMass, residues);
                                 ptm.setShortName(modificationName);
                                 ptmFactory.addUserPTM(ptm);
                             } else if (singleModificationName.toLowerCase().contains("c-term")){
+                                residues = new ArrayList<>();
+                                residues.add(singleModificationName.split(" of ")[1]);
                                 PTM ptm = new PTM(PTM.MODCP, singleModificationName, modificationMass, residues);
                                 ptm.setShortName(modificationName);
                                 ptmFactory.addUserPTM(ptm);
                             } else {
+                                residues = new ArrayList<>();
+                                // Extract amino acid from peptide sequence. This is more robust than that from modification name
+                                String amino_acid = String.valueOf(sequence.charAt(modificationSite-1));
+                                String[] aas = singleModificationName.split(" ");
+                                if(!aas[aas.length-1].equalsIgnoreCase(amino_acid)){
+                                    System.err.println("Warning: amino acid match issue - "+amino_acid+" vs "+aas[aas.length-1]+", "+singleModification);
+                                }
+                                residues.add(amino_acid);
+
                                 PTM ptm = new PTM(PTM.MODAA, singleModificationName, modificationMass, residues);
 
-                                if (singleModificationName.split(" of ")[1].equals("T") || singleModificationName.split(" of ")[1].equals("S")){
+                                //if (singleModificationName.split(" of ")[1].equals("T") || singleModificationName.split(" of ")[1].equals("S")){
+                                if (amino_acid.equals("T") || amino_acid.equals("S")){
                                     if (modificationMass < 80.01 && modificationMass > 79.9){
                                         ptm.addNeutralLoss(NeutralLoss.H3PO4);
                                     }
@@ -270,6 +286,24 @@ public class TextFileImport {
 
                                 ptm.setShortName(modificationName);
                                 ptmFactory.addUserPTM(ptm);
+
+                                // need to fix PTM name in some cases
+                                if(!singleModificationName.contains("of ")){
+                                    String singleModificationName_format = singleModificationName+" of "+amino_acid;
+                                    PTM ptm2 = new PTM(PTM.MODAA, singleModificationName_format, modificationMass, residues);
+
+                                    //if (singleModificationName.split(" of ")[1].equals("T") || singleModificationName.split(" of ")[1].equals("S")){
+                                    if (amino_acid.equals("T") || amino_acid.equals("S")){
+                                        if (modificationMass < 80.01 && modificationMass > 79.9){
+                                            ptm.addNeutralLoss(NeutralLoss.H3PO4);
+                                        }
+                                    }
+
+                                    ptm2.setShortName(singleModificationName);
+                                    System.out.println("Added format modification:"+singleModificationName);
+                                    System.out.println("Formatted modification:"+singleModificationName_format);
+                                    ptmFactory.addUserPTM(ptm2);
+                                }
                             }
                         }
 

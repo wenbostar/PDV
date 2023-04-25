@@ -1474,10 +1474,28 @@ public class SpectrumMainPanel extends JPanel {
                         for (ModificationMatch modificationMatch : allModifications) {
 
                             String name = modificationMatch.getTheoreticPtm();
-                            String aa = name.split("of ")[1];
+                            // modification site, 1 is the first amino acid.
+                            int mod_pos = modificationMatch.getModificationSite();
+                            // String aa = name.split("of ")[1];
                             double mass = ptmFactory.getPTM(name).getMass();
-                            if (aa.equals("N") & mass> 203){
-                                glycanProb += 1;
+                            if(mod_pos>=1 && mod_pos <= currentPeptideSequence.length()) {
+                                String aa = String.valueOf(currentPeptideSequence.charAt(mod_pos-1));
+                                if (aa.equals("N") & mass > 203) {
+                                    glycanProb += 1;
+                                }
+                            }
+                            if(!name.contains("of ")){
+                                System.out.println("Format modification:"+name);
+                                String aa = "";
+                                if(mod_pos == 0){
+                                    aa = "n-term";
+                                }else if(mod_pos == (currentPeptideSequence.length()+1)){
+                                    aa = "c-term";
+                                }else{
+                                    aa = String.valueOf(currentPeptideSequence.charAt(mod_pos-1));
+                                }
+                                System.out.println("After formatting:"+name+" of "+aa);
+                                modificationMatch.setTheoreticPtm(name+" of "+aa);
                             }
                         }
 
