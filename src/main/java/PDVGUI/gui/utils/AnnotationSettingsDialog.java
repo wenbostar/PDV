@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import static com.compomics.util.experiment.biology.Ion.IonType.IMMONIUM_ION;
+
 /**
  * Annotation setting dialog
  * Created by Ken on 9/15/2017.
@@ -156,18 +158,18 @@ public class AnnotationSettingsDialog extends JDialog {
         GroupLayout annotationColorsJPanelLayout = new GroupLayout(annotationColorsPanel);
         annotationColorsPanel.setLayout(annotationColorsJPanelLayout);
         annotationColorsJPanelLayout.setHorizontalGroup(
-            annotationColorsJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(annotationColorsJPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(colorsScrollPane, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                .addContainerGap())
+                annotationColorsJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(annotationColorsJPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(colorsScrollPane, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                                .addContainerGap())
         );
         annotationColorsJPanelLayout.setVerticalGroup(
-            annotationColorsJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(annotationColorsJPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(colorsScrollPane, GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
-                .addContainerGap())
+                annotationColorsJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(annotationColorsJPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(colorsScrollPane, GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
+                                .addContainerGap())
         );
 
         titledBorder = BorderFactory.createTitledBorder("Peak Settings" + " \t ");
@@ -199,12 +201,12 @@ public class AnnotationSettingsDialog extends JDialog {
         GroupLayout annotatedPeakColorJPanelLayout = new GroupLayout(annotatedPeakColorJPanel);
         annotatedPeakColorJPanel.setLayout(annotatedPeakColorJPanelLayout);
         annotatedPeakColorJPanelLayout.setHorizontalGroup(
-            annotatedPeakColorJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGap(0, 27, Short.MAX_VALUE)
+                annotatedPeakColorJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGap(0, 27, Short.MAX_VALUE)
         );
         annotatedPeakColorJPanelLayout.setVerticalGroup(
-            annotatedPeakColorJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGap(0, 20, Short.MAX_VALUE)
+                annotatedPeakColorJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGap(0, 20, Short.MAX_VALUE)
         );
 
         backgroundPeakColorJPanel.setBorder(BorderFactory.createEtchedBorder());
@@ -224,12 +226,12 @@ public class AnnotationSettingsDialog extends JDialog {
         GroupLayout backgroundPeakColorPanelLayout = new GroupLayout(backgroundPeakColorJPanel);
         backgroundPeakColorJPanel.setLayout(backgroundPeakColorPanelLayout);
         backgroundPeakColorPanelLayout.setHorizontalGroup(
-            backgroundPeakColorPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGap(0, 27, Short.MAX_VALUE)
+                backgroundPeakColorPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGap(0, 27, Short.MAX_VALUE)
         );
         backgroundPeakColorPanelLayout.setVerticalGroup(
-            backgroundPeakColorPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGap(0, 20, Short.MAX_VALUE)
+                backgroundPeakColorPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGap(0, 20, Short.MAX_VALUE)
         );
 
         annotatedWidthLabel.setText("Annotated Peak Width");
@@ -247,49 +249,49 @@ public class AnnotationSettingsDialog extends JDialog {
         GroupLayout peakSettingsJPanelLayout = new GroupLayout(peakSettingsJPanel);
         peakSettingsJPanel.setLayout(peakSettingsJPanelLayout);
         peakSettingsJPanelLayout.setHorizontalGroup(
-            peakSettingsJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(peakSettingsJPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(peakSettingsJPanelLayout.createParallelGroup(GroupLayout.Alignment.TRAILING, false)
-                    .addGroup(peakSettingsJPanelLayout.createSequentialGroup()
-                        .addComponent(backgroundPeakJLabel)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(backgroundPeakColorJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                    .addGroup(GroupLayout.Alignment.LEADING, peakSettingsJPanelLayout.createSequentialGroup()
-                        .addComponent(annotatedPeakJLabel, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(annotatedPeakColorJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
-                .addGap(50, 50, 50)
-                .addGroup(peakSettingsJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-                    .addGroup(peakSettingsJPanelLayout.createSequentialGroup()
-                        .addComponent(annotatedWidthLabel)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(annotatedPeakWidthJSpinner, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE))
-                    .addGroup(peakSettingsJPanelLayout.createSequentialGroup()
-                        .addComponent(backgroundWidthLabel)
-                        .addGap(18, 18, 18)
-                        .addComponent(backgroundPeakWidthJSpinner, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
+                peakSettingsJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(peakSettingsJPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(peakSettingsJPanelLayout.createParallelGroup(GroupLayout.Alignment.TRAILING, false)
+                                        .addGroup(peakSettingsJPanelLayout.createSequentialGroup()
+                                                .addComponent(backgroundPeakJLabel)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(backgroundPeakColorJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(GroupLayout.Alignment.LEADING, peakSettingsJPanelLayout.createSequentialGroup()
+                                                .addComponent(annotatedPeakJLabel, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(annotatedPeakColorJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
+                                .addGap(50, 50, 50)
+                                .addGroup(peakSettingsJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
+                                        .addGroup(peakSettingsJPanelLayout.createSequentialGroup()
+                                                .addComponent(annotatedWidthLabel)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(annotatedPeakWidthJSpinner, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(peakSettingsJPanelLayout.createSequentialGroup()
+                                                .addComponent(backgroundWidthLabel)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(backgroundPeakWidthJSpinner, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE)))
+                                .addContainerGap())
         );
 
         peakSettingsJPanelLayout.linkSize(SwingConstants.HORIZONTAL, new Component[] {annotatedPeakJLabel, annotatedWidthLabel, backgroundPeakJLabel, backgroundWidthLabel});
 
         peakSettingsJPanelLayout.setVerticalGroup(
-            peakSettingsJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(peakSettingsJPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(peakSettingsJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
-                    .addComponent(annotatedPeakJLabel)
-                    .addComponent(annotatedPeakColorJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                    .addComponent(annotatedWidthLabel)
-                    .addComponent(annotatedPeakWidthJSpinner, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                .addGroup(peakSettingsJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addComponent(backgroundPeakColorJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                    .addGroup(peakSettingsJPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(backgroundWidthLabel)
-                        .addComponent(backgroundPeakWidthJSpinner, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                    .addComponent(backgroundPeakJLabel))
-                .addContainerGap())
+                peakSettingsJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(peakSettingsJPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(peakSettingsJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                                        .addComponent(annotatedPeakJLabel)
+                                        .addComponent(annotatedPeakColorJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(annotatedWidthLabel)
+                                        .addComponent(annotatedPeakWidthJSpinner, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addGroup(peakSettingsJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addComponent(backgroundPeakColorJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addGroup(peakSettingsJPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                                .addComponent(backgroundWidthLabel)
+                                                .addComponent(backgroundPeakWidthJSpinner, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(backgroundPeakJLabel))
+                                .addContainerGap())
         );
 
         peakSettingsJPanelLayout.linkSize(SwingConstants.VERTICAL, new Component[] {annotatedPeakJLabel, annotatedPeakColorJPanel, annotatedPeakWidthJSpinner, annotatedWidthLabel, backgroundPeakJLabel, backgroundPeakColorJPanel, backgroundPeakWidthJSpinner, backgroundWidthLabel});
@@ -332,42 +334,42 @@ public class AnnotationSettingsDialog extends JDialog {
         GroupLayout backgroundPanelLayout = new GroupLayout(backgroundPanel);
         backgroundPanel.setLayout(backgroundPanelLayout);
         backgroundPanelLayout.setHorizontalGroup(
-            backgroundPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(backgroundPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(backgroundPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addGroup(backgroundPanelLayout.createSequentialGroup()
-                        .addGap(10, 10, 10)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(okButton, GroupLayout.PREFERRED_SIZE, 65, GroupLayout.PREFERRED_SIZE))
-                    .addComponent(peakSettingsJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(annotationColorsPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(annotationLevelJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+                backgroundPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(backgroundPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(backgroundPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addGroup(backgroundPanelLayout.createSequentialGroup()
+                                                .addGap(10, 10, 10)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(okButton, GroupLayout.PREFERRED_SIZE, 65, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(peakSettingsJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(annotationColorsPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(annotationLevelJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addContainerGap())
         );
         backgroundPanelLayout.setVerticalGroup(
-            backgroundPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(backgroundPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(annotationColorsPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(peakSettingsJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(annotationLevelJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                .addGroup(backgroundPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addComponent(okButton))
-                .addContainerGap())
+                backgroundPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(backgroundPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(annotationColorsPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(peakSettingsJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(annotationLevelJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addGroup(backgroundPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addComponent(okButton))
+                                .addContainerGap())
         );
 
         GroupLayout layout = new GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addComponent(backgroundPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addComponent(backgroundPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addComponent(backgroundPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addComponent(backgroundPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
@@ -425,7 +427,18 @@ public class AnnotationSettingsDialog extends JDialog {
                     int[] selectedRows = colorsJTable.getSelectedRows();
 
                     for (int selectedRow : selectedRows) {
-                        SpectrumPanel.setIonColor(((IonLabelColorTableModel) colorsJTable.getModel()).getIonAtRow(selectedRow), newColor);
+
+                        if (((IonLabelColorTableModel) colorsJTable.getModel()).getIonAtRow(selectedRow).getName() == "rA"){
+                            for (int i = 1; i < 21; i ++){
+                                SpectrumPanel.setIonColor(Ion.getGenericIon(Ion.IonType.RELATED_ION, i), newColor);
+                            }
+                        } else if (((IonLabelColorTableModel) colorsJTable.getModel()).getIonAtRow(selectedRow).getName() == "iA"){
+                            for (int i = 0; i < 21; i ++){
+                                SpectrumPanel.setIonColor(Ion.getGenericIon(IMMONIUM_ION, i), newColor);
+                            }
+                        } else {
+                            SpectrumPanel.setIonColor(((IonLabelColorTableModel) colorsJTable.getModel()).getIonAtRow(selectedRow), newColor);
+                        }
                     }
 
                     ((IonLabelColorTableModel) colorsJTable.getModel()).fireTableDataChanged();
