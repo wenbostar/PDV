@@ -8,6 +8,15 @@ import io.github.msdk.io.mzml.MzMLFileImportMethod;
 import io.github.msdk.io.mzml.data.MzMLRawDataFile;
 import io.github.msdk.io.mzxml.MzXMLFileParser;
 import io.github.msdk.io.mzxml.MzXMLRawDataFile;
+import umich.ms.datatypes.LCMSDataSubset;
+import umich.ms.datatypes.lcmsrun.LCMSRunInfo;
+import umich.ms.datatypes.scan.IScan;
+import umich.ms.datatypes.scan.StorageStrategy;
+import umich.ms.datatypes.scancollection.IScanCollection;
+import umich.ms.datatypes.scancollection.impl.ScanCollectionDefault;
+import umich.ms.fileio.exceptions.FileParsingException;
+import umich.ms.fileio.filetypes.mzml.MZMLFile;
+import umich.ms.fileio.filetypes.mzml.MZMLIndex;
 
 import java.io.File;
 import java.math.BigInteger;
@@ -86,6 +95,8 @@ public class MSOneImport {
 
             List<MsScan> msScans = mzMLRawDataFile.getScans();
 
+            System.out.println("Load file:"+spectrumFile.getAbsolutePath());
+
             if (spectrumFile.length() > 524288000) {
 
                 for (Chromatogram chromatogram : mzMLRawDataFile.getChromatograms()) {
@@ -110,7 +121,7 @@ public class MSOneImport {
 
                     rtRange = chromatogram.getRtRange();
 
-                    detailsList.add("RT/t/Start:"+rtRange.lowerEndpoint()+" End:"+rtRange.upperEndpoint());
+                    detailsList.add("LC gradient length/t/"+String.format("%.0f",rtRange.lowerEndpoint())+" - "+String.format("%.0f",rtRange.upperEndpoint())+" min");
                 }
 
                 for (MsScan msScan : msScans) {
@@ -122,6 +133,7 @@ public class MSOneImport {
                 }
 
             } else {
+                System.out.println("Extract meta information from mzML ...");
 
                 float startRT = 10000;
                 float endRT = 0f;
@@ -153,8 +165,16 @@ public class MSOneImport {
                 }
 
                 keyToRtAndInt.put("TIC", rtToItem);
+                detailsList.add("LC gradient length/t/"+String.format("%.0f",startRT)+" - "+String.format("%.0f",endRT)+" min");
 
-                detailsList.add("RT (min)/t/Start:" + startRT +" End:" + endRT);
+                //detailsList.add("RT (min)/t/Start:" + startRT +" End:" + endRT);
+            }
+
+            HashMap<String,String> ms2meta = get_ms2_meta(spectrumFilePath);
+            if(ms2meta.size()>=1) {
+                for(String item: ms2meta.keySet()){
+                    detailsList.add(item+"/t/" + ms2meta.get(item));
+                }
             }
 
         } else if (spectrumFileType.equals("mzxml")){
@@ -202,8 +222,11 @@ public class MSOneImport {
          msNum[0] = "MS Num";
          msNum[1] = String.valueOf(ms1Count);
          msNum[2] = String.valueOf(ms2Count);
+         detailsList.add("MS1 Spectra/t/"+ms1Count);
+         detailsList.add("MS2 Spectra/t/"+ms2Count);
 
-         detailsList.add("MS Num/t/MS1:"+ms1Count+" MS2:"+ms2Count);
+         // detailsList.add("MS Num/t/MS1:"+ms1Count+" MS2:"+ms2Count);
+         System.out.println("Load MS data: done!");
     }
 
     /**
@@ -227,5 +250,72 @@ public class MSOneImport {
      */
     public BigInteger getBiggestNum(){
         return BigInteger.valueOf((long) biggestNum);
+    }
+
+
+    public HashMap<String, String> get_ms2_meta(String fullMsFilePath){
+
+        HashMap<String,String> ms2meta = new HashMap<>();
+        String frag_method = "-";
+        MZMLFile source = new MZMLFile(fullMsFilePath);
+
+        LCMSRunInfo lcmsRunInfo = null;
+        try {
+            lcmsRunInfo = source.fetchRunInfo();
+        } catch (FileParsingException e) {
+            e.printStackTrace();
+        }
+        source.setNumThreadsForParsing(1);
+        ms2meta.put("MS Instrument",source.getRunInfo().getDefaultInstrument().getModel());
+
+        MZMLIndex mzMLindex = null;
+        try {
+            mzMLindex = source.fetchIndex();
+        } catch (FileParsingException e) {
+            e.printStackTrace();
+        }
+
+        if (mzMLindex.size() > 0) {
+
+        } else {
+            System.err.println("Parsed index was empty!");
+        }
+
+        IScanCollection scans;
+
+        scans = new ScanCollectionDefault(true);
+        scans.setDataSource(source);
+        try {
+            scans.loadData(LCMSDataSubset.MS2_WITH_SPECTRA, StorageStrategy.STRONG);
+        } catch (FileParsingException e) {
+            e.printStackTrace();
+        }
+
+        TreeMap<Integer, IScan> num2scanMap = scans.getMapNum2scan();
+        Set<Map.Entry<Integer, IScan>> num2scanEntries = num2scanMap.entrySet();
+
+
+
+        for (Map.Entry<Integer, IScan> next : num2scanEntries) {
+            IScan scan = next.getValue();
+            if (scan.getSpectrum() != null) {
+                //System.out.println(scan.getNum());
+                if (scan.getMsLevel() == 2) {
+                    frag_method = scan.getPrecursor().getActivationInfo().getActivationMethod();
+                    double ce_h = scan.getPrecursor().getActivationInfo().getActivationEnergyHi();
+                    double ce_l = scan.getPrecursor().getActivationInfo().getActivationEnergyLo();
+                    if(ce_h == ce_l){
+                        ms2meta.put("MS2 CE",String.valueOf(ce_h));
+                    }else{
+                        ms2meta.put("MS2 CE",String.valueOf(ce_l)+":"+String.valueOf(ce_h));
+                    }
+                    ms2meta.put("MS2 Fragmentation",frag_method);
+                    // ms2meta.put("MS2 Analyzer",scan.getInstrument().getAnalyzer());
+                    // ms2meta.put("MS2 Detector",scan.getInstrument().getDetector());
+                    break;
+                }
+            }
+        }
+        return ms2meta;
     }
 }
