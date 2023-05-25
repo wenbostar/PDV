@@ -303,7 +303,11 @@ public class PDVMainClass extends JFrame {
      */
     public PDVMainClass(String newStart){
 
+
         setUpLogFile();
+
+        String user_preferences_folder = System.getProperty("user.home") + "/.pdv/";
+        UtilitiesUserPreferences.setUserPreferencesFolder(user_preferences_folder);
 
         spectrumFactory = SpectrumFactory.getInstance();
         loadUserPreferences();
