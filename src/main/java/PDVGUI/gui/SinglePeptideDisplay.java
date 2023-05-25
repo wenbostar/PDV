@@ -516,7 +516,7 @@ public class SinglePeptideDisplay extends JFrame {
                 @Override
                 public void run() {
                     try {
-                        String url = "http://proteomecentral.proteomexchange.org/api/proxi/v0.1/spectra?resultType=compact&usi=" + usiID+"&format=json";
+                        String url = "https://proteomecentral.proteomexchange.org/api/proxi/v0.1/spectra?resultType=compact&usi=" + usiID+"&format=json";
                         URL obj = new URL(url);
 
                         int charge = 2;
