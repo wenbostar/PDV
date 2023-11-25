@@ -9,8 +9,5 @@
         <module name="PDV" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="PDV" target="1.8" />
-    </bytecodeTargetLevel>
   </component>
 </project>

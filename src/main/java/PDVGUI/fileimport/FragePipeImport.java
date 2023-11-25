@@ -762,9 +762,14 @@ public class FragePipeImport {
         } else {
             precursorInt = 0.0;
         }
+        Double precursorMz = 0.0;
+        if (iScan.getPrecursor().getMzTargetMono() != null){
+            precursorMz = iScan.getPrecursor().getMzTargetMono();
+        } else {
+            precursorMz = iScan.getPrecursor().getMzTarget();
+        }
 
-        Precursor precursor = new Precursor(currentScan.getScanByNum(iScan.getPrecursor().getParentScanNum()).getRt(), iScan.getPrecursor().getMzTarget(),
-                precursorInt, charges);
+        Precursor precursor = new Precursor(iScan.getRt(), precursorMz, precursorInt, charges);
 
         double[] mzs = spectrum.getMZs();
         double[] ins = spectrum.getIntensities();
