@@ -28,11 +28,13 @@ import com.compomics.util.gui.spectrum.SpectrumPanel;
 import com.compomics.util.preferences.LastSelectedFolder;
 import com.compomics.util.preferences.SequenceMatchingPreferences;
 import com.compomics.util.preferences.UtilitiesUserPreferences;
+import uk.ac.ebi.jmzml.xml.io.MzMLUnmarshallerException;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -156,7 +158,7 @@ public class SpectrumMainPanel extends JPanel {
     /**
      * Synthetic peptide spectra file map
      */
-    private HashMap<String, File> checkSpectrumFileMaps = new HashMap<>();
+    public HashMap<String, MSnSpectrum> checkSpectrumFileMaps = new HashMap<>();
     /**
      * Current assumptions
      */
@@ -401,6 +403,7 @@ public class SpectrumMainPanel extends JPanel {
         JMenuItem showIonTableJMenuItem = new JMenuItem();
         JMenuItem showMirrorJMenuItem = new JMenuItem();
         JMenuItem checkFileMenuItem = new JMenuItem();
+        JMenuItem importOnlineMenuItem = new JMenuItem();
         JMenuItem checkPeptideMenuItem = new JMenuItem();
         JMenuItem showCheckPeptideJMenuItem = new JMenuItem();
         JMenu splitterMenu1 = new JMenu();
@@ -711,7 +714,13 @@ public class SpectrumMainPanel extends JPanel {
 
         checkFileMenuItem.addActionListener(this::checkFileMenuItemPerform);
 
+        importOnlineMenuItem.setText("Import predicted");
+        importOnlineMenuItem.setFont(menuFont);
+
+        importOnlineMenuItem.addActionListener(this::importOnlineMenuItemPerform);
+
         checkFileMenu.add(checkFileMenuItem);
+        checkFileMenu.add(importOnlineMenuItem);
 
         annotationMenuBar.add(checkFileMenu);
 
@@ -1294,12 +1303,23 @@ public class SpectrumMainPanel extends JPanel {
                 checkSpectrumFileMaps.remove(selectedPsmKey);
             }
 
-            checkSpectrumFileMaps.put(selectedPsmKey,checkSpectrumFile);
+            try {
+                SpectrumFactory spectrumFactory1 = SpectrumFactory.getInstance();
+                spectrumFactory1.addSpectra(checkSpectrumFile);
+                MSnSpectrum mirrorSpectrum = (MSnSpectrum) spectrumFactory1.getSpectrum(checkSpectrumFile.getName(), spectrumFactory1.getSpectrumTitle(checkSpectrumFile.getName(),1));
+                checkSpectrumFileMaps.put(selectedPsmKey,mirrorSpectrum);
+            } catch (IOException | MzMLUnmarshallerException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
 
             lastSelectedFolder.setLastSelectedFolder(checkSpectrumFile.getParent());
 
             updateSpectrum();
         }
+    }
+
+    private void importOnlineMenuItemPerform(ActionEvent evt){
+        new ImportPredictedDialog(this, selectedPsmKey, spectrumIdentificationAssumption);
     }
 
     /**
@@ -1680,10 +1700,7 @@ public class SpectrumMainPanel extends JPanel {
                     sequenceFragmentationPanelMirror.setBackground(Color.WHITE);
 
                     if(checkSpectrumFileMaps.containsKey(selectedPsmKey)){
-                        File checkSpectrumFile = checkSpectrumFileMaps.get(selectedPsmKey);
-                        SpectrumFactory spectrumFactory1 = SpectrumFactory.getInstance();
-                        spectrumFactory1.addSpectra(checkSpectrumFile);
-                        MSnSpectrum mirrorSpectrum = (MSnSpectrum) spectrumFactory1.getSpectrum(checkSpectrumFile.getName(), spectrumFactory1.getSpectrumTitle(checkSpectrumFile.getName(),1));
+                        MSnSpectrum mirrorSpectrum = checkSpectrumFileMaps.get(selectedPsmKey);
                         Precursor mirrorPrecursor = mirrorSpectrum.getPrecursor();
                         mirrorSpectrumPanel.addMirroredSpectrum(
                                 mirrorSpectrum.getMzValuesAsArray(), mirrorSpectrum.getIntensityValuesNormalizedAsArray(), mirrorPrecursor.getMz(),
