@@ -187,12 +187,17 @@ public class ImportPredictedDialog extends JDialog {
         String modificationString = "";
 
         if (modelListComboBox.getSelectedIndex() == 0 || modelListComboBox.getSelectedIndex() == 7) {
+            if (originalMod.contains("of C")){
+                if (Math.abs(ptmFactory.getPTM(originalMod).getMass() -57.021464) < 0.01) {
+                    modificationString = "[UNIMOD:4]";
+                }
+            }
             if (originalMod.contains("of M")){
-                if (Math.abs(ptmFactory.getPTM(originalMod).getMass() -15.994915) < 0.001) {
+                if (Math.abs(ptmFactory.getPTM(originalMod).getMass() -15.994915) < 0.01) {
                     modificationString = "[UNIMOD:35]";
                 }
             } if (originalMod.contains("of S") || originalMod.contains("of T") || originalMod.contains("of Y") || originalMod.contains("of STY")) {
-                if (Math.abs(ptmFactory.getPTM(originalMod).getMass() -79.966331) < 0.001) {
+                if (Math.abs(ptmFactory.getPTM(originalMod).getMass() -79.966331) < 0.01) {
                     modificationString = "[UNIMOD:21]";
                 }
             }
