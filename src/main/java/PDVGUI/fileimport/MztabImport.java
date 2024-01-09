@@ -235,7 +235,7 @@ public class MztabImport {
 
                 spectrumTitle = values[spectrumTitleIndex].split("index=")[1];
                 sequence = values[sequenceIndex];
-                peptideCharge = Integer.valueOf(values[chargeIndex]);
+                peptideCharge = (int) Double.parseDouble(values[chargeIndex]);
                 modificationNames = values[modificationIndex];
                 pureSequence = sequence.replaceAll("[^A-Za-z]+", "");
 
