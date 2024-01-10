@@ -22,18 +22,21 @@ public class ImportPredictedDialog extends JDialog {
     private SpectrumMainPanel spectrumMainPanel;
     private JComboBox modelListComboBox;
     private JComboBox instrumentListComboBox;
+    private JComboBox fragmentMethodComboBox;
     private JSpinner precursorChargeJSpinner;
     private JSpinner collisionEnergyJSpinner;
+    private JLabel instrumentListLabel;
+    private JLabel fragmentMethodLabel;
     private JTable modificationJTable;
     private PeptideAssumption peptideAssumption;
     private PTMFactory ptmFactory = PTMFactory.getInstance();
     private MSnSpectrum predictedSpectrum;
     private String selectedPsmKey;
 
-    private String[] instrumentList = new String[]{"ThermoTOF: ThermoTOF",
+    private String[] instrumentList = new String[]{"QE: QE",
+            "ThermoTOF: ThermoTOF",
             "Astral: ThermoTOF",
             "Lumos: Lumos",
-            "QE: QE",
             "timsTOF: timsTOF",
             "SciexTOF: SciexTOF",
             "Fusion: Lumos",
@@ -54,8 +57,10 @@ public class ImportPredictedDialog extends JDialog {
             "Prosit_2023_intensity_timsTOF",
             "Prosit_2020_intensity_CID",
             "Prosit_2020_intensity_HCD",
-            "Prosit_2023_intensity_XL_CMS2",
+//            "Prosit_2023_intensity_XL_CMS2",
             "Prosit_2020_intensity_TMT"};
+
+    private String[] fragmentMethodList = new String[]{"HCD", "CID", "ETD"};
 
     public ImportPredictedDialog(SpectrumMainPanel spectrumMainPanel, String selectedPsmKey,
                                  SpectrumIdentificationAssumption spectrumIdentificationAssumption) {
@@ -68,6 +73,8 @@ public class ImportPredictedDialog extends JDialog {
         this.setSize(500, 500);
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         initComponents();
+        fragmentMethodLabel.setVisible(false);
+        fragmentMethodComboBox.setVisible(false);
 
         setLocationRelativeTo(spectrumMainPanel);
         setVisible(true);
@@ -77,8 +84,14 @@ public class ImportPredictedDialog extends JDialog {
         modificationJTable = new JTable();
         modelListComboBox = new JComboBox();
         instrumentListComboBox = new JComboBox();
+        fragmentMethodComboBox = new JComboBox();
         precursorChargeJSpinner = new JSpinner();
         collisionEnergyJSpinner = new JSpinner();
+        instrumentListLabel = new JLabel("Instrument: ");
+        fragmentMethodLabel = new JLabel("Fragment Method: ");
+        JLabel modelListLabel = new JLabel("Model: ");
+        JLabel precursorChargeLabel = new JLabel("Precursor Charge: ");
+        JLabel collisionEnergyLabel = new JLabel("Collision Energy: ");
         JButton submissionButton = new JButton();
         JPanel modificationJPanel = new JPanel();
         JPanel backgroundPanel = new JPanel();
@@ -93,11 +106,13 @@ public class ImportPredictedDialog extends JDialog {
         modelListComboBox.addItemListener(this::modelListComboBoxMouseClicked);
 
         precursorChargeJSpinner.setModel(new SpinnerNumberModel(peptideAssumption.getIdentificationCharge().value, 1, 6, 1));
-        collisionEnergyJSpinner.setModel(new SpinnerNumberModel(25, 0, 100, 1));
-
+        collisionEnergyJSpinner.setModel(new SpinnerNumberModel(27, 0, 100, 1));
 
         instrumentListComboBox.setModel(new DefaultComboBoxModel(this.instrumentList));
         instrumentListComboBox.setSelectedIndex(0);
+
+        fragmentMethodComboBox.setModel(new DefaultComboBoxModel(this.fragmentMethodList));
+        fragmentMethodComboBox.setSelectedIndex(0);
 
         modificationJTable.setModel(new ModificationTableModel());
         modificationJScrollPane.setOpaque(false);
@@ -138,14 +153,28 @@ public class ImportPredictedDialog extends JDialog {
                                 .addGroup(backgroundPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addGroup(backgroundPanelLayout.createSequentialGroup()
                                                 .addContainerGap()
+                                                .addComponent(modelListLabel, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(modelListComboBox, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.PREFERRED_SIZE)
                                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(precursorChargeLabel, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(precursorChargeJSpinner, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
                                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(collisionEnergyLabel, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(collisionEnergyJSpinner, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
                                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                                                 .addGap(0, 0, Short.MAX_VALUE))
-                                        .addComponent(instrumentListComboBox, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.PREFERRED_SIZE)
+                                        .addGroup(backgroundPanelLayout.createSequentialGroup()
+                                                .addComponent(instrumentListLabel, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(instrumentListComboBox, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(fragmentMethodLabel, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(fragmentMethodComboBox, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.PREFERRED_SIZE)
+                                                .addGap(0, 0, Short.MAX_VALUE))
                                         .addComponent(modificationJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addComponent(submissionButton, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE))
                                 .addContainerGap()));
@@ -155,11 +184,18 @@ public class ImportPredictedDialog extends JDialog {
                         .addGroup(backgroundPanelLayout.createSequentialGroup()
                                 .addContainerGap()
                                 .addGroup(backgroundPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(modelListLabel, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
                                         .addComponent(modelListComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(precursorChargeLabel, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
                                         .addComponent(precursorChargeJSpinner, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(collisionEnergyLabel, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
                                         .addComponent(collisionEnergyJSpinner, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(instrumentListComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addGroup(backgroundPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(instrumentListLabel, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(instrumentListComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(fragmentMethodLabel, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(fragmentMethodComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(modificationJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
@@ -214,6 +250,7 @@ public class ImportPredictedDialog extends JDialog {
         int precursorCharge = (int) precursorChargeJSpinner.getValue();
         int collisionEnergy = (int) collisionEnergyJSpinner.getValue();
         String instrument = instrumentListComboBox.getSelectedItem().toString().split(": ")[1];
+        String fragmentMethod = fragmentMethodComboBox.getSelectedItem().toString();
 
         HashMap<Integer, String> newMods = new HashMap<>();
         for (int i = 0; i<modificationJTable.getRowCount(); i ++){
@@ -221,6 +258,11 @@ public class ImportPredictedDialog extends JDialog {
             if (!Objects.equals(mod, "")){
                 newMods.put((int) modificationJTable.getValueAt(i, 1), mod);
             }
+        }
+        if (modelListComboBox.getSelectedIndex() == 6) {
+            JOptionPane.showMessageDialog(
+                    null, "This model will add a TMT tag to the N-term of the peptide.",
+                    "Warning", JOptionPane.WARNING_MESSAGE);
         }
 
         ProgressDialogX progressDialogX = new ProgressDialogX(spectrumMainPanel.parentFrame,
@@ -242,7 +284,7 @@ public class ImportPredictedDialog extends JDialog {
             public void run() {
 
                 try {
-                    GetPredictedOnline getPredictedOnline = new GetPredictedOnline(model, pepSeq, newMods,
+                    GetPredictedOnline getPredictedOnline = new GetPredictedOnline(model, pepSeq, newMods,fragmentMethod,
                             precursorCharge, collisionEnergy, instrument, peptideAssumption.getTheoreticMz());
                     predictedSpectrum = getPredictedOnline.getSpectra();
 
@@ -276,8 +318,19 @@ public class ImportPredictedDialog extends JDialog {
 
     private void modelListComboBoxMouseClicked(java.awt.event.ItemEvent evt) {
         if (modelListComboBox.getSelectedIndex() == 0) {
+            instrumentListLabel.setVisible(true);
             instrumentListComboBox.setVisible(true);
+            fragmentMethodLabel.setVisible(false);
+            fragmentMethodComboBox.setVisible(false);
         } else {
+            if (modelListComboBox.getSelectedIndex() == 6) {
+                fragmentMethodLabel.setVisible(true);
+                fragmentMethodComboBox.setVisible(true);
+            } else {
+                fragmentMethodLabel.setVisible(false);
+                fragmentMethodComboBox.setVisible(false);
+            }
+            instrumentListLabel.setVisible(false);
             instrumentListComboBox.setVisible(false);
         }
     }

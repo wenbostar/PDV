@@ -33,6 +33,7 @@ public class GetPredictedOnline {
     private HashMap<Integer, String> newMods;
     private String inputString;
     private double precursorMZ;
+    private String fragmentMethod;
 
     public static void main(String[] args) throws IOException {
 
@@ -40,15 +41,16 @@ public class GetPredictedOnline {
     }
 
     public GetPredictedOnline() throws IOException {
-        getSpectra();
+        getSpectra("");
     }
 
-    public GetPredictedOnline(String model, String pepSeq, HashMap<Integer, String> newMods,
+    public GetPredictedOnline(String model, String pepSeq, HashMap<Integer, String> newMods, String fragmentMethod,
                               int precursorCharge, int collisionEnergy, String instrument, double precursorMZ) throws IOException {
 
         this.model = model;
         this.pepSeq = pepSeq;
         this.newMods = newMods;
+        this.fragmentMethod = fragmentMethod;
         this.precursorCharge = precursorCharge;
         this.collisionEnergy = collisionEnergy;
         this.instrument = instrument;
@@ -77,10 +79,12 @@ public class GetPredictedOnline {
         } else if (model.equals("Prosit_2020_intensity_HCD")){
             String url = "https://koina.proteomicsdb.org/v2/models/Prosit_2020_intensity_HCD/infer";
             usedURL = new URL(url);
-        } else if (model.equals("Prosit_2023_intensity_XL_CMS2")){
-            String url = "https://koina.proteomicsdb.org/v2/models/Prosit_2023_intensity_XL_CMS2/infer";
-            usedURL = new URL(url);
-        } else if (model.equals("Prosit_2020_intensity_TMT")){
+        }
+//        else if (model.equals("Prosit_2023_intensity_XL_CMS2")){
+//            String url = "https://koina.proteomicsdb.org/v2/models/Prosit_2023_intensity_XL_CMS2/infer";
+//            usedURL = new URL(url);
+//        }
+        else if (model.equals("Prosit_2020_intensity_TMT")){
             String url = "https://koina.proteomicsdb.org/v2/models/Prosit_2020_intensity_TMT/infer";
             usedURL = new URL(url);
         }
@@ -96,6 +100,7 @@ public class GetPredictedOnline {
             int lastIndex = 0;
             for (int index : newMods.keySet()){
                 modPep += pepSeq.substring(lastIndex, index) + newMods.get(index);
+                lastIndex = index;
             }
             modPep += pepSeq.substring(lastIndex);
         }
@@ -134,18 +139,22 @@ public class GetPredictedOnline {
                     "\"shape\": [ 1, 1 ], \"datatype\": \"INT32\", \"data\": [ "+ precursorCharge + " ] }, { \"name\": " +
                     "\"collision_energies\", \"shape\": [ 1, 1 ], \"datatype\": \"FP32\", \"data\": [ "+ collisionEnergy +
                     " ] }] }";
-        } else if (model.equals("Prosit_2023_intensity_XL_CMS2")){
+        }
+//        else if (model.equals("Prosit_2023_intensity_XL_CMS2")){
+//            inputString = "{ \"id\": \"0\", \"inputs\": [ { \"name\": \"peptide_sequences\", \"shape\": [ 1, 1 ], " +
+//                    "\"datatype\": \"BYTES\", \"data\": [ \"" + modPep + "\" ] }, { \"name\": \"precursor_charges\", " +
+//                    "\"shape\": [ 1, 1 ], \"datatype\": \"INT32\", \"data\": [ "+ precursorCharge + " ] }, { \"name\": " +
+//                    "\"collision_energies\", \"shape\": [ 1, 1 ], \"datatype\": \"FP32\", \"data\": [ "+ collisionEnergy +
+//                    " ] }] }";
+//        }
+        else if (model.equals("Prosit_2020_intensity_TMT")){
+            modPep = "[UNIMOD:737]-" + modPep;
             inputString = "{ \"id\": \"0\", \"inputs\": [ { \"name\": \"peptide_sequences\", \"shape\": [ 1, 1 ], " +
                     "\"datatype\": \"BYTES\", \"data\": [ \"" + modPep + "\" ] }, { \"name\": \"precursor_charges\", " +
                     "\"shape\": [ 1, 1 ], \"datatype\": \"INT32\", \"data\": [ "+ precursorCharge + " ] }, { \"name\": " +
                     "\"collision_energies\", \"shape\": [ 1, 1 ], \"datatype\": \"FP32\", \"data\": [ "+ collisionEnergy +
-                    " ] }] }";
-        } else if (model.equals("Prosit_2020_intensity_TMT")){
-            inputString = "{ \"id\": \"0\", \"inputs\": [ { \"name\": \"peptide_sequences\", \"shape\": [ 1, 1 ], " +
-                    "\"datatype\": \"BYTES\", \"data\": [ \"" + modPep + "\" ] }, { \"name\": \"precursor_charges\", " +
-                    "\"shape\": [ 1, 1 ], \"datatype\": \"INT32\", \"data\": [ "+ precursorCharge + " ] }, { \"name\": " +
-                    "\"collision_energies\", \"shape\": [ 1, 1 ], \"datatype\": \"FP32\", \"data\": [ "+ collisionEnergy +
-                    " ] }] }";
+                    " ] }, { \"name\": \"fragmentation_types\", \"shape\": [ 1, 1 ], \"datatype\": \"BYTES\", \"data\": [ \"" +
+                    fragmentMethod + "\" ] } ] }";
         }
 
     }
@@ -177,10 +186,20 @@ public class GetPredictedOnline {
                 while ((responseLine = br.readLine()) != null) {
                     response.append(responseLine.trim());
                 }
+                String responseString = response.toString();
+                String collapsed = responseString;
+                if (responseString.contains("parameters")){
+                    collapsed = responseString.substring(0, responseString.indexOf("\"parameters\":")) + responseString.substring(responseString.indexOf("},") + 2);
+                }
 
-                JSONObject jsonObject = new JSONObject(response.toString());
+                JSONObject jsonObject = new JSONObject(collapsed);
                 JSONArray output = jsonObject.getJSONArray("outputs");
-                JSONObject intObject = (JSONObject) output.get(0);
+                JSONObject intObject;
+                if (model.equals("AlphaPept_ms2_generic")){
+                    intObject = (JSONObject) output.get(0);
+                } else {
+                    intObject = (JSONObject) output.get(2);
+                }
                 JSONObject mzObject = (JSONObject) output.get(1);
                 List<Object> intensity = intObject.getJSONArray("data").toList();
                 List<Object> mzs = mzObject.getJSONArray("data").toList();
@@ -207,101 +226,109 @@ public class GetPredictedOnline {
         return spectrum;
     }
 
-//    private void getSpectra() throws IOException {
-//        String url = "https://koina.proteomicsdb.org/v2/models/AlphaPept_ms2_generic/infer";
-//        usedURL = new URL(url);
-//
-//        HttpURLConnection conn = (HttpURLConnection) usedURL.openConnection();
-//        conn.setRequestMethod("POST");
-//        conn.setRequestProperty("Content-Type", "application/json; utf-8");
-//        conn.setRequestProperty("Accept", "application/json");
-//        conn.setDoOutput(true);
-//
-//        String jsonInputString = "{\n" +
-//                "  \"id\": \"0\",\n" +
-//                "  \"inputs\": [\n" +
-//                "    {\n" +
-//                "      \"name\": \"peptide_sequences\",\n" +
-//                "      \"shape\": [\n" +
-//                "        1,\n" +
-//                "        1\n" +
-//                "      ],\n" +
-//                "      \"datatype\": \"BYTES\",\n" +
-//                "      \"data\": [\n" +
-//                "        \"AAAAAKAKM[UNIMOD:35]\"\n" +
-//                "      ]\n" +
-//                "    },\n" +
-//                "    {\n" +
-//                "      \"name\": \"precursor_charges\",\n" +
-//                "      \"shape\": [\n" +
-//                "        1,\n" +
-//                "        1\n" +
-//                "      ],\n" +
-//                "      \"datatype\": \"INT32\",\n" +
-//                "      \"data\": [\n" +
-//                "        2\n" +
-//                "      ]\n" +
-//                "    },\n" +
-//                "    {\n" +
-//                "      \"name\": \"collision_energies\",\n" +
-//                "      \"shape\": [\n" +
-//                "        1,\n" +
-//                "        1\n" +
-//                "      ],\n" +
-//                "      \"datatype\": \"FP32\",\n" +
-//                "      \"data\": [\n" +
-//                "        25\n" +
-//                "      ]\n" +
-//                "    },\n" +
-//                "    {\n" +
-//                "      \"name\": \"instrument_types\",\n" +
-//                "      \"shape\": [\n" +
-//                "        1,\n" +
-//                "        1\n" +
-//                "      ],\n" +
-//                "      \"datatype\": \"BYTES\",\n" +
-//                "      \"data\": [\n" +
-//                "        \"QE\"\n" +
-//                "      ]\n" +
-//                "    }\n" +
-//                "  ]\n" +
-//                "}";
-//
-//        try(OutputStream os = conn.getOutputStream()) {
-//            byte[] input = jsonInputString.getBytes(StandardCharsets.UTF_8);
-//            os.write(input, 0, input.length);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//        int responseCode = conn.getResponseCode();
-//        System.out.println("Response Code : " + responseCode);
-//
-//        try(BufferedReader br = new BufferedReader(
-//                new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
-//
-//            StringBuilder response = new StringBuilder();
-//            String responseLine = null;
-//            while ((responseLine = br.readLine()) != null) {
-//                response.append(responseLine.trim());
-//            }
-//
-//            JSONObject jsonObject = new JSONObject(response.toString());
-//            JSONArray output = jsonObject.getJSONArray("outputs");
-//            JSONObject intObject = (JSONObject) output.get(0);
-//            JSONObject mzObject = (JSONObject) output.get(1);
-//            List<Object> intensity = intObject.getJSONArray("data").toList();
-//            List<Object> mzs = mzObject.getJSONArray("data").toList();
-//
-//            for (int i = 0; i < intensity.size(); i++) {
-//                if ((double) intensity.get(i) > 0) {
-//                    System.out.println(mzs.get(i) + " " + intensity.get(i));
-//                }
-//            }
-//
-//        }
-//
-//
-//    }
+    private void getSpectra(String test) throws IOException {
+        String url = "https://koina.proteomicsdb.org/v2/models/AlphaPept_ms2_generic/infer";
+        usedURL = new URL(url);
+
+        HttpURLConnection conn = (HttpURLConnection) usedURL.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/json; utf-8");
+        conn.setRequestProperty("Accept", "application/json");
+        conn.setDoOutput(true);
+
+        String jsonInputString = "{\n" +
+                "  \"id\": \"0\",\n" +
+                "  \"inputs\": [\n" +
+                "    {\n" +
+                "      \"name\": \"peptide_sequences\",\n" +
+                "      \"shape\": [\n" +
+                "        1,\n" +
+                "        1\n" +
+                "      ],\n" +
+                "      \"datatype\": \"BYTES\",\n" +
+                "      \"data\": [\n" +
+                "        \"SKSEEAHAEDSVM[UNIMOD:35]DHHFR\"\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"name\": \"precursor_charges\",\n" +
+                "      \"shape\": [\n" +
+                "        1,\n" +
+                "        1\n" +
+                "      ],\n" +
+                "      \"datatype\": \"INT32\",\n" +
+                "      \"data\": [\n" +
+                "        2\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"name\": \"collision_energies\",\n" +
+                "      \"shape\": [\n" +
+                "        1,\n" +
+                "        1\n" +
+                "      ],\n" +
+                "      \"datatype\": \"FP32\",\n" +
+                "      \"data\": [\n" +
+                "        27\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"name\": \"instrument_types\",\n" +
+                "      \"shape\": [\n" +
+                "        1,\n" +
+                "        1\n" +
+                "      ],\n" +
+                "      \"datatype\": \"BYTES\",\n" +
+                "      \"data\": [\n" +
+                "        \"QE\"\n" +
+                "      ]\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+
+        try(OutputStream os = conn.getOutputStream()) {
+            byte[] input = jsonInputString.getBytes(StandardCharsets.UTF_8);
+            os.write(input, 0, input.length);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        int responseCode = conn.getResponseCode();
+        System.out.println("Response Code : " + responseCode);
+
+        try(BufferedReader br = new BufferedReader(
+                new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+
+            StringBuilder response = new StringBuilder();
+            String responseLine = null;
+            while ((responseLine = br.readLine()) != null) {
+                response.append(responseLine.trim());
+            }
+            String responseString = response.toString();
+            String collapsed = responseString;
+            if (responseString.contains("parameters")){
+                collapsed = responseString.substring(0, responseString.indexOf("\"parameters\":")) + responseString.substring(responseString.indexOf("},") + 2);
+            }
+//            System.out.println(response.toString());
+
+            JSONObject jsonObject = new JSONObject(collapsed);
+            JSONArray output = jsonObject.getJSONArray("outputs");
+            JSONObject intObject = (JSONObject) output.get(0);
+            JSONObject mzObject = (JSONObject) output.get(1);
+            JSONObject annoObject = (JSONObject) output.get(2);
+            List<Object> intensity = intObject.getJSONArray("data").toList();
+            List<Object> mzs = mzObject.getJSONArray("data").toList();
+            List<Object> anno = annoObject.getJSONArray("data").toList();
+
+            for (int i = 0; i < intensity.size(); i++) {
+                if ((double) intensity.get(i) > 0) {
+                    System.out.println(mzs.get(i) + " " + intensity.get(i) + " " + anno.get(i));
+                }
+            }
+
+        }
+
+
+    }
 
 }
