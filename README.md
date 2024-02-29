@@ -1,6 +1,6 @@
 # [PDV](https://doi.org/10.1093/bioinformatics/bty770): an integrative proteomics data viewer
 
-[![Join the chat at https://gitter.im/PDV-public/Lobby](https://badges.gitter.im/PDV-public/Lobby.svg)](https://gitter.im/PDV-public/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) ![Downloads](https://img.shields.io/github/downloads/wenbostar/PDV/total.svg) ![Release](https://img.shields.io/github/release/wenbostar/PDV.svg)![Downloads](https://img.shields.io/github/downloads/wenbostar/PDV/latest/total) [![Citation Badge](https://api.juleskreuer.eu/citation-badge.php?doi=10.1093/bioinformatics/bty770)](https://juleskreuer.eu/projekte/citation-badge/)
+![Downloads](https://img.shields.io/github/downloads/wenbostar/PDV/total.svg) ![Release](https://img.shields.io/github/release/wenbostar/PDV.svg)![Downloads](https://img.shields.io/github/downloads/wenbostar/PDV/latest/total) [![Citation Badge](https://api.juleskreuer.eu/citation-badge.php?doi=10.1093/bioinformatics/bty770)](https://juleskreuer.eu/projekte/citation-badge/)
 
 
 
