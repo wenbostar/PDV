@@ -1,6 +1,6 @@
 # [PDV](https://doi.org/10.1093/bioinformatics/bty770): an integrative proteomics data viewer
 
-[![Join the chat at https://gitter.im/PDV-public/Lobby](https://badges.gitter.im/PDV-public/Lobby.svg)](https://gitter.im/PDV-public/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) ![Downloads](https://img.shields.io/github/downloads/wenbostar/PDV/total.svg) ![Release](https://img.shields.io/github/release/wenbostar/PDV.svg)![Downloads](https://img.shields.io/github/downloads/wenbostar/PDV/latest/total) [![Citation Badge](https://api.juleskreuer.eu/citation-badge.php?doi=10.1093/bioinformatics/bty770)](https://juleskreuer.eu/projekte/citation-badge/)
+![Downloads](https://img.shields.io/github/downloads/wenbostar/PDV/total.svg) ![Release](https://img.shields.io/github/release/wenbostar/PDV.svg)![Downloads](https://img.shields.io/github/downloads/wenbostar/PDV/latest/total) [![Citation Badge](https://api.juleskreuer.eu/citation-badge.php?doi=10.1093/bioinformatics/bty770)](https://juleskreuer.eu/projekte/citation-badge/)
 
 
 
@@ -60,6 +60,7 @@ PDV supports visualizing N-linked intact glycopeptide identification result (ide
 
 | Software        | Example files |
 | ----------------|:---------------|
+| [Casanovo](https://github.com/Noble-Lab/casanovo) | mgf:mzTab |
 | [Novor](https://www.ncbi.nlm.nih.gov/pubmed/26122521) | [mgf](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf.gz):[csv](http://pdv.zhang-lab.org/data/download/test_data/novor/SF_200217_U2OS_TiO2_HCD_OT_rep1.novor.csv.gz) (only support the Novor result generated through [DeNovoGUI](https://github.com/compomics/denovogui)) |
 | [DeepNovo](https://github.com/nh2tran/DeepNovo) | [mgf](http://pdv.zhang-lab.org/data/download/test_data/deepnovo/peaks.db.mgf.test.dup.mgf.gz):[txt](http://pdv.zhang-lab.org/data/download/test_data/deepnovo/output.deepnovo_db.tab) |
 | [PepNovo+](http://proteomics.ucsd.edu/software-tools/531-2/) | [mgf](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf.gz):[txt](http://pdv.zhang-lab.org/data/download/test_data/pepnovo/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf.out) |
