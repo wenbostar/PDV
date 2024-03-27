@@ -31,6 +31,14 @@ PDV supports visualizing N-linked intact glycopeptide identification result (ide
 
 [<img src="http://pdv.zhang-lab.org/data/download/PDV_USI_example.jpeg" width=600 class="center">](http://www.psidev.info/usi)
 
+
+#### [Mirror plot](https://github.com/wenbostar/PDV/wiki/Mirror-plot:-observed-vs-predicted-spectra) (Experimental spectrum VS predicted spectrum using deep learning)
+
+Top panel: experimental spectrum, bottom panel: predicted spectrum using deep learning.
+
+<img src="https://github.com/wenbostar/PDV/assets/5302110/bbf49a24-5a68-41f4-85a0-1091e0013d7b" width=600 class="center">
+
+
 #### Database searching:
 
 | Software        | Example files |
