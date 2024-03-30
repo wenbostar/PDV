@@ -234,6 +234,10 @@ public class ImportPredictedDialog extends JDialog {
                 if (Math.abs(ptmFactory.getPTM(originalMod).getMass() -79.966331) < 0.01) {
                     modificationString = "[UNIMOD:21]";
                 }
+            } if (originalMod.contains("of N-term")) {
+                if (Math.abs(ptmFactory.getPTM(originalMod).getMass() - 42.010565) < 0.01) {
+                    modificationString = "[UNIMOD:1]";
+                }
             }
 
         }
