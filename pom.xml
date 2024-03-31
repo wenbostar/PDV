@@ -133,32 +133,32 @@
         <repository>
             <id>genesis-maven2-repository</id>
             <name>Genesis maven2 repository</name>
-            <url>http://genesis.UGent.be/maven2</url>
+            <url>https://genesis.UGent.be/maven2</url>
             <layout>default</layout>
         </repository>
 
         <repository>
             <id>ebi-repo</id>
             <name>The EBI internal repository</name>
-            <url>http://www.ebi.ac.uk/~maven/m2repo</url>
+            <url>https://www.ebi.ac.uk/~maven/m2repo</url>
         </repository>
 
         <repository>
             <id>pst-release</id>
             <name>EBI Nexus Repository</name>
-            <url>http://www.ebi.ac.uk/Tools/maven/repos/content/repositories/pst-release</url>
+            <url>https://www.ebi.ac.uk/Tools/maven/repos/content/repositories/pst-release</url>
         </repository>
 
         <repository>
             <id>pst-snapshots</id>
             <name>EBI Nexus Snapshots Repository</name>
-            <url>http://www.ebi.ac.uk/Tools/maven/repos/content/repositories/pst-snapshots</url>
+            <url>https://www.ebi.ac.uk/Tools/maven/repos/content/repositories/pst-snapshots</url>
         </repository>
 
         <repository>
             <id>snapshots</id>
             <name>Archiva Managed Snapshot Repository</name>
-            <url>http://genesis.ugent.be/maven/repository/snapshots/</url>
+            <url>https://genesis.ugent.be/maven/repository/snapshots/</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -169,7 +169,7 @@
 
         <repository>
             <id>nexus-ebi-release-repo</id>
-            <url>http://www.ebi.ac.uk/Tools/maven/repos/content/groups/ebi-repo/</url>
+            <url>https://www.ebi.ac.uk/Tools/maven/repos/content/groups/ebi-repo/</url>
         </repository>
 
     </repositories>
@@ -330,13 +330,13 @@
         <repository>
             <id>archiva.compomics_maven_2</id>
             <name>Internal Release Repository</name>
-            <url>http://genesis.ugent.be/archiva/repository/compomics_maven_2</url>
+            <url>https://genesis.ugent.be/archiva/repository/compomics_maven_2</url>
         </repository>
 
         <snapshotRepository>
             <id>archiva.snapshots</id>
             <name>Internal Snapshot Repository</name>
-            <url>http://genesis.ugent.be/archiva/repository/snapshots</url>
+            <url>https://genesis.ugent.be/archiva/repository/snapshots</url>
         </snapshotRepository>
 
     </distributionManagement>
