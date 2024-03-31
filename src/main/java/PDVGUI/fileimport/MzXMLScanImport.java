@@ -12,6 +12,7 @@ import umich.ms.datatypes.scan.props.*;
 import umich.ms.datatypes.scancollection.IScanCollection;
 import umich.ms.datatypes.scancollection.impl.ScanCollectionDefault;
 import umich.ms.datatypes.spectrum.ISpectrum;
+import umich.ms.util.DoubleRange;
 
 import java.io.File;
 import java.util.List;
@@ -235,6 +236,12 @@ public class MzXMLScanImport {
                         public int[] findMzIdxsWithinPpm(double v, double v1) {
                             return new int[0];
                         }
+
+                        @Override
+                        public double[] getIMs() {
+                            // TODO Auto-generated method stub
+                            throw new UnsupportedOperationException("Unimplemented method 'getIMs'");
+                        }
                     };
 
                     return spectrum;
@@ -333,6 +340,30 @@ public class MzXMLScanImport {
                 @Override
                 public void setStorageStrategy(StorageStrategy storageStrategy) {
 
+                }
+
+                @Override
+                public Double getIm() {
+                    // TODO Auto-generated method stub
+                    throw new UnsupportedOperationException("Unimplemented method 'getIm'");
+                }
+
+                @Override
+                public void setIm(Double im) {
+                    // TODO Auto-generated method stub
+                    throw new UnsupportedOperationException("Unimplemented method 'setIm'");
+                }
+
+                @Override
+                public DoubleRange getImRange() {
+                    // TODO Auto-generated method stub
+                    throw new UnsupportedOperationException("Unimplemented method 'getImRange'");
+                }
+
+                @Override
+                public void setImRange(DoubleRange imRange) {
+                    // TODO Auto-generated method stub
+                    throw new UnsupportedOperationException("Unimplemented method 'setImRange'");
                 }
             };
 
