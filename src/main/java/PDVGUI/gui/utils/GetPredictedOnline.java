@@ -5,6 +5,7 @@ import com.compomics.util.experiment.massspectrometry.Charge;
 import com.compomics.util.experiment.massspectrometry.MSnSpectrum;
 import com.compomics.util.experiment.massspectrometry.Peak;
 import com.compomics.util.experiment.massspectrometry.Precursor;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.kohsuke.rngom.util.Uri;
@@ -13,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -97,12 +99,19 @@ public class GetPredictedOnline {
         } else {
             // Add the modifications to the peptide sequence
             // (the modifications are added in the order of their position in the peptide sequence)
-            int lastIndex = 0;
+            // pos: 1 - the first amino acid
+            String []aa_list = pepSeq.split("");
             for (int index : newMods.keySet()){
-                modPep += pepSeq.substring(lastIndex, index) + newMods.get(index);
-                lastIndex = index;
+                // TODO: C-term modification
+                if(index == 0){
+                    // N-term modification
+                    aa_list[0] = aa_list[0]+newMods.get(index);
+                }else{
+                    aa_list[index-1] = aa_list[index-1]+newMods.get(index);
+                }
             }
-            modPep += pepSeq.substring(lastIndex);
+            modPep = StringUtils.join(aa_list, "");
+            // System.out.println(modPep);
         }
 
         if (model.equals("AlphaPept_ms2_generic")){
@@ -206,9 +215,9 @@ public class GetPredictedOnline {
 
                 HashMap<Double, Peak> peakHashMap = new HashMap<>();
                 for (int i = 0; i < intensity.size(); i++) {
-                    if ((double) intensity.get(i) > 0) {
-                        Peak peak = new Peak((double) mzs.get(i), (double) intensity.get(i));
-                        peakHashMap.put((double) mzs.get(i), peak);
+                    if (((BigDecimal) intensity.get(i)).doubleValue() > 0) {
+                        Peak peak = new Peak(((BigDecimal) mzs.get(i)).doubleValue(), ((BigDecimal) intensity.get(i)).doubleValue());
+                        peakHashMap.put(((BigDecimal) mzs.get(i)).doubleValue(), peak);
                     }
                 }
                 Charge charge = new Charge(1, precursorCharge);

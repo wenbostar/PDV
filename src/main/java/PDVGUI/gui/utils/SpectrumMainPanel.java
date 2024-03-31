@@ -39,8 +39,6 @@ import java.text.DecimalFormat;
 import java.util.*;
 
 import static com.compomics.util.experiment.biology.Ion.IonType.*;
-import static com.compomics.util.experiment.biology.Ion.IonType.RELATED_ION;
-import static com.compomics.util.experiment.biology.Ion.IonType.REPORTER_ION;
 import static com.compomics.util.experiment.biology.NeutralLoss.H3PO4;
 
 /**
@@ -1680,6 +1678,7 @@ public class SpectrumMainPanel extends JPanel {
                     sequenceFragmentationPanel.setOpaque(false);
                     sequenceFragmentationPanel.setBackground(Color.WHITE);
 
+                    spectrumJLayeredPane.setLayer(spectrumPanel, JLayeredPane.DEFAULT_LAYER);
                     spectrumJLayeredPane.add(spectrumPanel);
 
                     spectrumPanel.setBounds(0, 75, spectrumShowPanel.getWidth(),spectrumShowPanel.getHeight()-85);
