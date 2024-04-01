@@ -221,23 +221,61 @@ public class ImportPredictedDialog extends JDialog {
         String modificationString = "";
 
         if (modelListComboBox.getSelectedIndex() == 0 || modelListComboBox.getSelectedIndex() == 7) {
+            // AlphaPept_ms2_generic model
+            if (originalMod.contains("of C")){
+                if (Math.abs(ptmFactory.getPTM(originalMod).getMass() -57.021464) < 0.01) {
+                    modificationString = "[UNIMOD:4]";
+                }else{
+                    System.out.println("This modification is not supported:"+originalMod);
+                }
+            } else if (originalMod.contains("of M")){
+                if (Math.abs(ptmFactory.getPTM(originalMod).getMass() -15.994915) < 0.01) {
+                    modificationString = "[UNIMOD:35]";
+                }else{
+                    System.out.println("This modification is not supported:"+originalMod);
+                }
+            } else if (originalMod.contains("of S") || originalMod.contains("of T") || originalMod.contains("of Y") || originalMod.contains("of STY")) {
+                if (Math.abs(ptmFactory.getPTM(originalMod).getMass() -79.966331) < 0.01) {
+                    modificationString = "[UNIMOD:21]";
+                }else{
+                    System.out.println("This modification is not supported:"+originalMod);
+                }
+            } else if (originalMod.contains("of N-term")) {
+                if (Math.abs(ptmFactory.getPTM(originalMod).getMass() - 42.010565) < 0.01) {
+                    modificationString = "[UNIMOD:1]";
+                }else if (Math.abs(ptmFactory.getPTM(originalMod).getMass() - 43.005814) < 0.01) {
+                    modificationString = "[UNIMOD:5]";
+                }else{
+                    System.out.println("This modification is not supported:"+originalMod);
+                }
+            } else if (originalMod.contains("of Q")) {
+                if (Math.abs(ptmFactory.getPTM(originalMod).getMass() - 0.984016) < 0.01) {
+                    modificationString = "[UNIMOD:7]";
+                }
+            } else if (originalMod.contains("of N")) {
+                if (Math.abs(ptmFactory.getPTM(originalMod).getMass() - 0.984016) < 0.01) {
+                    modificationString = "[UNIMOD:7]";
+                }
+            } else{
+                System.out.println("This modification is not supported:"+originalMod);
+            }
+        } else if (modelListComboBox.getSelectedIndex() == 1 ||
+                modelListComboBox.getSelectedIndex() == 2 ||
+                modelListComboBox.getSelectedIndex() == 3 ||
+                modelListComboBox.getSelectedIndex() == 4 ||
+                modelListComboBox.getSelectedIndex() == 5 ||
+                modelListComboBox.getSelectedIndex() == 6) {
+            // Prosit model
             if (originalMod.contains("of C")){
                 if (Math.abs(ptmFactory.getPTM(originalMod).getMass() -57.021464) < 0.01) {
                     modificationString = "[UNIMOD:4]";
                 }
-            }
-            if (originalMod.contains("of M")){
+            } else if (originalMod.contains("of M")){
                 if (Math.abs(ptmFactory.getPTM(originalMod).getMass() -15.994915) < 0.01) {
                     modificationString = "[UNIMOD:35]";
                 }
-            } if (originalMod.contains("of S") || originalMod.contains("of T") || originalMod.contains("of Y") || originalMod.contains("of STY")) {
-                if (Math.abs(ptmFactory.getPTM(originalMod).getMass() -79.966331) < 0.01) {
-                    modificationString = "[UNIMOD:21]";
-                }
-            } if (originalMod.contains("of N-term")) {
-                if (Math.abs(ptmFactory.getPTM(originalMod).getMass() - 42.010565) < 0.01) {
-                    modificationString = "[UNIMOD:1]";
-                }
+            } else{
+                System.out.println("This modification is not supported:"+originalMod);
             }
 
         }
