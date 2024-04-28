@@ -1,6 +1,5 @@
 package PDVGUI.gui.utils;
 
-import com.compomics.util.experiment.identification.spectrum_assumptions.PeptideAssumption;
 import com.compomics.util.experiment.massspectrometry.Charge;
 import com.compomics.util.experiment.massspectrometry.MSnSpectrum;
 import com.compomics.util.experiment.massspectrometry.Peak;
@@ -8,7 +7,6 @@ import com.compomics.util.experiment.massspectrometry.Precursor;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.kohsuke.rngom.util.Uri;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,7 +15,6 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -105,7 +102,7 @@ public class GetPredictedOnline {
                 // TODO: C-term modification
                 if(index == 0){
                     // N-term modification
-                    aa_list[0] = aa_list[0]+newMods.get(index);
+                    aa_list[0] = newMods.get(index) + "-"+ aa_list[0];
                 }else{
                     aa_list[index-1] = aa_list[index-1]+newMods.get(index);
                 }
@@ -157,7 +154,8 @@ public class GetPredictedOnline {
 //                    " ] }] }";
 //        }
         else if (model.equals("Prosit_2020_intensity_TMT")){
-            modPep = "[UNIMOD:737]-" + modPep;
+            // modPep = "[UNIMOD:737]-" + modPep;
+            // System.out.println(modPep);
             inputString = "{ \"id\": \"0\", \"inputs\": [ { \"name\": \"peptide_sequences\", \"shape\": [ 1, 1 ], " +
                     "\"datatype\": \"BYTES\", \"data\": [ \"" + modPep + "\" ] }, { \"name\": \"precursor_charges\", " +
                     "\"shape\": [ 1, 1 ], \"datatype\": \"INT32\", \"data\": [ "+ precursorCharge + " ] }, { \"name\": " +

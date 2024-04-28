@@ -11,8 +11,6 @@ import com.compomics.util.gui.waiting.waitinghandlers.ProgressDialogX;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
@@ -256,6 +254,14 @@ public class ImportPredictedDialog extends JDialog {
                 if (Math.abs(ptmFactory.getPTM(originalMod).getMass() - 0.984016) < 0.01) {
                     modificationString = "[UNIMOD:7]";
                 }
+            } else if(originalMod.contains("of K")){
+                if (Math.abs(ptmFactory.getPTM(originalMod).getMass() - 229.162932) < 0.01) {
+                    modificationString = "[UNIMOD:737]";
+                }
+            } else if(originalMod.contains("of N-term") || originalMod.contains("of peptide N-term")){
+                if (Math.abs(ptmFactory.getPTM(originalMod).getMass() - 229.162932) < 0.01) {
+                    modificationString = "[UNIMOD:737]";
+                }
             } else{
                 System.out.println("This modification is not supported:"+originalMod);
             }
@@ -270,9 +276,17 @@ public class ImportPredictedDialog extends JDialog {
                 if (Math.abs(ptmFactory.getPTM(originalMod).getMass() -57.021464) < 0.01) {
                     modificationString = "[UNIMOD:4]";
                 }
-            } else if (originalMod.contains("of M")){
-                if (Math.abs(ptmFactory.getPTM(originalMod).getMass() -15.994915) < 0.01) {
+            } else if (originalMod.contains("of M")) {
+                if (Math.abs(ptmFactory.getPTM(originalMod).getMass() - 15.994915) < 0.01) {
                     modificationString = "[UNIMOD:35]";
+                }
+            } else if(originalMod.contains("of K") && modelListComboBox.getSelectedIndex() == 6){
+                if (Math.abs(ptmFactory.getPTM(originalMod).getMass() - 229.162932) < 0.01) {
+                    modificationString = "[UNIMOD:737]";
+                }
+            } else if((originalMod.contains("of N-term") || originalMod.contains("of peptide N-term")) && modelListComboBox.getSelectedIndex() == 6){
+                if (Math.abs(ptmFactory.getPTM(originalMod).getMass() - 229.162932) < 0.01) {
+                    modificationString = "[UNIMOD:737]";
                 }
             } else{
                 System.out.println("This modification is not supported:"+originalMod);
@@ -299,11 +313,11 @@ public class ImportPredictedDialog extends JDialog {
                 newMods.put((int) modificationJTable.getValueAt(i, 1), mod);
             }
         }
-        if (modelListComboBox.getSelectedIndex() == 6) {
-            JOptionPane.showMessageDialog(
-                    null, "This model will add a TMT tag to the N-term of the peptide.",
-                    "Warning", JOptionPane.WARNING_MESSAGE);
-        }
+        //if (modelListComboBox.getSelectedIndex() == 6) {
+        //    JOptionPane.showMessageDialog(
+        //            null, "This model will add a TMT tag to the N-term of the peptide.",
+        //            "Warning", JOptionPane.WARNING_MESSAGE);
+        //}
 
         ProgressDialogX progressDialogX = new ProgressDialogX(spectrumMainPanel.parentFrame,
                 Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMass.png")),
@@ -418,7 +432,11 @@ public class ImportPredictedDialog extends JDialog {
                 case 0:
                     return modificationMatch.getTheoreticPtm();
                 case 1:
-                    return modificationMatch.getModificationSite();
+                    if(modificationMatch.getTheoreticPtm().contains("of N-term") || modificationMatch.getTheoreticPtm().contains("of peptide N-term")){
+                        return 0;
+                    }else{
+                        return modificationMatch.getModificationSite();
+                    }
                 case 2:
                     return getModificationString(modificationMatch.getTheoreticPtm());
                 case 3:
