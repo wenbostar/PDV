@@ -184,8 +184,8 @@ public class SinglePeptideDisplay extends JFrame {
 
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("PDV - One PSM");
-        setBackground(new java.awt.Color(255, 255, 255));
-        setMinimumSize(new java.awt.Dimension(760, 600));
+        setBackground(new Color(255, 255, 255));
+        setMinimumSize(new Dimension(760, 600));
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent evt) {
                 formWindowClosing(evt);
@@ -195,10 +195,10 @@ public class SinglePeptideDisplay extends JFrame {
 
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMass.png")));
 
-        mainJPanel.setBackground(new java.awt.Color(255, 255, 255));
-        mainJPanel.setPreferredSize(new java.awt.Dimension(1260, 800));
+        mainJPanel.setBackground(new Color(255, 255, 255));
+        mainJPanel.setPreferredSize(new Dimension(1260, 800));
 
-        menuBar.setBackground(new java.awt.Color(255, 255, 255));
+        menuBar.setBackground(new Color(255, 255, 255));
 
         fileJMenu.setMnemonic('F');
         fileJMenu.setText("File");
@@ -262,7 +262,7 @@ public class SinglePeptideDisplay extends JFrame {
 
         peptideSequenceJText.setEditable(true);
         peptideSequenceJText.setHorizontalAlignment(SwingConstants.CENTER);
-        peptideSequenceJText.addKeyListener(new java.awt.event.KeyAdapter() {
+        peptideSequenceJText.addKeyListener(new KeyAdapter() {
             public void keyReleased(KeyEvent evt) {
                 peptideSequenceJTextKeyReleased(evt);
             }
@@ -363,7 +363,7 @@ public class SinglePeptideDisplay extends JFrame {
 
         );
 
-        allJToolBar.setBackground(new java.awt.Color(255, 255, 255));
+        allJToolBar.setBackground(new Color(255, 255, 255));
         allJToolBar.setBorder(null);
         allJToolBar.setFloatable(false);
         allJToolBar.setRollover(true);
@@ -516,19 +516,29 @@ public class SinglePeptideDisplay extends JFrame {
                 @Override
                 public void run() {
                     try {
-                        String url = "https://proteomecentral.proteomexchange.org/api/proxi/v0.1/spectra?resultType=compact&usi=" + usiID+"&format=json";
-                        URL obj = new URL(url);
 
+                        ArrayList<String> usi_server_list = new ArrayList<>();
+                        usi_server_list.add("https://proteomecentral.proteomexchange.org/api/proxi/v0.1/spectra?resultType=compact&usi=");
+                        usi_server_list.add("https://www.ebi.ac.uk/pride/proxi/archive/v0.1/spectra?resultType=full&usi=");
+                        String url = "";
+                        int responseCode = -1;
+                        HttpURLConnection con = null;
                         int charge = 2;
                         double precursorMZ = 0.0;
-
-                        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-                        // optional default is GET
-                        con.setRequestMethod("GET");
-                        //add request header
-                        con.setRequestProperty("User-Agent", "Mozilla/5.0");
-                        int responseCode = con.getResponseCode();
-
+                        for(String base_url: usi_server_list) {
+                            url = base_url + usiID + "&format=json";
+                            System.out.println(url);
+                            URL obj = new URL(url);
+                            con = (HttpURLConnection) obj.openConnection();
+                            // optional default is GET
+                            con.setRequestMethod("GET");
+                            //add request header
+                            con.setRequestProperty("User-Agent", "Mozilla/5.0");
+                            responseCode = con.getResponseCode();
+                            if (responseCode == 200){
+                                break;
+                            }
+                        }
                         if (responseCode == 200){
                             System.out.println("\nSending 'GET' request to URL : " + url);
                             System.out.println("Response Code : " + responseCode);
