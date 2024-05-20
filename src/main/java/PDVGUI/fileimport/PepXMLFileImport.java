@@ -351,10 +351,14 @@ public class PepXMLFileImport {
                                     } else if (name.equals("massdiff")) {
                                         massDiff = new Double(xmlPullParser.getAttributeValue(i));
                                     } else if (name.equals("mass")) {
-                                        mass = new Double(xmlPullParser.getAttributeValue(i));
+                                        if(!xmlPullParser.getAttributeValue(i).equalsIgnoreCase("nan")) {
+                                            mass = new Double(xmlPullParser.getAttributeValue(i));
 
-                                        if (scoreName.contains("ptmprophet_result")){
-                                            mass = Double.valueOf(massDF.format(mass));
+                                            if (scoreName.contains("ptmprophet_result")) {
+                                                mass = Double.valueOf(massDF.format(mass));
+                                            }
+                                        }else{
+                                            mass = 0.0;
                                         }
 
                                     } else if (name.equals("variable")) {
