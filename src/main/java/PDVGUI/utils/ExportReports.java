@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * Export the reports
@@ -134,13 +135,17 @@ public class ExportReports {
                     fileWriter.write("Spectrum_Title");
 
                     for (String eachColumn : allColumn) {
-
-                        fileWriter.write("\t" + eachColumn);
+                        if (Objects.equals(eachColumn, "Annotations")){
+                            fileWriter.write("\tions\tions_mz\tions_int");
+                        } else {
+                            fileWriter.write("\t" + eachColumn);
+                        }
 
                     }
                     fileWriter.write("\n");
 
-                    if (allColumn.contains("b ions") || allColumn.contains("y ions") || allColumn.contains("by pairs") || allColumn.contains("Sequence") || allColumn.contains("Ratio")){
+                    if (allColumn.contains("b ions") || allColumn.contains("y ions") || allColumn.contains("by pairs") ||
+                            allColumn.contains("Annotations") || allColumn.contains("Sequence") || allColumn.contains("Ratio")){
                         read = true;
                     }
 
@@ -165,7 +170,11 @@ public class ExportReports {
                             }
 
                             for (String eachColumn : allColumn){
-
+                                if (Objects.equals(eachColumn, "Annotations")){
+                                    fileWriter.write("\t" + spectrumDetails.get("ions"));
+                                    fileWriter.write("\t" + spectrumDetails.get("ions_mz"));
+                                    fileWriter.write("\t" + spectrumDetails.get("ions_int"));
+                                }
                                 if (spectrumDetails.containsKey(eachColumn)){
                                     fileWriter.write("\t" + spectrumDetails.get(eachColumn));
                                 } else if (scoreAndValue.containsKey(eachColumn)){
@@ -242,8 +251,14 @@ public class ExportReports {
             HashMap<Integer, ArrayList<String>> yIonMap = new HashMap<>();
             ArrayList<String> bIonList;
             ArrayList<String> yIonList;
+            ArrayList<String> ionMatches = new ArrayList<>();
+            ArrayList<Double> ionsMzs = new ArrayList<>();
+            ArrayList<Double> ionInts = new ArrayList<>();
             for (IonMatch ionMatch : annotations){
                 String match = ionMatch.getPeakAnnotation();
+                ionMatches.add(match);
+                ionsMzs.add(ionMatch.peak.mz);
+                ionInts.add(ionMatch.peak.intensity);
 
                 Integer charge = ionMatch.charge;
 
@@ -292,6 +307,11 @@ public class ExportReports {
             }
             if (allColumn.contains("Ratio")){
                 spectrumDetails.put("Ratio", ratio);
+            }
+            if (allColumn.contains("Annotations")){
+                spectrumDetails.put("ions", ionMatches);
+                spectrumDetails.put("ions_mz", ionsMzs);
+                spectrumDetails.put("ions_int", ionInts);
             }
 
         } catch (IOException e) {

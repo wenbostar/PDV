@@ -3968,6 +3968,7 @@ public class PDVMainClass extends JFrame {
         allColumn.add("b ions");
         allColumn.add("y ions");
         allColumn.add("by pairs");
+        allColumn.add("Annotations");
         allColumn.add("Sequence");
         allColumn.add("Ratio");
         
