@@ -10,6 +10,7 @@ import PDVGUI.utils.ImportPTMsFromUnimod;
 import com.compomics.util.enumeration.ImageType;
 import com.compomics.util.experiment.biology.*;
 import com.compomics.util.experiment.biology.ions.PeptideFragmentIon;
+import com.compomics.util.experiment.identification.SpectrumIdentificationAssumption;
 import com.compomics.util.experiment.identification.identification_parameters.PtmSettings;
 import com.compomics.util.experiment.identification.matches.IonMatch;
 import com.compomics.util.experiment.identification.matches.SpectrumMatch;
@@ -18,6 +19,7 @@ import com.compomics.util.experiment.identification.spectrum_annotation.Specific
 import com.compomics.util.experiment.identification.spectrum_annotation.SpectrumAnnotator;
 import com.compomics.util.experiment.identification.spectrum_annotation.spectrum_annotators.PeptideSpectrumAnnotator;
 import com.compomics.util.experiment.identification.spectrum_assumptions.PeptideAssumption;
+import com.compomics.util.experiment.identification.spectrum_assumptions.TagAssumption;
 import com.compomics.util.experiment.massspectrometry.*;
 import com.compomics.util.gui.spectrum.SequenceFragmentationPanel;
 import com.compomics.util.gui.spectrum.SpectrumPanel;
@@ -41,6 +43,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.io.*;
+import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -167,6 +171,10 @@ public class PDVCLIMainClass extends JFrame {
      */
     private ImageType imageType = ImageType.PNG;
     /**
+     * Output report or not
+     */
+    private Boolean outputReport = false;
+    /**
      * The resize panel width
      */
     private Integer resizeJPanelWidth;
@@ -208,7 +216,7 @@ public class PDVCLIMainClass extends JFrame {
         options.addOption("fh", true, "Figure height. Default is 400");
         options.addOption("fw", true, "Figure width. Default is 800");
         options.addOption("fu", true, "The units in which ‘height’(fh) and ‘width’(fw) are given. Can be cm, mm or px. Default is px");
-        options.addOption("ft", true, "Figure type. Can be png, pdf or tiff.");
+        options.addOption("ft", true, "Figure type. Can be png, pdf, tiff or report file.");
         options.addOption("pw", true, "Peak width. Default is 1");
         options.addOption("ah", false, "Whether or not to consider neutral loss of H2O.");
         options.addOption("rp", false, "Whether or not to remove precursor peak.");
@@ -279,6 +287,8 @@ public class PDVCLIMainClass extends JFrame {
                 this.imageType = ImageType.PDF;
             } else if (commandLine.getOptionValue("ft").equals("tiff")){
                 this.imageType = ImageType.TIFF;
+            } else if (commandLine.getOptionValue("ft").equals("report")){
+                this.outputReport = true;
             }
         } else {
             System.err.println("Lost output picture type! (png, pdf, tiff)");
@@ -387,8 +397,11 @@ public class PDVCLIMainClass extends JFrame {
             processIndexFile();
 
             importFile();
-
-            displayResults();
+            if (outputReport){
+                outputReport();
+            } else {
+                displayResults();
+            }
         } else {
 
             importSpectrumFiles();
@@ -805,6 +818,266 @@ public class PDVCLIMainClass extends JFrame {
         } else {
             return null;
         }
+    }
+
+    private void outputReport() throws IOException {
+        FileWriter fileWriter = new FileWriter(outPutPath + "/PDVExportResult.txt");
+
+        fileWriter.write("Spectrum_Title\tpeptide\tcharge\t#b_ions\t#y_ions\t#by_pairs\tRatio\tions\tions_mz\tions_int\n");
+        if (indexesFromFile.size() == 0){
+            for (String spectrumIndex : spectrumMatchesMap.keySet()) {
+                SpectrumMatch spectrumMatch = spectrumMatchesMap.get(spectrumIndex);
+
+                String spectrumKey = spectrumIndex.split("_rank_")[0];
+
+                PeptideAssumption peptideAssumption = spectrumMatch.getBestPeptideAssumption();
+
+                MSnSpectrum mSnSpectrum;
+                if (spectrumFileType == 1){
+                    mSnSpectrum = getSpectrum(spectrumMatch.getKey());
+                } else {
+                    mSnSpectrum = getSpectrum(spectrumKey);
+                }
+                fileWriter.write(spectrumKey +"\t" + peptideAssumption.getPeptide().getSequence() + "\t" + peptideAssumption.getIdentificationCharge().value);
+
+                if (mSnSpectrum != null) {
+
+                    ArrayList<Object> spectrumDetails = getSpectrumDetails(spectrumKey, peptideAssumption, mSnSpectrum);
+                    for (Object oneDetail : spectrumDetails){
+                        fileWriter.write("\t" + oneDetail);
+                    }
+                    fileWriter.write("\n");
+
+                } else {
+
+                    for (int i = 0; i <7; i ++){
+                        fileWriter.write("\t");
+                    }
+                    fileWriter.write("\n");
+                }
+            }
+        } else {
+            for (String spectrumIndex : spectrumMatchesMap.keySet()) {
+                SpectrumMatch spectrumMatch = spectrumMatchesMap.get(spectrumIndex);
+
+                String spectrumKey = spectrumIndex.split("_rank_")[0];
+
+                if (isSpectrumKey) {
+                    if (indexesFromFile.containsKey(spectrumKey)) {
+
+                        PeptideAssumption peptideAssumption = spectrumMatch.getBestPeptideAssumption();
+
+                        MSnSpectrum mSnSpectrum;
+                        if (spectrumFileType == 1) {
+                            mSnSpectrum = getSpectrum(spectrumMatch.getKey());
+                        } else {
+                            mSnSpectrum = getSpectrum(spectrumKey);
+                        }
+                        fileWriter.write(spectrumKey + "\t" + peptideAssumption.getPeptide().getSequence() + "\t" + peptideAssumption.getIdentificationCharge().value);
+
+                        if (mSnSpectrum != null) {
+
+                            ArrayList<Object> spectrumDetails = getSpectrumDetails(spectrumKey, peptideAssumption, mSnSpectrum);
+                            for (Object oneDetail : spectrumDetails) {
+                                fileWriter.write("\t" + oneDetail);
+                            }
+                            fileWriter.write("\n");
+
+                        } else {
+
+                            for (int i = 0; i < 7; i++) {
+                                fileWriter.write("\t");
+                            }
+                            fileWriter.write("\n");
+                        }
+                    }
+
+                } else {
+
+                    PeptideAssumption peptideAssumption = spectrumMatch.getBestPeptideAssumption();
+
+                    if (indexesFromFile.containsKey(peptideAssumption.getPeptide().getSequence().toLowerCase())) {
+
+                        MSnSpectrum mSnSpectrum;
+                        if (spectrumFileType == 1) {
+                            mSnSpectrum = getSpectrum(spectrumMatch.getKey());
+                        } else {
+                            mSnSpectrum = getSpectrum(spectrumKey);
+                        }
+                        fileWriter.write(spectrumKey + "\t" + peptideAssumption.getPeptide().getSequence() + "\t" + peptideAssumption.getIdentificationCharge().value);
+
+                        if (mSnSpectrum != null) {
+
+                            ArrayList<Object> spectrumDetails = getSpectrumDetails(spectrumKey, peptideAssumption, mSnSpectrum);
+                            for (Object oneDetail : spectrumDetails) {
+                                fileWriter.write("\t" + oneDetail);
+                            }
+                            fileWriter.write("\n");
+                        } else {
+
+                            for (int i = 0; i < 7; i++) {
+                                fileWriter.write("\t");
+                            }
+                            fileWriter.write("\n");
+                        }
+
+                    }
+                }
+            }
+        }
+        fileWriter.close();
+        formWindowClosing(null);
+    }
+
+    /**
+     * Get spectrum and match details
+     * @param psmKey Spectrum key
+     * @param peptideAssumption Spectrum identification
+     * @param mSnSpectrum Spectrum
+     * @return Details
+     */
+    private ArrayList<Object> getSpectrumDetails(String psmKey, PeptideAssumption peptideAssumption, MSnSpectrum mSnSpectrum){
+
+        ArrayList<Object> spectrumDetails = new ArrayList<>();
+
+        try {
+            String currentPeptideSequence;
+            ArrayList<IonMatch> annotations;
+
+            SpecificAnnotationSettings specificAnnotationSettings = annotationPreferences.getSpecificAnnotationPreferences(psmKey, peptideAssumption, SequenceMatchingPreferences.defaultStringMatching, SequenceMatchingPreferences.defaultStringMatching);
+
+            specificAnnotationSettings.setNeutralLossesAuto(false);
+            specificAnnotationSettings.clearNeutralLosses();
+
+            specificAnnotationSettings.addIonType(Ion.IonType.PEPTIDE_FRAGMENT_ION, PeptideFragmentIon.B_ION);
+            specificAnnotationSettings.addIonType(Ion.IonType.TAG_FRAGMENT_ION, PeptideFragmentIon.B_ION);
+
+            specificAnnotationSettings.addIonType(Ion.IonType.PEPTIDE_FRAGMENT_ION, PeptideFragmentIon.Y_ION);
+            specificAnnotationSettings.addIonType(Ion.IonType.TAG_FRAGMENT_ION, PeptideFragmentIon.Y_ION);
+
+            Peptide currentPeptide = peptideAssumption.getPeptide();
+            currentPeptideSequence = currentPeptide.getSequence();
+
+            annotations = spectrumAnnotator.getSpectrumAnnotationFiter(annotationPreferences, specificAnnotationSettings, mSnSpectrum, peptideAssumption.getPeptide(), null, ptmFactory, true);
+
+            DecimalFormat df = new DecimalFormat("#.00");
+
+            Double allMatchInt = 0.0;
+            Double allPeakInt = 0.0;
+            HashMap<Integer, ArrayList<String>> bIonMap = new HashMap<>();
+            HashMap<Integer, ArrayList<String>> yIonMap = new HashMap<>();
+            ArrayList<String> bIonList;
+            ArrayList<String> yIonList;
+            ArrayList<String> ionMatches = new ArrayList<>();
+            ArrayList<Double> ionsMzs = new ArrayList<>();
+            ArrayList<Double> ionInts = new ArrayList<>();
+            for (IonMatch ionMatch : annotations){
+                String match = ionMatch.getPeakAnnotation();
+                ionMatches.add(match);
+                ionsMzs.add(ionMatch.peak.mz);
+                ionInts.add(ionMatch.peak.intensity);
+
+                Integer charge = ionMatch.charge;
+
+                if (match.contains("b") && !match.contains("-")){
+
+                    if (bIonMap.containsKey(charge)){
+                        bIonMap.get(charge).add(match.replace("+",""));
+                    } else {
+                        bIonList = new ArrayList<>();
+                        bIonList.add(match.replace("+",""));
+                        bIonMap.put(charge, bIonList);
+                    }
+
+                } else if (match.contains("y") && !match.contains("-")){
+                    if (yIonMap.containsKey(charge)){
+                        yIonMap.get(charge).add(match.replace("+",""));
+                    } else {
+                        yIonList = new ArrayList<>();
+                        yIonList.add(match.replace("+",""));
+                        yIonMap.put(charge, yIonList);
+                    }
+                }
+
+                allMatchInt += ionMatch.peak.getIntensity();
+            }
+
+            for (Double each : mSnSpectrum.getIntensityValuesAsArray()){
+                allPeakInt += each;
+            }
+
+            Double ratio = allMatchInt/allPeakInt;
+
+            Integer[] nums = getPair(bIonMap, yIonMap, currentPeptideSequence.length());
+
+            spectrumDetails.add(nums[0]);
+
+            spectrumDetails.add(nums[1]);
+
+            spectrumDetails.add(nums[2]);
+
+            spectrumDetails.add(ratio);
+
+            spectrumDetails.add(ionMatches);
+            spectrumDetails.add(ionsMzs);
+            spectrumDetails.add(ionInts);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return spectrumDetails;
+
+    }
+
+    /**
+     * Get by pairs
+     * @param bIonMap B ion map
+     * @param yIonMap Y ion map
+     * @param length Peptide length
+     * @return All details
+     */
+    private Integer[] getPair(HashMap<Integer, ArrayList<String>> bIonMap, HashMap<Integer, ArrayList<String>> yIonMap, Integer length){
+        Integer[] nums = new Integer[3];
+        Integer bIonNum = 0;
+        Integer yIonNum = 0;
+        Integer pairNum = 0;
+        ArrayList<String> bIonList;
+        ArrayList<String> yIonList;
+
+        for (Integer eachCharge : bIonMap.keySet()){
+            bIonList = bIonMap.get(eachCharge);
+
+            bIonNum += bIonList.size();
+
+            if (yIonMap.containsKey(eachCharge)){
+                yIonList = yIonMap.get(eachCharge);
+
+                for (String eachMatch : bIonList){
+                    for (String eachYMatch : yIonList){
+                        if (Integer.valueOf(eachMatch.substring(1, eachMatch.length())) + Integer.valueOf(eachYMatch.substring(1,eachYMatch.length())) == length){
+                            pairNum ++;
+                        }
+                    }
+                }
+            }
+        }
+        for (Integer eachCharge : yIonMap.keySet()){
+            yIonList = yIonMap.get(eachCharge);
+
+            yIonNum += yIonList.size();
+        }
+        nums[0] = bIonNum;
+        nums[1] = yIonNum;
+        nums[2] = pairNum;
+
+        return nums;
     }
 
     /**
