@@ -303,6 +303,9 @@ public class DatabaseTableModel extends DefaultTableModel {
                         int newColumn = index + 10;
                         if(column == newColumn){
                             Object object = oneItem.get(index+1);
+                            if (object == null){
+                                return "";
+                            }
                             if(object.getClass() == String.class){
                                 return object;
                             } else if (object.getClass() == Integer.class){
@@ -438,6 +441,9 @@ public class DatabaseTableModel extends DefaultTableModel {
                         int newColumn = index + 10;
                         if(column == newColumn){
                             Object object = oneItem.get(index+1);
+                            if (object == null){
+                                return "";
+                            }
                             if(object.getClass() == String.class){
                                 return object;
                             } else if (object.getClass() == Integer.class){

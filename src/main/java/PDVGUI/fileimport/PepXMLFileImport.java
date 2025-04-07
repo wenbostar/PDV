@@ -679,11 +679,12 @@ public class PepXMLFileImport {
                         if (spectrumNativeID == null){
                             if (searchEngine.toLowerCase().contains("mascot")){ // scan number is wrong
                                 spectrumNativeID = spectrumTitle;
+                                spectrumIndex = spectrumIdAndNumber.get(spectrumNativeID);
                             }   else {
                                 spectrumNativeID = "controllerType=0 controllerNumber=1 scan=" + scanNum; // Some results have different format.
+                                spectrumIndex= Integer.valueOf(scanNum);
                             }
                         }
-                        spectrumIndex = spectrumIdAndNumber.get(spectrumNativeID);
                         spectrumMatch = new SpectrumMatch(Spectrum.getSpectrumKey(spectrumFileName, String.valueOf(spectrumIndex - 1)));
                         spectrumTitle = String.valueOf(spectrumIndex - 1);
                     } else {

@@ -78,10 +78,6 @@ public class MztabImport {
      */
     private ArrayList<String> allModifications = new ArrayList<>();
     /**
-     * Check file format
-     */
-    private Boolean isNewSoft = false;
-    /**
      * Details information list
      */
     private ArrayList<String> detailsList = new ArrayList<>();
@@ -286,8 +282,6 @@ public class MztabImport {
                     }
                 }
 
-
-
                 currentMatch = new SpectrumMatch(Spectrum.getSpectrumKey(spectrumFile.getName(), spectrumTitle));
 
                 peptide = new Peptide(pureSequence, utilitiesModifications);
@@ -370,11 +364,12 @@ public class MztabImport {
                 lineCount ++;}
         }bufferedReader.close();
 
-        if(count != 0 && isNewSoft){
+        if(count != 0){
 
             int[] counts = preparedStatement.executeBatch();
             connection.commit();
             preparedStatement.close();
+            System.out.println("Import DB");
 
             pdvMainClass.updatePTMSetting();
             pdvMainClass.allSpectrumIndex.add(spectrumList);
@@ -389,6 +384,7 @@ public class MztabImport {
                 pdvMainClass.pageNumJTextField.setText(String.valueOf(pdvMainClass.selectedPageNum) + "/" + String.valueOf(pdvMainClass.allSpectrumIndex.size()));
             }
         }
+        System.out.println("Done all Import.");
 
         pdvMainClass.loadingJButton.setIcon(new ImageIcon(getClass().getResource("/icons/done.png")));
         pdvMainClass.loadingJButton.setText("Import done");
