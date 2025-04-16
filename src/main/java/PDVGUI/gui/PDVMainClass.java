@@ -164,6 +164,10 @@ public class PDVMainClass extends JFrame {
      */
     private ScanCollectionDefault scans;
     /**
+     * Objective to save map mzXML and mzml file
+     */
+    private HashMap<String, ScanCollectionDefault>  scansMap;
+    /**
      * spectrum factory Objective
      */
     private Object spectrumsFileFactory;
@@ -262,7 +266,7 @@ public class PDVMainClass extends JFrame {
     /**
      * Version
      */
-    private static final String VERSION = "2.1.3";
+    private static final String VERSION = "2.2.0";
 
     /**
      * Main class
@@ -1278,7 +1282,7 @@ public class PDVMainClass extends JFrame {
      * @param pepXMLFile PepXML File
      * @param spectrumFileType Type of spectrum file
      */
-    public void importFilePep(File spectrumFile, Object spectrumsFileFactory, File pepXMLFile, String spectrumFileType, HashMap<String, Integer> spectrumIdAndNumber) {
+    public void importFilePep(File spectrumFile, Object spectrumsFileFactory, File pepXMLFile, String spectrumFileType, HashMap<String, HashMap<String, Integer>> spectrumIdAndNumber) {
 
         isMaxQuant = false;
         isNewSoft = false;
@@ -1289,7 +1293,7 @@ public class PDVMainClass extends JFrame {
 
         if (spectrumFileType.equals("mzml")){
 
-            scans = (ScanCollectionDefault) spectrumsFileFactory;
+            scansMap = (HashMap<String, ScanCollectionDefault>)  spectrumsFileFactory;
 
         }else if(spectrumFileType.equals("mgf")){
 
@@ -1323,7 +1327,7 @@ public class PDVMainClass extends JFrame {
 
                 try {
                     pepXMLFileImport = new PepXMLFileImport(PDVMainClass.this, spectrumFile.getName(), pepXMLFile, getModificationMass(), spectrumFactory,
-                            scans, spectrumFileType, progressDialog, spectrumIdAndNumber);
+                            spectrumFileType, progressDialog, spectrumIdAndNumber);
 
                     sqliteConnection = pepXMLFileImport.getSqLiteConnection();
                     originalInfor = pepXMLFileImport.getOriginalInfor();
@@ -1367,7 +1371,7 @@ public class PDVMainClass extends JFrame {
 
         if (spectrumFileType.equals("mzml")){
 
-            scans = (ScanCollectionDefault) spectrumsFileFactory;
+            scansMap = (HashMap<String, ScanCollectionDefault>)  spectrumsFileFactory;
 
         }else if(spectrumFileType.equals("mgf")){
 
@@ -1444,7 +1448,7 @@ public class PDVMainClass extends JFrame {
 
         switch (spectrumFileType) {
             case "mzml":
-                scans = (ScanCollectionDefault) spectrumsFileFactory;
+                scansMap = (HashMap<String, ScanCollectionDefault>)  spectrumsFileFactory;
                 break;
 
             case "mgf":
@@ -1506,11 +1510,10 @@ public class PDVMainClass extends JFrame {
 
     /**
      * Import mztab results
-     * @param spectrumFile Spectrum file
      * @param spectrumsFileFactory Spectrum factory
      * @param textFile Text Id file
      */
-    public void importMztabResults(File spectrumFile, Object spectrumsFileFactory, File textFile, String spectrumFileType) {
+    public void importMztabResults(Object spectrumsFileFactory, File textFile, String spectrumFileType) {
 
         this.isNewSoft = false;
         this.isMztab = true;
@@ -1520,6 +1523,8 @@ public class PDVMainClass extends JFrame {
 
         if ("mgf".equals(spectrumFileType)) {
             spectrumFactory = (SpectrumFactory) spectrumsFileFactory;
+        } else {
+            scansMap = (HashMap<String, ScanCollectionDefault>)  spectrumsFileFactory;
         }
 
         databasePath = textFile.getAbsolutePath()+".db";
@@ -1544,7 +1549,7 @@ public class PDVMainClass extends JFrame {
                 MztabImport mztabImport;
 
                 try {
-                    mztabImport = new MztabImport(PDVMainClass.this, textFile, spectrumFile, progressDialog);
+                    mztabImport = new MztabImport(PDVMainClass.this, textFile, spectrumFileType, progressDialog);
 
                     sqliteConnection = mztabImport.getSqLiteConnection();
                     allModifications = mztabImport.getAllModifications();
@@ -1604,7 +1609,7 @@ public class PDVMainClass extends JFrame {
         switch (spectrumFileType) {
             case "mzml":
 
-                scans = (ScanCollectionDefault) spectrumsFileFactory;
+                scansMap = (HashMap<String, ScanCollectionDefault>)  spectrumsFileFactory;
                 break;
 
             case "mgf":
@@ -1683,7 +1688,7 @@ public class PDVMainClass extends JFrame {
         switch (spectrumFileType) {
             case "mzml":
 
-                scans = (ScanCollectionDefault) spectrumsFileFactory;
+                scansMap = (HashMap<String, ScanCollectionDefault>)  spectrumsFileFactory;
                 break;
 
             case "mgf":
@@ -2765,9 +2770,7 @@ public class PDVMainClass extends JFrame {
         }
 
         selectedPageNum = 1;
-        if(scans != null){
-            scans.reset();
-        }
+
         scoreName.clear();
 
         spectrumMainPanel.removeAll();
@@ -3645,15 +3648,16 @@ public class PDVMainClass extends JFrame {
             }
         }else if(spectrumFileType.equals("mzml")){
 
+            ScanCollectionDefault currentScans = scansMap.get(spectrumFileName);
             int scanKey = spectrumMatch.getSpectrumNumber();
 
-            IScan iScan = scans.getScanByNum(scanKey);
+            IScan iScan = currentScans.getScanByNum(scanKey);
             ISpectrum spectrum = iScan.getSpectrum();
 
             Charge charge = spectrumMatch.getBestPeptideAssumption().getIdentificationCharge();
             ArrayList<Charge> charges = new ArrayList<>();
             charges.add(charge);
-            IScan precursorScan = scans.getScanByNum(iScan.getPrecursor().getParentScanNum());
+            IScan precursorScan = currentScans.getScanByNum(iScan.getPrecursor().getParentScanNum());
             Double precursorInt = iScan.getPrecursor().getIntensity();
 
             if (precursorInt == null){

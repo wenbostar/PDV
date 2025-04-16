@@ -317,8 +317,9 @@ public class DatabaseTableModel extends DefaultTableModel {
                     }
 
                 } else if (spectrumFileType.toLowerCase().equals("mzml") || spectrumFileType.toLowerCase().equals("mzxml")) {
-                    ScanCollectionDefault scanCollectionDefault = (ScanCollectionDefault) spectrumsFileFactory;
-
+                    HashMap<String, ScanCollectionDefault> scansMap = (HashMap<String, ScanCollectionDefault>) spectrumsFileFactory;
+                    String spectrumFileName = matchKey.split("_cus_")[0];
+                    ScanCollectionDefault scanCollectionDefault = scansMap.get(spectrumFileName);
                     int spectrumNumber = spectrumMatch.getSpectrumNumber();
 
                     IScan iScan = scanCollectionDefault.getScanByNum(spectrumNumber);
@@ -346,7 +347,7 @@ public class DatabaseTableModel extends DefaultTableModel {
                         }
                     }
                     if(column == 4) {
-                        return spectrumMatch.getKey().split("_cus_")[1];
+                        return spectrumMatch.getKey();
                     }
                     if(column == 5) {
                         if (spectrumMatch.getBestPeptideAssumption() != null) {

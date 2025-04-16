@@ -132,7 +132,7 @@ public class PepXMLFileImport {
     /**
      * Spectrum ID to spectrum number
      */
-    private HashMap<String, Integer> spectrumIdAndNumber;
+    private HashMap<String, HashMap<String, Integer>> spectrumIdAndNumber;
 
     /**
      * Constructor
@@ -150,7 +150,8 @@ public class PepXMLFileImport {
      * @throws XmlPullParserException
      */
     public PepXMLFileImport(PDVMainClass pdvMainClass, String spectrumFileName, File pepXMLFile, HashMap<String,HashMap<Double, String >> modificationMass,
-                            SpectrumFactory spectrumFactory, ScanCollectionDefault scans, String spectrumFileType, ProgressDialogX progressDialog, HashMap<String, Integer> spectrumIdAndNumber)
+                            SpectrumFactory spectrumFactory, String spectrumFileType,
+                            ProgressDialogX progressDialog, HashMap<String, HashMap<String, Integer>> spectrumIdAndNumber)
             throws SQLException, ClassNotFoundException, IOException, XmlPullParserException {
 
         this.pdvMainClass = pdvMainClass;
@@ -158,7 +159,6 @@ public class PepXMLFileImport {
         this.spectrumFileName = spectrumFileName;
         this.modificationMass = modificationMass;
         this.spectrumFactory = spectrumFactory;
-        this.scans = scans;
         this.spectrumFileType = spectrumFileType;
         this.progressDialog = progressDialog;
         this.spectrumIdAndNumber = spectrumIdAndNumber;
@@ -667,28 +667,29 @@ public class PepXMLFileImport {
                     Integer spectrumIndex = Integer.valueOf(scanNum);
 
                     SpectrumMatch spectrumMatch;
+                    String currentSpectrumName = spectrumId.split("\\.")[0];
 
                     if (spectrumFileType.equals("mgf")){
                         if (searchEngine.toLowerCase().contains("crux")){
-                            spectrumTitle = spectrumFactory.getSpectrumTitle(spectrumFileName, Integer.parseInt(scanNum));
+                            spectrumTitle = spectrumFactory.getSpectrumTitle(currentSpectrumName+".mgf", Integer.parseInt(scanNum));
                         } else if (searchEngine.toLowerCase().contains("myrimatch")){
-                            spectrumTitle = spectrumFactory.getSpectrumTitle(spectrumFileName, Integer.parseInt(scanNum) + 1);
+                            spectrumTitle = spectrumFactory.getSpectrumTitle(currentSpectrumName+".mgf", Integer.parseInt(scanNum) + 1);
                         }
-                        spectrumMatch = new SpectrumMatch(Spectrum.getSpectrumKey(spectrumFileName, spectrumTitle));
+                        spectrumMatch = new SpectrumMatch(Spectrum.getSpectrumKey(currentSpectrumName+".mgf", spectrumTitle));
                     } else if (spectrumFileType.equals("mzml")){
                         if (spectrumNativeID == null){
                             if (searchEngine.toLowerCase().contains("mascot")){ // scan number is wrong
                                 spectrumNativeID = spectrumTitle;
-                                spectrumIndex = spectrumIdAndNumber.get(spectrumNativeID);
+                                spectrumIndex = spectrumIdAndNumber.get(currentSpectrumName+".mzML").get(spectrumNativeID);
                             }   else {
                                 spectrumNativeID = "controllerType=0 controllerNumber=1 scan=" + scanNum; // Some results have different format.
                                 spectrumIndex= Integer.valueOf(scanNum);
                             }
                         }
-                        spectrumMatch = new SpectrumMatch(Spectrum.getSpectrumKey(spectrumFileName, String.valueOf(spectrumIndex - 1)));
+                        spectrumMatch = new SpectrumMatch(Spectrum.getSpectrumKey(currentSpectrumName+".mzML", String.valueOf(spectrumIndex - 1)));
                         spectrumTitle = String.valueOf(spectrumIndex - 1);
                     } else {
-                        spectrumMatch = new SpectrumMatch(Spectrum.getSpectrumKey(spectrumFileName, String.valueOf(spectrumIndex - 1)));
+                        spectrumMatch = new SpectrumMatch(Spectrum.getSpectrumKey(currentSpectrumName+".mzML", String.valueOf(spectrumIndex - 1)));
 
                     }
 
@@ -1135,7 +1136,7 @@ public class PepXMLFileImport {
             score = 0.0;
         }
 
-        return new PeptideAssumption(peptide, rank, 1, new Charge(Charge.PLUS, charge), score, spectrumFileName);
+        return new PeptideAssumption(peptide, rank, 1, new Charge(Charge.PLUS, charge), score, "");
     }
 
     /**

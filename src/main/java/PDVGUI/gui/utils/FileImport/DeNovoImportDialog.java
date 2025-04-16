@@ -10,6 +10,12 @@ import com.compomics.util.gui.GuiUtilities;
 import com.compomics.util.gui.renderers.AlignedListCellRenderer;
 import com.compomics.util.gui.waiting.waitinghandlers.ProgressDialogX;
 import org.apache.commons.io.FileUtils;
+import umich.ms.datatypes.LCMSDataSubset;
+import umich.ms.datatypes.scan.StorageStrategy;
+import umich.ms.datatypes.scancollection.impl.ScanCollectionDefault;
+import umich.ms.fileio.exceptions.FileParsingException;
+import umich.ms.fileio.filetypes.mzml.MZMLFile;
+import umich.ms.fileio.filetypes.mzml.MZMLIndexElement;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -18,6 +24,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -40,9 +48,13 @@ public class DeNovoImportDialog extends JDialog {
      */
     private File identificationFile;
     /**
-     * Spectrum file
+     * Spectrum files list
      */
-    private File spectrumFile;
+    private ArrayList<File> spectrumFiles = new ArrayList<File>();
+    /**
+     * Spectrum file type
+     */
+    private String spectrumFileType;
     /**
     *  welcome dialog parent, can be null
      */
@@ -67,6 +79,10 @@ public class DeNovoImportDialog extends JDialog {
      * PTMFactory import from utilities
      */
     private PTMFactory ptmFactory = PTMFactory.getInstance();
+    /**
+     * Spectrum Object
+     */
+    private Object spectrumsFileFactory;
     /**
      * Parent class
      */
@@ -383,6 +399,8 @@ public class DeNovoImportDialog extends JDialog {
             @Override
             public void run() {
 
+                Integer threads = Runtime.getRuntime().availableProcessors();
+
                 ArrayList<String> modification =  ptmFactory.getPTMs();
                 PtmSettings ptmSettings = new PtmSettings();
 
@@ -419,19 +437,52 @@ public class DeNovoImportDialog extends JDialog {
 
                 if (identificationFile != null) {
 
-
-                    SpectrumFactory spectrumFactory = SpectrumFactory.getInstance();
                     try {
 
-                        if (spectrumFile.getName().endsWith(".dup")){
-                            if (new File(spectrumFile.getAbsolutePath()+".mgf").exists()){
-                                spectrumFile = new File(spectrumFile.getAbsolutePath()+".mgf");
-                            } else {
-                                FileUtils.copyFile(spectrumFile, new File(spectrumFile.getAbsolutePath()+".mgf"));
-                                spectrumFile = new File(spectrumFile.getAbsolutePath()+".mgf");
+                        if(spectrumFileType.equals("mgf")){
+                            SpectrumFactory spectrumFactory = SpectrumFactory.getInstance();
+                            try {
+                                for(File spectrumFile: spectrumFiles){
+                                    spectrumFactory.addSpectra(spectrumFile);
+                                }
+                            } catch (Exception e) {
+                                JOptionPane.showMessageDialog(DeNovoImportDialog.this, "Failed to pares Spectrum file. Please check your spectrum file!", "File Error", JOptionPane.WARNING_MESSAGE);
+                                progressDialog.setRunFinished();
+                                e.printStackTrace();
+                                System.exit(1);
                             }
+
+                            spectrumsFileFactory = spectrumFactory;
+
+                        }else if(spectrumFileType.equals("mzml")){
+                            HashMap<String, ScanCollectionDefault> scanCollectionDefaultHashMap = new HashMap<>();
+                            for(File spectrumFile: spectrumFiles){
+                                MZMLFile mzmlFile = new MZMLFile(spectrumFile.getAbsolutePath());
+
+                                ScanCollectionDefault scans = new ScanCollectionDefault();
+
+                                scans.setDefaultStorageStrategy(StorageStrategy.SOFT);
+
+                                scans.isAutoloadSpectra(true);
+
+                                scans.setDataSource(mzmlFile);
+
+                                mzmlFile.setNumThreadsForParsing(threads);
+
+                                try {
+                                    scans.loadData(LCMSDataSubset.MS2_WITH_SPECTRA);
+                                } catch (FileParsingException e) {
+                                    JOptionPane.showMessageDialog(DeNovoImportDialog.this, "Failed to pares Spectrum file. Please check your spectrum file!", "File Error", JOptionPane.WARNING_MESSAGE);
+                                    progressDialog.setRunFinished();
+                                    e.printStackTrace();
+                                    System.exit(1);
+                                }
+                                scanCollectionDefaultHashMap.put(spectrumFile.getName(), scans);
+                            }
+
+                            spectrumsFileFactory = scanCollectionDefaultHashMap;
+
                         }
-                         spectrumFactory.addSpectra(spectrumFile);
 
                     } catch (Exception e) {
                         JOptionPane.showMessageDialog(DeNovoImportDialog.this, "Failed to pares Spectrum file. Please check your spectrum file!", "File Error", JOptionPane.WARNING_MESSAGE);
@@ -443,13 +494,13 @@ public class DeNovoImportDialog extends JDialog {
                     progressDialog.setRunFinished();
 
                     if (identificationFile.getName().endsWith(".tab")){
-                        pdvMainClass.importDeepNovoResults(identificationFile, spectrumFile, spectrumFactory);
+                        pdvMainClass.importDeepNovoResults(identificationFile, spectrumFiles.get(0), (SpectrumFactory) spectrumsFileFactory);
                     } else if (identificationFile.getName().endsWith(".tsk")){
-                        pdvMainClass.importPNovoResults(identificationFile, spectrumFile, spectrumFactory);
+                        pdvMainClass.importPNovoResults(identificationFile, spectrumFiles.get(0), (SpectrumFactory) spectrumsFileFactory);
                     } else if (identificationFile.getName().endsWith(".mztab")){
-                        pdvMainClass.importMztabResults(spectrumFile, spectrumFactory, identificationFile, "mgf");
+                        pdvMainClass.importMztabResults(spectrumsFileFactory, identificationFile, spectrumFileType);
                     }else {
-                        pdvMainClass.importDeNovoResults(identificationFile, spectrumFile, spectrumFactory);
+                        pdvMainClass.importDeNovoResults(identificationFile, spectrumFiles.get(0), (SpectrumFactory) spectrumsFileFactory);
                     }
 
                 }
@@ -488,7 +539,7 @@ public class DeNovoImportDialog extends JDialog {
             allValid = false;
         }
 
-        if (spectrumFile != null) {
+        if (spectrumFiles.size() != 0) {
             spectrumFileLabel.setForeground(Color.BLACK);
             spectrumFileLabel.setToolTipText(null);
         } else {
@@ -565,39 +616,66 @@ public class DeNovoImportDialog extends JDialog {
      */
     private void browseSpectraJButtonActionPerformed(ActionEvent evt) {
         JFileChooser fileChooser = new JFileChooser(lastSelectedFolder);
-        fileChooser.setDialogTitle("Select Spectrum File");
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setDialogTitle("Select Spectrum File(s)");
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         fileChooser.setMultiSelectionEnabled(true);
 
         FileFilter filter = new FileFilter() {
             @Override
             public boolean accept(File myFile) {
-
                 return myFile.getName().toLowerCase().endsWith(".mgf")
-                        || myFile.getName().toLowerCase().endsWith(".dup")
+                        ||myFile.getName().toLowerCase().endsWith(".mzml")
+                        ||myFile.getName().toLowerCase().endsWith(".mzxml")
                         || myFile.isDirectory();
             }
 
             @Override
             public String getDescription() {
-                return " Mascot Generic Format (.mgf)";
+                return "Mascot Generic Format (.mgf), .mzML, .mzXML";
             }
         };
 
         fileChooser.setFileFilter(filter);
-
-        int returnValue = fileChooser.showDialog(this, "OK");
+        int returnValue = fileChooser.showDialog(this, "Add");
 
         if (returnValue == JFileChooser.APPROVE_OPTION) {
-            File[] selectedFiles = fileChooser.getSelectedFiles();
-            for (File selectedFile : selectedFiles) {
-                if (selectedFile.exists()) {
-                    spectrumFile = selectedFile;
-                    lastSelectedFolder = selectedFile.getParent();
-                }
 
+            for (File newFile : fileChooser.getSelectedFiles()) {
+                if (newFile.isDirectory()) {
+                    File[] selectedFiles = newFile.listFiles();
+
+                    if (selectedFiles != null) {
+
+                        for (File singleFile : selectedFiles){
+                            if (singleFile.getName().toLowerCase().endsWith(".mgf")){
+                                spectrumFileType = "mgf";
+                                spectrumFiles.add(singleFile);
+                            } else if (singleFile.getName().toLowerCase().endsWith(".mzml")){
+                                spectrumFileType = "mzml";
+                                spectrumFiles.add(singleFile);
+                            } else if (singleFile.getName().toLowerCase().endsWith(".mzxml")){
+                                spectrumFileType = "mzxml";
+                                spectrumFiles.add(singleFile);
+                            }
+                        }
+                    } else {
+                        System.err.println("No spectrum files in your directory!");
+                    }
+                } else {
+                    if(newFile.getName().toLowerCase().endsWith(".mgf")){
+                        spectrumFileType = "mgf";
+                        spectrumFiles.add(newFile);
+                    }else if(newFile.getName().toLowerCase().endsWith(".mzml")){
+                        spectrumFileType = "mzml";
+                        spectrumFiles.add(newFile);
+                    }else if(newFile.getName().toLowerCase().endsWith(".mzxml")){
+                        spectrumFileType = "mzxml";
+                        spectrumFiles.add(newFile);
+                    }
+                }
             }
-            spectrumFileJTextField.setText(spectrumFile.getName() + " selected.");
+
+            spectrumFileJTextField.setText(spectrumFiles.size() + " file(s) selected");
             validateInput();
         }
     }

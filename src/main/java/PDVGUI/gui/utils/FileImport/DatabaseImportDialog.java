@@ -113,7 +113,7 @@ public class DatabaseImportDialog extends JDialog {
     /**
      * Spectrum ID to spectrum number
      */
-    private HashMap<String, Integer> spectrumIdAndNumber = new HashMap<>();
+    private HashMap<String, HashMap<String, Integer>> spectrumIdAndNumber = new HashMap<>();
     /**
      * Boolean indicate txt file
      */
@@ -491,36 +491,42 @@ public class DatabaseImportDialog extends JDialog {
 
                         }else if(spectrumFileType.equals("mzml")){
 
-                            MZMLFile mzmlFile = new MZMLFile(spectrumFiles.get(0).getAbsolutePath());
+                            HashMap<String, ScanCollectionDefault> scanCollectionDefaultHashMap = new HashMap<>();
+                            for(File spectrumFile: spectrumFiles){
+                                MZMLFile mzmlFile = new MZMLFile(spectrumFile.getAbsolutePath());
+                                HashMap<String, Integer> oneMzmlID = new HashMap<>();
 
-                            ScanCollectionDefault scans = new ScanCollectionDefault();
+                                ScanCollectionDefault scans = new ScanCollectionDefault();
 
-                            scans.setDefaultStorageStrategy(StorageStrategy.SOFT);
+                                scans.setDefaultStorageStrategy(StorageStrategy.SOFT);
 
-                            scans.isAutoloadSpectra(true);
+                                scans.isAutoloadSpectra(true);
 
-                            scans.setDataSource(mzmlFile);
+                                scans.setDataSource(mzmlFile);
 
-                            mzmlFile.setNumThreadsForParsing(threads);
+                                mzmlFile.setNumThreadsForParsing(threads);
 
-                            try {
-                                scans.loadData(LCMSDataSubset.MS2_WITH_SPECTRA);
-                            } catch (FileParsingException e) {
-                                JOptionPane.showMessageDialog(DatabaseImportDialog.this, "Failed to pares Spectrum file. Please check your spectrum file!", "File Error", JOptionPane.WARNING_MESSAGE);
-                                progressDialog.setRunFinished();
-                                e.printStackTrace();
-                                System.exit(1);
+                                try {
+                                    scans.loadData(LCMSDataSubset.MS2_WITH_SPECTRA);
+                                } catch (FileParsingException e) {
+                                    JOptionPane.showMessageDialog(DatabaseImportDialog.this, "Failed to pares Spectrum file. Please check your spectrum file!", "File Error", JOptionPane.WARNING_MESSAGE);
+                                    progressDialog.setRunFinished();
+                                    e.printStackTrace();
+                                    System.exit(1);
+                                }
+
+                                Map<String, MZMLIndexElement> idMap = mzmlFile.getIndex().getMapById();
+
+                                for (String id : idMap.keySet()) {
+                                    MZMLIndexElement mzmlIndexElement = idMap.get(id);
+
+                                    oneMzmlID.put(id, mzmlIndexElement.getNumber());
+                                }
+                                spectrumIdAndNumber.put(spectrumFile.getName(), oneMzmlID);
+                                scanCollectionDefaultHashMap.put(spectrumFile.getName(), scans);
                             }
 
-                            Map<String, MZMLIndexElement> idMap = mzmlFile.getIndex().getMapById();
-
-                            for (String id : idMap.keySet()) {
-                                MZMLIndexElement mzmlIndexElement = idMap.get(id);
-
-                                spectrumIdAndNumber.put(id, mzmlIndexElement.getNumber());
-                            }
-
-                            spectrumsFileFactory = scans;
+                            spectrumsFileFactory = scanCollectionDefaultHashMap;
 
                         }else if(spectrumFileType.equals("mzxml")){
                             MzXMLScanImport mzXMLScanImport = new MzXMLScanImport(spectrumFiles.get(0).getAbsolutePath());
@@ -1012,9 +1018,11 @@ public class DatabaseImportDialog extends JDialog {
      */
     private void importIdentificationFiles() {
 
+
+
         if(idFile.getName().toLowerCase().endsWith(".mzid")) {
 
-            pdvMainClass.importMzID(spectrumsFileFactory, idFile, mzIdentMLType, spectrumFileType, spectrumIdAndNumber);
+            pdvMainClass.importMzID(spectrumsFileFactory, idFile, mzIdentMLType, spectrumFileType, spectrumIdAndNumber.get(spectrumFiles.get(0).getName()));
             idFile = null;
 
         } else if(idFile.getName().toLowerCase().endsWith("xml")){
@@ -1026,7 +1034,7 @@ public class DatabaseImportDialog extends JDialog {
             int selectedIndex = fileTypeCombox.getSelectedIndex();
 
             if (selectedIndex == 1){
-                pdvMainClass.importMSAmandaResults(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType, spectrumIdAndNumber);
+                pdvMainClass.importMSAmandaResults(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType, spectrumIdAndNumber.get(spectrumFiles.get(0).getName()));
             } else if (selectedIndex == 0){
                 pdvMainClass.importTextResults(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType);
             } else if (selectedIndex == 2){

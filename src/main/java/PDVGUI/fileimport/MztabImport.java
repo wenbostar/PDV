@@ -34,10 +34,6 @@ public class MztabImport {
      */
     private File textIdFile;
     /**
-     * Spectrum file
-     */
-    private File spectrumFile;
-    /**
      * Database connection
      */
     private SQLiteConnection sqLiteConnection;
@@ -53,6 +49,7 @@ public class MztabImport {
      * Progress dialog
      */
     private ProgressDialogX progressDialog;
+    private String spectrumFileType;
     /**
      * Spectrum title column index
      */
@@ -102,17 +99,16 @@ public class MztabImport {
      * Constructor
      * @param pdvMainClass Parent class
      * @param textIdFile Text identification file
-     * @param spectrumFile Spectrum file
      * @param progressDialog Progress dialog
      * @throws SQLException
      * @throws ClassNotFoundException
      * @throws IOException
      */
-    public MztabImport(PDVMainClass pdvMainClass, File textIdFile, File spectrumFile, ProgressDialogX progressDialog) throws SQLException, ClassNotFoundException, IOException {
+    public MztabImport(PDVMainClass pdvMainClass, File textIdFile, String spectrumFileType, ProgressDialogX progressDialog) throws SQLException, ClassNotFoundException, IOException {
 
         this.pdvMainClass = pdvMainClass;
         this.textIdFile = textIdFile;
-        this.spectrumFile = spectrumFile;
+        this.spectrumFileType = spectrumFileType;
         this.progressDialog = progressDialog;
 
         String dbName = textIdFile.getParentFile().getAbsolutePath()+"/"+ textIdFile.getName()+".db";
@@ -198,6 +194,7 @@ public class MztabImport {
         String line;
         String[] values;
         String spectrumTitle;
+        String currentSpectrumFileName;
         String modificationNames;
         String singleModificationName;
         String sequence;
@@ -218,8 +215,14 @@ public class MztabImport {
         int count = 0;
         int countRound = 0;
 
+        HashMap<String, String> spectrumFileMap = new HashMap<>();
+
         while ((line = bufferedReader.readLine()) != null) {
             values = line.split("\t");
+
+            if (line.startsWith("MTD") && values[1].startsWith("ms_run")){
+                spectrumFileMap.put(values[1].split("-")[0], values[2].split("/")[values[2].split("/").length-1]);
+            }
 
             if(!line.startsWith("MTD") && !line.startsWith("PSH")){
 
@@ -229,7 +232,14 @@ public class MztabImport {
 
                 utilitiesModifications = new ArrayList<>();
 
-                spectrumTitle = values[spectrumTitleIndex].split("index=")[1];
+                if (Objects.equals(spectrumFileType, "mgf")){
+                    spectrumTitle = values[spectrumTitleIndex].split(":index=")[1];
+                    currentSpectrumFileName = spectrumFileMap.get(values[spectrumTitleIndex].split(":index=")[0]);
+                } else {
+                    spectrumTitle = values[spectrumTitleIndex].split(":scan=")[1];
+                    currentSpectrumFileName = spectrumFileMap.get(values[spectrumTitleIndex].split(":scan=")[0]);
+                }
+
                 sequence = values[sequenceIndex];
                 peptideCharge = (int) Double.parseDouble(values[chargeIndex]);
                 modificationNames = values[modificationIndex];
@@ -282,7 +292,8 @@ public class MztabImport {
                     }
                 }
 
-                currentMatch = new SpectrumMatch(Spectrum.getSpectrumKey(spectrumFile.getName(), spectrumTitle));
+                currentMatch = new SpectrumMatch(Spectrum.getSpectrumKey(currentSpectrumFileName, spectrumTitle));
+                currentMatch.setSpectrumNumber(Integer.valueOf(spectrumTitle));
 
                 peptide = new Peptide(pureSequence, utilitiesModifications);
 
