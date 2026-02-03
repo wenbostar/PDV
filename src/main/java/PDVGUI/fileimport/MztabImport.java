@@ -450,9 +450,6 @@ public class MztabImport {
      * @return A hashmap with modification and sequence information.
      */
     public HashMap<String,String> get_modification(String peptideWithMods) {
-        // [Acetyl]-MAAAAAAAK
-        // PM[Oxidation]AAAAAK
-        // C[Carbamidomethyl]AAAA[Carbamidomethyl]
         if (peptideWithMods == null) {
             throw new IllegalArgumentException("peptideWithMods is null");
         }
@@ -471,11 +468,10 @@ public class MztabImport {
                 String modName = s.substring(i + 1, close).trim();
                 int after = close + 1;
                 if (after < n && s.charAt(after) == '-') {
-                    // It's an N-term mod prefix
                     if (!modName.isEmpty()) {
-                        mods.add(modName + " of N-term@0");
+                        mods.add(modName + " of N-term@0");  // N-term stays at 0
                     }
-                    i = after + 1; // skip "]-"
+                    i = after + 1;
                 }
             }
         }
@@ -484,25 +480,21 @@ public class MztabImport {
         while (i < n) {
             char c = s.charAt(i);
 
-            // Skip whitespace just in case
             if (Character.isWhitespace(c)) {
                 i++;
                 continue;
             }
 
-            // Expect a residue letter here (A-Z). If not, fail fast.
             if (c < 'A' || c > 'Z') {
                 throw new IllegalArgumentException(
                         "Unexpected character '" + c + "' at index " + i + " in: " + peptideWithMods
                 );
             }
 
-            // Consume residue
-            int pos0 = clean.length(); // 0-based position in unmodified peptide
             clean.append(c);
+            int pos1 = clean.length();  // 1-based position (first residue = 1)
             i++;
 
-            // Consume one or more [ModName] blocks immediately following the residue
             while (i < n && s.charAt(i) == '[') {
                 int close = s.indexOf(']', i + 1);
                 if (close < 0) {
@@ -510,8 +502,7 @@ public class MztabImport {
                 }
                 String modName = s.substring(i + 1, close).trim();
                 if (!modName.isEmpty()) {
-                    // If you want 1-based residue positions instead, change pos0 to (pos0 + 1) below.
-                    mods.add(modName + " of " + c + "@" + pos0);
+                    mods.add(modName + " of " + c + "@" + pos1);  // Now 1-based
                 }
                 i = close + 1;
             }
