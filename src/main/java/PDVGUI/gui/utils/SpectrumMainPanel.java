@@ -1681,7 +1681,7 @@ public class SpectrumMainPanel extends JPanel {
                     spectrumJLayeredPane.setLayer(spectrumPanel, JLayeredPane.DEFAULT_LAYER);
                     spectrumJLayeredPane.add(spectrumPanel);
 
-                    spectrumPanel.setBounds(0, 75, spectrumShowPanel.getWidth(),spectrumShowPanel.getHeight()-85);
+                    spectrumPanel.setBounds(0, 75, spectrumShowPanel.getWidth()-12,spectrumShowPanel.getHeight()-110);
 
                     spectrumJLayeredPane.setLayer(sequenceFragmentationPanel, JLayeredPane.DRAG_LAYER);
                     spectrumJLayeredPane.add(sequenceFragmentationPanel);
@@ -1780,7 +1780,7 @@ public class SpectrumMainPanel extends JPanel {
                     }
 
                     mirrorJLayeredPane.add(mirrorSpectrumPanel);
-                    mirrorSpectrumPanel.setBounds(0,75,spectrumShowPanel.getWidth(),spectrumShowPanel.getHeight()-85);
+                    mirrorSpectrumPanel.setBounds(0,75,spectrumShowPanel.getWidth()-12,spectrumShowPanel.getHeight()-110);
 
                     mirrorJLayeredPane.setLayer(sequenceFragmentationPanelMirror, JLayeredPane.DRAG_LAYER);
                     mirrorJLayeredPane.add(sequenceFragmentationPanelMirror);
@@ -1878,7 +1878,7 @@ public class SpectrumMainPanel extends JPanel {
                     }
 
                     checkPeptideJLayeredPane.add(checkPeptideSpectrumPanel);
-                    checkPeptideSpectrumPanel.setBounds(0,75,spectrumShowPanel.getWidth(),spectrumShowPanel.getHeight()-85);
+                    checkPeptideSpectrumPanel.setBounds(0,75,spectrumShowPanel.getWidth()-12,spectrumShowPanel.getHeight()-110);
 
                     checkPeptideJLayeredPane.setLayer(sequenceFragmentationPanelCheck, JLayeredPane.DRAG_LAYER);
                     checkPeptideJLayeredPane.add(sequenceFragmentationPanelCheck);
