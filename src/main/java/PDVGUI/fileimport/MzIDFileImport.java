@@ -440,6 +440,10 @@ public class MzIDFileImport {
                     currentSpectrumFile = spectrumFileNotInMzID;
                 }
 
+                if (spectrumFileType.equals("mzml")){
+                    currentSpectrumFile = currentSpectrumFile + ".mzML";
+                }
+
                 currentMatch = new SpectrumMatch(Spectrum.getSpectrumKey(currentSpectrumFile, spectrumIndex));
 
                 if (spectrumFileType.equals("mgf")) {

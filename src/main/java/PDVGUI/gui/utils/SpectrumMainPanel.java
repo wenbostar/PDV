@@ -1681,7 +1681,7 @@ public class SpectrumMainPanel extends JPanel {
                     spectrumJLayeredPane.setLayer(spectrumPanel, JLayeredPane.DEFAULT_LAYER);
                     spectrumJLayeredPane.add(spectrumPanel);
 
-                    spectrumPanel.setBounds(0, 75, spectrumShowPanel.getWidth()-12,spectrumShowPanel.getHeight()-110);
+                    spectrumPanel.setBounds(0, 75, spectrumShowPanel.getWidth(),spectrumShowPanel.getHeight()-85);
 
                     spectrumJLayeredPane.setLayer(sequenceFragmentationPanel, JLayeredPane.DRAG_LAYER);
                     spectrumJLayeredPane.add(sequenceFragmentationPanel);
@@ -1780,7 +1780,7 @@ public class SpectrumMainPanel extends JPanel {
                     }
 
                     mirrorJLayeredPane.add(mirrorSpectrumPanel);
-                    mirrorSpectrumPanel.setBounds(0,75,spectrumShowPanel.getWidth()-12,spectrumShowPanel.getHeight()-110);
+                    mirrorSpectrumPanel.setBounds(0,75,spectrumShowPanel.getWidth(),spectrumShowPanel.getHeight()-85);
 
                     mirrorJLayeredPane.setLayer(sequenceFragmentationPanelMirror, JLayeredPane.DRAG_LAYER);
                     mirrorJLayeredPane.add(sequenceFragmentationPanelMirror);
@@ -1878,7 +1878,7 @@ public class SpectrumMainPanel extends JPanel {
                     }
 
                     checkPeptideJLayeredPane.add(checkPeptideSpectrumPanel);
-                    checkPeptideSpectrumPanel.setBounds(0,75,spectrumShowPanel.getWidth()-12,spectrumShowPanel.getHeight()-110);
+                    checkPeptideSpectrumPanel.setBounds(0,75,spectrumShowPanel.getWidth(),spectrumShowPanel.getHeight()-85);
 
                     checkPeptideJLayeredPane.setLayer(sequenceFragmentationPanelCheck, JLayeredPane.DRAG_LAYER);
                     checkPeptideJLayeredPane.add(sequenceFragmentationPanelCheck);
@@ -1938,9 +1938,9 @@ public class SpectrumMainPanel extends JPanel {
         final int peptideLength = length;
 
         if (!isDown){
-            sequenceFragmentationPanel.setBounds(40,10, peptideLength*fontHeight*2 ,fontHeight * 5);
+            sequenceFragmentationPanel.setBounds(40,10, peptideLength*fontHeight*2 ,fontHeight * 8);
         } else {
-            sequenceFragmentationPanel.setBounds(40,spectrumShowPanel.getHeight()/2, peptideLength*fontHeight*2 ,fontHeight * 5);
+            sequenceFragmentationPanel.setBounds(40,spectrumShowPanel.getHeight() -fontHeight * 7, peptideLength*fontHeight*2 ,fontHeight * 8);
         }
 
         sequenceFragmentationPanel.addMouseWheelListener(e -> {
