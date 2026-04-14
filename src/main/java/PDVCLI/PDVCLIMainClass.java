@@ -362,13 +362,13 @@ public class PDVCLIMainClass extends JFrame {
                 System.exit(1);
             }
 
-            if (commandLine.getOptionValue("ah") != null){
+            if (commandLine.hasOption("ah")){
                 this.isH2O = true;
             }
-            if (commandLine.getOptionValue("an") != null){
+            if (commandLine.hasOption("an")){
                 this.isNH3 = true;
             }
-            if (commandLine.getOptionValue("rp") != null){
+            if (commandLine.hasOption("rp")){
                 this.isRP = true;
             }
 
