@@ -30,6 +30,9 @@ import com.compomics.util.preferences.*;
 import org.apache.commons.cli.ParseException;
 import umich.ms.datatypes.scan.IScan;
 import umich.ms.datatypes.scancollection.impl.ScanCollectionDefault;
+import umich.ms.datatypes.LCMSDataSubset;
+import umich.ms.datatypes.scan.StorageStrategy;
+import umich.ms.fileio.filetypes.mzml.MZMLFile;
 import umich.ms.datatypes.spectrum.ISpectrum;
 import umich.ms.fileio.filetypes.mzidentml.jaxb.standard.MzIdentMLType;
 import org.xmlpull.v1.XmlPullParserException;
@@ -285,6 +288,8 @@ public class PDVMainClass extends JFrame {
             im.put(KeyStroke.getKeyStroke(KeyEvent.VK_X, KeyEvent.META_DOWN_MASK), DefaultEditorKit.cutAction);
 
             new PDVMainClass("New");
+        } else if (args.length > 0 && args[0].equalsIgnoreCase("denovo-gui")) {
+            launchDenovoGui(args);
         } else {
             try {
                 new PDVCLIMainClass(args);
@@ -294,6 +299,126 @@ public class PDVMainClass extends JFrame {
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * Launch the GUI directly into the DeNovo (e.g. Casanovo) visualization with
+     * spectrum and mzTab files supplied on the command line, bypassing the
+     * welcome screen and import dialog. Usage:
+     *   java -jar PDV.jar denovo-gui --mztab result.mztab --spectrum a.mzML[,b.mzML] [--tol 0.05]
+     */
+    public static void launchDenovoGui(String[] args) {
+        java.util.List<File> spectra = new java.util.ArrayList<>();
+        File mzTab = null;
+        double tol = 0.05;
+        for (int i = 1; i < args.length; i++) {
+            String a = args[i];
+            if (a.equals("--mztab") && i + 1 < args.length) {
+                mzTab = new File(args[++i]);
+            } else if (a.equals("--spectrum") && i + 1 < args.length) {
+                for (String pth : args[++i].split(",")) {
+                    String t = pth.trim();
+                    if (t.isEmpty()) {
+                        continue;
+                    }
+                    File f = new File(t);
+                    if (f.isDirectory()) {
+                        File[] kids = f.listFiles();
+                        if (kids != null) {
+                            java.util.Arrays.sort(kids);
+                            for (File k : kids) {
+                                String kn = k.getName().toLowerCase();
+                                if (k.isFile() && (kn.endsWith(".mzml") || kn.endsWith(".mzxml") || kn.endsWith(".mgf"))) {
+                                    spectra.add(k);
+                                }
+                            }
+                        }
+                    } else {
+                        spectra.add(f);
+                    }
+                }
+            } else if (a.equals("--tol") && i + 1 < args.length) {
+                try { tol = Double.parseDouble(args[++i]); } catch (NumberFormatException ignored) {}
+            }
+        }
+        if (mzTab == null || spectra.isEmpty()) {
+            System.err.println("Usage: java -jar PDV.jar denovo-gui --mztab <file.mztab> "
+                    + "--spectrum <f1.mzML[,f2.mzML]> [--tol <Da>]");
+            System.exit(1);
+        }
+        final File fMzTab = mzTab;
+        final java.util.List<File> fSpectra = spectra;
+        final double fTol = tol;
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            PDVMainClass pdv = new PDVMainClass(true);
+            pdv.setVisible(true);
+            pdv.openDenovoFromCli(fSpectra, fMzTab, fTol);
+        });
+    }
+
+    /**
+     * Programmatic equivalent of the DeNovo import dialog "Start" action for
+     * mzTab (e.g. Casanovo) results: builds search parameters, loads the
+     * spectrum file(s) (mgf or mzML) and shows the visualization panel. Mirrors
+     * DeNovoImportDialog.startJButtonActionPerformed.
+     */
+    public void openDenovoFromCli(java.util.List<File> spectrumFiles, File mzTab, double fragTolDa) {
+        final String type = spectrumFiles.get(0).getName().toLowerCase().endsWith(".mgf") ? "mgf" : "mzml";
+        new Thread("CliDenovoSetUp") {
+            @Override
+            public void run() {
+                try {
+                    int threads = Runtime.getRuntime().availableProcessors();
+
+                    java.util.ArrayList<String> modification = ptmFactory.getPTMs();
+                    PtmSettings ptmSettings = new PtmSettings();
+                    for (String m : modification) {
+                        ptmSettings.addFixedModification(ptmFactory.getPTM(m));
+                    }
+                    for (String m : modification) {
+                        ptmSettings.addVariableModification(ptmFactory.getPTM(m));
+                    }
+
+                    SearchParameters searchParameters = new SearchParameters();
+                    searchParameters.setPtmSettings(ptmSettings);
+                    searchParameters.setFragmentAccuracyType(SearchParameters.MassAccuracyType.DA);
+                    searchParameters.setFragmentIonAccuracy(fragTolDa);
+
+                    AnnotationSettings annotationPreferences = new AnnotationSettings();
+                    annotationPreferences.setPreferencesFromSearchParameters(searchParameters);
+                    annotationPreferences.setFragmentIonAccuracy(fragTolDa);
+                    setAnnotationSettings(annotationPreferences);
+                    setSearchParameters(searchParameters);
+                    setFragmentAccuracyType(MassAccuracyType.DA);
+
+                    Object spectrumsFileFactoryLocal;
+                    if (type.equals("mgf")) {
+                        SpectrumFactory spectrumFactoryLocal = SpectrumFactory.getInstance();
+                        for (File sf : spectrumFiles) {
+                            spectrumFactoryLocal.addSpectra(sf);
+                        }
+                        spectrumsFileFactoryLocal = spectrumFactoryLocal;
+                    } else {
+                        java.util.HashMap<String, ScanCollectionDefault> map = new java.util.HashMap<>();
+                        for (File sf : spectrumFiles) {
+                            MZMLFile mzmlFile = new MZMLFile(sf.getAbsolutePath());
+                            ScanCollectionDefault scans = new ScanCollectionDefault();
+                            scans.setDefaultStorageStrategy(StorageStrategy.SOFT);
+                            scans.isAutoloadSpectra(true);
+                            scans.setDataSource(mzmlFile);
+                            mzmlFile.setNumThreadsForParsing(threads);
+                            scans.loadData(LCMSDataSubset.MS2_WITH_SPECTRA);
+                            map.put(sf.getName(), scans);
+                        }
+                        spectrumsFileFactoryLocal = map;
+                    }
+
+                    importMztabResults(spectrumsFileFactoryLocal, mzTab, type);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
     }
 
     /**
