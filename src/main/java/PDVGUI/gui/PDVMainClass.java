@@ -311,6 +311,7 @@ public class PDVMainClass extends JFrame {
         java.util.List<File> spectra = new java.util.ArrayList<>();
         File mzTab = null;
         double tol = 0.05;
+        String tolUnit = "Da";
         for (int i = 1; i < args.length; i++) {
             String a = args[i];
             if (a.equals("--mztab") && i + 1 < args.length) {
@@ -339,20 +340,23 @@ public class PDVMainClass extends JFrame {
                 }
             } else if (a.equals("--tol") && i + 1 < args.length) {
                 try { tol = Double.parseDouble(args[++i]); } catch (NumberFormatException ignored) {}
+            } else if (a.equals("--tol-unit") && i + 1 < args.length) {
+                tolUnit = args[++i];
             }
         }
         if (mzTab == null || spectra.isEmpty()) {
             System.err.println("Usage: java -jar PDV.jar denovo-gui --mztab <file.mztab> "
-                    + "--spectrum <f1.mzML[,f2.mzML]> [--tol <Da>]");
+                    + "--spectrum <f1.mzML[,f2.mzML]> [--tol <value>] [--tol-unit Da|ppm]");
             System.exit(1);
         }
         final File fMzTab = mzTab;
         final java.util.List<File> fSpectra = spectra;
         final double fTol = tol;
+        final String fTolUnit = tolUnit;
         javax.swing.SwingUtilities.invokeLater(() -> {
             PDVMainClass pdv = new PDVMainClass(true);
             pdv.setVisible(true);
-            pdv.openDenovoFromCli(fSpectra, fMzTab, fTol);
+            pdv.openDenovoFromCli(fSpectra, fMzTab, fTol, fTolUnit);
         });
     }
 
@@ -362,7 +366,7 @@ public class PDVMainClass extends JFrame {
      * spectrum file(s) (mgf or mzML) and shows the visualization panel. Mirrors
      * DeNovoImportDialog.startJButtonActionPerformed.
      */
-    public void openDenovoFromCli(java.util.List<File> spectrumFiles, File mzTab, double fragTolDa) {
+    public void openDenovoFromCli(java.util.List<File> spectrumFiles, File mzTab, double fragTol, String tolUnit) {
         final String type = spectrumFiles.get(0).getName().toLowerCase().endsWith(".mgf") ? "mgf" : "mzml";
         new Thread("CliDenovoSetUp") {
             @Override
@@ -379,17 +383,20 @@ public class PDVMainClass extends JFrame {
                         ptmSettings.addVariableModification(ptmFactory.getPTM(m));
                     }
 
+                    boolean ppm = "ppm".equalsIgnoreCase(tolUnit);
                     SearchParameters searchParameters = new SearchParameters();
                     searchParameters.setPtmSettings(ptmSettings);
-                    searchParameters.setFragmentAccuracyType(SearchParameters.MassAccuracyType.DA);
-                    searchParameters.setFragmentIonAccuracy(fragTolDa);
+                    searchParameters.setFragmentAccuracyType(ppm
+                            ? SearchParameters.MassAccuracyType.PPM
+                            : SearchParameters.MassAccuracyType.DA);
+                    searchParameters.setFragmentIonAccuracy(fragTol);
 
                     AnnotationSettings annotationPreferences = new AnnotationSettings();
                     annotationPreferences.setPreferencesFromSearchParameters(searchParameters);
-                    annotationPreferences.setFragmentIonAccuracy(fragTolDa);
+                    annotationPreferences.setFragmentIonAccuracy(fragTol);
                     setAnnotationSettings(annotationPreferences);
                     setSearchParameters(searchParameters);
-                    setFragmentAccuracyType(MassAccuracyType.DA);
+                    setFragmentAccuracyType(ppm ? MassAccuracyType.PPM : MassAccuracyType.DA);
 
                     Object spectrumsFileFactoryLocal;
                     if (type.equals("mgf")) {
