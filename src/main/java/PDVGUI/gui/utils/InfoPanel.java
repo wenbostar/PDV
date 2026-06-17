@@ -110,11 +110,14 @@ public class InfoPanel extends JPanel {
                     Component component = super.prepareRenderer(renderer, row, column);
                     if (row % 2 == 0) {
                         component.setBackground(Color.white);
+                        component.setForeground(Color.black);
                     }else{
                         component.setBackground(new Color(200, 203, 207));
+                        component.setForeground(Color.black);
                     }
                     if(isRowSelected(row)){
                         component.setBackground(new Color(20,20,40));
+                        component.setForeground(Color.white);
                     }
                     return component;
                 }

@@ -660,14 +660,18 @@ public class PDVMainClass extends JFrame {
                 Component component = super.prepareRenderer(renderer, row, column);
                 if (row % 2 == 0) {
                     component.setBackground(Color.white);
+                    component.setForeground(Color.black);
                 }else{
                     component.setBackground(new Color(164, 233, 255));
+                    component.setForeground(Color.black);
                 }
                 if(isRowSelected(row)){
                     component.setBackground(new Color(20,20,40));
+                    component.setForeground(Color.white);
                 }
                 if(String.valueOf(getValueAt(row, column)).contains(" Rank:"+"&nbsp<html>"+1)){
                     component.setBackground(new Color(255, 116, 135));
+                    component.setForeground(Color.black);
                 }
                 return component;
             }
