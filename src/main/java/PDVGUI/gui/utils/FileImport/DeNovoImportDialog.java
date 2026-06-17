@@ -493,12 +493,15 @@ public class DeNovoImportDialog extends JDialog {
 
                     progressDialog.setRunFinished();
 
-                    if (identificationFile.getName().endsWith(".tab")){
+                    String identificationFileName = identificationFile.getName().toLowerCase();
+                    if (identificationFileName.endsWith(".tab")){
                         pdvMainClass.importDeepNovoResults(identificationFile, spectrumFiles.get(0), (SpectrumFactory) spectrumsFileFactory);
-                    } else if (identificationFile.getName().endsWith(".tsk")){
+                    } else if (identificationFileName.endsWith(".tsk")){
                         pdvMainClass.importPNovoResults(identificationFile, spectrumFiles.get(0), (SpectrumFactory) spectrumsFileFactory);
-                    } else if (identificationFile.getName().endsWith(".mztab")){
+                    } else if (identificationFileName.endsWith(".mztab")){
                         pdvMainClass.importMztabResults(spectrumsFileFactory, identificationFile, spectrumFileType);
+                    } else if (identificationFileName.endsWith(".csv") && !identificationFileName.endsWith("novor.csv")) {
+                        pdvMainClass.importInstaNovoResults(spectrumsFileFactory, identificationFile, spectrumFiles, spectrumFileType);
                     }else {
                         pdvMainClass.importDeNovoResults(identificationFile, spectrumFiles.get(0), (SpectrumFactory) spectrumsFileFactory);
                     }
@@ -579,6 +582,7 @@ public class DeNovoImportDialog extends JDialog {
 
                 return   myFile.getName().toLowerCase().endsWith(".tags")
                         || myFile.getName().toLowerCase().endsWith("novor.csv")
+                        || myFile.getName().toLowerCase().endsWith(".csv")
                         || myFile.getName().toLowerCase().endsWith(".out")
                         || myFile.getName().toLowerCase().endsWith(".tab")
                         || myFile.getName().toLowerCase().endsWith(".tsk")
@@ -588,7 +592,7 @@ public class DeNovoImportDialog extends JDialog {
 
             @Override
             public String getDescription() {
-                return " pepNovo+ (.out), DirecTag (.tags), DeepNovo (.tab), pNovo (.tsk), Novor (.novor.csv), Casanovo(.mztab)";
+                return " pepNovo+ (.out), DirecTag (.tags), DeepNovo (.tab), pNovo (.tsk), Novor (.novor.csv), Casanovo(.mztab), InstaNovo (.csv)";
             }
         };
 
