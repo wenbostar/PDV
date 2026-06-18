@@ -962,6 +962,7 @@ public class PDVMainClass extends JFrame {
         loadingJButton.setBorderPainted(false);
         loadingJButton.setContentAreaFilled(false);
         loadingJButton.setEnabled(false);
+        loadingJButton.setFont(PDVFonts.of(Font.BOLD, 13f));
         loadingJButton.setText("Result importing");
 
         loadingJPanel.add(blankJPanel2);
