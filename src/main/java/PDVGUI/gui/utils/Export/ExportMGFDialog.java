@@ -1,4 +1,5 @@
 package PDVGUI.gui.utils.Export;
+import PDVGUI.gui.utils.PDVFonts;
 
 import PDVGUI.gui.PDVMainClass;
 import PDVGUI.gui.utils.SpectrumMainPanel;
@@ -99,14 +100,14 @@ public class ExportMGFDialog extends JDialog {
         mainJPanel.setBackground(Color.white);
 
         TitledBorder titledBorder = BorderFactory.createTitledBorder("Path & Type" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
         detailJPanel.setBorder(titledBorder);
 
         detailJPanel.setOpaque(false);
         detailJPanel.setBackground(Color.white);
 
         pathJLabel.setText("Output Path");
-        pathJLabel.setFont(new Font("Console", Font.PLAIN, 12));
+        pathJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         pathJLabel.setBackground(new Color(255, 0, 0));
 
         pathJText.setHorizontalAlignment(SwingConstants.CENTER);
@@ -119,7 +120,7 @@ public class ExportMGFDialog extends JDialog {
         pathBrowseJButton.addActionListener(this::pathBrowseJButtonActionPerformed);
 
         exportJButton.setText("Export");
-        exportJButton.setFont(new Font("Lucida", Font.BOLD, 13));
+        exportJButton.setFont(PDVFonts.of(Font.BOLD, 13f));
         exportJButton.setBackground(Color.GREEN);
         exportJButton.setOpaque(false);
         exportJButton.setEnabled(false);

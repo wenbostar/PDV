@@ -99,33 +99,20 @@ public class InfoPanel extends JPanel {
 
         for (String fileName : detailsListMap.keySet()){
 
-            JLabel fileJLabel = new JLabel(fileName);
-            fileJLabel.setOpaque(false);
-            fileJLabel.setFont(new Font("Dialog", Font.ITALIC, 15));
-
-            tableJPanel.add(fileJLabel, CENTER_ALIGNMENT);
+            if (fileName != null && !fileName.isEmpty()) {
+                JLabel fileJLabel = new JLabel(fileName);
+                fileJLabel.setOpaque(false);
+                fileJLabel.setFont(PDVFonts.of(Font.ITALIC, 15f));
+                tableJPanel.add(fileJLabel, CENTER_ALIGNMENT);
+            }
 
             JTable detailsJTable = new JTable(){
                 public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
-                    Component component = super.prepareRenderer(renderer, row, column);
-                    if (row % 2 == 0) {
-                        component.setBackground(Color.white);
-                        component.setForeground(Color.black);
-                    }else{
-                        component.setBackground(new Color(200, 203, 207));
-                        component.setForeground(Color.black);
-                    }
-                    if(isRowSelected(row)){
-                        component.setBackground(new Color(20,20,40));
-                        component.setForeground(Color.white);
-                    }
-                    return component;
+                    return PDVTableStyle.applyRowStyle(this, super.prepareRenderer(renderer, row, column), row, column);
                 }
             };
             ((DefaultTableCellRenderer)detailsJTable.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
-            detailsJTable.setRowHeight(30);
-            detailsJTable.setFont(new Font("Arial", Font.PLAIN, 13));
-            detailsJTable.getTableHeader().setFont(new Font("Dialog", Font.BOLD, 14));
+            PDVTableStyle.applyDefaults(detailsJTable);
             detailsJTable.setShowHorizontalLines(false);
             detailsJTable.setShowVerticalLines(false);
             detailsJTable.setPreferredScrollableViewportSize(new Dimension(300,300));

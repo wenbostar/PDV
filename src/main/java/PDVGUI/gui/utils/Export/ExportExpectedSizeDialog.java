@@ -1,4 +1,5 @@
 package PDVGUI.gui.utils.Export;
+import PDVGUI.gui.utils.PDVFonts;
 
 import PDVGUI.gui.PDVMainClass;
 import PDVGUI.gui.utils.SpectrumContainer;
@@ -170,14 +171,14 @@ public class ExportExpectedSizeDialog extends JDialog {
         mainJPanel.setBackground(Color.white);
 
         TitledBorder titledBorder = BorderFactory.createTitledBorder("Path & Type" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
         detailJPanel.setBorder(titledBorder);
 
         detailJPanel.setOpaque(false);
         detailJPanel.setBackground(Color.white);
 
         pathJLabel.setText("Output Path");
-        pathJLabel.setFont(new Font("Console", Font.PLAIN, 12));
+        pathJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         pathJLabel.setBackground(new Color(255, 0, 0));
 
         pathJText.setHorizontalAlignment(SwingConstants.CENTER);
@@ -190,7 +191,7 @@ public class ExportExpectedSizeDialog extends JDialog {
         pathBrowseJButton.addActionListener(this::pathBrowseJButtonActionPerformed);
 
         typeJLabel.setText("Type");
-        typeJLabel.setFont(new Font("Console", Font.PLAIN, 12));
+        typeJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
 
         typeJComboBox.setModel(new DefaultComboBoxModel(this.picType));
         typeJComboBox.addItemListener(this::typeJComboBoxdMouseClicked);
@@ -199,16 +200,16 @@ public class ExportExpectedSizeDialog extends JDialog {
 
         picWidthJText.setHorizontalAlignment(SwingConstants.CENTER);
 
-        picHeightJLabel.setFont(new Font("Console", Font.PLAIN, 12));
-        picWidthJLabel.setFont(new Font("Console", Font.PLAIN, 12));
+        picHeightJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
+        picWidthJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
 
         previewJButton.setOpaque(true);
-        previewJButton.setFont(new Font("Lucida", Font.BOLD, 12));
+        previewJButton.setFont(PDVFonts.of(Font.BOLD, 12f));
         previewJButton.setBackground(new Color(76, 191, 255));
         previewJButton.addActionListener(this::previewJButtonActionPerformed);
 
         exportJButton.setText("Export");
-        exportJButton.setFont(new Font("Lucida", Font.BOLD, 13));
+        exportJButton.setFont(PDVFonts.of(Font.BOLD, 13f));
         exportJButton.setBackground(Color.GREEN);
         exportJButton.setOpaque(false);
         exportJButton.setEnabled(false);
@@ -267,7 +268,7 @@ public class ExportExpectedSizeDialog extends JDialog {
         );
 
         titledBorder = BorderFactory.createTitledBorder("Preview" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
 
         viewerJPanel.setBorder(titledBorder);
         viewerJPanel.setBackground(Color.white);

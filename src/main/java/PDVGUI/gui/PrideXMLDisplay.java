@@ -1,5 +1,8 @@
 package PDVGUI.gui;
+import PDVGUI.gui.utils.PDVFonts;
 
+import PDVGUI.gui.utils.PDVLookAndFeel;
+import PDVGUI.gui.utils.PDVTableStyle;
 import PDVGUI.gui.utils.FileImport.PrideXMLImportDialog;
 import PDVGUI.gui.utils.InfoPanel;
 import PDVGUI.gui.utils.SpectrumMainPanel;
@@ -249,29 +252,11 @@ public class PrideXMLDisplay extends JFrame {
             }
 
             public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
-                Component component = super.prepareRenderer(renderer, row, column);
-                if (row % 2 == 0) {
-                    component.setBackground(Color.white);
-                    component.setForeground(Color.black);
-                } else {
-                    component.setBackground(new Color(164, 233, 255));
-                    component.setForeground(Color.black);
-                }
-                if (isRowSelected(row)) {
-                    component.setBackground(new Color(20, 20, 40));
-                    component.setForeground(Color.white);
-                }
-                if (String.valueOf(getValueAt(row, column)).contains(" Rank:" + "&nbsp<html>" + 1)) {
-                    component.setBackground(new Color(255, 116, 135));
-                    component.setForeground(Color.black);
-                }
-                return component;
+                return PDVTableStyle.applyRowStyle(this, super.prepareRenderer(renderer, row, column), row, column);
             }
         };
 
-        psmJTable.setRowHeight(20);
-        psmJTable.setFont(new Font("Arial", Font.PLAIN, 12));
-        psmJTable.getTableHeader().setFont(new Font("Dialog", 0, 13));
+        PDVTableStyle.applyDefaults(psmJTable);
         psmJTable.setAutoCreateRowSorter(true);
 
         spectrumJTable = new JTable() {
@@ -290,29 +275,11 @@ public class PrideXMLDisplay extends JFrame {
             }
 
             public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
-                Component component = super.prepareRenderer(renderer, row, column);
-                if (row % 2 == 0) {
-                    component.setBackground(Color.white);
-                    component.setForeground(Color.black);
-                } else {
-                    component.setBackground(new Color(164, 233, 255));
-                    component.setForeground(Color.black);
-                }
-                if (isRowSelected(row)) {
-                    component.setBackground(new Color(20, 20, 40));
-                    component.setForeground(Color.white);
-                }
-                if (String.valueOf(getValueAt(row, column)).contains(" Rank:" + "&nbsp<html>" + 1)) {
-                    component.setBackground(new Color(255, 116, 135));
-                    component.setForeground(Color.black);
-                }
-                return component;
+                return PDVTableStyle.applyRowStyle(this, super.prepareRenderer(renderer, row, column), row, column);
             }
         };
 
-        spectrumJTable.setRowHeight(20);
-        spectrumJTable.setFont(new Font("Arial", Font.PLAIN, 12));
-        spectrumJTable.getTableHeader().setFont(new Font("Dialog", 0, 13));
+        PDVTableStyle.applyDefaults(spectrumJTable);
         spectrumJTable.setAutoCreateRowSorter(true);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -385,8 +352,8 @@ public class PrideXMLDisplay extends JFrame {
 
         settingJPanel.setLayout(new BoxLayout(settingJPanel, BoxLayout.X_AXIS));
 
-        fragmentIonAccuracyJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-        fragmentIonType1Lbl.setFont(new Font("Arial", Font.PLAIN, 12));
+        fragmentIonAccuracyJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
+        fragmentIonType1Lbl.setFont(PDVFonts.of(Font.PLAIN, 12f));
 
         settingJPanel.add(splitJLabel2);
         settingJPanel.add(fragmentIonAccuracyJLabel);
@@ -414,7 +381,7 @@ public class PrideXMLDisplay extends JFrame {
         treeAndDetailJSplit.setContinuousLayout(true);
 
         TitledBorder titledBorder = BorderFactory.createTitledBorder("Pride XML file(s)" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
         treeJPanel.setBorder(titledBorder);
         treeJPanel.setOpaque(false);
 
@@ -445,7 +412,7 @@ public class PrideXMLDisplay extends JFrame {
         allJSplitPane.setTopComponent(treeAndDetailJSplit);
 
         titledBorder = BorderFactory.createTitledBorder("PSM Table" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
         psmJPanel.setBorder(titledBorder);
         psmJPanel.setOpaque(false);
 
@@ -488,7 +455,7 @@ public class PrideXMLDisplay extends JFrame {
         pSMSpectrumJTabbedpane.add(psmJPanel, "PSM");
 
         titledBorder = BorderFactory.createTitledBorder("Spectrum Table" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
         spectrumTableJPanel.setBorder(titledBorder);
         spectrumTableJPanel.setOpaque(false);
 
@@ -610,20 +577,7 @@ public class PrideXMLDisplay extends JFrame {
                         .addComponent(mainJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
-        String motif;
-        String os = System.getProperty("os.name");
-        if(os.toLowerCase().startsWith("win")){
-            motif="com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
-        } else if (os.toLowerCase().startsWith("mac")){
-            motif="com.sun.java.swing.plaf.mac.MacLookAndFeel";
-        } else {
-            motif=UIManager.getSystemLookAndFeelClassName();
-        }
-        try {
-            UIManager.setLookAndFeel(motif);
-        } catch (ClassNotFoundException | InstantiationException | UnsupportedLookAndFeelException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
+        PDVLookAndFeel.setup();
         SwingUtilities.updateComponentTreeUI(this);
 
         pack();

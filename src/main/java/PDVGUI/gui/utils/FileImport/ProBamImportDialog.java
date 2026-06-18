@@ -1,4 +1,5 @@
 package PDVGUI.gui.utils.FileImport;
+import PDVGUI.gui.utils.PDVFonts;
 
 import PDVGUI.fileimport.MzXMLScanImport;
 import PDVGUI.gui.PDVMainClass;
@@ -190,14 +191,14 @@ public class ProBamImportDialog extends JDialog{
         mainJPanel.setBackground(new Color(250, 250, 250));
 
         startJButton.setBackground(Color.GREEN);
-        startJButton.setFont( new Font("Lucida", Font.BOLD, 13));
+        startJButton.setFont( PDVFonts.of(Font.BOLD, 13f));
         startJButton.setText("Start");
         startJButton.setOpaque(false);
         startJButton.setEnabled(false);
         startJButton.addActionListener(this::startJButtonActionPerformed);
 
         TitledBorder titledBorder = BorderFactory.createTitledBorder("Project Settings" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
 
         annotationSettingJPanel.setBorder(titledBorder);
         annotationSettingJPanel.setOpaque(false);
@@ -205,7 +206,7 @@ public class ProBamImportDialog extends JDialog{
         precursorIonUnit.setModel(new DefaultComboBoxModel(new String[]{"Da", "ppm"}));
         precursorIonUnit.setBackground(Color.WHITE);
         precursorIonUnit.setOpaque(false);
-        fragmentIonLbl.setFont(new Font("Arial", Font.PLAIN, 12));
+        fragmentIonLbl.setFont(PDVFonts.of(Font.PLAIN, 12f));
         fragmentIonLbl.setText("Fragment m/z Tolerance");
         fragmentIonAccuracyTxt.setHorizontalAlignment(0);
         fragmentIonAccuracyTxt.addKeyListener(new KeyAdapter() {
@@ -244,13 +245,13 @@ public class ProBamImportDialog extends JDialog{
         );
 
         titledBorder = BorderFactory.createTitledBorder("Input Files" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
 
         inputFilesPanel.setBorder(titledBorder);
         inputFilesPanel.setOpaque(false);
 
         mzIDFileJLabel.setForeground(new Color(255, 0, 0));
-        mzIDFileJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        mzIDFileJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         mzIDFileJLabel.setText("mzID Results File *");
 
         mzIDFileJText.setHorizontalAlignment(JTextField.CENTER);
@@ -264,7 +265,7 @@ public class ProBamImportDialog extends JDialog{
         mzIDFileBrowseJButton.addActionListener(this::mzIDFileBrowseJButtonActionPerformed);
 
         proGenomicsFileLabel.setForeground(new Color(255, 0, 0));
-        proGenomicsFileLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        proGenomicsFileLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         proGenomicsFileLabel.setText("proBAM File *");
 
         proGenomicsFileTxt.setHorizontalAlignment(JTextField.CENTER);
@@ -276,7 +277,7 @@ public class ProBamImportDialog extends JDialog{
         browseProBAMJButton.addActionListener(this::browseProBAMJButtonActionPerformed);
 
         spectrumFilesLabel.setForeground(new Color(255, 0, 0));
-        spectrumFilesLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        spectrumFilesLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         spectrumFilesLabel.setText("Spectrum File *");
 
         spectrumFilesTxt.setEditable(false);
@@ -334,12 +335,12 @@ public class ProBamImportDialog extends JDialog{
         );
 
         titledBorder = BorderFactory.createTitledBorder("Type selection" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
 
         fileTypSelectionPanel.setBorder(titledBorder);
         fileTypSelectionPanel.setOpaque(false);
 
-        fileTypeJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        fileTypeJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
 
         fileTypeCombox.setModel(new DefaultComboBoxModel(new String[]{"proBAM", "proBed"}));
         fileTypeCombox.setBackground(Color.WHITE);

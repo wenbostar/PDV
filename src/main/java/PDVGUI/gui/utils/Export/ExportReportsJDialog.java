@@ -1,4 +1,6 @@
 package PDVGUI.gui.utils.Export;
+import PDVGUI.gui.utils.PDVFonts;
+import PDVGUI.gui.utils.PDVTableStyle;
 
 import PDVGUI.gui.PDVMainClass;
 import PDVGUI.utils.ExportReports;
@@ -181,11 +183,11 @@ public class ExportReportsJDialog extends JDialog {
         mainJPanel.setBackground(new Color(250, 250, 250));
 
         TitledBorder titledBorder = BorderFactory.createTitledBorder("Output Path" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
         outputJPanel.setBorder(titledBorder);
         outputJPanel.setOpaque(false);
 
-        outputJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        outputJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         outputJLabel.setText("Output Path");
         outputJLabel.setForeground(new Color(255, 0, 0));
         outputJLabel.setToolTipText("Select the output path. Result file named as input file and ends with .txt");
@@ -221,7 +223,7 @@ public class ExportReportsJDialog extends JDialog {
         );
 
         titledBorder = BorderFactory.createTitledBorder("Parameters" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
         parametersJPanel.setBorder(titledBorder);
         parametersJPanel.setOpaque(false);
 
@@ -231,7 +233,7 @@ public class ExportReportsJDialog extends JDialog {
         columnJSplitPane.setResizeWeight(0.5);
         columnJSplitPane.setOpaque(false);
         
-        selectColumnJLabel.setFont(new Font("Console", Font.ITALIC, 12));
+        selectColumnJLabel.setFont(PDVFonts.of(Font.ITALIC, 12f));
         selectColumnJLabel.setText("Selected column to export");
 
         selectColumnJPanel.setBorder(null);
@@ -264,9 +266,7 @@ public class ExportReportsJDialog extends JDialog {
         });
         selectedColumnJScrollPane.setViewportView(selectedJTabel);
 
-        selectedJTabel.setRowHeight(20);
-        selectedJTabel.setFont(new Font("Arial", Font.PLAIN, 12));
-        selectedJTabel.getTableHeader().setFont(new Font("Dialog", Font.BOLD, 12));
+        PDVTableStyle.applyDefaults(selectedJTabel);
 
         addColumnJButton.setText("<<");
         addColumnJButton.setToolTipText("Add as output reports column");
@@ -311,7 +311,7 @@ public class ExportReportsJDialog extends JDialog {
         
         columnJSplitPane.setLeftComponent(selectColumnJPanel);
 
-        allColumnJLabel.setFont(new Font("Console", Font.ITALIC, 12));
+        allColumnJLabel.setFont(PDVFonts.of(Font.ITALIC, 12f));
         allColumnJLabel.setText("All Columns");
 
         allColumnJPanel.setBorder(null);
@@ -344,9 +344,7 @@ public class ExportReportsJDialog extends JDialog {
         });
         allColumnJScrollPane.setViewportView(allColumnJTabel);
 
-        allColumnJTabel.setRowHeight(20);
-        allColumnJTabel.setFont(new Font("Arial", Font.PLAIN, 12));
-        allColumnJTabel.getTableHeader().setFont(new Font("Dialog", Font.BOLD, 12));
+        PDVTableStyle.applyDefaults(allColumnJTabel);
 
         GroupLayout allColumnJPanelLayout = new GroupLayout(allColumnJPanel);
         allColumnJPanel.setLayout(allColumnJPanelLayout);
@@ -368,7 +366,7 @@ public class ExportReportsJDialog extends JDialog {
         columnJSplitPane.setRightComponent(allColumnJPanel);
 
         precursorIonUnit.setModel(new DefaultComboBoxModel(new String[]{"Da", "ppm"}));
-        fragmentIonJLablel.setFont(new Font("Arial", Font.PLAIN, 12));
+        fragmentIonJLablel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         fragmentIonJLablel.setText("Fragment m/z Tolerance");
         fragmentIonAccuracyTxt.setHorizontalAlignment(0);
         fragmentIonAccuracyTxt.addKeyListener(new KeyAdapter() {
@@ -377,7 +375,7 @@ public class ExportReportsJDialog extends JDialog {
             }
         });
 
-        annotationLevelJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        annotationLevelJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         annotationLevelJLabel.setText("Annotation limit");
         annotationLevelJLabel.setToolTipText("Intensity percentile to ignore for annotation. e.g. 0.03 means that the 3% least intense peaks will be ignored.");
         annotationLevelJSpinner.setModel(new SpinnerNumberModel(Double.valueOf(0.75f), Double.valueOf(0.0f), Double.valueOf(1.0f), Double.valueOf(0.01f)));
@@ -425,7 +423,7 @@ public class ExportReportsJDialog extends JDialog {
 
         inforJLabel.setText("There are "+selectionSize +" spectral you selected to export");
 
-        inforJLabel.setFont(new Font("Arial", Font.ITALIC,12));
+        inforJLabel.setFont(PDVFonts.of(Font.ITALIC, 12f));
 
         GroupLayout mainJPanelLayout = new GroupLayout(mainJPanel);
         mainJPanel.setLayout(mainJPanelLayout);

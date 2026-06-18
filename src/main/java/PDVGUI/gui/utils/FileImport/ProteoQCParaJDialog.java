@@ -1,4 +1,6 @@
 package PDVGUI.gui.utils.FileImport;
+import PDVGUI.gui.utils.PDVFonts;
+import PDVGUI.gui.utils.PDVTableStyle;
 
 import PDVGUI.gui.PDVMainClass;
 import PDVGUI.gui.PDVStart;
@@ -248,12 +250,12 @@ public class ProteoQCParaJDialog extends JDialog {
         mainJPanel.setBackground(new Color(250, 250, 250));
 
         TitledBorder titledBorder = BorderFactory.createTitledBorder("Input Files" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
         inputFileJPanel.setBorder(titledBorder);
         inputFileJPanel.setOpaque(false);
 
         spectralListFileJLabel.setText("List File *");
-        spectralListFileJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        spectralListFileJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         spectralListFileJLabel.setForeground(new Color(255, 0, 0));
         spectralListFileJLabel.setToolTipText("A file contains the experiment design or a single mgf file");
 
@@ -268,7 +270,7 @@ public class ProteoQCParaJDialog extends JDialog {
         spectralListFileJButton.addActionListener(this::spectralListFileJButtonActionPerformed);
 
         fastaFileJLabel.setText("Fasta File *");
-        fastaFileJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        fastaFileJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         fastaFileJLabel.setForeground(new Color(255, 0, 0));
         fastaFileJLabel.setToolTipText("database file, must contain decoy sequences");
 
@@ -314,12 +316,12 @@ public class ProteoQCParaJDialog extends JDialog {
         );
 
         TitledBorder outputJPanelTitledBorder = BorderFactory.createTitledBorder("Out path" + " \t ");
-        outputJPanelTitledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        outputJPanelTitledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
         outputJPanel.setBorder(outputJPanelTitledBorder);
         outputJPanel.setOpaque(false);
         
         outdirJLabel.setText("Output Path *");
-        outdirJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        outdirJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         outdirJLabel.setForeground(new Color(255, 0, 0));
         outdirJLabel.setToolTipText("output directory");
 
@@ -354,7 +356,7 @@ public class ProteoQCParaJDialog extends JDialog {
         );
 
         TitledBorder parameterJPanelTitledBorder = BorderFactory.createTitledBorder("Parameters" + " \t ");
-        parameterJPanelTitledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        parameterJPanelTitledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
         parameterJPanel.setBorder(parameterJPanelTitledBorder);
         parameterJPanel.setOpaque(false);
 
@@ -413,9 +415,7 @@ public class ProteoQCParaJDialog extends JDialog {
 
         fixedModsJScrollPane.setViewportView(fixedModsTable);
 
-        fixedModsTable.setRowHeight(20);
-        fixedModsTable.setFont(new Font("Arial", Font.PLAIN, 10));
-        fixedModsTable.getTableHeader().setFont(new Font("Dialog", 0, 12));
+        PDVTableStyle.applyDefaults(fixedModsTable);
 
         GroupLayout fixedModsPanelLayout = new GroupLayout(fixedModsPanel);
         fixedModsPanel.setLayout(fixedModsPanelLayout);
@@ -491,9 +491,7 @@ public class ProteoQCParaJDialog extends JDialog {
         });
         variableModsJScrollPane.setViewportView(variableModsTable);
 
-        variableModsTable.setRowHeight(20);
-        variableModsTable.setFont(new Font("Arial", Font.PLAIN, 10));
-        variableModsTable.getTableHeader().setFont(new Font("Dialog", 0, 12));
+        PDVTableStyle.applyDefaults(variableModsTable);
 
         GroupLayout variableModsPanelLayout = new GroupLayout(variableModsPanel);
         variableModsPanel.setLayout(variableModsPanelLayout);
@@ -555,9 +553,7 @@ public class ProteoQCParaJDialog extends JDialog {
             }
         });
 
-        modificationsTable.setRowHeight(20);
-        modificationsTable.setFont(new Font("Arial", Font.PLAIN, 10));
-        modificationsTable.getTableHeader().setFont(new Font("Dialog", 0, 12));
+        PDVTableStyle.applyDefaults(modificationsTable);
 
         modificationsJScrollPane.setViewportView(modificationsTable);
 
@@ -603,7 +599,7 @@ public class ProteoQCParaJDialog extends JDialog {
         paraSplitPane.setOpaque(false);
 
         tolJLabel.setText("Tol *");
-        tolJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        tolJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         tolJLabel.setToolTipText("The error window on experimental peptide mass values");
         tolJLabel.setForeground(Color.red);
 
@@ -622,7 +618,7 @@ public class ProteoQCParaJDialog extends JDialog {
         toluJCombo.setSelectedIndex(0);
 
         modeJLabel.setText("Mode");
-        modeJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        modeJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         modeJLabel.setToolTipText("identification or quantification");
 
         modeJCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "identification", "quantification" }));
@@ -632,7 +628,7 @@ public class ProteoQCParaJDialog extends JDialog {
         modeJCombo.setSelectedIndex(1);
 
         thresholdJLabel.setText("threshold");
-        thresholdJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        thresholdJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         thresholdJLabel.setToolTipText("FDR value for PSM");
         thresholdJLabel.setForeground(Color.red);
 
@@ -646,7 +642,7 @@ public class ProteoQCParaJDialog extends JDialog {
         });
 
         nttJLabel.setText("ntt");
-        nttJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        nttJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         nttJLabel.setToolTipText("Semi-tryptic, 1; fully-tryptic, 2.");
 
         nttJCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "semi-tryptic", "fully-tryptic" }));
@@ -717,7 +713,7 @@ public class ProteoQCParaJDialog extends JDialog {
         paraSplitPane.setLeftComponent(firstParaJPanel);
 
         itolJLabel.setText("iTol *");
-        itolJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        itolJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         itolJLabel.setToolTipText("Error window for MS/MS fragment ion mass values.");
         itolJLabel.setForeground(Color.red);
 
@@ -736,7 +732,7 @@ public class ProteoQCParaJDialog extends JDialog {
         itoluJCombo.setSelectedIndex(0);
 
         missJLabel.setText("Miss *");
-        missJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        missJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         missJLabel.setToolTipText("max miss clevage");
         missJLabel.setForeground(Color.red);
 
@@ -749,7 +745,7 @@ public class ProteoQCParaJDialog extends JDialog {
         });
 
         refineJLabel.setText("refine");
-        refineJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        refineJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         refineJLabel.setToolTipText("Refine search for X!Tandem, default is TRUE");
 
         refineJCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "TRUE", "FALSE" }));
@@ -809,14 +805,14 @@ public class ProteoQCParaJDialog extends JDialog {
         paraSplitPane.setRightComponent(secondParaJPanel);
 
         cpuJLabel.setText("CPU num");
-        cpuJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        cpuJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         cpuJLabel.setToolTipText("Max number of cpu used");
 
         cpuJSpinner.setModel(new javax.swing.SpinnerNumberModel(1, 1, null, 1));
         cpuJSpinner.setToolTipText("Max number of cpu used");
 
         xmxJLabel.setText("Max memory");
-        xmxJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        xmxJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         xmxJLabel.setToolTipText("JAVA -Xmx");
 
         xmxJSpinner.setModel(new javax.swing.SpinnerNumberModel(1, 1, null, 1));
@@ -841,7 +837,7 @@ public class ProteoQCParaJDialog extends JDialog {
                                 )
         );
 
-        openProteoQCLinkJLabel.setFont(new Font("Arial", Font.ITALIC, 11));
+        openProteoQCLinkJLabel.setFont(PDVFonts.of(Font.ITALIC, 11f));
         openProteoQCLinkJLabel.setText("<html><u><a href=\"http://www.bioconductor.org/packages/release/bioc/html/proteoQC.html\">Click to see how to use ProteoQC</a></u></html>");
         openProteoQCLinkJLabel.setToolTipText("http://www.bioconductor.org/packages/release/bioc/html/proteoQC.html");
         openProteoQCLinkJLabel.addMouseListener(new MouseAdapter() {
@@ -865,7 +861,7 @@ public class ProteoQCParaJDialog extends JDialog {
         });
 
         startJButton.setBackground(Color.green);
-        startJButton.setFont(new Font("Lucida", Font.BOLD, 13));
+        startJButton.setFont(PDVFonts.of(Font.BOLD, 13f));
         startJButton.setText("Start");
         startJButton.setEnabled(false);
         startJButton.setOpaque(false);

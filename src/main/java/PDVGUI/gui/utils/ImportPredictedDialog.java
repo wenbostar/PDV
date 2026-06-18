@@ -94,7 +94,7 @@ public class ImportPredictedDialog extends JDialog {
         JScrollPane modificationJScrollPane = new JScrollPane();
 
         submissionButton.setText("Submit");
-        submissionButton.setFont(new Font("Lucida", Font.BOLD, 13));
+        submissionButton.setFont(PDVFonts.of(Font.BOLD, 13f));
         submissionButton.addActionListener(this::submissionButtonActionPerformed);
 
         modelListComboBox.setModel(new DefaultComboBoxModel(this.modelList));
@@ -113,9 +113,7 @@ public class ImportPredictedDialog extends JDialog {
         modificationJTable.setModel(new ModificationTableModel());
         modificationJScrollPane.setOpaque(false);
 
-        modificationJTable.setRowHeight(20);
-        modificationJTable.setFont(new Font("Arial", Font.PLAIN, 12));
-        modificationJTable.getTableHeader().setFont(new Font("Dialog", 0, 12));
+        PDVTableStyle.applyDefaults(modificationJTable);
         modificationJTable.setOpaque(false);
         modificationJTable.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         modificationJTable.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);

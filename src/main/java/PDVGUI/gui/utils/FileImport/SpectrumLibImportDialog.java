@@ -1,4 +1,5 @@
 package PDVGUI.gui.utils.FileImport;
+import PDVGUI.gui.utils.PDVFonts;
 
 import PDVGUI.gui.PDVStart;
 import PDVGUI.gui.SpectrumLibDisplay;
@@ -120,19 +121,19 @@ public class SpectrumLibImportDialog extends JDialog {
         mainJPanel.setBackground(new Color(250, 250, 250));
 
         startJButton.setBackground(Color.green);
-        startJButton.setFont(new Font("Lucida", Font.BOLD, 13));
+        startJButton.setFont(PDVFonts.of(Font.BOLD, 13f));
         startJButton.setText("Start");
         startJButton.setOpaque(false);
         startJButton.setEnabled(false);
         startJButton.addActionListener(evt -> startJButtonActionPerformed(evt));
 
         TitledBorder titledBorder = BorderFactory.createTitledBorder("Project Settings" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
         annotationSettingJPanel.setBorder(titledBorder);
         annotationSettingJPanel.setOpaque(false);
 
         precursorIonUnit.setModel(new DefaultComboBoxModel(new String[]{"Da", "ppm"}));
-        fragmentIonJLable.setFont(new Font("Console", Font.PLAIN, 12));
+        fragmentIonJLable.setFont(PDVFonts.of(Font.PLAIN, 12f));
         fragmentIonJLable.setText("Fragment m/z Tolerance");
         fragmentIonAccuracyTxt.setHorizontalAlignment(0);
         fragmentIonAccuracyTxt.addKeyListener(new KeyAdapter() {
@@ -171,12 +172,12 @@ public class SpectrumLibImportDialog extends JDialog {
         );
 
         titledBorder = BorderFactory.createTitledBorder("Input Files" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
         inputFilesPanel.setBorder(titledBorder);
         inputFilesPanel.setOpaque(false);
 
         spectrumLibResultLabel.setForeground(new Color(255, 0, 0));
-        spectrumLibResultLabel.setFont(new Font("Console", Font.PLAIN, 12));
+        spectrumLibResultLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         spectrumLibResultLabel.setText("Spectrum lib File *");
 
         spectrumLibResultTxt.setHorizontalAlignment(JTextField.CENTER);

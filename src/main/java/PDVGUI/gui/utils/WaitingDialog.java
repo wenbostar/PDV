@@ -98,7 +98,7 @@ public class WaitingDialog extends javax.swing.JDialog {
         );
 
         okJButton.setText("Cancel");
-        okJButton.setFont(new Font("Dialog", Font.BOLD, 13));
+        okJButton.setFont(PDVFonts.of(Font.BOLD, 13f));
         okJButton.setBackground(Color.white);
         okJButton.setIcon(new ImageIcon(getClass().getResource("/icons/loading.gif")));
         okJButton.setIconTextGap(3);
@@ -183,7 +183,7 @@ public class WaitingDialog extends javax.swing.JDialog {
     public void setRunFinished() {
         runFinished = true;
         okJButton.setText("ok");
-        okJButton.setFont(new Font("Dialog", Font.BOLD, 13));
+        okJButton.setFont(PDVFonts.of(Font.BOLD, 13f));
         okJButton.setBackground(Color.white);
         okJButton.setIcon(new ImageIcon(getClass().getResource("/icons/done.png")));
         okJButton.setIconTextGap(3);
@@ -200,7 +200,7 @@ public class WaitingDialog extends javax.swing.JDialog {
             appendReportEndLine();
             appendReport( "Progress Canceled!", true, true);
             okJButton.setText("Ok");
-            okJButton.setFont(new Font("Dialog", Font.BOLD, 13));
+            okJButton.setFont(PDVFonts.of(Font.BOLD, 13f));
             okJButton.setBackground(Color.white);
             okJButton.setIcon(new ImageIcon(getClass().getResource("/icons/done.png")));
             okJButton.setIconTextGap(3);

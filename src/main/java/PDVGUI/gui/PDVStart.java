@@ -1,4 +1,5 @@
 package PDVGUI.gui;
+import PDVGUI.gui.utils.PDVFonts;
 
 import PDVGUI.gui.utils.FileImport.*;
 import com.compomics.util.gui.DummyFrame;
@@ -145,7 +146,7 @@ public class PDVStart extends JDialog {
 
         backgroundPanel.setBackground(new java.awt.Color(255, 255, 255));
 
-        newDatabaseResultJButton.setFont(new Font("Arial", Font.BOLD, 14));
+        newDatabaseResultJButton.setFont(PDVFonts.of(Font.BOLD, 14f));
         newDatabaseResultJButton.setBackground(new Color(239, 252,255));
         newDatabaseResultJButton.setIcon(new ImageIcon(getClass().getResource("/icons/data.png")));
         newDatabaseResultJButton.setText("Database Searching");
@@ -167,7 +168,7 @@ public class PDVStart extends JDialog {
             }
         });
 
-        newDeNovoResultJButton.setFont(new Font("Arial", Font.BOLD, 14));
+        newDeNovoResultJButton.setFont(PDVFonts.of(Font.BOLD, 14f));
         newDeNovoResultJButton.setBackground(new Color(239, 252,255));
         newDeNovoResultJButton.setIcon(new ImageIcon(getClass().getResource("/icons/lab.png")));
         newDeNovoResultJButton.setText("Denovo Sequencing");
@@ -188,7 +189,7 @@ public class PDVStart extends JDialog {
             }
         });
 
-        singlePeptideDisplayJButton.setFont(new Font("Arial", Font.BOLD, 14));
+        singlePeptideDisplayJButton.setFont(PDVFonts.of(Font.BOLD, 14f));
         singlePeptideDisplayJButton.setBackground(new Color(239, 252,255));
         singlePeptideDisplayJButton.setIcon(new ImageIcon(getClass().getResource("/icons/tag.png")));
         singlePeptideDisplayJButton.setText("One PSM" );
@@ -209,7 +210,7 @@ public class PDVStart extends JDialog {
             }
         });
 
-        openProBamJButton.setFont(new Font("Arial", Font.BOLD, 14));
+        openProBamJButton.setFont(PDVFonts.of(Font.BOLD, 14f));
         openProBamJButton.setBackground(new Color(239, 252,255));
         openProBamJButton.setIcon(new ImageIcon(getClass().getResource("/icons/dna.png")));
         openProBamJButton.setText("Proteogenomics" );
@@ -230,7 +231,7 @@ public class PDVStart extends JDialog {
             }
         });
 
-        openMaxQuantJButton.setFont(new Font("Arial", Font.BOLD, 14));
+        openMaxQuantJButton.setFont(PDVFonts.of(Font.BOLD, 14f));
         openMaxQuantJButton.setBackground(new Color(239, 252,255));
         openMaxQuantJButton.setIcon(new ImageIcon(getClass().getResource("/icons/maxQuantLogo.png")));
         openMaxQuantJButton.setText("MaxQuant" );
@@ -251,7 +252,7 @@ public class PDVStart extends JDialog {
             }
         });
 
-        openSpectrumLibJButton.setFont(new Font("Arial", Font.BOLD, 14));
+        openSpectrumLibJButton.setFont(PDVFonts.of(Font.BOLD, 14f));
         openSpectrumLibJButton.setBackground(new Color(239, 252,255));
         openSpectrumLibJButton.setIcon(new ImageIcon(getClass().getResource("/icons/library.png")));
         openSpectrumLibJButton.setText("Spectrum Library" );
@@ -272,7 +273,7 @@ public class PDVStart extends JDialog {
             }
         });
 
-        openPrideXMLJButton.setFont(new Font("Arial", Font.BOLD, 14));
+        openPrideXMLJButton.setFont(PDVFonts.of(Font.BOLD, 14f));
         openPrideXMLJButton.setBackground(new Color(239, 252,255));
         openPrideXMLJButton.setIcon(new ImageIcon(getClass().getResource("/icons/pride_logo.png")));
         openPrideXMLJButton.setText("PRIDE XML" );
@@ -293,7 +294,7 @@ public class PDVStart extends JDialog {
             }
         });
 
-        openSpectrumFileJButton.setFont(new Font("Arial", Font.BOLD, 14));
+        openSpectrumFileJButton.setFont(PDVFonts.of(Font.BOLD, 14f));
         openSpectrumFileJButton.setBackground(new Color(239, 252,255));
         openSpectrumFileJButton.setIcon(new ImageIcon(getClass().getResource("/icons/ms.png")));
         openSpectrumFileJButton.setText("MS Data" );
@@ -315,7 +316,7 @@ public class PDVStart extends JDialog {
             }
         });
 
-        openProteoQCJButton.setFont(new Font("Arial", Font.BOLD, 14));
+        openProteoQCJButton.setFont(PDVFonts.of(Font.BOLD, 14f));
         openProteoQCJButton.setBackground(new Color(239, 252,255));
         openProteoQCJButton.setIcon(new ImageIcon(getClass().getResource("/icons/control.png")));
         openProteoQCJButton.setText("QC Analysis");
@@ -515,7 +516,7 @@ public class PDVStart extends JDialog {
 
         JLabel databaseJLabel = new JLabel("<html>Visualize database searching result with mzIdentML/pepXML/dat/txt format file. Accept MS/MS data in MGF/mzXML/mzML format.</html>");
 
-        databaseJLabel.setFont(new Font("simsun", Font.ITALIC, 12));
+        databaseJLabel.setFont(PDVFonts.of(Font.ITALIC, 12f));
 
         newDatabaseResultJButton.setForeground(new Color(24, 102,200));
 
@@ -610,7 +611,7 @@ public class PDVStart extends JDialog {
 
         JLabel deNovoJLabel = new JLabel("<html>Visualize denovo sequencing result (Casanovo, DeepNovo, Novor, PepNovo, pNovo).</html>");
 
-        deNovoJLabel.setFont(new Font("simsun", Font.ITALIC, 12));
+        deNovoJLabel.setFont(PDVFonts.of(Font.ITALIC, 12f));
 
         newDeNovoResultJButton.setForeground(new Color(24, 102,200));
 
@@ -707,7 +708,7 @@ public class PDVStart extends JDialog {
 
         JLabel singlePeptideJLabel = new JLabel("<html>Visualize a single PSM. Import a peptide sequence and a USI or an MS/MS spectrum in MGF format.</html>");
 
-        singlePeptideJLabel.setFont(new Font("simsun", Font.ITALIC, 12));
+        singlePeptideJLabel.setFont(PDVFonts.of(Font.ITALIC, 12f));
 
         singlePeptideDisplayJButton.setForeground(new Color(24, 102,200));
 
@@ -802,7 +803,7 @@ public class PDVStart extends JDialog {
         firstPartJPanel.removeAll();
 
         JLabel proBamJLabel = new JLabel("<html>Visualize proBAM/proBed result.</html>");
-        proBamJLabel.setFont(new Font("simsun", Font.ITALIC, 12));
+        proBamJLabel.setFont(PDVFonts.of(Font.ITALIC, 12f));
 
         openProBamJButton.setForeground(new Color(24, 102,200));
 
@@ -897,7 +898,7 @@ public class PDVStart extends JDialog {
 
         JLabel maxQuantJLabel = new JLabel("<html>Visualize MaxQuant result.</html>");
 
-        maxQuantJLabel.setFont(new Font("simsun", Font.ITALIC, 12));
+        maxQuantJLabel.setFont(PDVFonts.of(Font.ITALIC, 12f));
 
         openMaxQuantJButton.setForeground(new Color(24, 102,200));
 
@@ -996,7 +997,7 @@ public class PDVStart extends JDialog {
         setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 
         JLabel spectrumLibJLabel = new JLabel("<html>Visualize Spectrum library.</html>");
-        spectrumLibJLabel.setFont(new Font("simsun", Font.ITALIC, 12));
+        spectrumLibJLabel.setFont(PDVFonts.of(Font.ITALIC, 12f));
 
         GroupLayout secondPartJPanelLayout = new GroupLayout(secondPartJPanel);
         secondPartJPanel.setLayout(secondPartJPanelLayout);
@@ -1088,7 +1089,7 @@ public class PDVStart extends JDialog {
         setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 
         JLabel prideXMLJLabel = new JLabel("<html>Visualize PRIDE XML result.</html>");
-        prideXMLJLabel.setFont(new Font("simsun", Font.ITALIC, 12));
+        prideXMLJLabel.setFont(PDVFonts.of(Font.ITALIC, 12f));
 
         GroupLayout secondPartJPanelLayout = new GroupLayout(secondPartJPanel);
         secondPartJPanel.setLayout(secondPartJPanelLayout);
@@ -1180,7 +1181,7 @@ public class PDVStart extends JDialog {
         setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 
         JLabel openSpectrumFileJLabel = new JLabel("<html>Visualize MS data in mzML/mzXML format.</html>");
-        openSpectrumFileJLabel.setFont(new Font("simsun", Font.ITALIC, 12));
+        openSpectrumFileJLabel.setFont(PDVFonts.of(Font.ITALIC, 12f));
 
         GroupLayout secondPartJPanelLayout = new GroupLayout(secondPartJPanel);
         secondPartJPanel.setLayout(secondPartJPanelLayout);
@@ -1272,7 +1273,7 @@ public class PDVStart extends JDialog {
         setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 
         JLabel openProteoQCJLabel = new JLabel("<html>Run ProteoQC in R.</html>");
-        openProteoQCJLabel.setFont(new Font("simsun", Font.ITALIC, 12));
+        openProteoQCJLabel.setFont(PDVFonts.of(Font.ITALIC, 12f));
 
         GroupLayout secondPartJPanelLayout = new GroupLayout(secondPartJPanel);
         secondPartJPanel.setLayout(secondPartJPanelLayout);

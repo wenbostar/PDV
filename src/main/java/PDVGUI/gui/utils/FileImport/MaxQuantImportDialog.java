@@ -1,4 +1,5 @@
 package PDVGUI.gui.utils.FileImport;
+import PDVGUI.gui.utils.PDVFonts;
 
 import PDVGUI.gui.PDVMainClass;
 import PDVGUI.gui.PDVStart;
@@ -138,21 +139,21 @@ public class MaxQuantImportDialog extends JDialog {
         mainJPanel.setBackground(new Color(250, 250, 250));
 
         startJButton.setBackground(Color.green);
-        startJButton.setFont(new Font("Lucida", Font.BOLD, 13));
+        startJButton.setFont(PDVFonts.of(Font.BOLD, 13f));
         startJButton.setText("Start");
         startJButton.setEnabled(false);
         startJButton.setOpaque(false);
         startJButton.addActionListener(this::startJButtonActionPerformed);
 
         TitledBorder titledBorder = BorderFactory.createTitledBorder("Project Settings" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
 
         annotationSettingJPanel.setBorder(titledBorder);
         annotationSettingJPanel.setOpaque(false);
 
         precursorIonUnit.setModel(new DefaultComboBoxModel(new String[]{"Da", "ppm"}));
         precursorIonUnit.setOpaque(false);
-        fragmentIonJLable.setFont(new Font("Arial", Font.PLAIN, 12));
+        fragmentIonJLable.setFont(PDVFonts.of(Font.PLAIN, 12f));
         fragmentIonJLable.setText("Fragment m/z Tolerance");
         fragmentIonAccuracyTxt.setHorizontalAlignment(0);
         fragmentIonAccuracyTxt.addKeyListener(new KeyAdapter() {
@@ -191,13 +192,13 @@ public class MaxQuantImportDialog extends JDialog {
         );
 
         titledBorder = BorderFactory.createTitledBorder("Input Files" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
 
         inputFilesPanel.setBorder(titledBorder);
         inputFilesPanel.setOpaque(false);
 
         maxQuantResultLabel.setForeground(new Color(255, 0, 0));
-        maxQuantResultLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        maxQuantResultLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         maxQuantResultLabel.setText("MaxQuant result *");
 
         maxQuantResultTxt.setHorizontalAlignment(JTextField.CENTER);
@@ -210,7 +211,7 @@ public class MaxQuantImportDialog extends JDialog {
         browseIdJButton.addActionListener(this::browseIdJButtonActionPerformed);
 
         parXMLLabel.setForeground(new Color(255, 0, 0));
-        parXMLLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        parXMLLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         parXMLLabel.setText("MaxQuant par XML *");
 
         parXMLTxt.setHorizontalAlignment(JTextField.CENTER);
@@ -222,7 +223,7 @@ public class MaxQuantImportDialog extends JDialog {
         browseParJButton.setContentAreaFilled(false);
         browseParJButton.addActionListener(this::browseParJButtonActionPerformed);
 
-        existMGFJLabel.setFont(new Font("Arial", Font.ITALIC, 12));
+        existMGFJLabel.setFont(PDVFonts.of(Font.ITALIC, 12f));
         existMGFJLabel.setToolTipText("If you converted mgf files and had generatesMGF folder, select it.");
         existMGFJCheckBox.setOpaque(false);
         existMGFJCheckBox.setToolTipText("If you converted mgf files and had generatesMGF folder, select it.");

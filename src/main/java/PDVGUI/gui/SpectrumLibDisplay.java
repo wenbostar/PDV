@@ -1,4 +1,5 @@
 package PDVGUI.gui;
+import PDVGUI.gui.utils.PDVFonts;
 
 import PDVGUI.DB.SQLiteConnection;
 import PDVGUI.fileimport.FragePipeImport;
@@ -6,6 +7,8 @@ import PDVGUI.fileimport.SpectrumLibraryMspImport;
 import PDVGUI.fileimport.SpectrumLibrarySplibImport;
 import PDVGUI.gui.utils.Export.ExportBatchDialog;
 import PDVGUI.gui.utils.Export.RealTimeExportJDialog;
+import PDVGUI.gui.utils.PDVLookAndFeel;
+import PDVGUI.gui.utils.PDVTableStyle;
 import PDVGUI.gui.utils.SpectrumMainPanel;
 import com.compomics.util.enumeration.ImageType;
 import com.compomics.util.experiment.biology.PTMFactory;
@@ -233,23 +236,7 @@ public class SpectrumLibDisplay extends JFrame {
             }
 
             public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
-                Component component = super.prepareRenderer(renderer, row, column);
-                if (row % 2 == 0) {
-                    component.setBackground(Color.white);
-                    component.setForeground(Color.black);
-                } else {
-                    component.setBackground(new Color(164, 233, 255));
-                    component.setForeground(Color.black);
-                }
-                if (isRowSelected(row)) {
-                    component.setBackground(new Color(20, 20, 40));
-                    component.setForeground(Color.white);
-                }
-                if (String.valueOf(getValueAt(row, column)).contains(" Rank:" + "&nbsp<html>" + 1)) {
-                    component.setBackground(new Color(255, 116, 135));
-                    component.setForeground(Color.black);
-                }
-                return component;
+                return PDVTableStyle.applyRowStyle(this, super.prepareRenderer(renderer, row, column), row, column);
             }
         };
 
@@ -331,9 +318,9 @@ public class SpectrumLibDisplay extends JFrame {
         settingJPanel.setOpaque(false);
         settingJPanel.setLayout(new BoxLayout(settingJPanel, BoxLayout.X_AXIS));
 
-        fragmentIonAccuracyJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-        fragmentIonType1Lbl.setFont(new Font("Arial", Font.PLAIN, 12));
-        sortJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        fragmentIonAccuracyJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
+        fragmentIonType1Lbl.setFont(PDVFonts.of(Font.PLAIN, 12f));
+        sortJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
 
         settingJPanel.add(splitJLabel2);
         settingJPanel.add(fragmentIonAccuracyJLabel);
@@ -353,7 +340,7 @@ public class SpectrumLibDisplay extends JFrame {
         mainJPanel.setPreferredSize(new java.awt.Dimension(1260, 800));
 
         TitledBorder titledBorder = BorderFactory.createTitledBorder("PSM Table" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
         psmJPanel.setBorder(titledBorder);
         psmJPanel.setBackground(Color.white);
         psmJPanel.setOpaque(false);
@@ -370,9 +357,7 @@ public class SpectrumLibDisplay extends JFrame {
             }
         });
 
-        psmJTable.setRowHeight(20);
-        psmJTable.setFont(new Font("Arial", Font.PLAIN, 12));
-        psmJTable.getTableHeader().setFont(new Font("Dialog", 0, 13));
+        PDVTableStyle.applyDefaults(psmJTable);
 
         psmJTable.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(KeyEvent evt) {
@@ -504,13 +489,7 @@ public class SpectrumLibDisplay extends JFrame {
                         .addComponent(mainJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
-        try {
-            String lookAndFeel = UIManager.getSystemLookAndFeelClassName();
-            UIManager.setLookAndFeel(lookAndFeel);
-            //UIManager.setLookAndFeel(motif);
-        } catch (ClassNotFoundException | InstantiationException | UnsupportedLookAndFeelException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
+        PDVLookAndFeel.setup();
         SwingUtilities.updateComponentTreeUI(this);
 
         pack();
@@ -928,7 +907,7 @@ public class SpectrumLibDisplay extends JFrame {
      */
     private void updateSpectrum(MSnSpectrum mSnSpectrum, SpectrumMatch spectrumMatch){
         TitledBorder titledBorder = BorderFactory.createTitledBorder(spectrumMatch.getBestPeptideAssumption().getPeptide().getSequence() + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
 
         spectrumShowJPanel.setBorder(titledBorder);
 

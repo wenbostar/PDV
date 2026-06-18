@@ -226,13 +226,13 @@ public class SinglePeptideDisplay extends JFrame {
         setJMenuBar(menuBar);
 
         TitledBorder titledBorder = BorderFactory.createTitledBorder("Input File and Peptide" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
         inputJPanel.setBorder(titledBorder);
         inputJPanel.setOpaque(false);
         inputJPanel.setBackground(Color.white);
 
         spectrumFileJLabel.setText("Spectrum File *");
-        spectrumFileJLabel.setFont(new Font("Console", Font.PLAIN, 12));
+        spectrumFileJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         spectrumFileJLabel.setForeground(new Color(255, 0, 0));
 
         spectrumSourceBox.setModel(new DefaultComboBoxModel(new String[]{"MGF", "USI"}));
@@ -257,7 +257,7 @@ public class SinglePeptideDisplay extends JFrame {
         getUSIJButton.addActionListener(this::getUSIJButtonActionPerformed);
 
         peptideSequenceJLabel.setText("Peptide *");
-        peptideSequenceJLabel.setFont(new Font("Console", Font.PLAIN, 12));
+        peptideSequenceJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         peptideSequenceJLabel.setForeground(new Color(255, 0, 0));
 
         peptideSequenceJText.setEditable(true);
@@ -275,7 +275,7 @@ public class SinglePeptideDisplay extends JFrame {
 
         precursorIonUnit.setModel(new DefaultComboBoxModel(new String[]{"Da", "ppm"}));
         fragmentIonLbl.setText("Fragment m/z Tolerance");
-        fragmentIonLbl.setFont(new Font("Console", Font.PLAIN, 12));
+        fragmentIonLbl.setFont(PDVFonts.of(Font.PLAIN, 12f));
         fragmentIonAccuracyTxt.setHorizontalAlignment(0);
 
         peptideSequenceJScrollPane.setVisible(false);
@@ -1005,7 +1005,7 @@ public class SinglePeptideDisplay extends JFrame {
     private void updateSpectrum(){
 
         TitledBorder titledBorder = BorderFactory.createTitledBorder(peptideAssumption.getPeptide().getTaggedModifiedSequence(searchParameters.getPtmSettings(), false, false, false, false) + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
 
         spectrumShowJPanel.setBorder(titledBorder);
 

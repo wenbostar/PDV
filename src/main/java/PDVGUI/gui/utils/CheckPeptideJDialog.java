@@ -127,7 +127,7 @@ public class CheckPeptideJDialog extends JDialog {
         inputJPanel.setOpaque(false);
 
         peptideSequenceJLabel.setText("Peptide Sequence");
-        peptideSequenceJLabel.setFont(new Font("Console", Font.PLAIN, 11));
+        peptideSequenceJLabel.setFont(PDVFonts.of(Font.PLAIN, 11f));
 
         peptideSequenceJText.setEditable(true);
         peptideSequenceJText.setHorizontalAlignment(SwingConstants.CENTER);
@@ -168,7 +168,7 @@ public class CheckPeptideJDialog extends JDialog {
 
         setJButton.setEnabled(false);
         setJButton.setText("Add");
-        setJButton.setFont(new Font("Lucida", Font.BOLD, 12));
+        setJButton.setFont(PDVFonts.of(Font.BOLD, 12f));
         setJButton.addActionListener(this::setJButtonActionPerformed);
 
         javax.swing.GroupLayout mainJPanelLayout = new javax.swing.GroupLayout(mainJPanel);

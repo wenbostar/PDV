@@ -79,9 +79,7 @@ public class PTMColorDialog extends JDialog {
 
         colorJScrollPane.setOpaque(false);
 
-        colorJTable.setRowHeight(20);
-        colorJTable.setFont(new Font("Arial", Font.PLAIN, 12));
-        colorJTable.getTableHeader().setFont(new Font("Dialog", 0, 12));
+        PDVTableStyle.applyDefaults(colorJTable);
         colorJTable.setOpaque(false);
         colorJTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         colorJTable.addMouseListener(new MouseAdapter() {

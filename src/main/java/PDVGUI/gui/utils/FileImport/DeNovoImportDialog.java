@@ -1,4 +1,5 @@
 package PDVGUI.gui.utils.FileImport;
+import PDVGUI.gui.utils.PDVFonts;
 
 import PDVGUI.gui.*;
 import com.compomics.util.experiment.biology.PTMFactory;
@@ -183,20 +184,20 @@ public class DeNovoImportDialog extends JDialog {
         mainJPanel.setBackground(new Color(250, 250, 250));
 
         startJButton.setBackground(Color.green);
-        startJButton.setFont(new Font("Lucida", Font.BOLD, 13));
+        startJButton.setFont(PDVFonts.of(Font.BOLD, 13f));
         startJButton.setText("Start");
         startJButton.setEnabled(false);
         startJButton.setOpaque(false);
         startJButton.addActionListener(this::startJButtonActionPerformed);
 
         TitledBorder titledBorder = BorderFactory.createTitledBorder("Input Files" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
 
         inputJPanel.setBorder(titledBorder);
         inputJPanel.setOpaque(false);
 
         idFileLabel.setForeground(new Color(255, 0, 0));
-        idFileLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        idFileLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         idFileLabel.setText("Identification File *");
 
         idFileJTextField.setEditable(false);
@@ -211,7 +212,7 @@ public class DeNovoImportDialog extends JDialog {
         browseIdJButton.addActionListener(this::browseIdJButtonActionPerformed);
 
         spectrumFileLabel.setForeground(new Color(255, 0, 0));
-        spectrumFileLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        spectrumFileLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         spectrumFileLabel.setText("Spectrum File *");
 
         spectrumFileJTextField.setEditable(false);
@@ -226,7 +227,7 @@ public class DeNovoImportDialog extends JDialog {
         browseSpectraJButton.addActionListener(this::browseSpectraJButtonActionPerformed);
 
         titledBorder = BorderFactory.createTitledBorder("Project Settings" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
 
         annotationSettingJPanel.setBorder(titledBorder);
         annotationSettingJPanel.setOpaque(false);
@@ -235,7 +236,7 @@ public class DeNovoImportDialog extends JDialog {
         precursorIonUnit.setBackground(Color.WHITE);
         precursorIonUnit.setOpaque(false);
         fragmentIonLbl.setText("Fragment m/z Tolerance");
-        fragmentIonLbl.setFont(new Font("Arial", Font.PLAIN, 12));
+        fragmentIonLbl.setFont(PDVFonts.of(Font.PLAIN, 12f));
         fragmentIonAccuracyTxt.setHorizontalAlignment(0);
         fragmentIonAccuracyTxt.addKeyListener(new KeyAdapter() {
             public void keyReleased(KeyEvent evt) {

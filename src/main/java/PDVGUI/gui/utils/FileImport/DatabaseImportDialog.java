@@ -1,4 +1,5 @@
 package PDVGUI.gui.utils.FileImport;
+import PDVGUI.gui.utils.PDVFonts;
 
 import PDVGUI.fileimport.MzXMLScanImport;
 import PDVGUI.gui.PDVMainClass;
@@ -208,14 +209,14 @@ public class DatabaseImportDialog extends JDialog {
         mainJPanel.setBackground(new Color(250, 250, 250));
 
         startJButton.setBackground(new Color(255, 0, 11));
-        startJButton.setFont(new Font("Lucida", Font.BOLD, 13));
+        startJButton.setFont(PDVFonts.of(Font.BOLD, 13f));
         startJButton.setText("Start");
         startJButton.setEnabled(false);
         startJButton.setOpaque(false);
         startJButton.addActionListener(this::startJButtonActionPerformed);
 
         TitledBorder titledBorder = BorderFactory.createTitledBorder("Project Settings" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
 
         annotationSettingJPanel.setBorder(titledBorder);
         annotationSettingJPanel.setOpaque(false);
@@ -224,7 +225,7 @@ public class DatabaseImportDialog extends JDialog {
         precursorIonUnit.setOpaque(false);
         precursorIonUnit.setBackground(Color.WHITE);
         fragmentIonJLable.setText("Fragment m/z Tolerance");
-        fragmentIonJLable.setFont(new Font("Console", Font.PLAIN, 12));
+        fragmentIonJLable.setFont(PDVFonts.of(Font.PLAIN, 12f));
         fragmentIonAccuracyTxt.setHorizontalAlignment(0);
         fragmentIonAccuracyTxt.addKeyListener(new KeyAdapter() {
             public void keyReleased(KeyEvent evt) {
@@ -262,13 +263,13 @@ public class DatabaseImportDialog extends JDialog {
         );
 
         titledBorder = BorderFactory.createTitledBorder("Input Files" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
 
         inputFilesPanel.setBorder(titledBorder);
         inputFilesPanel.setOpaque(false);
 
         idFilesLabel.setForeground(new Color(255, 0, 0));
-        idFilesLabel.setFont(new Font("Console", Font.PLAIN, 12));
+        idFilesLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         idFilesLabel.setText("Identification File*");
 
         idFilesTxt.setHorizontalAlignment(JTextField.CENTER);
@@ -284,7 +285,7 @@ public class DatabaseImportDialog extends JDialog {
         fileTypeCombox.setBackground(Color.WHITE);
 
         spectrumFilesLabel.setForeground(new Color(255, 0, 0));
-        spectrumFilesLabel.setFont(new Font("Console", Font.PLAIN, 12));
+        spectrumFilesLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         spectrumFilesLabel.setText("Spectrum File(s)*");
 
         spectrumFilesTxt.setEditable(false);
@@ -813,7 +814,7 @@ public class DatabaseImportDialog extends JDialog {
                     inputFilesPanel.removeAll();
 
                     JLabel fileTypeJLabel = new JLabel();
-                    fileTypeJLabel.setFont(new Font("Console", Font.PLAIN, 12));
+                    fileTypeJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
                     fileTypeJLabel.setText("File Type");
                     fileTypeJLabel.setToolTipText("Please select the result file type!");
                     JLabel blankJLabel = new JLabel("");

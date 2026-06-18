@@ -128,11 +128,11 @@ public class AnnotationSettingsDialog extends JDialog {
         backgroundPanel.setBackground(new Color(255, 255, 255));
 
         okButton.setText("OK");
-        okButton.setFont(new Font("Lucida", Font.BOLD, 13));
+        okButton.setFont(PDVFonts.of(Font.BOLD, 13f));
         okButton.addActionListener(this::okButtonActionPerformed);
 
         TitledBorder titledBorder = BorderFactory.createTitledBorder("Annotation Colors" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
         annotationColorsPanel.setBorder(titledBorder);
         annotationColorsPanel.setOpaque(false);
 
@@ -173,16 +173,16 @@ public class AnnotationSettingsDialog extends JDialog {
         );
 
         titledBorder = BorderFactory.createTitledBorder("Peak Settings" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
         peakSettingsJPanel.setBorder(titledBorder);
         peakSettingsJPanel.setOpaque(false);
 
         annotatedPeakJLabel.setHorizontalAlignment(SwingConstants.LEFT);
         annotatedPeakJLabel.setText("Annotated Peak Color");
-        annotatedPeakJLabel.setFont(new Font("Console", Font.PLAIN, 11));
+        annotatedPeakJLabel.setFont(PDVFonts.of(Font.PLAIN, 11f));
 
         backgroundPeakJLabel.setText("Background Peak Color");
-        backgroundPeakJLabel.setFont(new Font("Console", Font.PLAIN, 11));
+        backgroundPeakJLabel.setFont(PDVFonts.of(Font.PLAIN, 11f));
 
         annotatedPeakColorJPanel.setBorder(BorderFactory.createEtchedBorder());
         annotatedPeakColorJPanel.setForeground(new Color(255, 255, 255));
@@ -235,10 +235,10 @@ public class AnnotationSettingsDialog extends JDialog {
         );
 
         annotatedWidthLabel.setText("Annotated Peak Width");
-        annotatedWidthLabel.setFont(new Font("Console", Font.PLAIN, 11));
+        annotatedWidthLabel.setFont(PDVFonts.of(Font.PLAIN, 11f));
 
         backgroundWidthLabel.setText("Background Peak Width");
-        backgroundWidthLabel.setFont(new Font("Console", Font.PLAIN, 11));
+        backgroundWidthLabel.setFont(PDVFonts.of(Font.PLAIN, 11f));
 
         annotatedPeakWidthJSpinner.setModel(new SpinnerNumberModel(1.0f, 1.0f, null, 1.0f));
         annotatedPeakWidthJSpinner.addChangeListener(this::annotatedPeakWidthValueChanged);
@@ -297,12 +297,12 @@ public class AnnotationSettingsDialog extends JDialog {
         peakSettingsJPanelLayout.linkSize(SwingConstants.VERTICAL, new Component[] {annotatedPeakJLabel, annotatedPeakColorJPanel, annotatedPeakWidthJSpinner, annotatedWidthLabel, backgroundPeakJLabel, backgroundPeakColorJPanel, backgroundPeakWidthJSpinner, backgroundWidthLabel});
 
         titledBorder = BorderFactory.createTitledBorder("Annotation Level" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
         annotationLevelJPanel.setBorder(titledBorder);
         annotationLevelJPanel.setOpaque(false);
 
         limitJLabel.setText("Annotation Limit");
-        limitJLabel.setFont(new Font("Console", Font.PLAIN, 11));
+        limitJLabel.setFont(PDVFonts.of(Font.PLAIN, 11f));
         limitJLabel.setToolTipText("Intensity percentile to ignore for annotation. e.g. 0.03 means that the 3% least intense peaks will be ignored.");
 
         limitJSpinner.setModel(new SpinnerNumberModel(Double.valueOf(0.75f), Double.valueOf(0.0f), Double.valueOf(1.0f), Double.valueOf(0.01f)));

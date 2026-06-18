@@ -1,5 +1,7 @@
 package PDVGUI.gui;
+import PDVGUI.gui.utils.PDVFonts;
 
+import PDVGUI.gui.utils.PDVLookAndFeel;
 import PDVGUI.gui.utils.FileImport.MSDataImportDialog;
 import PDVGUI.gui.utils.InfoPanel;
 import PDVGUI.gui.utils.TICPanel;
@@ -178,7 +180,7 @@ public class MSDataDisplay extends JFrame {
         allJSplitPane.setContinuousLayout(true);
 
         TitledBorder titledBorder = BorderFactory.createTitledBorder("Spectrum file(s)" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
         treeJPanel.setBorder(titledBorder);
         treeJPanel.setBackground(Color.WHITE);
         treeJPanel.setOpaque(false);
@@ -189,7 +191,7 @@ public class MSDataDisplay extends JFrame {
         detailsJPanel.setBackground(Color.WHITE);
 
         titledBorder = BorderFactory.createTitledBorder("Details" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
         detailsJPanel.setBorder(titledBorder);
 
         inforJEditor.setContentType("text/html");
@@ -219,7 +221,7 @@ public class MSDataDisplay extends JFrame {
         allJSplitPane.setTopComponent(treeAndDetailJSplit);
 
         BorderFactory.createTitledBorder("Show" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
         ticShowJPanel.setBorder(titledBorder);
         ticShowJPanel.setBackground(Color.WHITE);
         ticShowJPanel.setOpaque(false);
@@ -302,13 +304,7 @@ public class MSDataDisplay extends JFrame {
                         .addComponent(mainJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
-        try {
-            String lookAndFeel = UIManager.getSystemLookAndFeelClassName();
-            UIManager.setLookAndFeel(lookAndFeel);
-            //UIManager.setLookAndFeel(motif);
-        } catch (ClassNotFoundException | InstantiationException | UnsupportedLookAndFeelException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
+        PDVLookAndFeel.setup();
         SwingUtilities.updateComponentTreeUI(this);
 
         pack();
@@ -450,7 +446,7 @@ public class MSDataDisplay extends JFrame {
 
             JTree tree = new JTree(treeModel);
             tree.setOpaque(true);
-            tree.setFont(new Font("Arial", Font.PLAIN, 12));
+            tree.setFont(PDVFonts.of(Font.PLAIN, 12f));
             tree.setBackground(Color.white);
             tree.getSelectionModel().setSelectionMode(
                     TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);

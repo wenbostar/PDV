@@ -656,29 +656,11 @@ public class PDVMainClass extends JFrame {
             }
 
             public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
-                Component component = super.prepareRenderer(renderer, row, column);
-                if (row % 2 == 0) {
-                    component.setBackground(Color.white);
-                    component.setForeground(Color.black);
-                }else{
-                    component.setBackground(new Color(164, 233, 255));
-                    component.setForeground(Color.black);
-                }
-                if(isRowSelected(row)){
-                    component.setBackground(new Color(20,20,40));
-                    component.setForeground(Color.white);
-                }
-                if(String.valueOf(getValueAt(row, column)).contains(" Rank:"+"&nbsp<html>"+1)){
-                    component.setBackground(new Color(255, 116, 135));
-                    component.setForeground(Color.black);
-                }
-                return component;
+                return PDVTableStyle.applyRowStyle(this, super.prepareRenderer(renderer, row, column), row, column);
             }
         };
 
-        spectrumJTable.setRowHeight(20);
-        spectrumJTable.setFont(new Font("Arial", Font.PLAIN, 12));
-        spectrumJTable.getTableHeader().setFont(new Font("Dialog", 1, 13));
+        PDVTableStyle.applyDefaults(spectrumJTable);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("PDV");
@@ -932,9 +914,9 @@ public class PDVMainClass extends JFrame {
 
         settingJPanel.setLayout(new BoxLayout(settingJPanel, BoxLayout.X_AXIS));
 
-        fragmentIonAccuracyJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-        fragmentIonType1Lbl.setFont(new Font("Arial", Font.PLAIN, 12));
-        sortJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        fragmentIonAccuracyJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
+        fragmentIonType1Lbl.setFont(PDVFonts.of(Font.PLAIN, 12f));
+        sortJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
 
         settingJPanel.add(splitJLabel1);
         settingJPanel.add(fragmentIonAccuracyJLabel);
@@ -1018,12 +1000,14 @@ public class PDVMainClass extends JFrame {
         spectrumJTable.getAccessibleContext().setAccessibleName("spectrumJTable");
 
         psmsJPanel.setOpaque(false);
-        TitledBorder titledBorder = BorderFactory.createTitledBorder("PSM Table" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
-        psmsJPanel.setBorder(titledBorder);
+        psmsJPanel.setLayout(new BorderLayout(0, 4));
+        psmsJPanel.setBorder(BorderFactory.createEmptyBorder(2, 6, 4, 6));
+
+        JLabel psmTableTitleJLabel = new JLabel("PSM Table");
+        psmTableTitleJLabel.setFont(PDVFonts.of(Font.BOLD, 12f));
 
         allSelectedJLabel.setText("Whole page");
-        allSelectedJLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        allSelectedJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         allSelectedJLabel.setToolTipText("Select all spectrum in this page");
         allSelectedJCheckBox.setToolTipText("Select all spectrum in this page");
         allSelectedJCheckBox.setSelected(false);
@@ -1040,8 +1024,10 @@ public class PDVMainClass extends JFrame {
         pageNumJTextField.setBackground(Color.white);
         pageNumJTextField.setText(String.valueOf(selectedPageNum)+"/"+String.valueOf(allSpectrumIndex.size()));
         pageNumJTextField.setHorizontalAlignment(SwingConstants.CENTER);
+        pageNumJTextField.setColumns(5);
 
         pageSelectNumJTextField.setHorizontalAlignment(SwingConstants.CENTER);
+        pageSelectNumJTextField.setColumns(4);
         pageSelectNumJTextField.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(KeyEvent evt) {
                 pageSelectNumJTextFieldKeyReleased(evt);
@@ -1062,40 +1048,23 @@ public class PDVMainClass extends JFrame {
         buttonCheck();
         nextJButton.addActionListener(this::nextJButtonActionPerformed);
 
-        GroupLayout psmssLayeredPanelLayout = new GroupLayout(psmsJPanel);
-        psmsJPanel.setLayout(psmssLayeredPanelLayout);
-        psmssLayeredPanelLayout.setHorizontalGroup(
-                psmssLayeredPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+        JPanel psmControlsJPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        psmControlsJPanel.setOpaque(false);
+        psmControlsJPanel.add(allSelectedJCheckBox);
+        psmControlsJPanel.add(allSelectedJLabel);
+        psmControlsJPanel.add(pageSelectNumJTextField);
+        psmControlsJPanel.add(upJButton);
+        psmControlsJPanel.add(nextJButton);
+        psmControlsJPanel.add(pageNumJTextField);
 
-                        .addGroup(psmssLayeredPanelLayout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(psmsScrollPane, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addContainerGap())
-                        .addGroup(psmssLayeredPanelLayout.createSequentialGroup()
-                                .addGap(10, 15, 15)
-                                .addComponent(allSelectedJCheckBox)
-                                .addComponent(allSelectedJLabel)
-                                .addGap(100,1200,2000)
-                                .addComponent(pageSelectNumJTextField,50, 50, 50)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(upJButton,GroupLayout.DEFAULT_SIZE, 10, 10)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(nextJButton,GroupLayout.DEFAULT_SIZE, 10, 10)
-                                .addComponent(pageNumJTextField,50, 50, 70))
-        );
-        psmssLayeredPanelLayout.setVerticalGroup(
-                psmssLayeredPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(psmssLayeredPanelLayout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(psmsScrollPane, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGroup(psmssLayeredPanelLayout.createParallelGroup()
-                                        .addComponent(allSelectedJCheckBox)
-                                        .addComponent(allSelectedJLabel)
-                                        .addComponent(pageSelectNumJTextField, 10, 20, 20)
-                                        .addComponent(upJButton, 10, 20, 20)
-                                        .addComponent(nextJButton, 10, 20, 20)
-                                        .addComponent(pageNumJTextField, 10, 20, 20)))
-        );
+        JPanel psmHeaderJPanel = new JPanel(new BorderLayout());
+        psmHeaderJPanel.setOpaque(false);
+        psmHeaderJPanel.add(psmTableTitleJLabel, BorderLayout.WEST);
+        psmHeaderJPanel.add(psmControlsJPanel, BorderLayout.EAST);
+        psmHeaderJPanel.setPreferredSize(new Dimension(10, 30));
+
+        psmsJPanel.add(psmHeaderJPanel, BorderLayout.NORTH);
+        psmsJPanel.add(psmsScrollPane, BorderLayout.CENTER);
 
         msAndTableJSplitPane.setBorder(null);
         msAndTableJSplitPane.setDividerLocation(0.2);
@@ -1107,22 +1076,20 @@ public class PDVMainClass extends JFrame {
 
         detailsJPanel.setOpaque(false);
         detailsJPanel.setBackground(Color.WHITE);
-        titledBorder = BorderFactory.createTitledBorder("File detail" + " \t ");
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 13));
-        detailsJPanel.setBorder(titledBorder);
-
-        GroupLayout msOneJPanelLayout = new GroupLayout(detailsJPanel);
-        detailsJPanel.setLayout(msOneJPanelLayout);
+        detailsJPanel.setLayout(new BorderLayout(0, 4));
+        detailsJPanel.setBorder(BorderFactory.createEmptyBorder(2, 6, 4, 6));
         infoPanel.setOpaque(false);
 
-        msOneJPanelLayout.setHorizontalGroup(
-                msOneJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(infoPanel, GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
-        );
-        msOneJPanelLayout.setVerticalGroup(
-                msOneJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(infoPanel, GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
-        );
+        JLabel detailTitleJLabel = new JLabel("File detail");
+        detailTitleJLabel.setFont(PDVFonts.of(Font.BOLD, 12f));
+
+        JPanel detailHeaderJPanel = new JPanel(new BorderLayout());
+        detailHeaderJPanel.setOpaque(false);
+        detailHeaderJPanel.add(detailTitleJLabel, BorderLayout.WEST);
+        detailHeaderJPanel.setPreferredSize(new Dimension(100, psmHeaderJPanel.getPreferredSize().height));
+
+        detailsJPanel.add(detailHeaderJPanel, BorderLayout.NORTH);
+        detailsJPanel.add(infoPanel, BorderLayout.CENTER);
 
         msAndTableJSplitPane.setLeftComponent(detailsJPanel);
         msAndTableJSplitPane.setRightComponent(psmsJPanel);
@@ -1197,13 +1164,7 @@ public class PDVMainClass extends JFrame {
                         .addComponent(mainJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
-        try {
-            String lookAndFeel = UIManager.getSystemLookAndFeelClassName();
-            UIManager.setLookAndFeel(lookAndFeel);
-            //UIManager.setLookAndFeel(motif);
-        } catch (ClassNotFoundException | InstantiationException | UnsupportedLookAndFeelException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
+        PDVLookAndFeel.setup();
         SwingUtilities.updateComponentTreeUI(this);
 
         pack();
@@ -3922,7 +3883,7 @@ public class PDVMainClass extends JFrame {
 
         TitledBorder titledBorder = BorderFactory.createTitledBorder(modSequence + " \t ");
 
-        titledBorder.setTitleFont(new Font("Console", Font.PLAIN, 12));
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
 
         spectrumShowJPanel.setBorder(titledBorder);
         mSnSpectrum.setSpectrumTitle(spectrumTitle);
