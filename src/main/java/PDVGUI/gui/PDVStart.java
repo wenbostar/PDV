@@ -609,7 +609,7 @@ public class PDVStart extends JDialog {
      */
     private void newDeNovoResultJButtonMouseEntered(MouseEvent evt) {
 
-        JLabel deNovoJLabel = new JLabel("<html>Visualize denovo sequencing result (Casanovo, DeepNovo, Novor, PepNovo, pNovo).</html>");
+        JLabel deNovoJLabel = new JLabel("<html>Visualize denovo sequencing result (Casanovo, DeepNovo, InstaNovo, Novor, PepNovo, pNovo).</html>");
 
         deNovoJLabel.setFont(PDVFonts.of(Font.ITALIC, 12f));
 

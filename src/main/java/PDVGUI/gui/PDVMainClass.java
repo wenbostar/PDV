@@ -1981,6 +1981,89 @@ public class PDVMainClass extends JFrame {
     }
 
     /**
+     * Import InstaNovo CSV results.
+     * @param spectrumsFileFactory Spectrum factory
+     * @param resultFile InstaNovo CSV result file
+     * @param spectrumFiles Spectrum files
+     * @param spectrumFileType Spectrum file type
+     */
+    public void importInstaNovoResults(Object spectrumsFileFactory, File resultFile, ArrayList<File> spectrumFiles, String spectrumFileType) {
+
+        this.isNewSoft = false;
+        this.isMztab = false;
+        this.isDenovo = false;
+        this.isMaxQuant = "mgf".equals(spectrumFileType);
+        this.isPepXML = false;
+        this.isFrage = false;
+        this.isMSAmanda = false;
+
+        this.spectrumsFileFactory = spectrumsFileFactory;
+        this.spectrumFileType = spectrumFileType;
+
+        if ("mgf".equals(spectrumFileType)) {
+            spectrumFactory = (SpectrumFactory) spectrumsFileFactory;
+        } else if ("mzml".equals(spectrumFileType)) {
+            scansMap = (HashMap<String, ScanCollectionDefault>) spectrumsFileFactory;
+        }
+
+        databasePath = resultFile.getAbsolutePath() + ".db";
+
+        ProgressDialogX progressDialog = new ProgressDialogX(this,
+                Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMass.png")),
+                Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMassWait.png")),
+                true);
+        progressDialog.setPrimaryProgressCounterIndeterminate(true);
+        progressDialog.setTitle("Loading Results. Please Wait...");
+
+        new Thread(() -> {
+            try {
+                progressDialog.setVisible(true);
+            } catch (IndexOutOfBoundsException ignored) {
+            }
+        }, "ProgressDialog").start();
+        new Thread("DisplayThread") {
+            @Override
+            public void run() {
+
+                InstaNovoImport instaNovoImport;
+
+                try {
+                    instaNovoImport = new InstaNovoImport(PDVMainClass.this, resultFile, spectrumFiles, spectrumsFileFactory, spectrumFileType, progressDialog);
+
+                    sqliteConnection = instaNovoImport.getSqLiteConnection();
+                    allModifications = instaNovoImport.getAllModifications();
+                    originalInfor = new HashMap<>();
+                    detailsList = new ArrayList<>();
+                    scoreName = instaNovoImport.getScoreName();
+
+                    ArrayList<String> orderName = new ArrayList<>();
+                    orderName.add("PSMIndex");
+                    orderName.add("MZ");
+                    orderName.add("Sequence");
+                    orderName.addAll(scoreName);
+                    setUpTableHeaderToolTips();
+
+                    columnToSelected = new HashMap<>();
+                    for (String eachColumn: scoreName){
+                        columnToSelected.put(eachColumn, true);
+                    }
+                    columnToSelected.put("Other Assumption", false);
+
+                    buttonCheck();
+
+                    sortColumnJCombox.setModel(new DefaultComboBoxModel(orderName.toArray()));
+
+                    instaNovoImport.importResults();
+
+                } catch (SQLException | ClassNotFoundException | IOException e) {
+                    progressDialog.setRunFinished();
+                    e.printStackTrace();
+                }
+            }
+        }.start();
+    }
+
+    /**
      * Import deep novo results
      * @param resultFile Result file
      * @param spectrumFile spectrum file
