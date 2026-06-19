@@ -547,8 +547,13 @@ public class PDVMainClass extends JFrame {
     private void setTableProperties(){
         spectrumJTable.setAutoCreateRowSorter(true);
 
-        spectrumJTable.getColumn(" ").setMaxWidth(40);
-        spectrumJTable.getColumn(" ").setMinWidth(40);
+        TableColumn indexColumn = spectrumJTable.getColumn(" ");
+        indexColumn.setMaxWidth(40);
+        indexColumn.setMinWidth(40);
+        // Keep the identifier " " (used by getColumn(" ") lookups) but show "#" as the
+        // header so the row-index column is labelled instead of appearing empty.
+        indexColumn.setIdentifier(" ");
+        indexColumn.setHeaderValue("#");
 
         TableColumn selectedColumn = spectrumJTable.getColumn("Selected");
         selectedColumn.setMinWidth(30);
