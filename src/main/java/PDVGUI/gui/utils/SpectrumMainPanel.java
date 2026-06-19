@@ -3,6 +3,7 @@ package PDVGUI.gui.utils;
 import PDVGUI.gui.*;
 import PDVGUI.gui.utils.Export.ExportExpectedSizeDialog;
 import PDVGUI.gui.utils.Export.ExportMGFDialog;
+import PDVGUI.utils.DecimalFormats;
 import com.compomics.util.experiment.biology.*;
 import com.compomics.util.experiment.biology.ions.PeptideFragmentIon;
 import com.compomics.util.experiment.biology.ions.TagFragmentIon;
@@ -1564,7 +1565,7 @@ public class SpectrumMainPanel extends JPanel {
                     spectrumPanel.showAnnotatedPeaksOnly(!annotationSettings.showAllPeaks());
                     spectrumPanel.setYAxisZoomExcludesBackgroundPeaks(false);
 
-                    DecimalFormat df = new DecimalFormat("#.00");
+                    DecimalFormat df = DecimalFormats.create("#.00");
 
                     Double allMatchInt = 0.0;
                     Double allPeakInt = 0.0;

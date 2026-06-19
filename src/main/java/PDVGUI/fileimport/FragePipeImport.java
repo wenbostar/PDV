@@ -2,6 +2,7 @@ package PDVGUI.fileimport;
 
 import PDVGUI.DB.SQLiteConnection;
 import PDVGUI.gui.PDVMainClass;
+import PDVGUI.utils.DecimalFormats;
 import com.compomics.util.experiment.biology.NeutralLoss;
 import com.compomics.util.experiment.biology.PTM;
 import com.compomics.util.experiment.biology.PTMFactory;
@@ -96,7 +97,7 @@ public class FragePipeImport {
     /**
      * Decimal
      */
-    DecimalFormat df = new DecimalFormat("####0.000");
+    DecimalFormat df = DecimalFormats.create("####0.000");
 
     /**
      * Main constructor

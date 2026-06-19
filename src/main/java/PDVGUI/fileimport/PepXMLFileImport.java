@@ -2,6 +2,7 @@ package PDVGUI.fileimport;
 
 import PDVGUI.DB.SQLiteConnection;
 import PDVGUI.gui.PDVMainClass;
+import PDVGUI.utils.DecimalFormats;
 import com.compomics.util.experiment.biology.*;
 import com.compomics.util.experiment.identification.matches.ModificationMatch;
 import com.compomics.util.experiment.identification.matches.SpectrumMatch;
@@ -124,11 +125,11 @@ public class PepXMLFileImport {
     /**
      * For PTNProphet
      */
-    DecimalFormat massDF = new DecimalFormat("#.0000");
+    DecimalFormat massDF = DecimalFormats.create("#.0000");
     /**
      * For crux modification mass
      */
-    DecimalFormat cruxDF = new DecimalFormat("#.00");
+    DecimalFormat cruxDF = DecimalFormats.create("#.00");
     /**
      * Spectrum ID to spectrum number
      */

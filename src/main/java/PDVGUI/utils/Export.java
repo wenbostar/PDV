@@ -88,7 +88,7 @@ public class Export {
     private static void exportExceptedFormatPic(File exportFile, ImageType imageType, SVGGraphics2D svgGraphics2D)
             throws IOException, TranscoderException {
 
-        DecimalFormat df = new DecimalFormat("#.000000");
+        DecimalFormat df = DecimalFormats.create("#.000000");
 
         if (new File(exportFile.getAbsolutePath() + ".temp").exists()) {
             new File(exportFile.getAbsolutePath() + ".temp").delete();
