@@ -36,6 +36,13 @@ import java.util.LinkedList;
 public class DeNovoFileImport {
 
     /**
+     * Human-readable list of supported de novo identification formats (single source of truth,
+     * also shown in the DeNovoImportDialog file-chooser filter description).
+     */
+    public static final String SUPPORTED_DENOVO_FORMATS =
+            "PepNovo+ (.out), DirecTag (.tags), DeepNovo (.tab), pNovo (.tsk), Novor (.novor.csv), Casanovo (.mztab), InstaNovo (.csv)";
+
+    /**
      * Parent frame
      */
     private PDVMainClass pdvMainClass;
@@ -144,11 +151,11 @@ public class DeNovoFileImport {
         IdfileReader idfileReader = IdfileReaderFactory.getInstance().getFileReader(resultFile);
 
         if (idfileReader == null) {
+            sqLiteConnection.closeConnection();
             progressDialog.setRunFinished();
             JOptionPane.showMessageDialog(pdvMainClass, JOptionEditorPane.getJOptionEditorPane(
                     "Unsupported identification file format: '" + resultFile.getName() + "'.<br>"
-                            + "Supported de novo formats are: PepNovo+ (.out), DirecTag (.tags), "
-                            + "DeepNovo (.tab), pNovo (.tsk), Novor (.novor.csv), Casanovo (.mztab) and InstaNovo (.csv)."),
+                            + "Supported de novo formats are: " + SUPPORTED_DENOVO_FORMATS + "."),
                     "Unsupported File Format", JOptionPane.ERROR_MESSAGE);
             return;
         }

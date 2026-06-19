@@ -1,6 +1,7 @@
 package PDVGUI.gui.utils.FileImport;
 import PDVGUI.gui.utils.PDVFonts;
 
+import PDVGUI.fileimport.DeNovoFileImport;
 import PDVGUI.gui.*;
 import com.compomics.util.experiment.biology.PTMFactory;
 import com.compomics.util.experiment.identification.identification_parameters.PtmSettings;
@@ -593,7 +594,7 @@ public class DeNovoImportDialog extends JDialog {
 
             @Override
             public String getDescription() {
-                return " pepNovo+ (.out), DirecTag (.tags), DeepNovo (.tab), pNovo (.tsk), Novor (.novor.csv), Casanovo(.mztab), InstaNovo (.csv)";
+                return DeNovoFileImport.SUPPORTED_DENOVO_FORMATS;
             }
         };
 
