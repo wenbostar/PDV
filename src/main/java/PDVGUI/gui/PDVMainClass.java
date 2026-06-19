@@ -550,8 +550,13 @@ public class PDVMainClass extends JFrame {
         spectrumJTable.getColumn(" ").setMaxWidth(40);
         spectrumJTable.getColumn(" ").setMinWidth(40);
 
-        spectrumJTable.getColumn("Selected").setMinWidth(30);
-        spectrumJTable.getColumn("Selected").setMaxWidth(30);
+        TableColumn selectedColumn = spectrumJTable.getColumn("Selected");
+        selectedColumn.setMinWidth(30);
+        selectedColumn.setMaxWidth(30);
+        // Keep the identifier "Selected" (used by getColumn("Selected") lookups) but show a
+        // compact check mark glyph as the header so it is not truncated to "S..." in 30px.
+        selectedColumn.setIdentifier("Selected");
+        selectedColumn.setHeaderValue("✓");
 
         spectrumJTable.setDefaultRenderer(Double.class, new DefaultTableCellRenderer(){
             private static final long serialVersionUID = 1L;
