@@ -529,7 +529,7 @@ public class PDVMainClass extends JFrame {
     private void setUpTableHeaderToolTips() {
         spectrumJTableToolTips = new ArrayList<>();
         spectrumJTableToolTips.add("Select it and output");
-        spectrumJTableToolTips.add("Index");
+        spectrumJTableToolTips.add("Row number (current page)");
         spectrumJTableToolTips.add("Key of spectrum in Identification File");
         spectrumJTableToolTips.add("Retention Time");
         spectrumJTableToolTips.add("Spectrum Title in Spectrum File");
