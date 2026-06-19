@@ -69,7 +69,7 @@ Top panel: experimental spectrum, bottom panel: predicted spectrum using deep le
 | Software        | Example files |
 | ----------------|:---------------|
 | [Casanovo](https://github.com/Noble-Lab/casanovo) | [Manual](https://github.com/wenbostar/PDV/wiki/Visualize-Casanovo-result) |
-| [InstaNovo](https://github.com/instadeepai/InstaNovo) | CSV prediction output from InstaNovo v1.0.0 and higher |
+| [InstaNovo](https://github.com/instadeepai/InstaNovo) | [mgf](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf.gz):[csv](https://zenodo.org/records/20756892/files/SF_200217_U2OS_TiO2_HCD_OT_rep1.full.mgf.instanovo-1.2.2.transformer.model-instanovo-v1.2.0.denovo.beam-search.beams-5.save-all-predictions.normalized-columns.csv) (example CSV prediction files from InstaNovo v1.0.0 to v1.2.2 on [Zenodo](https://zenodo.org/records/20756892)) |
 | [Novor](https://www.ncbi.nlm.nih.gov/pubmed/26122521) | [mgf](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf.gz):[csv](http://pdv.zhang-lab.org/data/download/test_data/novor/SF_200217_U2OS_TiO2_HCD_OT_rep1.novor.csv.gz) (only support the Novor result generated through [DeNovoGUI](https://github.com/compomics/denovogui)) |
 | [DeepNovo](https://github.com/nh2tran/DeepNovo) | [mgf](http://pdv.zhang-lab.org/data/download/test_data/deepnovo/peaks.db.mgf.test.dup.mgf.gz):[txt](http://pdv.zhang-lab.org/data/download/test_data/deepnovo/output.deepnovo_db.tab) |
 | [PepNovo+](http://proteomics.ucsd.edu/software-tools/531-2/) | [mgf](http://pdv.zhang-lab.org/data/download/test_data/msdata/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf.gz):[txt](http://pdv.zhang-lab.org/data/download/test_data/pepnovo/SF_200217_U2OS_TiO2_HCD_OT_rep1.mgf.out) |
