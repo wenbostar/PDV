@@ -461,34 +461,13 @@ public class SpectrumMainPanel extends JPanel {
         mirrorJLayeredPane= new JLayeredPane();
         checkPeptideJLayeredPane = new JLayeredPane();
 
-        // Re-fit the active spectrum panel when its container is resized (e.g. the main window
+        // Re-fit the active spectrum view when its container is resized (e.g. the main window
         // is maximized/restored). The layered panes use absolute positioning, so without this
         // the spectrum keeps its old bounds until a mouse move over it triggers SetAction's re-fit.
         spectrumShowPanel.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent evt) {
-                int width = spectrumShowPanel.getWidth();
-                int height = spectrumShowPanel.getHeight();
-                if (mirrorSelected) {
-                    if (mirrorSpectrumPanel != null) {
-                        mirrorSpectrumPanel.setBounds(0, 75, width, height - 85);
-                        mirrorJLayeredPane.revalidate();
-                        mirrorJLayeredPane.repaint();
-                    }
-                } else if (peptideCheckSelected) {
-                    if (checkPeptideSpectrumPanel != null) {
-                        checkPeptideSpectrumPanel.setBounds(0, 75, width, height - 85);
-                        checkPeptideJLayeredPane.revalidate();
-                        checkPeptideJLayeredPane.repaint();
-                    }
-                } else if (spectrumPanel != null) {
-                    // Keep the panel's origin (0 for the de novo single view, 75 when the
-                    // sequence-fragmentation overlay is present) and only refit the size.
-                    int bottomMargin = spectrumPanel.getY() == 0 ? 25 : 85;
-                    spectrumPanel.setBounds(spectrumPanel.getX(), spectrumPanel.getY(), width, height - bottomMargin);
-                    spectrumJLayeredPane.revalidate();
-                    spectrumJLayeredPane.repaint();
-                }
+                relayoutActiveSpectrum();
             }
         });
 
@@ -1943,6 +1922,67 @@ public class SpectrumMainPanel extends JPanel {
     }
 
     /**
+     * Re-applies the anchored bounds of the active spectrum view (the spectrum plot plus its
+     * bottom sequence-fragmentation overlay, when present) to the current container size. Invoked
+     * when spectrumShowPanel is resized so the absolutely-positioned layered children track the
+     * new size instead of waiting for a mouse-move re-fit.
+     *
+     * Deliberately not invoked on mouse-move: the bottom overlay is user-draggable, so re-anchoring
+     * it on every mouse move would defeat dragging; it is only re-anchored on an actual resize.
+     */
+    private void relayoutActiveSpectrum() {
+        int width = spectrumShowPanel.getWidth();
+        int height = spectrumShowPanel.getHeight();
+
+        if (mirrorSelected) {
+            if (mirrorSpectrumPanel != null) {
+                mirrorSpectrumPanel.setBounds(0, 75, width, height - 85);
+                reanchorBottomOverlay(mirrorFragmentPanel);
+                mirrorJLayeredPane.revalidate();
+                mirrorJLayeredPane.repaint();
+            }
+        } else if (peptideCheckSelected) {
+            if (checkPeptideSpectrumPanel != null) {
+                checkPeptideSpectrumPanel.setBounds(0, 75, width, height - 85);
+                reanchorBottomOverlay(checkFragmentPanel);
+                checkPeptideJLayeredPane.revalidate();
+                checkPeptideJLayeredPane.repaint();
+            }
+        } else if (spectrumPanel != null) {
+            // Keep the panel's origin (0 for the de novo single view, 75 when the
+            // sequence-fragmentation overlay is present) and only refit the size. The normal
+            // view's overlay is top-anchored (fixed y), so it needs no repositioning.
+            int bottomMargin = spectrumPanel.getY() == 0 ? 25 : 85;
+            spectrumPanel.setBounds(spectrumPanel.getX(), spectrumPanel.getY(), width, height - bottomMargin);
+            spectrumJLayeredPane.revalidate();
+            spectrumJLayeredPane.repaint();
+        }
+    }
+
+    /**
+     * Re-anchors a bottom-aligned sequence-fragmentation overlay to the bottom of the resized
+     * container, preserving its width/height and horizontal position. Mirrors the "isDown" branch
+     * of {@link #zoomAction}.
+     * @param overlay bottom overlay to reposition (may be null if the active view has none)
+     */
+    private void reanchorBottomOverlay(SequenceFragmentationPanel overlay) {
+        if (overlay == null) {
+            return;
+        }
+        int fontHeight = overlay.getFontMetrics(overlay.getFont()).getHeight() + 3;
+        overlay.setBounds(overlay.getX(), bottomOverlayY(fontHeight), overlay.getWidth(), overlay.getHeight());
+    }
+
+    /**
+     * Y coordinate anchoring a bottom sequence-fragmentation overlay near the bottom of the
+     * spectrum container, for an overlay whose line height is {@code fontHeight}. Single source of
+     * truth shared by {@link #zoomAction} and {@link #reanchorBottomOverlay}.
+     */
+    private int bottomOverlayY(int fontHeight) {
+        return spectrumShowPanel.getHeight() - fontHeight * 7;
+    }
+
+    /**
      * Zoom in out
      * @param sequenceFragmentationPanel Sequence fragment panel
      * @param modSequence Peptide Sequence
@@ -1972,7 +2012,7 @@ public class SpectrumMainPanel extends JPanel {
         if (!isDown){
             sequenceFragmentationPanel.setBounds(40,10, peptideLength*fontHeight*2 ,fontHeight * 8);
         } else {
-            sequenceFragmentationPanel.setBounds(40,spectrumShowPanel.getHeight() -fontHeight * 7, peptideLength*fontHeight*2 ,fontHeight * 8);
+            sequenceFragmentationPanel.setBounds(40, bottomOverlayY(fontHeight), peptideLength*fontHeight*2 ,fontHeight * 8);
         }
 
         sequenceFragmentationPanel.addMouseWheelListener(e -> {
