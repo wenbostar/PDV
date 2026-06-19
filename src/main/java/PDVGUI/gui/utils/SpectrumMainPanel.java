@@ -460,6 +460,38 @@ public class SpectrumMainPanel extends JPanel {
         spectrumJLayeredPane = new JLayeredPane();
         mirrorJLayeredPane= new JLayeredPane();
         checkPeptideJLayeredPane = new JLayeredPane();
+
+        // Re-fit the active spectrum panel when its container is resized (e.g. the main window
+        // is maximized/restored). The layered panes use absolute positioning, so without this
+        // the spectrum keeps its old bounds until a mouse move over it triggers SetAction's re-fit.
+        spectrumShowPanel.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent evt) {
+                int width = spectrumShowPanel.getWidth();
+                int height = spectrumShowPanel.getHeight();
+                if (mirrorSelected) {
+                    if (mirrorSpectrumPanel != null) {
+                        mirrorSpectrumPanel.setBounds(0, 75, width, height - 85);
+                        mirrorJLayeredPane.revalidate();
+                        mirrorJLayeredPane.repaint();
+                    }
+                } else if (peptideCheckSelected) {
+                    if (checkPeptideSpectrumPanel != null) {
+                        checkPeptideSpectrumPanel.setBounds(0, 75, width, height - 85);
+                        checkPeptideJLayeredPane.revalidate();
+                        checkPeptideJLayeredPane.repaint();
+                    }
+                } else if (spectrumPanel != null) {
+                    // Keep the panel's origin (0 for the de novo single view, 75 when the
+                    // sequence-fragmentation overlay is present) and only refit the size.
+                    int bottomMargin = spectrumPanel.getY() == 0 ? 25 : 85;
+                    spectrumPanel.setBounds(spectrumPanel.getX(), spectrumPanel.getY(), width, height - bottomMargin);
+                    spectrumJLayeredPane.revalidate();
+                    spectrumJLayeredPane.repaint();
+                }
+            }
+        });
+
         contentJLabel = new JLabel();
         bIonNumJLabel = new JLabel();
         yIonNumJLabel = new JLabel();
