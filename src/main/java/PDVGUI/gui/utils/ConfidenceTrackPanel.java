@@ -45,9 +45,9 @@ public class ConfidenceTrackPanel extends JPanel {
      */
     private final int[] centerX;
     /**
-     * Width of each residue letter (used as the bar width so bars match the letters).
+     * Uniform bar width (same for every residue), capped so adjacent bars never overlap.
      */
-    private final int[] slotW;
+    private final int barWidth;
     /**
      * Natural content width spanning all residues.
      */
@@ -68,8 +68,10 @@ public class ConfidenceTrackPanel extends JPanel {
      * @param seqFont the residue font copied from the sequence strip
      * @param extraSpacing per-residue space added on top of the letter width (matches the panel:
      *                     2 * iHorizontalSpace + iBarWidth)
+     * @param fm font metrics measured with the sequence strip's own (on-screen) graphics, so the
+     *           per-character widths match how the strip paints (avoids drift on HiDPI displays)
      */
-    public ConfidenceTrackPanel(double[] scores, String residues, Font seqFont, int extraSpacing) {
+    public ConfidenceTrackPanel(double[] scores, String residues, Font seqFont, int extraSpacing, FontMetrics fm) {
         this.scores = scores;
         this.residues = residues == null ? "" : residues;
         this.seqFont = seqFont;
@@ -77,23 +79,26 @@ public class ConfidenceTrackPanel extends JPanel {
         setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
 
         // SequenceFragmentationPanel advances per residue by stringWidth(residue) + extraSpacing
-        // (where extraSpacing = 2*iHorizontalSpace + iBarWidth). Reproduce it exactly so the
-        // per-residue centers match with no cumulative drift. Use a real device FontMetrics, as the
-        // panel does at paint time.
-        Graphics2D mg = new java.awt.image.BufferedImage(1, 1, java.awt.image.BufferedImage.TYPE_INT_ARGB).createGraphics();
-        FontMetrics fm = mg.getFontMetrics(seqFont);
+        // (where extraSpacing = 2*iHorizontalSpace + iBarWidth). Reproduce it exactly, using the
+        // strip's own FontMetrics, so the per-residue centers match with no cumulative drift.
         centerX = new int[scores.length];
-        slotW = new int[scores.length];
         int x = pad;
         for (int i = 0; i < scores.length; i++) {
             String aa = i < this.residues.length() ? String.valueOf(this.residues.charAt(i)) : "?";
             int charWidth = fm.stringWidth(aa);
             centerX[i] = x + charWidth / 2;
-            slotW[i] = charWidth;
             x += charWidth + extraSpacing;
         }
-        mg.dispose();
         contentWidth = x - extraSpacing + pad;
+
+        // Uniform bar width: aim for ~0.85 of the font size, but never wider than the smallest
+        // center-to-center distance (minus a gap) so adjacent bars don't overlap.
+        int minCenterDist = Integer.MAX_VALUE;
+        for (int i = 1; i < centerX.length; i++) {
+            minCenterDist = Math.min(minCenterDist, centerX[i] - centerX[i - 1]);
+        }
+        int desired = Math.round(seqFont.getSize() * 0.85f);
+        barWidth = Math.max(4, minCenterDist == Integer.MAX_VALUE ? desired : Math.min(desired, minCenterDist - 2));
 
         setToolTipText("Per-residue confidence (drag to move)");
 
@@ -180,7 +185,6 @@ public class ConfidenceTrackPanel extends JPanel {
         for (int i = 0; i < scores.length; i++) {
             double s = Math.max(0.0, Math.min(1.0, scores[i]));
             int barHeight = (int) Math.round(s * maxBarHeight);
-            int barWidth = Math.max(4, slotW[i]);
             int x = centerX[i] - barWidth / 2;
             int y = baselineY - barHeight;
 

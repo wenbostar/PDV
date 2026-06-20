@@ -2069,8 +2069,9 @@ public class SpectrumMainPanel extends JPanel {
         // track can be shifted to line residue 1 up under the strip's residue 1, and (b) the strip's
         // drawn-content right edge, so the strip can be aligned to the right (its bounding box is
         // far wider than its content). The strip advances per component by stringWidth + extraSpacing.
-        FontMetrics fm = new java.awt.image.BufferedImage(1, 1, java.awt.image.BufferedImage.TYPE_INT_ARGB)
-                .createGraphics().getFontMetrics(seqFont);
+        // Use the strip's own on-screen FontMetrics so per-character widths match how it paints
+        // (a BufferedImage's metrics can differ on HiDPI/Retina displays and cause drift).
+        FontMetrics fm = sequenceFragmentationPanel.getFontMetrics(seqFont);
         int prefixWidth = 0;
         int contentRight = xStart;
         if (components != null && components.length > 0) {
@@ -2088,7 +2089,7 @@ public class SpectrumMainPanel extends JPanel {
         seqResidueLeadingOffset = xStart + prefixWidth;
         seqContentRightEdge = contentRight;
 
-        confidenceTrackPanel = new ConfidenceTrackPanel(aaScores, residues, seqFont, extraSpacing);
+        confidenceTrackPanel = new ConfidenceTrackPanel(aaScores, residues, seqFont, extraSpacing, fm);
         spectrumJLayeredPane.setLayer(confidenceTrackPanel, JLayeredPane.DRAG_LAYER + 10);
         spectrumJLayeredPane.add(confidenceTrackPanel);
         anchorSequenceAndTrack();
