@@ -163,9 +163,9 @@ public class SpectrumMainPanel extends JPanel {
      */
     private int seqContentRightEdge = 0;
     /**
-     * Height of the floating confidence bar track (bars plus the amino-acid label row).
+     * Height of the floating confidence bar track (score row, bars, and amino-acid label row).
      */
-    private static final int CONF_TRACK_HEIGHT = 64;
+    private static final int CONF_TRACK_HEIGHT = 74;
     /**
      * Original peptide sequence
      */

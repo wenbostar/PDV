@@ -37,7 +37,11 @@ public class ConfidenceTrackPanel extends JPanel {
      */
     private final Font seqFont;
     /**
-     * Inner padding between the box border and the content.
+     * Small font used for the per-bar score labels.
+     */
+    private static final Font SCORE_FONT = new Font("Arial", Font.PLAIN, 9);
+    /**
+     * Inner padding between the panel edge and the content.
      */
     private final int pad = 6;
     /**
@@ -161,43 +165,40 @@ public class ConfidenceTrackPanel extends JPanel {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        int w = getWidth();
         int h = getHeight();
 
-        // Translucent box so the bars stay readable over the spectrum, signalling a movable widget.
-        g2.setColor(new Color(255, 255, 255, 215));
-        g2.fillRoundRect(0, 0, w - 1, h - 1, 6, 6);
-        g2.setColor(new Color(150, 150, 150));
-        g2.drawRoundRect(0, 0, w - 1, h - 1, 6, 6);
-
-        // Same residue font as the sequence strip, so labels match in weight, size and spacing.
-        g2.setFont(seqFont);
-        FontMetrics lfm = g2.getFontMetrics();
-        int labelRow = lfm.getHeight();
-        int baselineY = h - pad - labelRow;
-        int maxBarHeight = baselineY - pad;
-
-        g2.setColor(new Color(200, 200, 200));
-        if (scores.length > 0) {
-            g2.drawLine(pad, baselineY, contentWidth - pad, baselineY);
-        }
+        // Amino-acid letters use the sequence font (matching the strip) and sit below the baseline;
+        // the score is printed in a smaller font just above each bar.
+        FontMetrics lfm = g2.getFontMetrics(seqFont);
+        FontMetrics sfm = g2.getFontMetrics(SCORE_FONT);
+        int letterRow = lfm.getHeight();
+        int baselineY = h - pad - letterRow;
+        // Leave room for a score label above even a full-height bar.
+        int maxBarHeight = baselineY - pad - sfm.getHeight();
 
         for (int i = 0; i < scores.length; i++) {
             double s = Math.max(0.0, Math.min(1.0, scores[i]));
             int barHeight = (int) Math.round(s * maxBarHeight);
             int x = centerX[i] - barWidth / 2;
-            int y = baselineY - barHeight;
+            int barTop = baselineY - barHeight;
 
             g2.setColor(heatColor(s));
-            g2.fillRect(x, y, barWidth, barHeight);
+            g2.fillRect(x, barTop, barWidth, barHeight);
             g2.setColor(new Color(120, 120, 120));
-            g2.drawRect(x, y, barWidth, barHeight);
+            g2.drawRect(x, barTop, barWidth, barHeight);
 
+            // Score (as percent) just above the bar.
+            g2.setFont(SCORE_FONT);
+            String pct = String.valueOf((int) Math.round(s * 100));
+            g2.setColor(new Color(70, 70, 70));
+            g2.drawString(pct, centerX[i] - sfm.stringWidth(pct) / 2, barTop - 2);
+
+            // Amino-acid letter below the baseline.
             if (i < residues.length()) {
+                g2.setFont(seqFont);
                 String aa = String.valueOf(residues.charAt(i));
-                int tw = lfm.stringWidth(aa);
                 g2.setColor(new Color(60, 60, 60));
-                g2.drawString(aa, centerX[i] - tw / 2, baselineY + lfm.getAscent() + 1);
+                g2.drawString(aa, centerX[i] - lfm.stringWidth(aa) / 2, baselineY + lfm.getAscent() + 1);
             }
         }
         g2.dispose();
