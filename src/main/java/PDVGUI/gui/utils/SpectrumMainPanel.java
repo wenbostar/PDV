@@ -1221,7 +1221,7 @@ public class SpectrumMainPanel extends JPanel {
         checkFileMenu.setVisible(false);
         peptideCheckMenu.setVisible(false);
 
-        realignViewStrips(sequenceFragmentationPanel, null, normalTrack);
+        realignViewStrips(sequenceFragmentationPanel, null, spectrumJLayeredPane, normalTrack, t -> normalTrack = t);
     }
 
     /**
@@ -1280,7 +1280,7 @@ public class SpectrumMainPanel extends JPanel {
         checkFileMenu.setVisible(true);
         peptideCheckMenu.setVisible(false);
 
-        realignViewStrips(sequenceFragmentationPanelMirror, mirrorFragmentPanel, mirrorTrack);
+        realignViewStrips(sequenceFragmentationPanelMirror, mirrorFragmentPanel, mirrorJLayeredPane, mirrorTrack, t -> mirrorTrack = t);
     }
 
     /**
@@ -1312,7 +1312,7 @@ public class SpectrumMainPanel extends JPanel {
         checkFileMenu.setVisible(false);
         peptideCheckMenu.setVisible(true);
 
-        realignViewStrips(sequenceFragmentationPanelCheck, checkFragmentPanel, checkTrack);
+        realignViewStrips(sequenceFragmentationPanelCheck, checkFragmentPanel, checkPeptideJLayeredPane, checkTrack, t -> checkTrack = t);
     }
 
     /**
@@ -1744,15 +1744,15 @@ public class SpectrumMainPanel extends JPanel {
                     spectrumSetAction = new SetAction(this, spectrumJLayeredPane, sequenceFragmentationPanel, null, spectrumPanel, 0, 0, spectrumShowPanel);
 
                     // Floating confidence bar track: an independent, draggable overlay on top of the
-                    // plot (does not change the spectrum or sequence layout). Build it deferred, after
-                    // the strip is realized and right-aligned, so the track is built with the same
-                    // realized font metrics and anchored to the strip's final position -- otherwise
-                    // its residues would not line up with the (deferred, realized) sequence strip.
+                    // plot (does not change the spectrum or sequence layout). Build it deferred and
+                    // only once the strip is realized (showing), so it is built with the same realized
+                    // font metrics as the strip -- otherwise its residues would not line up. An
+                    // inactive view's strip is not showing here; that view builds its track on switch.
                     normalTrack = null;
                     if (confidenceTrackApplicable()) {
                         final SequenceFragmentationPanel ftStrip = sequenceFragmentationPanel;
                         SwingUtilities.invokeLater(() -> {
-                            if (ftStrip.getParent() == spectrumJLayeredPane) {
+                            if (ftStrip.getParent() == spectrumJLayeredPane && ftStrip.isShowing()) {
                                 normalTrack = buildConfidenceTrack(ftStrip, spectrumJLayeredPane);
                             }
                         });
@@ -1863,8 +1863,17 @@ public class SpectrumMainPanel extends JPanel {
 
                     mirrorSetAction = new SetAction(this, mirrorJLayeredPane, sequenceFragmentationPanelMirror, mirrorFragmentPanel, mirrorSpectrumPanel, 0, 0, spectrumShowPanel);
 
-                    mirrorTrack = confidenceTrackApplicable()
-                            ? buildConfidenceTrack(sequenceFragmentationPanelMirror, mirrorJLayeredPane) : null;
+                    // Build deferred, only if this view's strip is realized (showing). The mirror
+                    // view is usually inactive here, so its track is built on view switch instead.
+                    mirrorTrack = null;
+                    if (confidenceTrackApplicable()) {
+                        final SequenceFragmentationPanel ftStrip = sequenceFragmentationPanelMirror;
+                        SwingUtilities.invokeLater(() -> {
+                            if (ftStrip.getParent() == mirrorJLayeredPane && ftStrip.isShowing()) {
+                                mirrorTrack = buildConfidenceTrack(ftStrip, mirrorJLayeredPane);
+                            }
+                        });
+                    }
 
                     checkPeptideSpectrumPanel = new SpectrumContainer(
                             currentSpectrum.getMzValuesAsArray(), intensitiesAsArray,
@@ -1970,8 +1979,17 @@ public class SpectrumMainPanel extends JPanel {
 
                     checkSetAction = new SetAction(this, checkPeptideJLayeredPane, sequenceFragmentationPanelCheck, checkFragmentPanel, checkPeptideSpectrumPanel, 0, 0, spectrumShowPanel);
 
-                    checkTrack = confidenceTrackApplicable()
-                            ? buildConfidenceTrack(sequenceFragmentationPanelCheck, checkPeptideJLayeredPane) : null;
+                    // Build deferred, only if this view's strip is realized (showing). The check view
+                    // is usually inactive here, so its track is built on view switch instead.
+                    checkTrack = null;
+                    if (confidenceTrackApplicable()) {
+                        final SequenceFragmentationPanel ftStrip = sequenceFragmentationPanelCheck;
+                        SwingUtilities.invokeLater(() -> {
+                            if (ftStrip.getParent() == checkPeptideJLayeredPane && ftStrip.isShowing()) {
+                                checkTrack = buildConfidenceTrack(ftStrip, checkPeptideJLayeredPane);
+                            }
+                        });
+                    }
 
                     ArrayList<ArrayList<IonMatch>> allAnnotations = new ArrayList<>();
                     allAnnotations.add(annotations);
@@ -2052,18 +2070,65 @@ public class SpectrumMainPanel extends JPanel {
         if (overlay == null) {
             return;
         }
-        int fontHeight = overlay.getFontMetrics(overlay.getFont()).getHeight() + 3;
         int x = Math.max(5, spectrumShowPanel.getWidth() - 15 - seqContentRightEdge(overlay));
-        overlay.setBounds(x, bottomOverlayY(fontHeight), overlay.getWidth(), overlay.getHeight());
+        overlay.setBounds(x, bottomOverlayY(overlay), overlay.getWidth(), overlay.getHeight());
     }
 
     /**
-     * Y coordinate anchoring a bottom sequence-fragmentation overlay near the bottom of the
-     * spectrum container, for an overlay whose line height is {@code fontHeight}. Single source of
-     * truth shared by {@link #zoomAction} and {@link #reanchorBottomOverlay}.
+     * Y coordinate for a bottom sequence-fragmentation overlay so its drawn content sits just above
+     * the spectrum container's bottom edge. The strip's bounding box is much taller than its content
+     * and the content (residues plus the b-ion labels drawn below them) occupies only the top part,
+     * so rather than guess a fixed offset we measure where the content actually ends and anchor that
+     * to the bottom -- self-adjusting to font size and label layout, never clipped, no empty gap.
+     * The strip must already be sized (setSize/setBounds) before calling. Shared by
+     * {@link #zoomAction} and {@link #reanchorBottomOverlay}.
+     * @param strip the bottom overlay strip
+     * @return the strip's top y so its content bottom rests a few pixels above the container bottom
      */
-    private int bottomOverlayY(int fontHeight) {
-        return spectrumShowPanel.getHeight() - fontHeight * 7;
+    private int bottomOverlayY(SequenceFragmentationPanel strip) {
+        // Anchor to the strip's own container (the layered pane), NOT spectrumShowPanel: the latter
+        // is taller by the ion toolbar (allJToolBar) that sits below the layered pane, so using its
+        // height would push the strip down onto the toolbar. The layered pane fills mainShowJPanel,
+        // whose bottom is the spectrum area's true bottom edge.
+        Container pane = strip.getParent();
+        int paneBottom = (pane != null && pane.getHeight() > 0) ? pane.getHeight() : spectrumShowPanel.getHeight() - 25;
+        return paneBottom - 4 - stripContentBottom(strip);
+    }
+
+    /**
+     * The bottommost painted pixel offset within a strip's box (its content's bottom edge). Measured
+     * by rendering the strip offscreen with the desktop's font hints (matching how it paints on
+     * screen). Returns the box height as a fallback if nothing is painted.
+     * @param strip the sequence strip (already sized)
+     * @return the content's bottom edge offset from the strip's top
+     */
+    private int stripContentBottom(SequenceFragmentationPanel strip) {
+        int w = strip.getWidth();
+        int h = strip.getHeight();
+        if (w <= 0 || h <= 0) {
+            return Math.max(0, h);
+        }
+        try {
+            java.awt.image.BufferedImage img = new java.awt.image.BufferedImage(w, h, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = img.createGraphics();
+            java.util.Map<?, ?> hints = (java.util.Map<?, ?>) Toolkit.getDefaultToolkit().getDesktopProperty("awt.font.desktophints");
+            if (hints != null) {
+                g.addRenderingHints(hints);
+            }
+            strip.paint(g);
+            g.dispose();
+            int[] px = img.getRGB(0, 0, w, h, null, 0, w);
+            for (int y = h - 1; y >= 0; y--) {
+                for (int x = 0; x < w; x++) {
+                    if ((px[y * w + x] >>> 24) != 0) { // non-transparent pixel
+                        return y;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return h;
     }
 
     /**
@@ -2229,20 +2294,44 @@ public class SpectrumMainPanel extends JPanel {
      * positioned while the view was inactive (its layered pane not in mainShowJPanel), so they used
      * non-realized font metrics and landed at the wrong right position. Re-aligning now -- once the
      * view is showing -- uses realized metrics, so the right edges line up like the normal view.
+     * If this view's track was not yet built (its view was inactive during the render, so building
+     * then would have used non-realized metrics), it is built now that the view is showing.
      * @param topStrip the view's top sequence strip
      * @param bottomStrip the view's bottom sequence strip, or null if it has none
-     * @param track the view's confidence track, or null
+     * @param pane the view's layered pane (for building the track)
+     * @param track the view's confidence track, or null if not yet built
+     * @param setTrack assigns the (possibly newly built) track back to the view's field
      */
-    private void realignViewStrips(SequenceFragmentationPanel topStrip, SequenceFragmentationPanel bottomStrip, ConfidenceTrack track) {
-        if (track != null && track.panel.getParent() != null && !track.panel.isUserMoved()) {
-            // The top strip is positioned together with the track; re-anchor both (deferred).
-            SwingUtilities.invokeLater(() -> anchorTrack(track, false));
-        } else {
-            rightAlignStrip(topStrip, true);
-        }
-        if (bottomStrip != null) {
-            rightAlignStrip(bottomStrip, true);
-        }
+    private void realignViewStrips(SequenceFragmentationPanel topStrip, SequenceFragmentationPanel bottomStrip,
+                                   JLayeredPane pane, ConfidenceTrack track, java.util.function.Consumer<ConfidenceTrack> setTrack) {
+        SwingUtilities.invokeLater(() -> {
+            // The view-switch revalidate() is asynchronous; force the layout now (unconditionally,
+            // since validate() is a no-op when the tree is already marked valid) so the layered
+            // pane's height is current before we anchor the bottom strip to its container bottom.
+            // Otherwise, on the first show of a view, the pane is still unsized and the strip lands
+            // mid-panel until the next render.
+            spectrumShowPanel.doLayout();
+            Container mainPanel = pane.getParent();
+            if (mainPanel != null) {
+                mainPanel.doLayout();
+            }
+            pane.doLayout();
+            if (confidenceTrackApplicable()) {
+                if (track == null) {
+                    // Built lazily here (the view is now showing -> realized metrics).
+                    setTrack.accept(buildConfidenceTrack(topStrip, pane));
+                } else if (!track.panel.isUserMoved()) {
+                    anchorTrack(track, false);
+                }
+            } else {
+                rightAlignStrip(topStrip, false);
+            }
+            if (bottomStrip != null) {
+                // Re-anchor both x and y: now that the view is showing and laid out, its layered pane
+                // is sized, so bottomOverlayY can place the strip just above the toolbar correctly.
+                reanchorBottomOverlay(bottomStrip);
+            }
+        });
     }
 
     /**
@@ -2274,8 +2363,11 @@ public class SpectrumMainPanel extends JPanel {
         }
 
         // Sequence strip: keep its y; move its x so its drawn content (not its much-wider bounding
-        // box) sits at the right. The empty right part of the box just extends off-screen.
-        int stripX = Math.max(5, paneWidth - 15 - track.contentRightEdge);
+        // box) sits at the right. Measure the content edge fresh (with the strip's current, realized
+        // font metrics) rather than using the value stored at build time -- otherwise a track built
+        // while its view was inactive (non-realized metrics) would place its strip at a different
+        // right position than the bottom strip, which is aligned with realized metrics.
+        int stripX = Math.max(5, paneWidth - 15 - seqContentRightEdge(track.strip));
         track.strip.setBounds(stripX, track.strip.getY(), track.strip.getWidth(), track.strip.getHeight());
 
         // Track: below the strip, shifted so residue 1 sits under the strip's residue 1. Both share
@@ -2315,7 +2407,14 @@ public class SpectrumMainPanel extends JPanel {
         if (!isDown){
             sequenceFragmentationPanel.setBounds(40,10, peptideLength*fontHeight*2 ,fontHeight * 8);
         } else {
-            sequenceFragmentationPanel.setBounds(40, bottomOverlayY(fontHeight), peptideLength*fontHeight*2 ,fontHeight * 8);
+            // Size the strip first so bottomOverlayY can measure its content extent, then anchor it.
+            sequenceFragmentationPanel.setSize(peptideLength*fontHeight*2, fontHeight * 8);
+            sequenceFragmentationPanel.setBounds(40, bottomOverlayY(sequenceFragmentationPanel), peptideLength*fontHeight*2 ,fontHeight * 8);
+            // The layered pane may not be laid out yet here (e.g. on the first show of a view), so the
+            // y above can be off. Re-anchor (x and y) one cycle later when the pane is sized -- this
+            // is independent of the view-switch flow, so the strip lands correctly even the first time.
+            final SequenceFragmentationPanel downStrip = sequenceFragmentationPanel;
+            SwingUtilities.invokeLater(() -> reanchorBottomOverlay(downStrip));
         }
         // Default all sequence strips to the right (top -> top-right, bottom -> bottom-right); the
         // provisional left bounds above keep the y/box size, this only shifts x to the right.
