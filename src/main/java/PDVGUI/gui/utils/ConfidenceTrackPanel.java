@@ -33,9 +33,13 @@ public class ConfidenceTrackPanel extends JPanel {
      */
     private final String residues;
     /**
-     * Residue font, copied from the sequence strip.
+     * Font used to draw the amino-acid letters under the bars (the sequence strip's font).
      */
-    private final Font seqFont;
+    private final Font aaFont;
+    /**
+     * Whether to draw the amino-acid letter under each bar.
+     */
+    private final boolean showResidues;
     /**
      * Small font used for the per-bar score labels.
      */
@@ -69,16 +73,18 @@ public class ConfidenceTrackPanel extends JPanel {
      * Constructor.
      * @param scores per-residue confidence scores in [0, 1]
      * @param residues amino-acid residues, one per score
-     * @param seqFont the residue font copied from the sequence strip
+     * @param aaFont the sequence strip's font, used to draw the amino-acid letters under the bars
      * @param extraSpacing per-residue space added on top of the letter width (matches the panel:
      *                     2 * iHorizontalSpace + iBarWidth)
      * @param fm font metrics measured with the sequence strip's own (on-screen) graphics, so the
-     *           per-character widths match how the strip paints (avoids drift on HiDPI displays)
+     *           per-character widths (and thus the bar pitch) match how the strip paints
+     * @param showResidues whether to draw the amino-acid letter under each bar
      */
-    public ConfidenceTrackPanel(double[] scores, String residues, Font seqFont, int extraSpacing, FontMetrics fm) {
+    public ConfidenceTrackPanel(double[] scores, String residues, Font aaFont, int extraSpacing, FontMetrics fm, boolean showResidues) {
         this.scores = scores;
         this.residues = residues == null ? "" : residues;
-        this.seqFont = seqFont;
+        this.aaFont = aaFont;
+        this.showResidues = showResidues;
         setOpaque(false);
         setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
 
@@ -95,14 +101,14 @@ public class ConfidenceTrackPanel extends JPanel {
         }
         contentWidth = x - extraSpacing + pad;
 
-        // Uniform bar width: aim for ~0.85 of the font size, but never wider than the smallest
-        // center-to-center distance (minus a gap) so adjacent bars don't overlap.
+        // Uniform bar width derived from the residue spacing (not the letter font, which is
+        // independently configurable): ~0.7 of the smallest center-to-center distance, so bars stay
+        // proportioned to the sequence and adjacent bars never overlap.
         int minCenterDist = Integer.MAX_VALUE;
         for (int i = 1; i < centerX.length; i++) {
             minCenterDist = Math.min(minCenterDist, centerX[i] - centerX[i - 1]);
         }
-        int desired = Math.round(seqFont.getSize() * 0.85f);
-        barWidth = Math.max(4, minCenterDist == Integer.MAX_VALUE ? desired : Math.min(desired, minCenterDist - 2));
+        barWidth = Math.max(4, minCenterDist == Integer.MAX_VALUE ? 12 : Math.round(minCenterDist * 0.7f));
 
         setToolTipText("Per-residue confidence (drag to move)");
 
@@ -169,11 +175,11 @@ public class ConfidenceTrackPanel extends JPanel {
 
         int h = getHeight();
 
-        // Amino-acid letters use the sequence font (matching the strip) and sit below the baseline;
-        // the score is printed in a smaller font just above each bar.
-        FontMetrics lfm = g2.getFontMetrics(seqFont);
+        // Amino-acid letters use the sequence font and sit below the baseline (when shown); the
+        // score is printed in a smaller font just above each bar.
+        FontMetrics lfm = g2.getFontMetrics(aaFont);
         FontMetrics sfm = g2.getFontMetrics(SCORE_FONT);
-        int letterRow = lfm.getHeight();
+        int letterRow = showResidues ? lfm.getHeight() : 0;
         int baselineY = h - pad - letterRow;
         // Leave room for a score label above even a full-height bar.
         int maxBarHeight = baselineY - pad - sfm.getHeight();
@@ -196,8 +202,8 @@ public class ConfidenceTrackPanel extends JPanel {
             g2.drawString(pct, centerX[i] - sfm.stringWidth(pct) / 2, barTop - 2);
 
             // Amino-acid letter below the baseline.
-            if (i < residues.length()) {
-                g2.setFont(seqFont);
+            if (showResidues && i < residues.length()) {
+                g2.setFont(aaFont);
                 String aa = String.valueOf(residues.charAt(i));
                 g2.setColor(new Color(60, 60, 60));
                 g2.drawString(aa, centerX[i] - lfm.stringWidth(aa) / 2, baselineY + lfm.getAscent() + 1);

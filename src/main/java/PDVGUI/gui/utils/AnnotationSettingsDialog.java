@@ -33,6 +33,9 @@ public class AnnotationSettingsDialog extends JDialog {
     private JPanel backgroundPeakColorJPanel;
     private JSpinner backgroundPeakWidthJSpinner;
     private JSpinner limitJSpinner;
+    private JSpinner sequenceFontSizeJSpinner;
+    private JCheckBox showConfidenceTrackCheckBox;
+    private JCheckBox showTrackResiduesCheckBox;
     private JScrollPane colorsScrollPane;
     private JTable colorsJTable;
 
@@ -87,6 +90,11 @@ public class AnnotationSettingsDialog extends JDialog {
 
         limitJSpinner.setValue(annotationSettings.getAnnotationIntensityFilter());
 
+        sequenceFontSizeJSpinner.setValue(spectrumMainPanel.getSequenceFontSize());
+        showConfidenceTrackCheckBox.setSelected(spectrumMainPanel.isShowConfidenceTrack());
+        showTrackResiduesCheckBox.setSelected(spectrumMainPanel.isShowConfidenceResidues());
+        showTrackResiduesCheckBox.setEnabled(spectrumMainPanel.isShowConfidenceTrack());
+
         colorsScrollPane.getViewport().setOpaque(false);
 
         colorsJTable.getColumn(" ").setMaxWidth(40);
@@ -110,6 +118,9 @@ public class AnnotationSettingsDialog extends JDialog {
         annotatedPeakWidthJSpinner = new JSpinner();
         backgroundPeakWidthJSpinner = new JSpinner();
         limitJSpinner = new JSpinner();
+        sequenceFontSizeJSpinner = new JSpinner();
+        showConfidenceTrackCheckBox = new JCheckBox();
+        showTrackResiduesCheckBox = new JCheckBox();
         JPanel peakSettingsJPanel = new JPanel();
         JLabel annotatedPeakJLabel = new JLabel();
         JLabel backgroundPeakJLabel = new JLabel();
@@ -117,6 +128,8 @@ public class AnnotationSettingsDialog extends JDialog {
         JLabel backgroundWidthLabel = new JLabel();
         JPanel annotationLevelJPanel = new JPanel();
         JLabel limitJLabel = new JLabel();
+        JPanel fontSettingsJPanel = new JPanel();
+        JLabel sequenceFontLabel = new JLabel();
         JPanel backgroundPanel = new JPanel();
         JButton okButton = new JButton();
         JPanel annotationColorsPanel = new JPanel();
@@ -331,6 +344,58 @@ public class AnnotationSettingsDialog extends JDialog {
                                         .addComponent(limitJSpinner, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
         );
 
+        titledBorder = BorderFactory.createTitledBorder("Sequence & Confidence Track" + " \t ");
+        titledBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
+        fontSettingsJPanel.setBorder(titledBorder);
+        fontSettingsJPanel.setOpaque(false);
+
+        sequenceFontLabel.setText("Sequence Font Size");
+        sequenceFontLabel.setFont(PDVFonts.of(Font.PLAIN, 11f));
+        sequenceFontLabel.setToolTipText("Font size of the peptide sequence strip (the confidence track uses the same size).");
+        sequenceFontSizeJSpinner.setModel(new SpinnerNumberModel(16, 14, 30, 1));
+        sequenceFontSizeJSpinner.addChangeListener(this::sequenceFontSizeValueChanged);
+
+        showConfidenceTrackCheckBox.setText("Show confidence track");
+        showConfidenceTrackCheckBox.setFont(PDVFonts.of(Font.PLAIN, 11f));
+        showConfidenceTrackCheckBox.setOpaque(false);
+        showConfidenceTrackCheckBox.setToolTipText("Show the per-residue confidence bar track (when scores are available).");
+        showConfidenceTrackCheckBox.addActionListener(this::showConfidenceTrackActionPerformed);
+
+        showTrackResiduesCheckBox.setText("Show amino acids in confidence track");
+        showTrackResiduesCheckBox.setFont(PDVFonts.of(Font.PLAIN, 11f));
+        showTrackResiduesCheckBox.setOpaque(false);
+        showTrackResiduesCheckBox.setToolTipText("Show the amino-acid letter under each confidence bar.");
+        showTrackResiduesCheckBox.addActionListener(this::showTrackResiduesActionPerformed);
+
+        GroupLayout fontSettingsJPanelLayout = new GroupLayout(fontSettingsJPanel);
+        fontSettingsJPanel.setLayout(fontSettingsJPanelLayout);
+        fontSettingsJPanelLayout.setHorizontalGroup(
+                fontSettingsJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(fontSettingsJPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(fontSettingsJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addGroup(fontSettingsJPanelLayout.createSequentialGroup()
+                                                .addComponent(sequenceFontLabel)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(sequenceFontSizeJSpinner, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(showConfidenceTrackCheckBox)
+                                        .addComponent(showTrackResiduesCheckBox))
+                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        fontSettingsJPanelLayout.setVerticalGroup(
+                fontSettingsJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(fontSettingsJPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(fontSettingsJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                                        .addComponent(sequenceFontLabel)
+                                        .addComponent(sequenceFontSizeJSpinner, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(showConfidenceTrackCheckBox)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(showTrackResiduesCheckBox)
+                                .addContainerGap())
+        );
+
         GroupLayout backgroundPanelLayout = new GroupLayout(backgroundPanel);
         backgroundPanel.setLayout(backgroundPanelLayout);
         backgroundPanelLayout.setHorizontalGroup(
@@ -344,7 +409,8 @@ public class AnnotationSettingsDialog extends JDialog {
                                                 .addComponent(okButton, GroupLayout.PREFERRED_SIZE, 65, GroupLayout.PREFERRED_SIZE))
                                         .addComponent(peakSettingsJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addComponent(annotationColorsPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(annotationLevelJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addComponent(annotationLevelJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(fontSettingsJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addContainerGap())
         );
         backgroundPanelLayout.setVerticalGroup(
@@ -356,6 +422,8 @@ public class AnnotationSettingsDialog extends JDialog {
                                 .addComponent(peakSettingsJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(annotationLevelJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(fontSettingsJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                 .addGroup(backgroundPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addComponent(okButton))
                                 .addContainerGap())
@@ -536,6 +604,32 @@ public class AnnotationSettingsDialog extends JDialog {
     private void limitSpinnerValueChanged(ChangeEvent evt) {
         annotationSettings.setIntensityFilter((Double) limitJSpinner.getValue());
         updateSpectrumAnnotations();
+    }
+
+    /**
+     * Sequence strip font size changed.
+     * @param evt change event
+     */
+    private void sequenceFontSizeValueChanged(ChangeEvent evt) {
+        spectrumMainPanel.setSequenceFontSize((Integer) sequenceFontSizeJSpinner.getValue());
+    }
+
+    /**
+     * Toggle showing the confidence bar track.
+     * @param evt action event
+     */
+    private void showConfidenceTrackActionPerformed(ActionEvent evt) {
+        boolean show = showConfidenceTrackCheckBox.isSelected();
+        showTrackResiduesCheckBox.setEnabled(show);
+        spectrumMainPanel.setShowConfidenceTrack(show);
+    }
+
+    /**
+     * Toggle showing the amino-acid letters in the confidence track.
+     * @param evt action event
+     */
+    private void showTrackResiduesActionPerformed(ActionEvent evt) {
+        spectrumMainPanel.setShowConfidenceResidues(showTrackResiduesCheckBox.isSelected());
     }
 
     /**

@@ -153,6 +153,19 @@ public class SpectrumMainPanel extends JPanel {
      */
     private ConfidenceTrackPanel confidenceTrackPanel;
     /**
+     * Font size (points) of the normal-view sequence strip. 16 is the strip's default. The
+     * confidence track's amino-acid letters use the same font/size.
+     */
+    private int sequenceFontSize = 16;
+    /**
+     * Whether to show the confidence bar track at all (when scores are available).
+     */
+    private boolean showConfidenceTrack = true;
+    /**
+     * Whether to show the amino-acid letters under the bars in the confidence track.
+     */
+    private boolean showConfidenceResidues = true;
+    /**
      * Distance from the sequence strip's left edge to its first residue (iXStart + N-terminal
      * prefix width), used to shift the confidence track so its residues align under the strip's.
      */
@@ -1714,6 +1727,12 @@ public class SpectrumMainPanel extends JPanel {
                     sequenceFragmentationPanel.setOpaque(false);
                     sequenceFragmentationPanel.setBackground(Color.WHITE);
 
+                    // Apply the user-chosen sequence strip font size (no-op at the default 16). The
+                    // strip is created fresh at size 16, and updateFontSize takes a relative delta.
+                    if (sequenceFontSize != 16) {
+                        sequenceFragmentationPanel.updateFontSize(sequenceFontSize - 16);
+                    }
+
                     spectrumJLayeredPane.setLayer(spectrumPanel, JLayeredPane.DEFAULT_LAYER);
                     spectrumJLayeredPane.add(spectrumPanel);
 
@@ -2025,6 +2044,9 @@ public class SpectrumMainPanel extends JPanel {
      * @return true if the track applies
      */
     private boolean confidenceTrackApplicable() {
+        if (!showConfidenceTrack) {
+            return false;
+        }
         if (aaScores == null) {
             return false;
         }
@@ -2089,7 +2111,9 @@ public class SpectrumMainPanel extends JPanel {
         seqResidueLeadingOffset = xStart + prefixWidth;
         seqContentRightEdge = contentRight;
 
-        confidenceTrackPanel = new ConfidenceTrackPanel(aaScores, residues, seqFont, extraSpacing, fm);
+        // The track's letters use the sequence strip's font (same size); the bar pitch uses the
+        // strip's metrics (fm), so the bars stay aligned under the sequence.
+        confidenceTrackPanel = new ConfidenceTrackPanel(aaScores, residues, seqFont, extraSpacing, fm, showConfidenceResidues);
         spectrumJLayeredPane.setLayer(confidenceTrackPanel, JLayeredPane.DRAG_LAYER + 10);
         spectrumJLayeredPane.add(confidenceTrackPanel);
         anchorSequenceAndTrack();
@@ -2282,6 +2306,54 @@ public class SpectrumMainPanel extends JPanel {
      */
     public void setAaScores(double[] aaScores) {
         this.aaScores = aaScores;
+    }
+
+    /**
+     * @return the normal-view sequence strip font size (points).
+     */
+    public int getSequenceFontSize() {
+        return sequenceFontSize;
+    }
+
+    /**
+     * Sets the normal-view sequence strip font size and re-renders the current spectrum.
+     * @param size font size in points
+     */
+    public void setSequenceFontSize(int size) {
+        this.sequenceFontSize = size;
+        updateSpectrum();
+    }
+
+    /**
+     * @return whether the confidence bar track is shown (when scores are available).
+     */
+    public boolean isShowConfidenceTrack() {
+        return showConfidenceTrack;
+    }
+
+    /**
+     * Sets whether to show the confidence bar track, and re-renders the current spectrum.
+     * @param show whether to show the track
+     */
+    public void setShowConfidenceTrack(boolean show) {
+        this.showConfidenceTrack = show;
+        updateSpectrum();
+    }
+
+    /**
+     * @return whether the amino-acid letters are shown under the bars in the confidence track.
+     */
+    public boolean isShowConfidenceResidues() {
+        return showConfidenceResidues;
+    }
+
+    /**
+     * Sets whether to show the amino-acid letters under the confidence track bars, and re-renders.
+     * @param show whether to show the letters
+     */
+    public void setShowConfidenceResidues(boolean show) {
+        this.showConfidenceResidues = show;
+        updateSpectrum();
     }
 
     /**
