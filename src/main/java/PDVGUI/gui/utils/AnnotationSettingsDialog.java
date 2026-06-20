@@ -269,7 +269,7 @@ public class AnnotationSettingsDialog extends JDialog {
                                                 .addComponent(annotatedPeakWidthJSpinner, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE))
                                         .addGroup(peakSettingsJPanelLayout.createSequentialGroup()
                                                 .addComponent(backgroundWidthLabel)
-                                                .addGap(18, 18, 18)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(backgroundPeakWidthJSpinner, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE)))
                                 .addContainerGap())
         );
@@ -319,7 +319,7 @@ public class AnnotationSettingsDialog extends JDialog {
                                         .addGroup(annotationLevelJPanelLayout.createSequentialGroup()
                                                 .addComponent(limitJLabel)
                                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(limitJSpinner, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE)))
+                                                .addComponent(limitJSpinner, GroupLayout.PREFERRED_SIZE, 75, GroupLayout.PREFERRED_SIZE)))
                                 .addContainerGap())
         );
         annotationLevelJPanelLayout.setVerticalGroup(
