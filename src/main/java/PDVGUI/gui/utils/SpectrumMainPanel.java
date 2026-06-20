@@ -148,13 +148,16 @@ public class SpectrumMainPanel extends JPanel {
      */
     private double[] aaScores;
     /**
-     * The floating, draggable confidence bar track overlay for the current PSM, or null when not
-     * shown. It floats above the spectrum/sequence and never alters their layout.
+     * The floating, draggable confidence bar track overlays for the current PSM (one per view:
+     * normal, mirror, check), or null when not shown. Each floats above its spectrum/sequence and
+     * never alters their layout.
      */
-    private ConfidenceTrackPanel confidenceTrackPanel;
+    private ConfidenceTrack normalTrack;
+    private ConfidenceTrack mirrorTrack;
+    private ConfidenceTrack checkTrack;
     /**
-     * Font size (points) of the normal-view sequence strip. 16 is the strip's default. The
-     * confidence track's amino-acid letters use the same font/size.
+     * Font size (points) of the sequence strips. 16 is the strip's default. The confidence track's
+     * amino-acid letters use the same font/size.
      */
     private int sequenceFontSize = 16;
     /**
@@ -165,16 +168,6 @@ public class SpectrumMainPanel extends JPanel {
      * Whether to show the amino-acid letters under the bars in the confidence track.
      */
     private boolean showConfidenceResidues = true;
-    /**
-     * Distance from the sequence strip's left edge to its first residue (iXStart + N-terminal
-     * prefix width), used to shift the confidence track so its residues align under the strip's.
-     */
-    private int seqResidueLeadingOffset = 0;
-    /**
-     * Right edge of the sequence strip's drawn content, measured from the strip's left edge (the
-     * strip's bounding box is much wider than its content), used to align the strip to the right.
-     */
-    private int seqContentRightEdge = 0;
     /**
      * Height of the floating confidence bar track (score row, bars, and amino-acid label row).
      */
@@ -1227,6 +1220,8 @@ public class SpectrumMainPanel extends JPanel {
         splitterMenu7.setVisible(false);
         checkFileMenu.setVisible(false);
         peptideCheckMenu.setVisible(false);
+
+        realignViewStrips(sequenceFragmentationPanel, null, normalTrack);
     }
 
     /**
@@ -1284,6 +1279,8 @@ public class SpectrumMainPanel extends JPanel {
         splitterMenu7.setVisible(true);
         checkFileMenu.setVisible(true);
         peptideCheckMenu.setVisible(false);
+
+        realignViewStrips(sequenceFragmentationPanelMirror, mirrorFragmentPanel, mirrorTrack);
     }
 
     /**
@@ -1314,6 +1311,8 @@ public class SpectrumMainPanel extends JPanel {
         splitterMenu7.setVisible(true);
         checkFileMenu.setVisible(false);
         peptideCheckMenu.setVisible(true);
+
+        realignViewStrips(sequenceFragmentationPanelCheck, checkFragmentPanel, checkTrack);
     }
 
     /**
@@ -1745,10 +1744,18 @@ public class SpectrumMainPanel extends JPanel {
                     spectrumSetAction = new SetAction(this, spectrumJLayeredPane, sequenceFragmentationPanel, null, spectrumPanel, 0, 0, spectrumShowPanel);
 
                     // Floating confidence bar track: an independent, draggable overlay on top of the
-                    // plot (does not change the spectrum or sequence layout).
-                    confidenceTrackPanel = null;
+                    // plot (does not change the spectrum or sequence layout). Build it deferred, after
+                    // the strip is realized and right-aligned, so the track is built with the same
+                    // realized font metrics and anchored to the strip's final position -- otherwise
+                    // its residues would not line up with the (deferred, realized) sequence strip.
+                    normalTrack = null;
                     if (confidenceTrackApplicable()) {
-                        addConfidenceTrack();
+                        final SequenceFragmentationPanel ftStrip = sequenceFragmentationPanel;
+                        SwingUtilities.invokeLater(() -> {
+                            if (ftStrip.getParent() == spectrumJLayeredPane) {
+                                normalTrack = buildConfidenceTrack(ftStrip, spectrumJLayeredPane);
+                            }
+                        });
                     }
 
                     mirrorSpectrumPanel = new SpectrumContainer(
@@ -1759,6 +1766,9 @@ public class SpectrumMainPanel extends JPanel {
                     sequenceFragmentationPanelMirror.setMinimumSize(new Dimension(sequenceFragmentationPanelMirror.getPreferredSize().width, sequenceFragmentationPanelMirror.getHeight()));
                     sequenceFragmentationPanelMirror.setOpaque(false);
                     sequenceFragmentationPanelMirror.setBackground(Color.WHITE);
+                    if (sequenceFontSize != 16) {
+                        sequenceFragmentationPanelMirror.updateFontSize(sequenceFontSize - 16);
+                    }
 
                     if(checkSpectrumFileMaps.containsKey(selectedPsmKey)){
                         MSnSpectrum mirrorSpectrum = checkSpectrumFileMaps.get(selectedPsmKey);
@@ -1800,6 +1810,9 @@ public class SpectrumMainPanel extends JPanel {
                         mirrorFragmentPanel.setMinimumSize(new Dimension(mirrorFragmentPanel.getPreferredSize().width, mirrorFragmentPanel.getHeight()));
                         mirrorFragmentPanel.setOpaque(false);
                         mirrorFragmentPanel.setBackground(Color.WHITE);
+                        if (sequenceFontSize != 16) {
+                            mirrorFragmentPanel.updateFontSize(sequenceFontSize - 16);
+                        }
 
                         mirrorJLayeredPane.setLayer(mirrorFragmentPanel, JLayeredPane.DRAG_LAYER);
                         mirrorJLayeredPane.add(mirrorFragmentPanel);
@@ -1850,6 +1863,9 @@ public class SpectrumMainPanel extends JPanel {
 
                     mirrorSetAction = new SetAction(this, mirrorJLayeredPane, sequenceFragmentationPanelMirror, mirrorFragmentPanel, mirrorSpectrumPanel, 0, 0, spectrumShowPanel);
 
+                    mirrorTrack = confidenceTrackApplicable()
+                            ? buildConfidenceTrack(sequenceFragmentationPanelMirror, mirrorJLayeredPane) : null;
+
                     checkPeptideSpectrumPanel = new SpectrumContainer(
                             currentSpectrum.getMzValuesAsArray(), intensitiesAsArray,
                             precursor.getMz(), spectrumIdentificationAssumption.getIdentificationCharge().toString(),
@@ -1861,6 +1877,9 @@ public class SpectrumMainPanel extends JPanel {
                     sequenceFragmentationPanelCheck.setMinimumSize(new Dimension(sequenceFragmentationPanelCheck.getPreferredSize().width, sequenceFragmentationPanelCheck.getHeight()));
                     sequenceFragmentationPanelCheck.setOpaque(false);
                     sequenceFragmentationPanelCheck.setBackground(Color.WHITE);
+                    if (sequenceFontSize != 16) {
+                        sequenceFragmentationPanelCheck.updateFontSize(sequenceFontSize - 16);
+                    }
 
                     if(checkPeptideMap.containsKey(selectedPsmKey)){
                         Peptide peptide = checkPeptideMap.get(selectedPsmKey);
@@ -1897,6 +1916,9 @@ public class SpectrumMainPanel extends JPanel {
                         checkFragmentPanel.setMinimumSize(new Dimension(checkFragmentPanel.getPreferredSize().width, checkFragmentPanel.getHeight()));
                         checkFragmentPanel.setOpaque(false);
                         checkFragmentPanel.setBackground(Color.WHITE);
+                        if (sequenceFontSize != 16) {
+                            checkFragmentPanel.updateFontSize(sequenceFontSize - 16);
+                        }
 
                         checkPeptideJLayeredPane.setLayer(checkFragmentPanel, JLayeredPane.DRAG_LAYER);
                         checkPeptideJLayeredPane.add(checkFragmentPanel);
@@ -1948,6 +1970,9 @@ public class SpectrumMainPanel extends JPanel {
 
                     checkSetAction = new SetAction(this, checkPeptideJLayeredPane, sequenceFragmentationPanelCheck, checkFragmentPanel, checkPeptideSpectrumPanel, 0, 0, spectrumShowPanel);
 
+                    checkTrack = confidenceTrackApplicable()
+                            ? buildConfidenceTrack(sequenceFragmentationPanelCheck, checkPeptideJLayeredPane) : null;
+
                     ArrayList<ArrayList<IonMatch>> allAnnotations = new ArrayList<>();
                     allAnnotations.add(annotations);
 
@@ -1988,14 +2013,18 @@ public class SpectrumMainPanel extends JPanel {
         if (mirrorSelected) {
             if (mirrorSpectrumPanel != null) {
                 mirrorSpectrumPanel.setBounds(0, 75, width, height - 85);
+                rightAlignStrip(sequenceFragmentationPanelMirror, false);
                 reanchorBottomOverlay(mirrorFragmentPanel);
+                reanchorTrackOnResize(mirrorTrack);
                 mirrorJLayeredPane.revalidate();
                 mirrorJLayeredPane.repaint();
             }
         } else if (peptideCheckSelected) {
             if (checkPeptideSpectrumPanel != null) {
                 checkPeptideSpectrumPanel.setBounds(0, 75, width, height - 85);
+                rightAlignStrip(sequenceFragmentationPanelCheck, false);
                 reanchorBottomOverlay(checkFragmentPanel);
+                reanchorTrackOnResize(checkTrack);
                 checkPeptideJLayeredPane.revalidate();
                 checkPeptideJLayeredPane.repaint();
             }
@@ -2006,10 +2035,8 @@ public class SpectrumMainPanel extends JPanel {
             int bottomMargin = spectrumPanel.getY() == 0 ? 25 : 85;
             spectrumPanel.setBounds(spectrumPanel.getX(), spectrumPanel.getY(), width, height - bottomMargin);
             // Keep the sequence strip + confidence track pinned to the right on resize, unless dragged.
-            if (confidenceTrackPanel != null && confidenceTrackPanel.getParent() != null
-                    && !confidenceTrackPanel.isUserMoved()) {
-                anchorSequenceAndTrack();
-            }
+            rightAlignStrip(sequenceFragmentationPanel, false);
+            reanchorTrackOnResize(normalTrack);
             spectrumJLayeredPane.revalidate();
             spectrumJLayeredPane.repaint();
         }
@@ -2026,7 +2053,8 @@ public class SpectrumMainPanel extends JPanel {
             return;
         }
         int fontHeight = overlay.getFontMetrics(overlay.getFont()).getHeight() + 3;
-        overlay.setBounds(overlay.getX(), bottomOverlayY(fontHeight), overlay.getWidth(), overlay.getHeight());
+        int x = Math.max(5, spectrumShowPanel.getWidth() - 15 - seqContentRightEdge(overlay));
+        overlay.setBounds(x, bottomOverlayY(fontHeight), overlay.getWidth(), overlay.getHeight());
     }
 
     /**
@@ -2061,7 +2089,32 @@ public class SpectrumMainPanel extends JPanel {
      * Adds the floating confidence bar track as an overlay above the spectrum and sequence. It is
      * placed in its own top layer so it can be dragged anywhere without affecting the plot.
      */
-    private void addConfidenceTrack() {
+    /**
+     * Per-view binding of a confidence track to its sequence strip and layered pane, with the
+     * pre-computed offsets needed to align the track under the strip (shared by normal, mirror and
+     * check views).
+     */
+    private static class ConfidenceTrack {
+        final ConfidenceTrackPanel panel;
+        final SequenceFragmentationPanel strip;
+        final int leadingOffset;
+        final int contentRightEdge;
+
+        ConfidenceTrack(ConfidenceTrackPanel panel, SequenceFragmentationPanel strip, int leadingOffset, int contentRightEdge) {
+            this.panel = panel;
+            this.strip = strip;
+            this.leadingOffset = leadingOffset;
+            this.contentRightEdge = contentRightEdge;
+        }
+    }
+
+    /**
+     * Builds a confidence track aligned to the given sequence strip and adds it to the given pane.
+     * @param strip the view's sequence strip the track aligns to
+     * @param pane the view's layered pane the track is added to
+     * @return the new track binding
+     */
+    private ConfidenceTrack buildConfidenceTrack(SequenceFragmentationPanel strip, JLayeredPane pane) {
         String residues = "";
         if (spectrumIdentificationAssumption instanceof PeptideAssumption) {
             residues = ((PeptideAssumption) spectrumIdentificationAssumption).getPeptide().getSequence();
@@ -2076,11 +2129,11 @@ public class SpectrumMainPanel extends JPanel {
         int xStart = 10;
         String[] components = null;
         try {
-            seqFont = (Font) readSeqPanelField("iBaseFont");
-            horizontalSpace = (Integer) readSeqPanelField("iHorizontalSpace");
-            barWidth = (Integer) readSeqPanelField("iBarWidth");
-            xStart = (Integer) readSeqPanelField("iXStart");
-            components = (String[]) readSeqPanelField("iSequenceComponents");
+            seqFont = (Font) readSeqPanelField(strip, "iBaseFont");
+            horizontalSpace = (Integer) readSeqPanelField(strip, "iHorizontalSpace");
+            barWidth = (Integer) readSeqPanelField(strip, "iBarWidth");
+            xStart = (Integer) readSeqPanelField(strip, "iXStart");
+            components = (String[]) readSeqPanelField(strip, "iSequenceComponents");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -2093,78 +2146,143 @@ public class SpectrumMainPanel extends JPanel {
         // far wider than its content). The strip advances per component by stringWidth + extraSpacing.
         // Use the strip's own on-screen FontMetrics so per-character widths match how it paints
         // (a BufferedImage's metrics can differ on HiDPI/Retina displays and cause drift).
-        FontMetrics fm = sequenceFragmentationPanel.getFontMetrics(seqFont);
+        FontMetrics fm = strip.getFontMetrics(seqFont);
         int prefixWidth = 0;
-        int contentRight = xStart;
         if (components != null && components.length > 0) {
             String first = components[0];
             if (first.length() > 1) {
                 prefixWidth = fm.stringWidth(first) - fm.stringWidth(first.substring(first.length() - 1));
             }
-            for (int i = 0; i < components.length; i++) {
-                contentRight += fm.stringWidth(components[i]);
-                if (i < components.length - 1) {
-                    contentRight += extraSpacing;
-                }
-            }
         }
-        seqResidueLeadingOffset = xStart + prefixWidth;
-        seqContentRightEdge = contentRight;
+        int contentRight = seqContentRightEdge(strip);
 
         // The track's letters use the sequence strip's font (same size); the bar pitch uses the
         // strip's metrics (fm), so the bars stay aligned under the sequence.
-        confidenceTrackPanel = new ConfidenceTrackPanel(aaScores, residues, seqFont, extraSpacing, fm, showConfidenceResidues);
-        spectrumJLayeredPane.setLayer(confidenceTrackPanel, JLayeredPane.DRAG_LAYER + 10);
-        spectrumJLayeredPane.add(confidenceTrackPanel);
-        anchorSequenceAndTrack();
+        ConfidenceTrackPanel panel = new ConfidenceTrackPanel(aaScores, residues, seqFont, extraSpacing, fm, showConfidenceResidues);
+        pane.setLayer(panel, JLayeredPane.DRAG_LAYER + 10);
+        pane.add(panel);
+
+        ConfidenceTrack track = new ConfidenceTrack(panel, strip, xStart + prefixWidth, contentRight);
+        anchorTrack(track, true);
+        return track;
     }
 
     /**
-     * Reads a (private) field of the current sequence strip by reflection.
+     * Reads a (private) field of a sequence strip by reflection.
+     * @param strip the sequence strip to read from
      * @param name field name
      * @return the field value
      * @throws Exception on reflection failure
      */
-    private Object readSeqPanelField(String name) throws Exception {
+    private Object readSeqPanelField(SequenceFragmentationPanel strip, String name) throws Exception {
         java.lang.reflect.Field field = SequenceFragmentationPanel.class.getDeclaredField(name);
         field.setAccessible(true);
-        return field.get(sequenceFragmentationPanel);
+        return field.get(strip);
     }
 
     /**
-     * Default placement for the confidence feature: moves the sequence strip to the right (keeping
-     * its y) and places the confidence track directly below it, shifted so the residues align
-     * vertically. Called on first display and on resize, until the user drags the track.
+     * Where a strip's drawn content ends (in logical pixels from its left edge), used to right-align
+     * it. Uses the strip's own preferred width -- deterministic (same peptide always gives the same
+     * value) and never clips the sequence. It over-reports the true painted edge by a margin that,
+     * on HiDPI displays, varies slightly with sequence length, so the right edge can shift a little
+     * between very different-length peptides. Measuring the exact painted edge offscreen was tried
+     * extensively but cannot reliably reproduce a scaled display's on-screen text layout.
+     * @param strip the sequence strip
+     * @return the content's right edge offset from the strip's left edge
      */
-    private void anchorSequenceAndTrack() {
-        anchorSequenceAndTrack(true);
+    private int seqContentRightEdge(SequenceFragmentationPanel strip) {
+        return strip.getPreferredSize().width;
     }
 
     /**
+     * Right-aligns a sequence strip so its drawn content ends near the right edge of the spectrum
+     * area (keeping the strip's y and box size). The wide empty part of the box extends off-screen.
+     *
+     * The first call defers the actual measurement by one EDT cycle. A strip's font metrics are not
+     * realized synchronously when it is added (its getPreferredSize() right after add() under-reports
+     * the content width by an amount that grows with sequence length, even though isShowing() is
+     * already true). One cycle later the metrics are realized, and the realized width is a constant
+     * offset above the painted edge for every length -- so right-aligning then lines all peptides up
+     * at the same position. Deferring also moves an off-EDT page-load render onto the EDT.
+     * @param strip the sequence strip (skipped if null or not in a pane)
+     * @param defer true to defer one EDT cycle (use on first placement); false to measure now
+     *              (use on resize, when metrics are already realized)
+     */
+    private void rightAlignStrip(SequenceFragmentationPanel strip, boolean defer) {
+        if (strip == null || strip.getParent() == null) {
+            return;
+        }
+        if (defer) {
+            SwingUtilities.invokeLater(() -> rightAlignStrip(strip, false));
+            return;
+        }
+        int paneWidth = spectrumShowPanel.getWidth();
+        if (paneWidth <= 0) {
+            return; // not laid out yet; the resize handler will align it once sized
+        }
+        int x = Math.max(5, paneWidth - 15 - seqContentRightEdge(strip));
+        strip.setBounds(x, strip.getY(), strip.getWidth(), strip.getHeight());
+    }
+
+    /**
+     * Re-aligns a view's sequence strips after it becomes the active (showing) view. The strips were
+     * positioned while the view was inactive (its layered pane not in mainShowJPanel), so they used
+     * non-realized font metrics and landed at the wrong right position. Re-aligning now -- once the
+     * view is showing -- uses realized metrics, so the right edges line up like the normal view.
+     * @param topStrip the view's top sequence strip
+     * @param bottomStrip the view's bottom sequence strip, or null if it has none
+     * @param track the view's confidence track, or null
+     */
+    private void realignViewStrips(SequenceFragmentationPanel topStrip, SequenceFragmentationPanel bottomStrip, ConfidenceTrack track) {
+        if (track != null && track.panel.getParent() != null && !track.panel.isUserMoved()) {
+            // The top strip is positioned together with the track; re-anchor both (deferred).
+            SwingUtilities.invokeLater(() -> anchorTrack(track, false));
+        } else {
+            rightAlignStrip(topStrip, true);
+        }
+        if (bottomStrip != null) {
+            rightAlignStrip(bottomStrip, true);
+        }
+    }
+
+    /**
+     * Re-anchors a view's track on resize, unless the user has dragged it.
+     * @param track the track binding (may be null when the view has no track)
+     */
+    private void reanchorTrackOnResize(ConfidenceTrack track) {
+        if (track != null && track.panel.getParent() != null && !track.panel.isUserMoved()) {
+            anchorTrack(track, false);
+        }
+    }
+
+    /**
+     * Default placement for a confidence track: moves its sequence strip to the right (keeping its
+     * y) and places the track directly below it, shifted so the residues align vertically. Called
+     * on first display and on resize, until the user drags the track.
+     * @param track the track binding
      * @param allowRetry retry once on the EDT if the container has not been sized yet (so the
      *                   panels do not get stuck at the left edge when added before layout)
      */
-    private void anchorSequenceAndTrack(boolean allowRetry) {
-        if (confidenceTrackPanel == null || confidenceTrackPanel.isUserMoved()) {
+    private void anchorTrack(ConfidenceTrack track, boolean allowRetry) {
+        if (track == null || track.panel.isUserMoved()) {
             return;
         }
         int paneWidth = spectrumShowPanel.getWidth();
         if (paneWidth <= 0 && allowRetry) {
-            SwingUtilities.invokeLater(() -> anchorSequenceAndTrack(false));
+            SwingUtilities.invokeLater(() -> anchorTrack(track, false));
             return;
         }
 
         // Sequence strip: keep its y; move its x so its drawn content (not its much-wider bounding
         // box) sits at the right. The empty right part of the box just extends off-screen.
-        int stripX = Math.max(5, paneWidth - 15 - seqContentRightEdge);
-        sequenceFragmentationPanel.setBounds(stripX, sequenceFragmentationPanel.getY(),
-                sequenceFragmentationPanel.getWidth(), sequenceFragmentationPanel.getHeight());
+        int stripX = Math.max(5, paneWidth - 15 - track.contentRightEdge);
+        track.strip.setBounds(stripX, track.strip.getY(), track.strip.getWidth(), track.strip.getHeight());
 
         // Track: below the strip, shifted so residue 1 sits under the strip's residue 1. Both share
         // the same per-residue pitch, so aligning residue 1 aligns them all.
-        int trackWidth = confidenceTrackPanel.naturalWidth();
-        int trackX = stripX + seqResidueLeadingOffset - confidenceTrackPanel.leftInset();
-        confidenceTrackPanel.setBounds(trackX, 85, trackWidth, CONF_TRACK_HEIGHT);
+        int trackWidth = track.panel.naturalWidth();
+        int trackX = stripX + track.leadingOffset - track.panel.leftInset();
+        track.panel.setBounds(trackX, 85, trackWidth, CONF_TRACK_HEIGHT);
     }
 
     /**
@@ -2199,6 +2317,9 @@ public class SpectrumMainPanel extends JPanel {
         } else {
             sequenceFragmentationPanel.setBounds(40, bottomOverlayY(fontHeight), peptideLength*fontHeight*2 ,fontHeight * 8);
         }
+        // Default all sequence strips to the right (top -> top-right, bottom -> bottom-right); the
+        // provisional left bounds above keep the y/box size, this only shifts x to the right.
+        rightAlignStrip(sequenceFragmentationPanel, true);
 
         sequenceFragmentationPanel.addMouseWheelListener(e -> {
             if(e.getWheelRotation()==1){
