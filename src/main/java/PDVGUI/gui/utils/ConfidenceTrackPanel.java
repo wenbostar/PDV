@@ -149,13 +149,15 @@ public class ConfidenceTrackPanel extends JPanel {
     }
 
     /**
-     * Map a score in [0, 1] to a red(low) -> yellow -> green(high) color.
+     * Map a score in [0, 1] to a red(low) -> yellow -> green(high) color, drawn 40% transparent so
+     * the spectrum shows through.
      * @param score confidence score
      * @return bar color
      */
     private static Color heatColor(double score) {
         float s = (float) Math.max(0.0, Math.min(1.0, score));
-        return Color.getHSBColor(s * 0.34f, 0.85f, 0.9f);
+        Color c = Color.getHSBColor(s * 0.34f, 0.85f, 0.9f);
+        return new Color(c.getRed(), c.getGreen(), c.getBlue(), 153);
     }
 
     @Override
