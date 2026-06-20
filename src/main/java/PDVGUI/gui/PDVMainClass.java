@@ -182,6 +182,11 @@ public class PDVMainClass extends JFrame {
      */
     private ArrayList<String> scoreName = new ArrayList<>();
     /**
+     * Name of the per-residue aa-score column (e.g. Casanovo mzTab opt_global_aa_scores),
+     * or null when the current result has no such column. Used to draw the confidence track.
+     */
+    private String aaScoreColumn = null;
+    /**
      * Boolean indicate if MaxQuant or not
      */
     private Boolean isMaxQuant = false;
@@ -1664,6 +1669,14 @@ public class PDVMainClass extends JFrame {
                     originalInfor = mztabImport.getOriginalInfor();
 
                     scoreName = mztabImport.getScoreName();
+
+                    aaScoreColumn = null;
+                    for (String eachColumn : scoreName) {
+                        if (eachColumn.toLowerCase().contains("aa_score")) {
+                            aaScoreColumn = eachColumn;
+                            break;
+                        }
+                    }
 
                     ArrayList<String> orderName = new ArrayList<>();
                     orderName.add("PSMIndex");
@@ -3981,10 +3994,43 @@ public class PDVMainClass extends JFrame {
 
         spectrumShowJPanel.setBorder(titledBorder);
         mSnSpectrum.setSpectrumTitle(spectrumTitle);
+
+        double[] aaScores = null;
+        if (aaScoreColumn != null) {
+            try {
+                aaScores = parseAaScores(sqliteConnection.getColumnValue(aaScoreColumn, String.valueOf(selectedPsmKey)));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        spectrumMainPanel.setAaScores(aaScores);
+
         spectrumMainPanel.updateSpectrum(spectrumIdentificationAssumption, mSnSpectrum, String.valueOf(selectedPsmKey));
 
         spectrumShowJPanel.revalidate();
         spectrumShowJPanel.repaint();
+    }
+
+    /**
+     * Parse a comma-separated per-residue score string (e.g. Casanovo opt_global_aa_scores)
+     * into an array of scores.
+     * @param raw comma-separated scores; may be null/empty
+     * @return the parsed scores, or null if absent or not parseable
+     */
+    private double[] parseAaScores(String raw) {
+        if (raw == null || raw.trim().isEmpty()) {
+            return null;
+        }
+        String[] parts = raw.trim().split(",");
+        double[] scores = new double[parts.length];
+        try {
+            for (int i = 0; i < parts.length; i++) {
+                scores[i] = Double.parseDouble(parts[i].trim());
+            }
+        } catch (NumberFormatException e) {
+            return null;
+        }
+        return scores;
     }
 
     /**

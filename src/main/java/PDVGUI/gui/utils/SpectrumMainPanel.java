@@ -142,6 +142,31 @@ public class SpectrumMainPanel extends JPanel {
      */
     private SpectrumContainer spectrumPanel;
     /**
+     * Per-residue confidence scores for the current PSM (e.g. Casanovo opt_global_aa_scores),
+     * or null when unavailable. When present (and aligned with the sequence) a confidence track
+     * is drawn under the sequence strip in the normal spectrum view.
+     */
+    private double[] aaScores;
+    /**
+     * The floating, draggable confidence bar track overlay for the current PSM, or null when not
+     * shown. It floats above the spectrum/sequence and never alters their layout.
+     */
+    private ConfidenceTrackPanel confidenceTrackPanel;
+    /**
+     * Distance from the sequence strip's left edge to its first residue (iXStart + N-terminal
+     * prefix width), used to shift the confidence track so its residues align under the strip's.
+     */
+    private int seqResidueLeadingOffset = 0;
+    /**
+     * Right edge of the sequence strip's drawn content, measured from the strip's left edge (the
+     * strip's bounding box is much wider than its content), used to align the strip to the right.
+     */
+    private int seqContentRightEdge = 0;
+    /**
+     * Height of the floating confidence bar track (bars plus the amino-acid label row).
+     */
+    private static final int CONF_TRACK_HEIGHT = 64;
+    /**
      * Original peptide sequence
      */
     private String currentPeptideSequence;
@@ -1700,6 +1725,13 @@ public class SpectrumMainPanel extends JPanel {
 
                     spectrumSetAction = new SetAction(this, spectrumJLayeredPane, sequenceFragmentationPanel, null, spectrumPanel, 0, 0, spectrumShowPanel);
 
+                    // Floating confidence bar track: an independent, draggable overlay on top of the
+                    // plot (does not change the spectrum or sequence layout).
+                    confidenceTrackPanel = null;
+                    if (confidenceTrackApplicable()) {
+                        addConfidenceTrack();
+                    }
+
                     mirrorSpectrumPanel = new SpectrumContainer(
                             currentSpectrum.getMzValuesAsArray(), intensitiesAsArray,
                             precursor.getMz(), spectrumIdentificationAssumption.getIdentificationCharge().toString(),
@@ -1954,6 +1986,11 @@ public class SpectrumMainPanel extends JPanel {
             // view's overlay is top-anchored (fixed y), so it needs no repositioning.
             int bottomMargin = spectrumPanel.getY() == 0 ? 25 : 85;
             spectrumPanel.setBounds(spectrumPanel.getX(), spectrumPanel.getY(), width, height - bottomMargin);
+            // Keep the sequence strip + confidence track pinned to the right on resize, unless dragged.
+            if (confidenceTrackPanel != null && confidenceTrackPanel.getParent() != null
+                    && !confidenceTrackPanel.isUserMoved()) {
+                anchorSequenceAndTrack();
+            }
             spectrumJLayeredPane.revalidate();
             spectrumJLayeredPane.repaint();
         }
@@ -1980,6 +2017,129 @@ public class SpectrumMainPanel extends JPanel {
      */
     private int bottomOverlayY(int fontHeight) {
         return spectrumShowPanel.getHeight() - fontHeight * 7;
+    }
+
+    /**
+     * Whether a per-residue confidence track should be drawn for the current PSM: scores are
+     * available and their count matches the peptide's residue count (so the cells line up).
+     * @return true if the track applies
+     */
+    private boolean confidenceTrackApplicable() {
+        if (aaScores == null) {
+            return false;
+        }
+        if (spectrumIdentificationAssumption instanceof PeptideAssumption) {
+            int residues = ((PeptideAssumption) spectrumIdentificationAssumption).getPeptide().getSequence().length();
+            return aaScores.length == residues;
+        }
+        return false;
+    }
+
+    /**
+     * Adds the floating confidence bar track as an overlay above the spectrum and sequence. It is
+     * placed in its own top layer so it can be dragged anywhere without affecting the plot.
+     */
+    private void addConfidenceTrack() {
+        String residues = "";
+        if (spectrumIdentificationAssumption instanceof PeptideAssumption) {
+            residues = ((PeptideAssumption) spectrumIdentificationAssumption).getPeptide().getSequence();
+        }
+
+        // Copy the actual residue font, spacing constants and layout origin from the sequence strip
+        // (not otherwise exposed) so the track matches its font and per-residue advance exactly
+        // (stringWidth(residue) + 2*iHorizontalSpace + iBarWidth) and can be aligned under it.
+        Font seqFont = new Font("Arial", Font.PLAIN, 16);
+        int horizontalSpace = 3;
+        int barWidth = 2;
+        int xStart = 10;
+        String[] components = null;
+        try {
+            seqFont = (Font) readSeqPanelField("iBaseFont");
+            horizontalSpace = (Integer) readSeqPanelField("iHorizontalSpace");
+            barWidth = (Integer) readSeqPanelField("iBarWidth");
+            xStart = (Integer) readSeqPanelField("iXStart");
+            components = (String[]) readSeqPanelField("iSequenceComponents");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        int extraSpacing = 2 * horizontalSpace + barWidth;
+
+        // Measure (a) the N-terminal prefix fused into the first component (e.g. "NH2-"), so the
+        // track can be shifted to line residue 1 up under the strip's residue 1, and (b) the strip's
+        // drawn-content right edge, so the strip can be aligned to the right (its bounding box is
+        // far wider than its content). The strip advances per component by stringWidth + extraSpacing.
+        FontMetrics fm = new java.awt.image.BufferedImage(1, 1, java.awt.image.BufferedImage.TYPE_INT_ARGB)
+                .createGraphics().getFontMetrics(seqFont);
+        int prefixWidth = 0;
+        int contentRight = xStart;
+        if (components != null && components.length > 0) {
+            String first = components[0];
+            if (first.length() > 1) {
+                prefixWidth = fm.stringWidth(first) - fm.stringWidth(first.substring(first.length() - 1));
+            }
+            for (int i = 0; i < components.length; i++) {
+                contentRight += fm.stringWidth(components[i]);
+                if (i < components.length - 1) {
+                    contentRight += extraSpacing;
+                }
+            }
+        }
+        seqResidueLeadingOffset = xStart + prefixWidth;
+        seqContentRightEdge = contentRight;
+
+        confidenceTrackPanel = new ConfidenceTrackPanel(aaScores, residues, seqFont, extraSpacing);
+        spectrumJLayeredPane.setLayer(confidenceTrackPanel, JLayeredPane.DRAG_LAYER + 10);
+        spectrumJLayeredPane.add(confidenceTrackPanel);
+        anchorSequenceAndTrack();
+    }
+
+    /**
+     * Reads a (private) field of the current sequence strip by reflection.
+     * @param name field name
+     * @return the field value
+     * @throws Exception on reflection failure
+     */
+    private Object readSeqPanelField(String name) throws Exception {
+        java.lang.reflect.Field field = SequenceFragmentationPanel.class.getDeclaredField(name);
+        field.setAccessible(true);
+        return field.get(sequenceFragmentationPanel);
+    }
+
+    /**
+     * Default placement for the confidence feature: moves the sequence strip to the right (keeping
+     * its y) and places the confidence track directly below it, shifted so the residues align
+     * vertically. Called on first display and on resize, until the user drags the track.
+     */
+    private void anchorSequenceAndTrack() {
+        anchorSequenceAndTrack(true);
+    }
+
+    /**
+     * @param allowRetry retry once on the EDT if the container has not been sized yet (so the
+     *                   panels do not get stuck at the left edge when added before layout)
+     */
+    private void anchorSequenceAndTrack(boolean allowRetry) {
+        if (confidenceTrackPanel == null || confidenceTrackPanel.isUserMoved()) {
+            return;
+        }
+        int paneWidth = spectrumShowPanel.getWidth();
+        if (paneWidth <= 0 && allowRetry) {
+            SwingUtilities.invokeLater(() -> anchorSequenceAndTrack(false));
+            return;
+        }
+
+        // Sequence strip: keep its y; move its x so its drawn content (not its much-wider bounding
+        // box) sits at the right. The empty right part of the box just extends off-screen.
+        int stripX = Math.max(5, paneWidth - 15 - seqContentRightEdge);
+        sequenceFragmentationPanel.setBounds(stripX, sequenceFragmentationPanel.getY(),
+                sequenceFragmentationPanel.getWidth(), sequenceFragmentationPanel.getHeight());
+
+        // Track: below the strip, shifted so residue 1 sits under the strip's residue 1. Both share
+        // the same per-residue pitch, so aligning residue 1 aligns them all.
+        int trackWidth = confidenceTrackPanel.naturalWidth();
+        int trackX = stripX + seqResidueLeadingOffset - confidenceTrackPanel.leftInset();
+        confidenceTrackPanel.setBounds(trackX, 85, trackWidth, CONF_TRACK_HEIGHT);
     }
 
     /**
@@ -2112,6 +2272,15 @@ public class SpectrumMainPanel extends JPanel {
         this.selectedPsmKey = selectedPsmKey;
 
         updateSpectrum();
+    }
+
+    /**
+     * Set the per-residue confidence scores for the PSM about to be displayed. Pass null when the
+     * result has no per-residue scores (the confidence track is then not drawn).
+     * @param aaScores per-residue scores in [0, 1], or null
+     */
+    public void setAaScores(double[] aaScores) {
+        this.aaScores = aaScores;
     }
 
     /**

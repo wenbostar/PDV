@@ -101,6 +101,28 @@ public class SQLiteConnection {
     }
 
     /**
+     * Get a single text column value for one PSM.
+     * @param quotedColumn column name as stored in the table (may include `backtick` quoting)
+     * @param psmKey PSM index key
+     * @return the column value as text, or null if not found
+     * @throws SQLException
+     */
+    public String getColumnValue(String quotedColumn, String psmKey) throws SQLException {
+        String value = null;
+        Statement statement = connection.createStatement();
+        try {
+            ResultSet rs = statement.executeQuery(
+                    "SELECT " + quotedColumn + " FROM SpectrumMatch WHERE PSMIndex = '" + psmKey + "'");
+            if (rs.next()) {
+                value = rs.getString(1);
+            }
+        } finally {
+            statement.close();
+        }
+        return value;
+    }
+
+    /**
      * Get one record
      * @param libID Library ID
      * @return ArrayList
