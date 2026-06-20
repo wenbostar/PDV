@@ -34,6 +34,7 @@ public class AnnotationSettingsDialog extends JDialog {
     private JSpinner backgroundPeakWidthJSpinner;
     private JSpinner limitJSpinner;
     private JSpinner sequenceFontSizeJSpinner;
+    private JSpinner scoreFontSizeJSpinner;
     private JCheckBox showConfidenceTrackCheckBox;
     private JCheckBox showTrackResiduesCheckBox;
     private JScrollPane colorsScrollPane;
@@ -91,9 +92,11 @@ public class AnnotationSettingsDialog extends JDialog {
         limitJSpinner.setValue(annotationSettings.getAnnotationIntensityFilter());
 
         sequenceFontSizeJSpinner.setValue(spectrumMainPanel.getSequenceFontSize());
+        scoreFontSizeJSpinner.setValue(spectrumMainPanel.getConfidenceScoreFontSize());
         showConfidenceTrackCheckBox.setSelected(spectrumMainPanel.isShowConfidenceTrack());
         showTrackResiduesCheckBox.setSelected(spectrumMainPanel.isShowConfidenceResidues());
         showTrackResiduesCheckBox.setEnabled(spectrumMainPanel.isShowConfidenceTrack());
+        scoreFontSizeJSpinner.setEnabled(spectrumMainPanel.isShowConfidenceTrack());
 
         colorsScrollPane.getViewport().setOpaque(false);
 
@@ -119,6 +122,7 @@ public class AnnotationSettingsDialog extends JDialog {
         backgroundPeakWidthJSpinner = new JSpinner();
         limitJSpinner = new JSpinner();
         sequenceFontSizeJSpinner = new JSpinner();
+        scoreFontSizeJSpinner = new JSpinner();
         showConfidenceTrackCheckBox = new JCheckBox();
         showTrackResiduesCheckBox = new JCheckBox();
         JPanel peakSettingsJPanel = new JPanel();
@@ -130,6 +134,7 @@ public class AnnotationSettingsDialog extends JDialog {
         JLabel limitJLabel = new JLabel();
         JPanel fontSettingsJPanel = new JPanel();
         JLabel sequenceFontLabel = new JLabel();
+        JLabel scoreFontLabel = new JLabel();
         JPanel backgroundPanel = new JPanel();
         JButton okButton = new JButton();
         JPanel annotationColorsPanel = new JPanel();
@@ -367,6 +372,12 @@ public class AnnotationSettingsDialog extends JDialog {
         showTrackResiduesCheckBox.setToolTipText("Show the amino-acid letter under each confidence bar.");
         showTrackResiduesCheckBox.addActionListener(this::showTrackResiduesActionPerformed);
 
+        scoreFontLabel.setText("Score Font Size");
+        scoreFontLabel.setFont(PDVFonts.of(Font.PLAIN, 11f));
+        scoreFontLabel.setToolTipText("Font size of the confidence score numbers above each bar.");
+        scoreFontSizeJSpinner.setModel(new SpinnerNumberModel(9, 6, 20, 1));
+        scoreFontSizeJSpinner.addChangeListener(this::scoreFontSizeValueChanged);
+
         GroupLayout fontSettingsJPanelLayout = new GroupLayout(fontSettingsJPanel);
         fontSettingsJPanel.setLayout(fontSettingsJPanelLayout);
         fontSettingsJPanelLayout.setHorizontalGroup(
@@ -379,7 +390,11 @@ public class AnnotationSettingsDialog extends JDialog {
                                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(sequenceFontSizeJSpinner, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE))
                                         .addComponent(showConfidenceTrackCheckBox)
-                                        .addComponent(showTrackResiduesCheckBox))
+                                        .addComponent(showTrackResiduesCheckBox)
+                                        .addGroup(fontSettingsJPanelLayout.createSequentialGroup()
+                                                .addComponent(scoreFontLabel)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(scoreFontSizeJSpinner, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE)))
                                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         fontSettingsJPanelLayout.setVerticalGroup(
@@ -393,6 +408,10 @@ public class AnnotationSettingsDialog extends JDialog {
                                 .addComponent(showConfidenceTrackCheckBox)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(showTrackResiduesCheckBox)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(fontSettingsJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                                        .addComponent(scoreFontLabel)
+                                        .addComponent(scoreFontSizeJSpinner, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                                 .addContainerGap())
         );
 
@@ -615,12 +634,21 @@ public class AnnotationSettingsDialog extends JDialog {
     }
 
     /**
+     * Confidence score number font size changed.
+     * @param evt change event
+     */
+    private void scoreFontSizeValueChanged(ChangeEvent evt) {
+        spectrumMainPanel.setConfidenceScoreFontSize((Integer) scoreFontSizeJSpinner.getValue());
+    }
+
+    /**
      * Toggle showing the confidence bar track.
      * @param evt action event
      */
     private void showConfidenceTrackActionPerformed(ActionEvent evt) {
         boolean show = showConfidenceTrackCheckBox.isSelected();
         showTrackResiduesCheckBox.setEnabled(show);
+        scoreFontSizeJSpinner.setEnabled(show);
         spectrumMainPanel.setShowConfidenceTrack(show);
     }
 

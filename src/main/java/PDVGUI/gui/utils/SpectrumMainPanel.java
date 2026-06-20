@@ -169,9 +169,18 @@ public class SpectrumMainPanel extends JPanel {
      */
     private boolean showConfidenceResidues = true;
     /**
+     * Font size (points) of the per-bar confidence score numbers in the confidence track.
+     */
+    private int confidenceScoreFontSize = 9;
+    /**
      * Height of the floating confidence bar track (score row, bars, and amino-acid label row).
      */
     private static final int CONF_TRACK_HEIGHT = 74;
+    /**
+     * Vertical gap between the sequence strip's lowest drawn content (deepest ion label) and the top
+     * of the confidence track, so the track clears the labels but stays close to the strip.
+     */
+    private static final int CONF_TRACK_GAP = 3;
     /**
      * Original peptide sequence
      */
@@ -2166,12 +2175,15 @@ public class SpectrumMainPanel extends JPanel {
         final SequenceFragmentationPanel strip;
         final int leadingOffset;
         final int contentRightEdge;
+        /** The strip's lowest drawn content (deepest ion label) offset from its top, used to place the track just below it. */
+        final int stripContentBottom;
 
-        ConfidenceTrack(ConfidenceTrackPanel panel, SequenceFragmentationPanel strip, int leadingOffset, int contentRightEdge) {
+        ConfidenceTrack(ConfidenceTrackPanel panel, SequenceFragmentationPanel strip, int leadingOffset, int contentRightEdge, int stripContentBottom) {
             this.panel = panel;
             this.strip = strip;
             this.leadingOffset = leadingOffset;
             this.contentRightEdge = contentRightEdge;
+            this.stripContentBottom = stripContentBottom;
         }
     }
 
@@ -2222,14 +2234,17 @@ public class SpectrumMainPanel extends JPanel {
             }
         }
         int contentRight = seqContentRightEdge(strip);
+        // Lowest drawn pixel of the strip (deepest b-ion label), so the track can sit just below it
+        // rather than at a fixed offset that the variable-depth labels can overlap.
+        int seqBottom = stripContentBottom(strip);
 
         // The track's letters use the sequence strip's font (same size); the bar pitch uses the
         // strip's metrics (fm), so the bars stay aligned under the sequence.
-        ConfidenceTrackPanel panel = new ConfidenceTrackPanel(aaScores, residues, seqFont, extraSpacing, fm, showConfidenceResidues);
+        ConfidenceTrackPanel panel = new ConfidenceTrackPanel(aaScores, residues, seqFont, extraSpacing, fm, showConfidenceResidues, confidenceScoreFontSize);
         pane.setLayer(panel, JLayeredPane.DRAG_LAYER + 10);
         pane.add(panel);
 
-        ConfidenceTrack track = new ConfidenceTrack(panel, strip, xStart + prefixWidth, contentRight);
+        ConfidenceTrack track = new ConfidenceTrack(panel, strip, xStart + prefixWidth, contentRight, seqBottom);
         anchorTrack(track, true);
         return track;
     }
@@ -2418,11 +2433,13 @@ public class SpectrumMainPanel extends JPanel {
         int stripX = Math.max(5, paneWidth - 15 - seqContentRightEdge(track.strip));
         track.strip.setBounds(stripX, track.strip.getY(), track.strip.getWidth(), track.strip.getHeight());
 
-        // Track: below the strip, shifted so residue 1 sits under the strip's residue 1. Both share
-        // the same per-residue pitch, so aligning residue 1 aligns them all.
+        // Track: just below the strip's lowest drawn content (so variable-depth ion labels never
+        // overlap it), shifted in x so residue 1 sits under the strip's residue 1. Both share the
+        // same per-residue pitch, so aligning residue 1 aligns them all.
         int trackWidth = track.panel.naturalWidth();
         int trackX = stripX + track.leadingOffset - track.panel.leftInset();
-        track.panel.setBounds(trackX, 85, trackWidth, CONF_TRACK_HEIGHT);
+        int trackY = track.strip.getY() + track.stripContentBottom + CONF_TRACK_GAP;
+        track.panel.setBounds(trackX, trackY, trackWidth, CONF_TRACK_HEIGHT);
     }
 
     /**
@@ -2621,6 +2638,22 @@ public class SpectrumMainPanel extends JPanel {
      */
     public void setShowConfidenceResidues(boolean show) {
         this.showConfidenceResidues = show;
+        updateSpectrum();
+    }
+
+    /**
+     * @return the font size (points) of the per-bar confidence score numbers.
+     */
+    public int getConfidenceScoreFontSize() {
+        return confidenceScoreFontSize;
+    }
+
+    /**
+     * Sets the font size of the per-bar confidence score numbers, and re-renders.
+     * @param size font size in points
+     */
+    public void setConfidenceScoreFontSize(int size) {
+        this.confidenceScoreFontSize = size;
         updateSpectrum();
     }
 

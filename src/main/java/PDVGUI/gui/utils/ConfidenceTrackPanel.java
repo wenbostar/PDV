@@ -43,7 +43,7 @@ public class ConfidenceTrackPanel extends JPanel {
     /**
      * Small font used for the per-bar score labels.
      */
-    private static final Font SCORE_FONT = new Font("Arial", Font.PLAIN, 9);
+    private final Font scoreFont;
     /**
      * Inner padding between the panel edge and the content.
      */
@@ -79,12 +79,14 @@ public class ConfidenceTrackPanel extends JPanel {
      * @param fm font metrics measured with the sequence strip's own (on-screen) graphics, so the
      *           per-character widths (and thus the bar pitch) match how the strip paints
      * @param showResidues whether to draw the amino-acid letter under each bar
+     * @param scoreFontSize point size of the font used for the per-bar score labels
      */
-    public ConfidenceTrackPanel(double[] scores, String residues, Font aaFont, int extraSpacing, FontMetrics fm, boolean showResidues) {
+    public ConfidenceTrackPanel(double[] scores, String residues, Font aaFont, int extraSpacing, FontMetrics fm, boolean showResidues, int scoreFontSize) {
         this.scores = scores;
         this.residues = residues == null ? "" : residues;
         this.aaFont = aaFont;
         this.showResidues = showResidues;
+        this.scoreFont = new Font("Arial", Font.PLAIN, scoreFontSize);
         setOpaque(false);
         setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
 
@@ -178,7 +180,7 @@ public class ConfidenceTrackPanel extends JPanel {
         // Amino-acid letters use the sequence font and sit below the baseline (when shown); the
         // score is printed in a smaller font just above each bar.
         FontMetrics lfm = g2.getFontMetrics(aaFont);
-        FontMetrics sfm = g2.getFontMetrics(SCORE_FONT);
+        FontMetrics sfm = g2.getFontMetrics(scoreFont);
         int letterRow = showResidues ? lfm.getHeight() : 0;
         int baselineY = h - pad - letterRow;
         // Leave room for a score label above even a full-height bar.
@@ -196,7 +198,7 @@ public class ConfidenceTrackPanel extends JPanel {
             g2.drawRect(x, barTop, barWidth, barHeight);
 
             // Score (as percent) just above the bar.
-            g2.setFont(SCORE_FONT);
+            g2.setFont(scoreFont);
             String pct = String.valueOf((int) Math.round(s * 100));
             g2.setColor(new Color(70, 70, 70));
             g2.drawString(pct, centerX[i] - sfm.stringWidth(pct) / 2, barTop - 2);
