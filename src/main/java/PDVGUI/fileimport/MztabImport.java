@@ -175,13 +175,18 @@ public class MztabImport {
         String matchTableQuery = "CREATE TABLE SpectrumMatch (PSMIndex INT(10), MZ DOUBLE, Title Char, Sequence Char, MassError DOUBLE, Match OBJECT(50), Modification varchar(200)" + addQuery +", PRIMARY KEY(PSMIndex))";
 
         try {
+            // Drop any leftover table first: when re-loading the same file the <file>.db could
+            // not always be deleted (e.g. still open / locked on Windows), which would otherwise
+            // make CREATE TABLE fail with "table SpectrumMatch already exists".
+            statement.execute("DROP TABLE IF EXISTS SpectrumMatch");
             statement.execute(matchTableQuery);
         }catch (SQLException e){
             progressDialog.setRunFinished();
             JOptionPane.showMessageDialog(pdvMainClass, JOptionEditorPane.getJOptionEditorPane(
-                            "An error occurred while creating table SpectrumMatch in database."),
+                            "An error occurred while creating table SpectrumMatch in database.<br>" + e.getMessage()),
                     "DB Error", JOptionPane.ERROR_MESSAGE);
-            System.err.println("An error occurred while creating table SpectrumMatch");
+            System.err.println("An error occurred while creating table SpectrumMatch: " + e.getMessage());
+            System.err.println("CREATE TABLE statement was: " + matchTableQuery);
             throw (e);
         }finally {
             statement.close();
