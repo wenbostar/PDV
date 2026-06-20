@@ -35,6 +35,7 @@ public class AnnotationSettingsDialog extends JDialog {
     private JSpinner limitJSpinner;
     private JSpinner sequenceFontSizeJSpinner;
     private JSpinner scoreFontSizeJSpinner;
+    private JCheckBox boldAminoAcidsCheckBox;
     private JCheckBox showConfidenceTrackCheckBox;
     private JCheckBox showTrackResiduesCheckBox;
     private JScrollPane colorsScrollPane;
@@ -93,6 +94,7 @@ public class AnnotationSettingsDialog extends JDialog {
 
         sequenceFontSizeJSpinner.setValue(spectrumMainPanel.getSequenceFontSize());
         scoreFontSizeJSpinner.setValue(spectrumMainPanel.getConfidenceScoreFontSize());
+        boldAminoAcidsCheckBox.setSelected(spectrumMainPanel.isBoldSequenceFont());
         showConfidenceTrackCheckBox.setSelected(spectrumMainPanel.isShowConfidenceTrack());
         showTrackResiduesCheckBox.setSelected(spectrumMainPanel.isShowConfidenceResidues());
         showTrackResiduesCheckBox.setEnabled(spectrumMainPanel.isShowConfidenceTrack());
@@ -123,6 +125,7 @@ public class AnnotationSettingsDialog extends JDialog {
         limitJSpinner = new JSpinner();
         sequenceFontSizeJSpinner = new JSpinner();
         scoreFontSizeJSpinner = new JSpinner();
+        boldAminoAcidsCheckBox = new JCheckBox();
         showConfidenceTrackCheckBox = new JCheckBox();
         showTrackResiduesCheckBox = new JCheckBox();
         JPanel peakSettingsJPanel = new JPanel();
@@ -360,6 +363,12 @@ public class AnnotationSettingsDialog extends JDialog {
         sequenceFontSizeJSpinner.setModel(new SpinnerNumberModel(16, 14, 30, 1));
         sequenceFontSizeJSpinner.addChangeListener(this::sequenceFontSizeValueChanged);
 
+        boldAminoAcidsCheckBox.setText("Bold amino acids");
+        boldAminoAcidsCheckBox.setFont(PDVFonts.of(Font.PLAIN, 11f));
+        boldAminoAcidsCheckBox.setOpaque(false);
+        boldAminoAcidsCheckBox.setToolTipText("Draw the sequence strip and confidence-track amino-acid letters in bold.");
+        boldAminoAcidsCheckBox.addActionListener(this::boldAminoAcidsActionPerformed);
+
         showConfidenceTrackCheckBox.setText("Show confidence track");
         showConfidenceTrackCheckBox.setFont(PDVFonts.of(Font.PLAIN, 11f));
         showConfidenceTrackCheckBox.setOpaque(false);
@@ -389,6 +398,7 @@ public class AnnotationSettingsDialog extends JDialog {
                                                 .addComponent(sequenceFontLabel)
                                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(sequenceFontSizeJSpinner, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(boldAminoAcidsCheckBox)
                                         .addComponent(showConfidenceTrackCheckBox)
                                         .addComponent(showTrackResiduesCheckBox)
                                         .addGroup(fontSettingsJPanelLayout.createSequentialGroup()
@@ -404,6 +414,8 @@ public class AnnotationSettingsDialog extends JDialog {
                                 .addGroup(fontSettingsJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
                                         .addComponent(sequenceFontLabel)
                                         .addComponent(sequenceFontSizeJSpinner, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(boldAminoAcidsCheckBox)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(showConfidenceTrackCheckBox)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
@@ -639,6 +651,14 @@ public class AnnotationSettingsDialog extends JDialog {
      */
     private void scoreFontSizeValueChanged(ChangeEvent evt) {
         spectrumMainPanel.setConfidenceScoreFontSize((Integer) scoreFontSizeJSpinner.getValue());
+    }
+
+    /**
+     * Toggle bold amino-acid letters in the sequence strip and confidence track.
+     * @param evt action event
+     */
+    private void boldAminoAcidsActionPerformed(ActionEvent evt) {
+        spectrumMainPanel.setBoldSequenceFont(boldAminoAcidsCheckBox.isSelected());
     }
 
     /**

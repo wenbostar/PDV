@@ -173,6 +173,10 @@ public class SpectrumMainPanel extends JPanel {
      */
     private int confidenceScoreFontSize = 9;
     /**
+     * Whether the sequence strip and confidence-track amino-acid letters are drawn bold.
+     */
+    private boolean boldSequenceFont = false;
+    /**
      * Height of the floating confidence bar track (score row, bars, and amino-acid label row).
      */
     private static final int CONF_TRACK_HEIGHT = 74;
@@ -1735,11 +1739,8 @@ public class SpectrumMainPanel extends JPanel {
                     sequenceFragmentationPanel.setOpaque(false);
                     sequenceFragmentationPanel.setBackground(Color.WHITE);
 
-                    // Apply the user-chosen sequence strip font size (no-op at the default 16). The
-                    // strip is created fresh at size 16, and updateFontSize takes a relative delta.
-                    if (sequenceFontSize != 16) {
-                        sequenceFragmentationPanel.updateFontSize(sequenceFontSize - 16);
-                    }
+                    // Apply the user-chosen sequence strip font size and bold style.
+                    applySequenceFontStyle(sequenceFragmentationPanel);
 
                     spectrumJLayeredPane.setLayer(spectrumPanel, JLayeredPane.DEFAULT_LAYER);
                     spectrumJLayeredPane.add(spectrumPanel);
@@ -1775,9 +1776,7 @@ public class SpectrumMainPanel extends JPanel {
                     sequenceFragmentationPanelMirror.setMinimumSize(new Dimension(sequenceFragmentationPanelMirror.getPreferredSize().width, sequenceFragmentationPanelMirror.getHeight()));
                     sequenceFragmentationPanelMirror.setOpaque(false);
                     sequenceFragmentationPanelMirror.setBackground(Color.WHITE);
-                    if (sequenceFontSize != 16) {
-                        sequenceFragmentationPanelMirror.updateFontSize(sequenceFontSize - 16);
-                    }
+                    applySequenceFontStyle(sequenceFragmentationPanelMirror);
 
                     if(checkSpectrumFileMaps.containsKey(selectedPsmKey)){
                         MSnSpectrum mirrorSpectrum = checkSpectrumFileMaps.get(selectedPsmKey);
@@ -1819,9 +1818,7 @@ public class SpectrumMainPanel extends JPanel {
                         mirrorFragmentPanel.setMinimumSize(new Dimension(mirrorFragmentPanel.getPreferredSize().width, mirrorFragmentPanel.getHeight()));
                         mirrorFragmentPanel.setOpaque(false);
                         mirrorFragmentPanel.setBackground(Color.WHITE);
-                        if (sequenceFontSize != 16) {
-                            mirrorFragmentPanel.updateFontSize(sequenceFontSize - 16);
-                        }
+                        applySequenceFontStyle(mirrorFragmentPanel);
 
                         mirrorJLayeredPane.setLayer(mirrorFragmentPanel, JLayeredPane.DRAG_LAYER);
                         mirrorJLayeredPane.add(mirrorFragmentPanel);
@@ -1895,9 +1892,7 @@ public class SpectrumMainPanel extends JPanel {
                     sequenceFragmentationPanelCheck.setMinimumSize(new Dimension(sequenceFragmentationPanelCheck.getPreferredSize().width, sequenceFragmentationPanelCheck.getHeight()));
                     sequenceFragmentationPanelCheck.setOpaque(false);
                     sequenceFragmentationPanelCheck.setBackground(Color.WHITE);
-                    if (sequenceFontSize != 16) {
-                        sequenceFragmentationPanelCheck.updateFontSize(sequenceFontSize - 16);
-                    }
+                    applySequenceFontStyle(sequenceFragmentationPanelCheck);
 
                     if(checkPeptideMap.containsKey(selectedPsmKey)){
                         Peptide peptide = checkPeptideMap.get(selectedPsmKey);
@@ -1934,9 +1929,7 @@ public class SpectrumMainPanel extends JPanel {
                         checkFragmentPanel.setMinimumSize(new Dimension(checkFragmentPanel.getPreferredSize().width, checkFragmentPanel.getHeight()));
                         checkFragmentPanel.setOpaque(false);
                         checkFragmentPanel.setBackground(Color.WHITE);
-                        if (sequenceFontSize != 16) {
-                            checkFragmentPanel.updateFontSize(sequenceFontSize - 16);
-                        }
+                        applySequenceFontStyle(checkFragmentPanel);
 
                         checkPeptideJLayeredPane.setLayer(checkFragmentPanel, JLayeredPane.DRAG_LAYER);
                         checkPeptideJLayeredPane.add(checkFragmentPanel);
@@ -2260,6 +2253,36 @@ public class SpectrumMainPanel extends JPanel {
         java.lang.reflect.Field field = SequenceFragmentationPanel.class.getDeclaredField(name);
         field.setAccessible(true);
         return field.get(strip);
+    }
+
+    /**
+     * Sets a private field on a SequenceFragmentationPanel by reflection (its font is not otherwise
+     * exposed).
+     */
+    private void writeSeqPanelField(SequenceFragmentationPanel strip, String name, Object value) throws Exception {
+        java.lang.reflect.Field field = SequenceFragmentationPanel.class.getDeclaredField(name);
+        field.setAccessible(true);
+        field.set(strip, value);
+    }
+
+    /**
+     * Applies the user-chosen sequence-strip font size and bold style to a freshly created strip
+     * (created at the default Arial PLAIN 16). The strip computes its layout from this font when it
+     * paints, and the confidence track reads the same font, so this styles both consistently.
+     * @param strip the sequence strip to style
+     */
+    private void applySequenceFontStyle(SequenceFragmentationPanel strip) {
+        if (sequenceFontSize != 16) {
+            strip.updateFontSize(sequenceFontSize - 16); // relative delta from the default 16
+        }
+        if (boldSequenceFont) {
+            try {
+                Font base = (Font) readSeqPanelField(strip, "iBaseFont");
+                writeSeqPanelField(strip, "iBaseFont", base.deriveFont(Font.BOLD));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -2654,6 +2677,22 @@ public class SpectrumMainPanel extends JPanel {
      */
     public void setConfidenceScoreFontSize(int size) {
         this.confidenceScoreFontSize = size;
+        updateSpectrum();
+    }
+
+    /**
+     * @return whether the sequence strip and confidence-track amino acids are drawn bold.
+     */
+    public boolean isBoldSequenceFont() {
+        return boldSequenceFont;
+    }
+
+    /**
+     * Sets whether the sequence strip and confidence-track amino acids are drawn bold, and re-renders.
+     * @param bold whether to use a bold font
+     */
+    public void setBoldSequenceFont(boolean bold) {
+        this.boldSequenceFont = bold;
         updateSpectrum();
     }
 
