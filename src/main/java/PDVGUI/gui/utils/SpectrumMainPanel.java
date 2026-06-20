@@ -2032,6 +2032,7 @@ public class SpectrumMainPanel extends JPanel {
             if (mirrorSpectrumPanel != null) {
                 mirrorSpectrumPanel.setBounds(0, 75, width, height - 85);
                 rightAlignStrip(sequenceFragmentationPanelMirror, false);
+                rightAlignStrip(mirrorFragmentPanel, false);
                 reanchorBottomOverlay(mirrorFragmentPanel);
                 reanchorTrackOnResize(mirrorTrack);
                 mirrorJLayeredPane.revalidate();
@@ -2041,6 +2042,7 @@ public class SpectrumMainPanel extends JPanel {
             if (checkPeptideSpectrumPanel != null) {
                 checkPeptideSpectrumPanel.setBounds(0, 75, width, height - 85);
                 rightAlignStrip(sequenceFragmentationPanelCheck, false);
+                rightAlignStrip(checkFragmentPanel, false);
                 reanchorBottomOverlay(checkFragmentPanel);
                 reanchorTrackOnResize(checkTrack);
                 checkPeptideJLayeredPane.revalidate();
@@ -2061,17 +2063,17 @@ public class SpectrumMainPanel extends JPanel {
     }
 
     /**
-     * Re-anchors a bottom-aligned sequence-fragmentation overlay to the bottom of the resized
-     * container, preserving its width/height and horizontal position. Mirrors the "isDown" branch
-     * of {@link #zoomAction}.
+     * Re-anchors a bottom-aligned sequence-fragmentation overlay's vertical position to just above
+     * the toolbar, preserving its x (and width/height). The x is owned by {@link #rightAlignStrip},
+     * which measures the content width with realized metrics; setting x here too would override that
+     * with a possibly non-realized measurement and leave the bottom strip out of line with the top.
      * @param overlay bottom overlay to reposition (may be null if the active view has none)
      */
     private void reanchorBottomOverlay(SequenceFragmentationPanel overlay) {
         if (overlay == null) {
             return;
         }
-        int x = Math.max(5, spectrumShowPanel.getWidth() - 15 - seqContentRightEdge(overlay));
-        overlay.setBounds(x, bottomOverlayY(overlay), overlay.getWidth(), overlay.getHeight());
+        overlay.setBounds(overlay.getX(), bottomOverlayY(overlay), overlay.getWidth(), overlay.getHeight());
     }
 
     /**
@@ -2247,15 +2249,60 @@ public class SpectrumMainPanel extends JPanel {
 
     /**
      * Where a strip's drawn content ends (in logical pixels from its left edge), used to right-align
-     * it. Uses the strip's own preferred width -- deterministic (same peptide always gives the same
-     * value) and never clips the sequence. It over-reports the true painted edge by a margin that,
-     * on HiDPI displays, varies slightly with sequence length, so the right edge can shift a little
-     * between very different-length peptides. Measuring the exact painted edge offscreen was tried
-     * extensively but cannot reliably reproduce a scaled display's on-screen text layout.
-     * @param strip the sequence strip
-     * @return the content's right edge offset from the strip's left edge
+     * it. Measures the actual painted right edge by rendering the strip offscreen at the display's
+     * scale with its desktop font hints, then dividing back to logical pixels. This is:
+     * <ul>
+     *   <li>deterministic -- it does not depend on the component's realization/layout state (unlike
+     *       getPreferredSize().width, which changes over the first layout cycles), so two strips for
+     *       the same peptide always get the same value and line up regardless of when each is measured;
+     *   <li>scale/OS robust -- it renders with the active monitor's scale and the platform's font
+     *       hints, so the measured edge matches the on-screen text layout on any DPI or OS (a 1x
+     *       render does not, which is why earlier attempts drifted with sequence length on HiDPI).
+     * </ul>
+     * Falls back to the preferred width if rendering is unavailable.
+     * @param strip the sequence strip (must be sized)
+     * @return the content's right edge offset from the strip's left edge, in logical pixels
      */
     private int seqContentRightEdge(SequenceFragmentationPanel strip) {
+        int boxW = Math.max(strip.getWidth(), strip.getPreferredSize().width) + 40;
+        int boxH = strip.getHeight() > 0 ? strip.getHeight() : 160;
+        if (boxW <= 40) {
+            return strip.getPreferredSize().width;
+        }
+        try {
+            double scale = 1.0;
+            java.awt.GraphicsConfiguration gc = strip.getGraphicsConfiguration();
+            if (gc == null) {
+                gc = getGraphicsConfiguration();
+            }
+            if (gc != null) {
+                double sx = gc.getDefaultTransform().getScaleX();
+                if (sx > 0) {
+                    scale = sx;
+                }
+            }
+            int iw = (int) Math.ceil(boxW * scale);
+            int ih = (int) Math.ceil(boxH * scale);
+            java.awt.image.BufferedImage img = new java.awt.image.BufferedImage(iw, ih, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = img.createGraphics();
+            g.scale(scale, scale);
+            java.util.Map<?, ?> hints = (java.util.Map<?, ?>) Toolkit.getDefaultToolkit().getDesktopProperty("awt.font.desktophints");
+            if (hints != null) {
+                g.addRenderingHints(hints);
+            }
+            strip.paint(g);
+            g.dispose();
+            int[] px = img.getRGB(0, 0, iw, ih, null, 0, iw);
+            for (int x = iw - 1; x >= 0; x--) {
+                for (int y = 0; y < ih; y++) {
+                    if ((px[y * iw + x] >>> 24) != 0) { // non-transparent pixel
+                        return (int) Math.ceil(x / scale);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return strip.getPreferredSize().width;
     }
 
@@ -2327,8 +2374,9 @@ public class SpectrumMainPanel extends JPanel {
                 rightAlignStrip(topStrip, false);
             }
             if (bottomStrip != null) {
-                // Re-anchor both x and y: now that the view is showing and laid out, its layered pane
-                // is sized, so bottomOverlayY can place the strip just above the toolbar correctly.
+                // Now that the view is showing and laid out: right-align x with realized metrics
+                // (same as the top strip, so they line up), then drop y to just above the toolbar.
+                rightAlignStrip(bottomStrip, false);
                 reanchorBottomOverlay(bottomStrip);
             }
         });
