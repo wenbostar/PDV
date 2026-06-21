@@ -48,7 +48,6 @@ import java.net.URLDecoder;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -83,6 +82,12 @@ public class PDVMainClass extends JFrame {
     private JComboBox precursorIonUnit;
     private JComboBox sortColumnJCombox;
     private JComboBox searchTypeComboBox;
+    private JComboBox decimalPlacesJComboBox;
+    /**
+     * Number of decimal places shown for numeric columns in the PSM table
+     * (-1 shows the original full-precision value)
+     */
+    private int tableDecimalPlaces = 2;
     private String[] searchType = new String[]{"Peptide (String)","Spectrum (String)", "Peptide (File)", "Spectrum (File)"};
 
     /**
@@ -572,20 +577,14 @@ public class PDVMainClass extends JFrame {
             private static final long serialVersionUID = 1L;
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column){
-                Component c = null;
 
-                Pattern pattern = Pattern.compile("-?[0-9]+\\.?[0-9]*");
+                Object display = value;
 
-                String s = String.valueOf(value);
-
-                if (pattern.matcher(s).matches()){
-                    Double d = (Double)value;
-                    s = String.valueOf(d);
+                if (value instanceof Double){
+                    display = formatTableNumber((Double) value);
                 }
 
-                c = super.getTableCellRendererComponent(table, s, isSelected, hasFocus, row, column);
-
-                return c;
+                return super.getTableCellRendererComponent(table, display, isSelected, hasFocus, row, column);
             }
         });
 
@@ -652,6 +651,7 @@ public class PDVMainClass extends JFrame {
         checkSpectrumJTextField = new JTextField();
         searchButton = new JButton();
         searchTypeComboBox = new JComboBox();
+        decimalPlacesJComboBox = new JComboBox();
         psmsJPanel = new JPanel();
         spectrumShowJPanel = new JPanel();
         backgroundPanel = new JPanel();
@@ -1064,8 +1064,20 @@ public class PDVMainClass extends JFrame {
         buttonCheck();
         nextJButton.addActionListener(this::nextJButtonActionPerformed);
 
+        decimalPlacesJComboBox.setModel(new DefaultComboBoxModel(new String[]{"all", "1", "2", "3", "4"}));
+        decimalPlacesJComboBox.setSelectedIndex(tableDecimalPlaces < 0 ? 0 : tableDecimalPlaces);
+        decimalPlacesJComboBox.setToolTipText("Decimal places shown for numeric columns");
+        decimalPlacesJComboBox.setMaximumSize(new Dimension(55, 20));
+        decimalPlacesJComboBox.addActionListener(this::decimalPlacesJComboBoxActionPerformed);
+
+        JLabel decimalPlacesJLabel = new JLabel("Decimals");
+        decimalPlacesJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
+        decimalPlacesJLabel.setToolTipText("Decimal places shown for numeric columns");
+
         JPanel psmControlsJPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         psmControlsJPanel.setOpaque(false);
+        psmControlsJPanel.add(decimalPlacesJLabel);
+        psmControlsJPanel.add(decimalPlacesJComboBox);
         psmControlsJPanel.add(allSelectedJCheckBox);
         psmControlsJPanel.add(allSelectedJLabel);
         psmControlsJPanel.add(pageSelectNumJTextField);
@@ -3352,6 +3364,47 @@ public class PDVMainClass extends JFrame {
 
         spectrumJTable.requestFocus();
         spectrumJTable.setRowSelectionInterval(0, 0);
+    }
+
+    /**
+     * Update the number of decimal places shown for numeric PSM-table columns
+     * @param evt Action event
+     */
+    private void decimalPlacesJComboBoxActionPerformed(ActionEvent evt){
+        int selected = decimalPlacesJComboBox.getSelectedIndex();
+        tableDecimalPlaces = (selected == 0) ? -1 : selected;
+        spectrumJTable.repaint();
+    }
+
+    /**
+     * Formats a numeric PSM-table value using the user-selected number of decimal
+     * places. Whole numbers (e.g. count columns surfaced as integer scores stored
+     * as doubles) are shown without any decimals. Very small or very large
+     * magnitudes fall back to scientific notation so that tiny scores (e.g.
+     * e-values) are not collapsed to zero.
+     * @param value the cell value
+     * @return the formatted text
+     */
+    private String formatTableNumber(double value){
+        if (Double.isNaN(value) || Double.isInfinite(value)){
+            return String.valueOf(value);
+        }
+        // Whole-number counts (including integer scores normalized to doubles) show
+        // without decimals in every mode (including "all").
+        if (value == Math.rint(value) && Math.abs(value) < 1e15){
+            return String.valueOf((long) value);
+        }
+        // "all": show the original full-precision value.
+        if (tableDecimalPlaces < 0){
+            return String.valueOf(value);
+        }
+        double abs = Math.abs(value);
+        // Use fixed notation, unless the value is so small that it would round to
+        // zero at the chosen precision, or so large that fixed notation is unwieldy.
+        if (abs >= 0.5 * Math.pow(10, -tableDecimalPlaces) && abs < 1e7){
+            return String.format(java.util.Locale.US, "%." + tableDecimalPlaces + "f", value);
+        }
+        return String.format(java.util.Locale.US, "%." + tableDecimalPlaces + "e", value);
     }
 
     /**
