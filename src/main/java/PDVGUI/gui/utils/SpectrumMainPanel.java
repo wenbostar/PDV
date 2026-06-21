@@ -177,6 +177,10 @@ public class SpectrumMainPanel extends JPanel {
      */
     private boolean boldSequenceFont = false;
     /**
+     * Font size (points) of the b/y ion labels on the sequence strip. 10 is the strip's default.
+     */
+    private int ionLabelFontSize = 10;
+    /**
      * Height of the floating confidence bar track (score row, bars, and amino-acid label row).
      */
     private static final int CONF_TRACK_HEIGHT = 74;
@@ -2266,9 +2270,10 @@ public class SpectrumMainPanel extends JPanel {
     }
 
     /**
-     * Applies the user-chosen sequence-strip font size and bold style to a freshly created strip
-     * (created at the default Arial PLAIN 16). The strip computes its layout from this font when it
-     * paints, and the confidence track reads the same font, so this styles both consistently.
+     * Applies the user-chosen sequence-strip font size, bold style and ion-label size to a freshly
+     * created strip (created at the default Arial PLAIN 16 residues / Arial BOLD 10 ion labels). The
+     * strip computes its layout from these fonts when it paints, and the confidence track reads the
+     * residue font, so this styles both consistently.
      * @param strip the sequence strip to style
      */
     private void applySequenceFontStyle(SequenceFragmentationPanel strip) {
@@ -2282,6 +2287,16 @@ public class SpectrumMainPanel extends JPanel {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+        try {
+            // updateFontSize above also rescales the ion-label font; set its size explicitly so the
+            // ion labels are controlled independently of the residue size (keeping their bold style).
+            Font ion = (Font) readSeqPanelField(strip, "ionFont");
+            if (ion.getSize() != ionLabelFontSize) {
+                writeSeqPanelField(strip, "ionFont", ion.deriveFont((float) ionLabelFontSize));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -2693,6 +2708,22 @@ public class SpectrumMainPanel extends JPanel {
      */
     public void setBoldSequenceFont(boolean bold) {
         this.boldSequenceFont = bold;
+        updateSpectrum();
+    }
+
+    /**
+     * @return the font size (points) of the b/y ion labels on the sequence strip.
+     */
+    public int getIonLabelFontSize() {
+        return ionLabelFontSize;
+    }
+
+    /**
+     * Sets the font size of the b/y ion labels on the sequence strip, and re-renders.
+     * @param size font size in points
+     */
+    public void setIonLabelFontSize(int size) {
+        this.ionLabelFontSize = size;
         updateSpectrum();
     }
 

@@ -34,6 +34,7 @@ public class AnnotationSettingsDialog extends JDialog {
     private JSpinner backgroundPeakWidthJSpinner;
     private JSpinner limitJSpinner;
     private JSpinner sequenceFontSizeJSpinner;
+    private JSpinner ionLabelFontSizeJSpinner;
     private JSpinner scoreFontSizeJSpinner;
     private JCheckBox boldAminoAcidsCheckBox;
     private JCheckBox showConfidenceTrackCheckBox;
@@ -93,6 +94,7 @@ public class AnnotationSettingsDialog extends JDialog {
         limitJSpinner.setValue(annotationSettings.getAnnotationIntensityFilter());
 
         sequenceFontSizeJSpinner.setValue(spectrumMainPanel.getSequenceFontSize());
+        ionLabelFontSizeJSpinner.setValue(spectrumMainPanel.getIonLabelFontSize());
         scoreFontSizeJSpinner.setValue(spectrumMainPanel.getConfidenceScoreFontSize());
         boldAminoAcidsCheckBox.setSelected(spectrumMainPanel.isBoldSequenceFont());
         showConfidenceTrackCheckBox.setSelected(spectrumMainPanel.isShowConfidenceTrack());
@@ -124,6 +126,7 @@ public class AnnotationSettingsDialog extends JDialog {
         backgroundPeakWidthJSpinner = new JSpinner();
         limitJSpinner = new JSpinner();
         sequenceFontSizeJSpinner = new JSpinner();
+        ionLabelFontSizeJSpinner = new JSpinner();
         scoreFontSizeJSpinner = new JSpinner();
         boldAminoAcidsCheckBox = new JCheckBox();
         showConfidenceTrackCheckBox = new JCheckBox();
@@ -137,6 +140,7 @@ public class AnnotationSettingsDialog extends JDialog {
         JLabel limitJLabel = new JLabel();
         JPanel fontSettingsJPanel = new JPanel();
         JLabel sequenceFontLabel = new JLabel();
+        JLabel ionLabelFontLabel = new JLabel();
         JLabel scoreFontLabel = new JLabel();
         JPanel backgroundPanel = new JPanel();
         JButton okButton = new JButton();
@@ -363,6 +367,12 @@ public class AnnotationSettingsDialog extends JDialog {
         sequenceFontSizeJSpinner.setModel(new SpinnerNumberModel(16, 14, 30, 1));
         sequenceFontSizeJSpinner.addChangeListener(this::sequenceFontSizeValueChanged);
 
+        ionLabelFontLabel.setText("Strip Ion Label Size");
+        ionLabelFontLabel.setFont(PDVFonts.of(Font.PLAIN, 11f));
+        ionLabelFontLabel.setToolTipText("Font size of the b/y ion labels on the sequence strip.");
+        ionLabelFontSizeJSpinner.setModel(new SpinnerNumberModel(10, 6, 24, 1));
+        ionLabelFontSizeJSpinner.addChangeListener(this::ionLabelFontSizeValueChanged);
+
         boldAminoAcidsCheckBox.setText("Bold amino acids");
         boldAminoAcidsCheckBox.setFont(PDVFonts.of(Font.PLAIN, 11f));
         boldAminoAcidsCheckBox.setOpaque(false);
@@ -398,6 +408,10 @@ public class AnnotationSettingsDialog extends JDialog {
                                                 .addComponent(sequenceFontLabel)
                                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(sequenceFontSizeJSpinner, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(fontSettingsJPanelLayout.createSequentialGroup()
+                                                .addComponent(ionLabelFontLabel)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(ionLabelFontSizeJSpinner, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE))
                                         .addComponent(boldAminoAcidsCheckBox)
                                         .addComponent(showConfidenceTrackCheckBox)
                                         .addComponent(showTrackResiduesCheckBox)
@@ -414,6 +428,10 @@ public class AnnotationSettingsDialog extends JDialog {
                                 .addGroup(fontSettingsJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
                                         .addComponent(sequenceFontLabel)
                                         .addComponent(sequenceFontSizeJSpinner, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(fontSettingsJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                                        .addComponent(ionLabelFontLabel)
+                                        .addComponent(ionLabelFontSizeJSpinner, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(boldAminoAcidsCheckBox)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
@@ -643,6 +661,14 @@ public class AnnotationSettingsDialog extends JDialog {
      */
     private void sequenceFontSizeValueChanged(ChangeEvent evt) {
         spectrumMainPanel.setSequenceFontSize((Integer) sequenceFontSizeJSpinner.getValue());
+    }
+
+    /**
+     * Sequence strip ion-label font size changed.
+     * @param evt change event
+     */
+    private void ionLabelFontSizeValueChanged(ChangeEvent evt) {
+        spectrumMainPanel.setIonLabelFontSize((Integer) ionLabelFontSizeJSpinner.getValue());
     }
 
     /**
