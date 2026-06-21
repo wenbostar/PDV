@@ -35,6 +35,25 @@
             </extension>
         </extensions>
 
+        <!-- Resources: filter project.properties so ${project.version} is substituted from
+             pom.xml at build time; copy everything else (icons, conf data) unfiltered. -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>project.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>project.properties</exclude>
+                </excludes>
+            </resource>
+        </resources>
+
         <!-- Plugins -->
         <plugins>
             <!-- Compiler plugin -->

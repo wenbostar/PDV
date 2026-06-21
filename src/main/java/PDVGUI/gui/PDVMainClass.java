@@ -44,7 +44,6 @@ import javax.swing.text.DefaultEditorKit;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.net.URLDecoder;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
@@ -278,7 +277,7 @@ public class PDVMainClass extends JFrame {
     /**
      * Version
      */
-    private static final String VERSION = "2.2.3";
+    private static final String VERSION = readVersion();
 
     /**
      * Main class
@@ -496,41 +495,45 @@ public class PDVMainClass extends JFrame {
     }
 
     /**
+     * Reads the application version from project.properties, which Maven populates
+     * from pom.xml (${project.version}) via resource filtering at build time.
+     * @return the version string
+     */
+    private static String readVersion(){
+        Properties properties = new Properties();
+        try (InputStream inputStream = PDVMainClass.class.getClassLoader().getResourceAsStream("project.properties")) {
+            if (inputStream != null) {
+                properties.load(inputStream);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return properties.getProperty("version", "dev");
+    }
+
+    /**
      * Get JarFile path
      * @return path
      */
     public static String getJarFilePath(){
-        String jarPath = (new PDVMainClass()).getClass().getResource("PDVMainClass.class").getPath().split("!")[0];
-
-        if (jarPath.lastIndexOf("/" + "PDV-" + VERSION) != -1) {
-            if (jarPath.startsWith("file:")) {
-                jarPath = jarPath.substring("file:".length(), jarPath.lastIndexOf("/" + "PDV-" + VERSION));
-            } else {
-                jarPath = jarPath.substring(0, jarPath.lastIndexOf("/" + "PDV-" + VERSION));
-            }
-
-            if (System.getProperty("os.name").lastIndexOf("Windows") != -1) {
-                jarPath = jarPath.replace("/", "\\");
-            }
-        }else {
-            jarPath = ".";
-        }
-
         try {
-            if (!new File(jarPath).exists()) {
-                jarPath = URLDecoder.decode(jarPath, "UTF-8");
-            }
-            if (!new File(jarPath).exists()) {
-                System.err.println(jarPath + " not found!");
-                FileNotFoundException ex = new FileNotFoundException(jarPath + " not found!");
-                ex.printStackTrace();
-            }
-        } catch (UnsupportedEncodingException ex) {
-            System.err.println("Error reading file " + jarPath + "!");
-            ex.printStackTrace();
-        }
+            // Resolve this class's code source location (the jar when packaged, or the
+            // compiled-classes directory when run from an IDE) independently of the
+            // process working directory, so the bundled resources load no matter which
+            // folder the jar is launched from. new File(URI) handles URL decoding and
+            // Windows drive letters correctly.
+            File codeSource = new File(PDVMainClass.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 
-        return jarPath;
+            if (codeSource.isFile()) { // packaged jar: the resources folder sits beside it
+                return codeSource.getParentFile().getAbsolutePath();
+            }
+
+            // Run from compiled classes (IDE): resources are resolved against the working directory.
+            return ".";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ".";
+        }
     }
 
     /**
@@ -573,6 +576,11 @@ public class PDVMainClass extends JFrame {
         selectedColumn.setIdentifier("Selected");
         selectedColumn.setHeaderValue("✓");
 
+        // These columns hold short values, so auto-resize squeezes them narrower than
+        // their header; widen them so "RT (min)" and "Charge" are not truncated.
+        fitColumnWidthToHeader("RT (min)");
+        fitColumnWidthToHeader("Charge");
+
         spectrumJTable.setDefaultRenderer(Double.class, new DefaultTableCellRenderer(){
             private static final long serialVersionUID = 1L;
             @Override
@@ -590,6 +598,24 @@ public class PDVMainClass extends JFrame {
 
         ((DefaultTableCellRenderer)spectrumJTable.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
 
+    }
+
+    /**
+     * Widens a column so its full header text stays visible (with room for the sort
+     * arrow) instead of being truncated when the table auto-resizes its columns.
+     * @param identifier the column identifier
+     */
+    private void fitColumnWidthToHeader(Object identifier){
+        TableColumn column = spectrumJTable.getColumn(identifier);
+        JTableHeader header = spectrumJTable.getTableHeader();
+        // Measure with the actual (bold) header font rather than the table's cell font,
+        // otherwise the header text is under-measured and still clips.
+        java.awt.FontMetrics fm = header.getFontMetrics(header.getFont());
+        int textWidth = fm.stringWidth(String.valueOf(column.getHeaderValue()));
+        int width = textWidth + 30; // padding for the sort arrow and header insets
+        column.setMinWidth(width);
+        column.setPreferredWidth(width);
+        column.setMaxWidth(width);
     }
 
     /**
@@ -2662,6 +2688,16 @@ public class PDVMainClass extends JFrame {
 
         updateTable();
 
+        // Give the wide text columns a readable default width in both the mzTab and the
+        // plain database paths (previously only set for mzTab, which left the Sequence
+        // column squeezed to its default width when many score columns were present).
+        spectrumJTable.getColumn("Title").setPreferredWidth(250);
+        spectrumJTable.getColumn("Title").setMinWidth(10);
+        spectrumJTable.getColumn("Title").setMaxWidth(500);
+        spectrumJTable.getColumn("Sequence").setPreferredWidth(250);
+        spectrumJTable.getColumn("Sequence").setMinWidth(100);
+        spectrumJTable.getColumn("Sequence").setMaxWidth(500);
+
         if (isMztab) {
             String key = "Key";
             spectrumJTable.getColumn(key).setPreferredWidth(50);
@@ -2671,18 +2707,7 @@ public class PDVMainClass extends JFrame {
             spectrumJTable.getColumn(key).setPreferredWidth(50);
             spectrumJTable.getColumn(key).setMinWidth(40);
             spectrumJTable.getColumn(key).setMaxWidth(100);
-            key = "Charge";
-            spectrumJTable.getColumn(key).setPreferredWidth(50);
-            spectrumJTable.getColumn(key).setMinWidth(50);
-            spectrumJTable.getColumn(key).setMaxWidth(50);
-            key = "Title";
-            spectrumJTable.getColumn(key).setPreferredWidth(250);
-            spectrumJTable.getColumn(key).setMinWidth(10);
-            spectrumJTable.getColumn(key).setMaxWidth(500);
-            key = "Sequence";
-            spectrumJTable.getColumn(key).setPreferredWidth(250);
-            spectrumJTable.getColumn(key).setMinWidth(100);
-            spectrumJTable.getColumn(key).setMaxWidth(500);
+            fitColumnWidthToHeader("Charge");
 
             for (String newKey : columnToSelected.keySet()) {
                 if (!columnToSelected.get(newKey)) {
@@ -2694,9 +2719,10 @@ public class PDVMainClass extends JFrame {
                     spectrumJTable.getColumn(newKey).setMaxWidth(400);
                 }
             }
-            spectrumJTable.revalidate();
-            spectrumJTable.repaint();
         }
+
+        spectrumJTable.revalidate();
+        spectrumJTable.repaint();
     }
 
     /**
