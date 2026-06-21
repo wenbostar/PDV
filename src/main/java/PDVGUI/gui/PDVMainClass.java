@@ -87,6 +87,12 @@ public class PDVMainClass extends JFrame {
      * (-1 shows the original full-precision value)
      */
     private int tableDecimalPlaces = 2;
+    private JToggleButton fitColumnsJToggleButton;
+    /**
+     * Column widths saved before fitting to content, keyed by column model index ->
+     * {min, preferred, max}, so the fit-to-window layout can be restored
+     */
+    private final HashMap<Integer, int[]> savedColumnWidths = new HashMap<>();
     private String[] searchType = new String[]{"Peptide (String)","Spectrum (String)", "Peptide (File)", "Spectrum (File)"};
 
     /**
@@ -278,6 +284,15 @@ public class PDVMainClass extends JFrame {
      * Version
      */
     private static final String VERSION = readVersion();
+
+    /**
+     * Maximum width (px) a column may reach when fitting to content
+     */
+    private static final int MAX_FIT_COLUMN_WIDTH = 400;
+    /**
+     * Number of rows sampled when measuring content width for column fitting
+     */
+    private static final int FIT_SAMPLE_ROWS = 50;
 
     /**
      * Main class
@@ -619,6 +634,97 @@ public class PDVMainClass extends JFrame {
     }
 
     /**
+     * Toggle between fitting columns to their content (with a horizontal scroll bar)
+     * and fitting the table to the window.
+     * @param evt Action event
+     */
+    private void fitColumnsJToggleButtonActionPerformed(ActionEvent evt){
+        if (fitColumnsJToggleButton.isSelected()) {
+            if (savedColumnWidths.isEmpty()) {
+                saveColumnWidths();
+            }
+            spectrumJTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+            fitColumnsToContent();
+        } else {
+            spectrumJTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
+            restoreColumnWidths();
+            savedColumnWidths.clear();
+            spectrumJTable.revalidate();
+            spectrumJTable.repaint();
+        }
+    }
+
+    /**
+     * Remembers the current min/preferred/max width of every column (keyed by model
+     * index) so the fit-to-window layout can be restored later.
+     */
+    private void saveColumnWidths(){
+        savedColumnWidths.clear();
+        TableColumnModel columnModel = spectrumJTable.getColumnModel();
+        for (int i = 0; i < columnModel.getColumnCount(); i++) {
+            TableColumn column = columnModel.getColumn(i);
+            savedColumnWidths.put(column.getModelIndex(),
+                    new int[]{column.getMinWidth(), column.getPreferredWidth(), column.getMaxWidth()});
+        }
+    }
+
+    /**
+     * Restores the column widths saved by {@link #saveColumnWidths()}.
+     */
+    private void restoreColumnWidths(){
+        TableColumnModel columnModel = spectrumJTable.getColumnModel();
+        for (int i = 0; i < columnModel.getColumnCount(); i++) {
+            TableColumn column = columnModel.getColumn(i);
+            int[] widths = savedColumnWidths.get(column.getModelIndex());
+            if (widths == null) {
+                continue;
+            }
+            column.setMinWidth(0);
+            column.setMaxWidth(Integer.MAX_VALUE);
+            column.setPreferredWidth(widths[1]);
+            column.setMinWidth(widths[0]);
+            column.setMaxWidth(widths[2]);
+        }
+    }
+
+    /**
+     * Sizes each visible column to fit its header and a sample of its cell contents,
+     * capped at {@link #MAX_FIT_COLUMN_WIDTH}. Hidden columns (max width 0) are left
+     * collapsed.
+     */
+    private void fitColumnsToContent(){
+        JTableHeader header = spectrumJTable.getTableHeader();
+        java.awt.FontMetrics headerMetrics = header.getFontMetrics(header.getFont());
+        TableColumnModel columnModel = spectrumJTable.getColumnModel();
+        int sampleRows = Math.min(spectrumJTable.getRowCount(), FIT_SAMPLE_ROWS);
+
+        for (int viewColumn = 0; viewColumn < columnModel.getColumnCount(); viewColumn++) {
+            TableColumn column = columnModel.getColumn(viewColumn);
+
+            if (column.getMaxWidth() == 0) {
+                continue; // intentionally hidden column
+            }
+
+            int width = headerMetrics.stringWidth(String.valueOf(column.getHeaderValue())) + 30;
+
+            for (int row = 0; row < sampleRows; row++) {
+                TableCellRenderer renderer = spectrumJTable.getCellRenderer(row, viewColumn);
+                Component cell = spectrumJTable.prepareRenderer(renderer, row, viewColumn);
+                width = Math.max(width, cell.getPreferredSize().width + 6);
+            }
+
+            width = Math.min(width, MAX_FIT_COLUMN_WIDTH);
+
+            column.setMinWidth(15);
+            column.setMaxWidth(Integer.MAX_VALUE);
+            column.setPreferredWidth(width);
+        }
+
+        spectrumJTable.revalidate();
+        spectrumJTable.repaint();
+    }
+
+    /**
      * Init all GUI components
      */
     private void initComponents(){
@@ -678,6 +784,7 @@ public class PDVMainClass extends JFrame {
         searchButton = new JButton();
         searchTypeComboBox = new JComboBox();
         decimalPlacesJComboBox = new JComboBox();
+        fitColumnsJToggleButton = new JToggleButton();
         psmsJPanel = new JPanel();
         spectrumShowJPanel = new JPanel();
         backgroundPanel = new JPanel();
@@ -1110,10 +1217,18 @@ public class PDVMainClass extends JFrame {
         decimalPlacesJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
         decimalPlacesJLabel.setToolTipText("Decimal places shown for numeric columns");
 
+        fitColumnsJToggleButton.setText("Fit columns");
+        fitColumnsJToggleButton.setFont(PDVFonts.of(Font.PLAIN, 12f));
+        fitColumnsJToggleButton.setFocusPainted(false);
+        fitColumnsJToggleButton.setSelected(true);
+        fitColumnsJToggleButton.setToolTipText("Fit each column to its content (up to 400px) with a horizontal scroll bar; click again to fit the window");
+        fitColumnsJToggleButton.addActionListener(this::fitColumnsJToggleButtonActionPerformed);
+
         JPanel psmControlsJPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         psmControlsJPanel.setOpaque(false);
         psmControlsJPanel.add(decimalPlacesJLabel);
         psmControlsJPanel.add(decimalPlacesJComboBox);
+        psmControlsJPanel.add(fitColumnsJToggleButton);
         psmControlsJPanel.add(allSelectedJCheckBox);
         psmControlsJPanel.add(allSelectedJLabel);
         psmControlsJPanel.add(pageSelectNumJTextField);
@@ -2940,6 +3055,17 @@ public class PDVMainClass extends JFrame {
                 spectrumJTable.repaint();
 
                 psmsJPanel.repaint();
+
+                // Re-fit columns to the new page's content while fit-to-content mode is on.
+                if (fitColumnsJToggleButton != null && fitColumnsJToggleButton.isSelected()) {
+                    SwingUtilities.invokeLater(() -> {
+                        if (savedColumnWidths.isEmpty()) {
+                            saveColumnWidths();
+                        }
+                        spectrumJTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+                        fitColumnsToContent();
+                    });
+                }
 
             }
         }.start();
