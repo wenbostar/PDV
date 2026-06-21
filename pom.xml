@@ -208,7 +208,29 @@
                     <artifactId>sqlite-jdbc</artifactId>
                     <groupId>org.xerial</groupId>
                 </exclusion>
+                <!-- Replaced by modern Apache Batik/FOP below (image/SVG/PDF export). -->
+                <exclusion>
+                    <artifactId>batik-all</artifactId>
+                    <groupId>batik</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>pdf-transcoder</artifactId>
+                    <groupId>batik</groupId>
+                </exclusion>
             </exclusions>
+        </dependency>
+
+        <!-- Image/SVG/PDF export (PDVGUI.utils.Export). Apache FOP brings a matching modern Batik
+             (transcoder, bridge, anim/dom, codec); add batik-svggen for the SVGGraphics2D we use. -->
+        <dependency>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>fop</artifactId>
+            <version>2.10</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-svggen</artifactId>
+            <version>1.18</version>
         </dependency>
 
         <dependency>

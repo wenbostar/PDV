@@ -14,7 +14,8 @@ import com.twelvemonkeys.imageio.metadata.tiff.Rational;
 import com.twelvemonkeys.imageio.metadata.tiff.TIFF;
 import com.twelvemonkeys.imageio.metadata.tiff.TIFFEntry;
 import com.twelvemonkeys.imageio.plugins.tiff.TIFFImageMetadata;
-import org.apache.batik.dom.svg.SVGDOMImplementation;
+import org.apache.batik.anim.dom.SVGDOMImplementation;
+import org.apache.batik.svggen.SVGGeneratorContext;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.apache.batik.transcoder.*;
 import org.apache.batik.transcoder.image.PNGTranscoder;
@@ -71,7 +72,10 @@ public class Export {
         String svgNS = "http://www.w3.org/2000/svg";
         SVGDocument svgDocument = (SVGDocument) domImplementation.createDocument(svgNS, "svg", null);
 
-        SVGGraphics2D svgGraphics2D = new SVGGraphics2D(svgDocument);
+        // Render text as vector outlines (not <text> elements). The old FOP-based pdf-transcoder did
+        // this implicitly, so the exported font looked like the on-screen Arial; modern FOP instead
+        // substitutes a base-14 font (Times) for an unresolved family. Outlines keep the exact look.
+        SVGGraphics2D svgGraphics2D = new SVGGraphics2D(SVGGeneratorContext.createDefault(svgDocument), true);
         svgGraphics2D.setSVGCanvasSize(bounds.getSize());
 
         chart.draw(svgGraphics2D, bounds);
@@ -121,20 +125,23 @@ public class Export {
             if (imageType == ImageType.PDF) {
 
                 Transcoder pdfTranscoder = new PDFTranscoder();
-                pdfTranscoder.addTranscodingHint(PDFTranscoder.KEY_DEVICE_RESOLUTION, (float) Toolkit.getDefaultToolkit().getScreenResolution());
+                // Size the PDF page with the pixel-to-mm hint (as PNG/TIFF do). KEY_DEVICE_RESOLUTION
+                // does NOT control the page size, leaving it scaled by the screen DPI (2x too large
+                // on a HiDPI display).
+                pdfTranscoder.addTranscodingHint(PDFTranscoder.KEY_PIXEL_UNIT_TO_MILLIMETER, Float.valueOf(df.format(25.4 / Toolkit.getDefaultToolkit().getScreenResolution())));
                 pdfTranscoder.transcode(svgInputFile, output);
 
             } else if (imageType == ImageType.JPEG) {
 
                 Transcoder tiffTranscoder = new TIFFTranscoder();
-                tiffTranscoder.addTranscodingHint(TIFFTranscoder.KEY_PIXEL_UNIT_TO_MILLIMETER, new Float(df.format(25.4 / Toolkit.getDefaultToolkit().getScreenResolution())));
+                tiffTranscoder.addTranscodingHint(TIFFTranscoder.KEY_PIXEL_UNIT_TO_MILLIMETER, Float.valueOf(df.format(25.4 / Toolkit.getDefaultToolkit().getScreenResolution())));
                 tiffTranscoder.addTranscodingHint(TIFFTranscoder.KEY_FORCE_TRANSPARENT_WHITE, true);
                 tiffTranscoder.transcode(svgInputFile, output);
 
             } else if (imageType == ImageType.PNG) {
 
                 Transcoder pngTranscoder = new PNGTranscoder();
-                pngTranscoder.addTranscodingHint(PNGTranscoder.KEY_PIXEL_UNIT_TO_MILLIMETER, new Float(df.format(25.4 / Toolkit.getDefaultToolkit().getScreenResolution())));
+                pngTranscoder.addTranscodingHint(PNGTranscoder.KEY_PIXEL_UNIT_TO_MILLIMETER, Float.valueOf(df.format(25.4 / Toolkit.getDefaultToolkit().getScreenResolution())));
                 pngTranscoder.transcode(svgInputFile, output);
 
             } else if (imageType == ImageType.SVG) {
@@ -165,7 +172,10 @@ public class Export {
         String svgNS = "http://www.w3.org/2000/svg";
         SVGDocument svgDocument = (SVGDocument) domImplementation.createDocument(svgNS, "svg", null);
 
-        SVGGraphics2D svgGraphics2D = new SVGGraphics2D(svgDocument);
+        // Render text as vector outlines (not <text> elements). The old FOP-based pdf-transcoder did
+        // this implicitly, so the exported font looked like the on-screen Arial; modern FOP instead
+        // substitutes a base-14 font (Times) for an unresolved family. Outlines keep the exact look.
+        SVGGraphics2D svgGraphics2D = new SVGGraphics2D(SVGGeneratorContext.createDefault(svgDocument), true);
         svgGraphics2D.setSVGCanvasSize(bounds.getSize());
 
         component.paintAll(svgGraphics2D);
@@ -194,7 +204,9 @@ public class Export {
         TranscoderOutput output = new TranscoderOutput(bos);
 
         Transcoder pdfTranscoder = new PDFTranscoder();
-        pdfTranscoder.addTranscodingHint(PDFTranscoder.KEY_DEVICE_RESOLUTION, (float) Toolkit.getDefaultToolkit().getScreenResolution());
+        // Size the PDF page with the pixel-to-mm hint (as PNG/TIFF do). KEY_DEVICE_RESOLUTION does
+        // NOT control the page size, leaving it scaled by the screen DPI (2x too large on HiDPI).
+        pdfTranscoder.addTranscodingHint(PDFTranscoder.KEY_PIXEL_UNIT_TO_MILLIMETER, (float) (25.4 / Toolkit.getDefaultToolkit().getScreenResolution()));
         pdfTranscoder.transcode(svgInputFile, output);
 
         outstream.flush();
@@ -221,7 +233,10 @@ public class Export {
         String svgNS = "http://www.w3.org/2000/svg";
         SVGDocument svgDocument = (SVGDocument) domImplementation.createDocument(svgNS, "svg", null);
 
-        SVGGraphics2D svgGraphics2D = new SVGGraphics2D(svgDocument);
+        // Render text as vector outlines (not <text> elements). The old FOP-based pdf-transcoder did
+        // this implicitly, so the exported font looked like the on-screen Arial; modern FOP instead
+        // substitutes a base-14 font (Times) for an unresolved family. Outlines keep the exact look.
+        SVGGraphics2D svgGraphics2D = new SVGGraphics2D(SVGGeneratorContext.createDefault(svgDocument), true);
         svgGraphics2D.setSVGCanvasSize(bounds.getSize());
 
         component.paintAll(svgGraphics2D);

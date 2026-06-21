@@ -18,6 +18,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 /**
@@ -86,6 +87,17 @@ public class ExportExpectedSizeDialog extends JDialog {
 
     public Integer resizeJPanelWidth;
     public Integer resizeJPanelHeight;
+
+    /**
+     * The unit currently applied to the width/height fields, so they can be converted when the unit
+     * changes (the combo's selected item is the new unit; this remembers the one to convert from).
+     */
+    private String previousUnit = "px";
+    /**
+     * Guards the unit combo listener while the unit is being changed programmatically (e.g. when the
+     * format switch rebuilds the unit list), so the conversion is driven explicitly and runs once.
+     */
+    private boolean adjustingUnit = false;
 
     /**
      * Constructor
@@ -359,18 +371,43 @@ public class ExportExpectedSizeDialog extends JDialog {
      * @param evt Item event
      */
     private void typeJComboBoxdMouseClicked(ItemEvent evt){
-        Integer selectIndex = typeJComboBox.getSelectedIndex();
-
-        if(selectIndex == 2){
-
-            unitJCombox.setModel(new DefaultComboBoxModel(new String[]{"mm", "cm", "in"}));
-        } else {
-            unitJCombox.setModel(new DefaultComboBoxModel(new String[]{"px", "mm", "cm", "in"}));
+        if (evt.getStateChange() != ItemEvent.SELECTED) {
+            return; // a combo change fires DESELECTED then SELECTED; act once
         }
+        int selectIndex = typeJComboBox.getSelectedIndex();
+
+        // PDF has no pixel unit. Keep the current unit if it is still offered; otherwise fall back
+        // (to inches for PDF, pixels for the raster formats).
+        String[] newUnits = (selectIndex == 2) ? new String[]{"mm", "cm", "in"} : new String[]{"px", "mm", "cm", "in"};
+        String targetUnit = Arrays.asList(newUnits).contains(previousUnit) ? previousUnit : (selectIndex == 2 ? "in" : "px");
+
+        adjustingUnit = true;
+        unitJCombox.setModel(new DefaultComboBoxModel(newUnits));
+        unitJCombox.setSelectedItem(targetUnit);
+        adjustingUnit = false;
+
+        if (!targetUnit.equals(previousUnit)) {
+            convertSizeFields(previousUnit, targetUnit); // keep the same physical/pixel size
+            previousUnit = targetUnit;
+        }
+        previewJButtonActionPerformed(null);
     }
 
+    /**
+     * Converts the width/height fields when the user changes the unit, so the actual size is kept.
+     * @param evt item event
+     */
     private void unitJComboxdMouseClicked(ItemEvent evt){
-
+        if (adjustingUnit || evt.getStateChange() != ItemEvent.SELECTED) {
+            return;
+        }
+        String newUnit = (String) unitJCombox.getSelectedItem();
+        if (newUnit == null || newUnit.equals(previousUnit)) {
+            return;
+        }
+        convertSizeFields(previousUnit, newUnit);
+        previousUnit = newUnit;
+        previewJButtonActionPerformed(null);
     }
 
     /**
@@ -382,10 +419,19 @@ public class ExportExpectedSizeDialog extends JDialog {
         String unitName = (String) unitJCombox.getSelectedItem();
 
         if(!picHeightJText.getText().equals("") && !picWidthJText.getText().equals("")){
-            Integer currentHeight = (Integer.valueOf(picHeightJText.getText()));
-            Integer currentWidth = (Integer.valueOf(picWidthJText.getText()));
+            double currentHeight;
+            double currentWidth;
+            try {
+                // Parse as a decimal: physical units (in/mm/cm) are naturally fractional (e.g. 2.5in).
+                // Integer parsing here previously threw on such values, so the preview never updated.
+                currentHeight = Double.parseDouble(picHeightJText.getText().trim());
+                currentWidth = Double.parseDouble(picWidthJText.getText().trim());
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null, "Please enter a valid numeric width and height.", "Warning", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
 
-            FormLayout layout = new FormLayout(currentWidth + unitName, currentHeight + unitName);
+            FormLayout layout = new FormLayout(sizeSpec(currentWidth, unitName), sizeSpec(currentHeight, unitName));
 
             resizeJPanel.setLayout(layout);
             resizeJPanel.revalidate();
@@ -414,6 +460,79 @@ public class ExportExpectedSizeDialog extends JDialog {
 
             }
         }
+    }
+
+    /**
+     * Builds a FormLayout size spec for a value and unit. Pixels must be whole; physical units
+     * (mm, cm, in) keep their fractional part (e.g. "2.5in"), and a whole value drops its ".0".
+     * @param value the size value
+     * @param unit the unit ("px", "mm", "cm" or "in")
+     * @return the FormLayout size spec, e.g. "900px", "3in" or "2.5in"
+     */
+    private static String sizeSpec(double value, String unit) {
+        if ("px".equals(unit)) {
+            return Math.round(value) + "px";
+        }
+        if (value == Math.rint(value)) {
+            return (long) value + unit;
+        }
+        return value + unit;
+    }
+
+    /**
+     * Pixels per unit at the current screen resolution -- the same factor FormLayout and the
+     * exporters use, so converting through pixels keeps the rendered output identical.
+     * @param unit "px", "in", "mm" or "cm"
+     * @return pixels per one unit
+     */
+    private static double pixelsPerUnit(String unit) {
+        double dpi = Toolkit.getDefaultToolkit().getScreenResolution();
+        switch (unit) {
+            case "in": return dpi;
+            case "mm": return dpi / 25.4;
+            case "cm": return dpi / 2.54;
+            default:   return 1.0; // px
+        }
+    }
+
+    /**
+     * Converts both size fields from one unit to another, preserving the actual (pixel) size.
+     * @param fromUnit the unit the field values are currently in
+     * @param toUnit the unit to convert to
+     */
+    private void convertSizeFields(String fromUnit, String toUnit) {
+        convertField(picWidthJText, fromUnit, toUnit);
+        convertField(picHeightJText, fromUnit, toUnit);
+    }
+
+    /**
+     * Converts a single size field through pixels; leaves it unchanged if empty or non-numeric.
+     */
+    private void convertField(JTextField field, String fromUnit, String toUnit) {
+        String text = field.getText().trim();
+        if (text.isEmpty()) {
+            return;
+        }
+        double value;
+        try {
+            value = Double.parseDouble(text);
+        } catch (NumberFormatException e) {
+            return;
+        }
+        double pixels = value * pixelsPerUnit(fromUnit);
+        field.setText(formatFieldValue(pixels / pixelsPerUnit(toUnit), toUnit));
+    }
+
+    /**
+     * Formats a converted size for display: whole numbers for pixels, up to two decimals (with any
+     * trailing ".0" dropped) for physical units.
+     */
+    private static String formatFieldValue(double value, String unit) {
+        if ("px".equals(unit)) {
+            return String.valueOf(Math.round(value));
+        }
+        double rounded = Math.round(value * 100.0) / 100.0;
+        return (rounded == Math.rint(rounded)) ? String.valueOf((long) rounded) : String.valueOf(rounded);
     }
 
     /**
