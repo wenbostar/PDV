@@ -908,6 +908,16 @@ public class PDVMainClass extends JFrame {
 
         setJMenuBar(menuBar);
 
+        // When the window is restored down from maximized, fold the file-detail side
+        // panel if it is still open, to keep the smaller window uncluttered.
+        addWindowStateListener(evt -> {
+            boolean wasMaximized = (evt.getOldState() & JFrame.MAXIMIZED_BOTH) == JFrame.MAXIMIZED_BOTH;
+            boolean isMaximized = (evt.getNewState() & JFrame.MAXIMIZED_BOTH) == JFrame.MAXIMIZED_BOTH;
+            if (wasMaximized && !isMaximized && detailsJPanel.isVisible()) {
+                foldDetailsPanel();
+            }
+        });
+
         fragmentIonAccuracyTxt.setHorizontalAlignment(SwingConstants.CENTER);
         fragmentIonAccuracyTxt.setMaximumSize(new Dimension(100, 20));
         fragmentIonAccuracyTxt.setMinimumSize(new Dimension(50, 20));
@@ -3044,15 +3054,7 @@ public class PDVMainClass extends JFrame {
     private void openSidebarJButtonActionPerform(ActionEvent evt){
 
         if(detailsJPanel.isVisible()){
-            openSidebarJButton.setIcon(new ImageIcon(getClass().getResource("/icons/unfold.png")));
-
-            detailsJPanel.setVisible(false);
-
-            msAndTableJSplitPane.setDividerSize(0);
-
-            msAndTableJSplitPane.revalidate();
-            msAndTableJSplitPane.repaint();
-
+            foldDetailsPanel();
         } else {
             openSidebarJButton.setIcon(new ImageIcon(getClass().getResource("/icons/fold.png")));
 
@@ -3065,6 +3067,20 @@ public class PDVMainClass extends JFrame {
             msAndTableJSplitPane.revalidate();
             msAndTableJSplitPane.repaint();
         }
+    }
+
+    /**
+     * Folds (hides) the file-detail side panel, mirroring the sidebar toggle's fold action.
+     */
+    private void foldDetailsPanel(){
+        openSidebarJButton.setIcon(new ImageIcon(getClass().getResource("/icons/unfold.png")));
+
+        detailsJPanel.setVisible(false);
+
+        msAndTableJSplitPane.setDividerSize(0);
+
+        msAndTableJSplitPane.revalidate();
+        msAndTableJSplitPane.repaint();
     }
 
     /**
