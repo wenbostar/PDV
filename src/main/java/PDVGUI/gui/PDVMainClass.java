@@ -725,6 +725,18 @@ public class PDVMainClass extends JFrame {
     }
 
     /**
+     * Forces a control to a fixed height (keeping its preferred width) so the PSM
+     * controls row lines up.
+     * @param component the control to size
+     * @param height the target height in pixels
+     */
+    private void matchRowControlHeight(JComponent component, int height){
+        component.setPreferredSize(new Dimension(component.getPreferredSize().width, height));
+        component.setMinimumSize(new Dimension(component.getMinimumSize().width, height));
+        component.setMaximumSize(new Dimension(component.getMaximumSize().width, height));
+    }
+
+    /**
      * Init all GUI components
      */
     private void initComponents(){
@@ -968,7 +980,7 @@ public class PDVMainClass extends JFrame {
 
         searchTextOrButtonJPanelLayout.setVerticalGroup(
                 searchTextOrButtonJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
-                        .addComponent(searchItemTextField, 10, 20, 20)
+                        .addComponent(searchItemTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
         );
 
         searchTextOrButtonJPanel.add(searchItemTextField);
@@ -992,8 +1004,8 @@ public class PDVMainClass extends JFrame {
                 searchJPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(searchJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
                                 .addComponent(backJButton)
-                                .addComponent(searchTypeComboBox, 10, 20, 20)
-                                .addComponent(searchTextOrButtonJPanel, 10, 20, 20)
+                                .addComponent(searchTypeComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(searchTextOrButtonJPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                 .addComponent(searchButton, 10, 25, 35))
         );
 
@@ -1345,6 +1357,22 @@ public class PDVMainClass extends JFrame {
 
         PDVLookAndFeel.setup();
         SwingUtilities.updateComponentTreeUI(this);
+
+        // Align the box controls in both control rows to a common height (the combo's), so
+        // the buttons/fields line up while keeping their standard look.
+        int rowControlHeight = decimalPlacesJComboBox.getPreferredSize().height;
+        // PSM table controls row
+        matchRowControlHeight(fitColumnsJToggleButton, rowControlHeight);
+        matchRowControlHeight(pageSelectNumJTextField, rowControlHeight);
+        matchRowControlHeight(pageNumJTextField, rowControlHeight);
+        // Top settings / search toolbar row
+        matchRowControlHeight(fragmentIonAccuracyTxt, rowControlHeight);
+        matchRowControlHeight(precursorIonUnit, rowControlHeight);
+        // Sort combo: width auto-fits the longest sort option (Swing default), capped at the
+        // original 100px; only the height is updated to the shared row height.
+        sortColumnJCombox.setMaximumSize(new Dimension(100, rowControlHeight));
+        matchRowControlHeight(searchTypeComboBox, rowControlHeight);
+        matchRowControlHeight(searchItemTextField, rowControlHeight);
 
         pack();
     }
@@ -3906,7 +3934,7 @@ public class PDVMainClass extends JFrame {
 
             searchTextOrButtonJPanelLayout.setVerticalGroup(
                     searchTextOrButtonJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
-                            .addComponent(searchItemTextField, 10, 20, 20)
+                            .addComponent(searchItemTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
             );
             searchTextOrButtonJPanel.repaint();
             searchTextOrButtonJPanel.revalidate();
@@ -3929,7 +3957,7 @@ public class PDVMainClass extends JFrame {
 
             searchTextOrButtonJPanelLayout.setVerticalGroup(
                     searchTextOrButtonJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
-                            .addComponent(searchItemTextField, 10, 20, 20)
+                            .addComponent(searchItemTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
             );
             searchTextOrButtonJPanel.repaint();
             searchTextOrButtonJPanel.revalidate();
@@ -3958,7 +3986,7 @@ public class PDVMainClass extends JFrame {
             searchTextOrButtonJPanelLayout.setVerticalGroup(
                     searchTextOrButtonJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
                             .addComponent(openSearchFileJButton, 10, 20, 20)
-                            .addComponent(searchItemTextField, 10, 20, 20)
+                            .addComponent(searchItemTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
             );
             searchItemTextField.setEditable(false);
             searchTextOrButtonJPanel.repaint();
@@ -3983,7 +4011,7 @@ public class PDVMainClass extends JFrame {
             searchTextOrButtonJPanelLayout.setVerticalGroup(
                     searchTextOrButtonJPanelLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
                             .addComponent(openSearchFileJButton, 10, 20, 20)
-                            .addComponent(searchItemTextField, 10, 20, 20)
+                            .addComponent(searchItemTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
             );
             searchItemTextField.setEditable(false);
             searchTextOrButtonJPanel.repaint();
