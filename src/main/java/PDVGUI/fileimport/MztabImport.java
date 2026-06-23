@@ -64,6 +64,12 @@ public class MztabImport {
      */
     private Integer modificationIndex = 0;
     /**
+     * ProForma peptidoform column index (opt_global_cv_MS:1003169_proforma_peptidoform_sequence),
+     * -1 when absent. Casanovo 5.2 puts the bracketed modified peptide here while the plain
+     * {@code sequence} column is unmodified, so when present this column is the source of mods.
+     */
+    private Integer proformaIndex = -1;
+    /**
      * Charge column index
      */
     private Integer chargeIndex = 0;
@@ -95,6 +101,31 @@ public class MztabImport {
      * PTM factory
      */
     private PTMFactory ptmFactory = PTMFactory.getInstance();
+    /**
+     * ProForma interim modification name -> compomics-utilities PTM name stem. ProForma (and
+     * Casanovo's bracket labels) use Unimod interim names like "Carbamidomethyl"/"Deamidated"
+     * that differ from the utilities PTM names ("Carbamidomethylation"/"Deamidation"); the full
+     * residue-specific name is rebuilt as {@code <stem> of <residue>} in {@link #resolvePtmName}.
+     */
+    private static final HashMap<String, String> PROFORMA_PTM_ALIASES = new HashMap<>();
+    static {
+        PROFORMA_PTM_ALIASES.put("Carbamidomethyl", "Carbamidomethylation");
+        PROFORMA_PTM_ALIASES.put("Deamidated", "Deamidation");
+        PROFORMA_PTM_ALIASES.put("Oxidation", "Oxidation");
+    }
+    /**
+     * Casanovo N-terminal ProForma label ("{@code <name> of N-term}", as built by
+     * {@link #get_modification}) -> compomics-utilities PTM name. Only the labels that have a
+     * factory PTM are mapped here; {@code Ammonia-loss} and Casanovo's numeric {@code [+25.980265]-}
+     * have no factory entry and are registered on the fly from their delta mass instead (see
+     * {@link #registerableNtermDelta}). Names/masses are taken from Casanovo's config.yaml residues
+     * dict: Acetyl +42.010565 (UNIMOD:1), Carbamyl +43.005814 (UNIMOD:5).
+     */
+    private static final HashMap<String, String> PROFORMA_NTERM_ALIASES = new HashMap<>();
+    static {
+        PROFORMA_NTERM_ALIASES.put("Acetyl of N-term", "Acetylation of peptide N-term");
+        PROFORMA_NTERM_ALIASES.put("Carbamyl of N-term", "Carbamilation of protein N-term");
+    }
 
     /**
      * Constructor
@@ -250,6 +281,17 @@ public class MztabImport {
                 }
 
                 sequence = values[sequenceIndex];
+                // Prefer the ProForma peptidoform column when present (Casanovo 5.2): it carries the
+                // bracketed modifications (e.g. C[Carbamidomethyl]GC...) that the plain sequence
+                // column lacks. Falls back to the sequence column when the column is absent, empty,
+                // or "null". An unmodified proforma is just the bare sequence, so the bracket branch
+                // below is skipped and behaviour is unchanged for those rows.
+                if (proformaIndex != -1 && proformaIndex < values.length) {
+                    String proforma = values[proformaIndex];
+                    if (proforma != null && !proforma.isEmpty() && !proforma.equalsIgnoreCase("null")) {
+                        sequence = proforma;
+                    }
+                }
                 peptideCharge = (int) Double.parseDouble(values[chargeIndex]);
                 if(sequence.contains("[")) {
                     // [Acetyl]-MAAAAAAAK
@@ -263,18 +305,33 @@ public class MztabImport {
                         for(String m: mods){
                             String m_name = m.split("@")[0];
                             int eachPos = Integer.parseInt(m.split("@")[1]);
-                            if(ptmFactory.containsPTM(m_name)){
+                            // N-term mods are emitted at position 0; compomics anchors them on the
+                            // first residue, so move 0 -> 1 (residue mods are already 1-based).
+                            if (eachPos == 0) {
+                                eachPos = 1;
+                            }
+                            // ProForma interim names (e.g. "Carbamidomethyl of C", "Deamidated of N",
+                            // "Acetyl of N-term") differ from compomics-utilities PTM names
+                            // ("Carbamidomethylation of C", "Deamidation of N", "Acetylation of
+                            // peptide N-term"); resolve to the factory's name before matching.
+                            String resolved = resolvePtmName(m_name);
+                            if(resolved != null){
                                 // good
+                                m_name = resolved;
                                 utilitiesModifications.add(new ModificationMatch(m_name, true, eachPos));
-                            }else if(m_name.equalsIgnoreCase("Ammonia-loss of N-term")) {
-                                // Add this modification
-                                addModification(m_name, -17.026549);
                             }else{
-                                for(String s_mod: ptmFactory.getPTMs()){
-                                    System.out.println("Supported modification: "+s_mod);
+                                // No factory PTM (Ammonia-loss, or Casanovo's numeric "[+25.980265]-"):
+                                // register it on the fly from its exact delta mass, then use it.
+                                Double delta = registerableNtermDelta(m_name);
+                                if (delta == null) {
+                                    for(String s_mod: ptmFactory.getPTMs()){
+                                        System.out.println("Supported modification: "+s_mod);
+                                    }
+                                    // modification is not present
+                                    throw new IllegalArgumentException("unknown modification:"+sequence+" -> "+m_name);
                                 }
-                                // modification is not present
-                                throw new IllegalArgumentException("unknown modification:"+sequence+" -> "+m_name);
+                                addModification(m_name, delta);
+                                utilitiesModifications.add(new ModificationMatch(m_name, true, eachPos));
                             }
                             if (!allModifications.contains(m_name)) {
                                 allModifications.add(m_name);
@@ -535,6 +592,59 @@ public class MztabImport {
         return res;
     }
 
+    /**
+     * Resolve a "{@code <name> of <residue>}" modification (as built by {@link #get_modification})
+     * to an existing compomics-utilities PTM name. Tries the name verbatim first (covers mods whose
+     * ProForma label already matches, e.g. "Oxidation of M"), then retries with the ProForma->
+     * utilities alias from {@link #PROFORMA_PTM_ALIASES} (e.g. "Carbamidomethyl of C" ->
+     * "Carbamidomethylation of C"). Returns the resolved PTM name, or {@code null} if none matches.
+     * @param nameOfResidue modification name in "{@code <name> of <residue>}" form
+     * @return the matching PTM factory name, or null
+     */
+    private String resolvePtmName(String nameOfResidue) {
+        if (ptmFactory.containsPTM(nameOfResidue)) {
+            return nameOfResidue;
+        }
+        // N-terminal mods: the residue label is "N-term" but the factory uses "peptide/protein
+        // N-term", so map the full name directly rather than via the residue-stem alias.
+        String nterm = PROFORMA_NTERM_ALIASES.get(nameOfResidue);
+        if (nterm != null && ptmFactory.containsPTM(nterm)) {
+            return nterm;
+        }
+        int idx = nameOfResidue.lastIndexOf(" of ");
+        if (idx < 0) {
+            return null;
+        }
+        String alias = PROFORMA_PTM_ALIASES.get(nameOfResidue.substring(0, idx));
+        if (alias != null) {
+            String candidate = alias + " of " + nameOfResidue.substring(idx + 4);
+            if (ptmFactory.containsPTM(candidate)) {
+                return candidate;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Delta mass for an N-terminal ProForma mod that has no compomics PTM and must be registered on
+     * the fly: {@code Ammonia-loss} (-17.026549, UNIMOD:385) and Casanovo's numeric combined label
+     * {@code [+25.980265]-} (written by {@link #get_modification} as "{@code +25.980265 of N-term}").
+     * @param nameOfResidue modification name in "{@code <name> of <residue>}" form
+     * @return the delta mass, or {@code null} if the name is neither Ammonia-loss nor numeric
+     */
+    private Double registerableNtermDelta(String nameOfResidue) {
+        int idx = nameOfResidue.lastIndexOf(" of ");
+        String stem = idx < 0 ? nameOfResidue : nameOfResidue.substring(0, idx);
+        if (stem.equalsIgnoreCase("Ammonia-loss")) {
+            return -17.026549;
+        }
+        try {
+            return Double.valueOf(stem);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
     private void addModification(String singleModificationName, double modificationMass){
         if (!ptmFactory.containsPTM(singleModificationName)){
             String modificationName = singleModificationName.split(" of ")[0];
@@ -604,6 +714,14 @@ public class MztabImport {
                         //Do nothing
                         default:
 //                            indexToName.put(index, "Test" + index);
+                            // Casanovo ProForma peptidoform column: the bracketed modified peptide
+                            // (e.g. C[Carbamidomethyl]GC...) used to recover modifications. The header
+                            // name differs by version -- "opt_global_cv_MS:1003169_proforma_
+                            // peptidoform_sequence" (5.2) vs "opt_ms_run[1]_proforma" (5.1.x) -- so
+                            // match on the shared "proforma" substring.
+                            if (values[index].toLowerCase().contains("proforma")) {
+                                proformaIndex = index;
+                            }
                             indexToName.put(index, "`" + values[index] + "`");
                             break;
                     }}
