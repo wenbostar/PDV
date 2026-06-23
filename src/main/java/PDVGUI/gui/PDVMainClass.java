@@ -58,6 +58,8 @@ public class PDVMainClass extends JFrame {
 
     public JButton searchButton;
     public JButton loadingJButton;
+    /** Inline "Loading. Please Wait..." status shown at the bottom-left during a table page reload. */
+    private JLabel movingStatusJLabel;
     public JButton settingColorJButton;
     public JTextField pageNumJTextField;
     public JTextField searchItemTextField;
@@ -78,6 +80,14 @@ public class PDVMainClass extends JFrame {
     private JTextField fragmentIonAccuracyTxt;
     private JCheckBox allSelectedJCheckBox;
     private JSplitPane msAndTableJSplitPane;
+    /** Outer vertical split: top = PSM-table region, bottom = spectrum. Held as a field so the
+     *  "PSM table" toggle can collapse the top region for a spectrum-only view. */
+    private JSplitPane allJSplitPane;
+    /** Toolbar toggle; when unchecked the PSM-table region is hidden and the spectrum fills the view. */
+    private JCheckBox showPsmTableJCheckBox;
+    /** True while {@link #setPsmTableVisible} is moving the divider, to suppress the per-divider-move
+     *  spectrum re-render (which would re-lay-out the split and loop, freezing the window). */
+    private boolean adjustingPsmTable = false;
     private JComboBox precursorIonUnit;
     private JComboBox sortColumnJCombox;
     private JComboBox searchTypeComboBox;
@@ -155,6 +165,26 @@ public class PDVMainClass extends JFrame {
      * All spectrum Index
      */
     public ArrayList<ArrayList<String>> allSpectrumIndex = new ArrayList<>();
+    /**
+     * Verbatim mzTab {@code spectra_ref} (e.g. "ms_run[1]:...scan=1882") -> the per-PSM row key
+     * used by the spectrum table / SQLite. Filled during mzTab import; used only by the optional
+     * {@link PDVGUI.gui.utils.PdvControlServer} to locate a PSM by its spectra_ref.
+     */
+    public final HashMap<String, String> spectraRefToSpectrumIndex = new HashMap<>();
+    /**
+     * True once an mzTab result has finished importing (controls the control server's readiness).
+     */
+    private volatile boolean loadComplete = false;
+    /**
+     * Optional loopback HTTP control server; null unless launched with {@code denovo-gui ... --port}.
+     */
+    private PdvControlServer pdvControlServer;
+    /** {@link #selectBySpectraRef} result: the row was found, selected and rendered. */
+    public static final int SELECT_OK = 0;
+    /** {@link #selectBySpectraRef} result: no PSM matches the given spectra_ref. */
+    public static final int SELECT_NOT_FOUND = 1;
+    /** {@link #selectBySpectraRef} result: the result table is not loaded yet. */
+    public static final int SELECT_NOT_READY = 2;
     /**
      * Current page default 1
      */
@@ -335,6 +365,8 @@ public class PDVMainClass extends JFrame {
         File mzTab = null;
         double tol = 0.05;
         String tolUnit = "Da";
+        int port = -1;
+        boolean hidePsmTable = false;
         for (int i = 1; i < args.length; i++) {
             String a = args[i];
             if (a.equals("--mztab") && i + 1 < args.length) {
@@ -365,21 +397,43 @@ public class PDVMainClass extends JFrame {
                 try { tol = Double.parseDouble(args[++i]); } catch (NumberFormatException ignored) {}
             } else if (a.equals("--tol-unit") && i + 1 < args.length) {
                 tolUnit = args[++i];
+            } else if (a.equals("--port") && i + 1 < args.length) {
+                try { port = Integer.parseInt(args[++i]); } catch (NumberFormatException ignored) {}
+            } else if (a.equals("--hide-psm-table")) {
+                hidePsmTable = true;
             }
         }
         if (mzTab == null || spectra.isEmpty()) {
             System.err.println("Usage: java -jar PDV.jar denovo-gui --mztab <file.mztab> "
-                    + "--spectrum <f1.mzML[,f2.mzML]> [--tol <value>] [--tol-unit Da|ppm]");
+                    + "--spectrum <f1.mzML[,f2.mzML]> [--tol <value>] [--tol-unit Da|ppm] [--port <p>] [--hide-psm-table]");
             System.exit(1);
         }
         final File fMzTab = mzTab;
         final java.util.List<File> fSpectra = spectra;
         final double fTol = tol;
         final String fTolUnit = tolUnit;
+        final int fPort = port;
+        final boolean fHidePsmTable = hidePsmTable;
         javax.swing.SwingUtilities.invokeLater(() -> {
             PDVMainClass pdv = new PDVMainClass(true);
+            // Open at a reasonable windowed size (not maximized) for the CasanovoGUI-driven viewer.
+            pdv.setExtendedState(JFrame.NORMAL);
+            pdv.setSize(1000, 600);
+            pdv.setLocationRelativeTo(null);
             pdv.setVisible(true);
+            // Collapse the PSM table BEFORE the result loads, so the spectrum always paints at full
+            // height. With the table shown in a small window the spectrum area is a thin strip, and
+            // compomics' GraphicsPanel axis-tag layout can hang there, wedging the EDT — so hide up
+            // front rather than after load.
+            if (fHidePsmTable) {
+                pdv.applyHidePsmTable();
+            }
             pdv.openDenovoFromCli(fSpectra, fMzTab, fTol, fTolUnit);
+            // Start the control server off the EDT so binding the socket never perturbs the
+            // initial table/spectrum paint timing (keeps default startup behaviour unchanged).
+            if (fPort > 0) {
+                new Thread(() -> pdv.startControlServer(fPort), "pdv-control-server").start();
+            }
         });
     }
 
@@ -449,6 +503,142 @@ public class PDVMainClass extends JFrame {
                 }
             }
         }.start();
+    }
+
+    /**
+     * Start the optional loopback HTTP control server that lets an external launcher (e.g.
+     * CasanovoGUI) drive this window via {@code /select?ref=<spectra_ref>}. Started only when
+     * launched with {@code --port}; a failure here is logged and otherwise ignored so the GUI
+     * still runs normally. The server is stopped when the window closes.
+     *
+     * @param port loopback TCP port to listen on
+     */
+    public void startControlServer(int port) {
+        if (port < 1 || port > 65535) {
+            System.err.println("Invalid PDV control port " + port + " (must be 1-65535); control server not started.");
+            return;
+        }
+        try {
+            pdvControlServer = new PdvControlServer(this, port);
+            pdvControlServer.start();
+            // Register the close hook on the EDT (this may run on a background starter thread).
+            SwingUtilities.invokeLater(() -> addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    if (pdvControlServer != null) {
+                        pdvControlServer.stop();
+                    }
+                }
+            }));
+            System.out.println("PDV control server listening on 127.0.0.1:" + port);
+        } catch (IOException | RuntimeException e) {
+            System.err.println("Could not start PDV control server on port " + port + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Flag that an mzTab result has finished importing. Called by the importer once
+     * {@link #allSpectrumIndex} and {@link #spectraRefToSpectrumIndex} are fully populated.
+     */
+    public void setLoadComplete(boolean complete) {
+        this.loadComplete = complete;
+    }
+
+    /** Uncheck the "PSM table" toggle and collapse it to a spectrum-only view (see {@code --hide-psm-table}). */
+    private void applyHidePsmTable() {
+        if (showPsmTableJCheckBox != null) {
+            showPsmTableJCheckBox.setSelected(false);
+        }
+        setPsmTableVisible(false);
+    }
+
+    /**
+     * @return true when an mzTab result is fully loaded and a {@code spectra_ref} select can be
+     * served. Used by the control server's {@code /ready} endpoint.
+     */
+    public boolean isReadyForSelect() {
+        return loadComplete
+                && allSpectrumIndex != null && !allSpectrumIndex.isEmpty()
+                && !spectraRefToSpectrumIndex.isEmpty()
+                && spectrumJTable != null && spectrumJTable.getRowCount() > 0;
+    }
+
+    /**
+     * Locate the PSM whose verbatim mzTab {@code spectra_ref} equals the argument, switch to its
+     * page if needed, select its table row and render its annotated spectrum — i.e. the same effect
+     * as the user clicking that row. Safe to call off the EDT (it marshals all Swing work onto it).
+     *
+     * @param spectraRef the verbatim spectra_ref string, exactly as it appears in the mzTab
+     * @return {@link #SELECT_OK}, {@link #SELECT_NOT_FOUND} or {@link #SELECT_NOT_READY}
+     */
+    public int selectBySpectraRef(String spectraRef) {
+        if (!isReadyForSelect()) {
+            return SELECT_NOT_READY;
+        }
+        String key = spectraRefToSpectrumIndex.get(spectraRef);
+        if (key == null) {
+            return SELECT_NOT_FOUND;
+        }
+        // Find which page (1-based) holds this row key and its index within that page. A linear scan
+        // of the current allSpectrumIndex is always correct even after sort/search rebuilds it; the
+        // scan runs on the control-server thread, so snapshot the reference and tolerate a concurrent
+        // rebuild (return NOT_FOUND, letting the caller retry) instead of throwing.
+        int page = -1;
+        int modelRow = -1;
+        try {
+            ArrayList<ArrayList<String>> pages = allSpectrumIndex;
+            for (int p = 0; p < pages.size(); p++) {
+                int r = pages.get(p).indexOf(key);
+                if (r >= 0) {
+                    page = p + 1;
+                    modelRow = r;
+                    break;
+                }
+            }
+        } catch (RuntimeException raceWithRebuild) {
+            return SELECT_NOT_FOUND;
+        }
+        if (page == -1) {
+            return SELECT_NOT_FOUND;
+        }
+        final int fModelRow = modelRow;
+        if (page == selectedPageNum) {
+            SwingUtilities.invokeLater(() -> selectModelRowAndRender(fModelRow));
+        } else {
+            final int fPage = page;
+            SwingUtilities.invokeLater(() -> {
+                selectedPageNum = fPage;
+                pageNumJTextField.setText(selectedPageNum + "/" + allSpectrumIndex.size());
+                // Keep the "select all this page" checkbox in sync, like the manual page-nav handlers.
+                allSelectedJCheckBox.setSelected(pageToSelected.contains(selectedPageNum));
+                buttonCheck();
+                // Reload the page, then select the target row once the new page is in the model.
+                updateTable(() -> selectModelRowAndRender(fModelRow));
+            });
+        }
+        return SELECT_OK;
+    }
+
+    /**
+     * EDT-only: select {@code modelRow} of the current page (mapping through the row sorter) and
+     * render its spectrum by reusing the existing programmatic render hook.
+     */
+    private void selectModelRowAndRender(int modelRow) {
+        if (modelRow < 0 || modelRow >= spectrumJTable.getRowCount()) {
+            return;
+        }
+        int viewRow = spectrumJTable.convertRowIndexToView(modelRow);
+        if (viewRow < 0) {
+            // The row is filtered out of the current view; don't fall back to selecting a different
+            // (wrong) row. Currently unreachable — no RowFilter is installed — but safe if one is added.
+            return;
+        }
+        spectrumJTable.requestFocus();
+        spectrumJTable.setRowSelectionInterval(viewRow, viewRow);
+        spectrumJTable.scrollRectToVisible(spectrumJTable.getCellRect(viewRow, 0, true));
+        // Same call updateTable() uses to render the selected row (handles the evt == null case).
+        spectrumJTableMouseReleased(null);
+        toFront();
     }
 
     /**
@@ -737,11 +927,44 @@ public class PDVMainClass extends JFrame {
     }
 
     /**
+     * Render a combo box at a fixed compact {@code width} (so a long option cannot stretch the
+     * toolbar) while still showing every option in full when the drop-down list is opened: the popup
+     * is widened to the longest option's preferred width each time it appears.
+     * @param combo  the combo box to pin
+     * @param width  the fixed display width, in pixels
+     * @param height the row height to match
+     */
+    private void fixComboWidthWidePopup(JComboBox combo, int width, int height){
+        Dimension fixed = new Dimension(width, height);
+        combo.setPreferredSize(fixed);
+        combo.setMinimumSize(fixed);
+        combo.setMaximumSize(fixed);
+        combo.addPopupMenuListener(new javax.swing.event.PopupMenuListener() {
+            @Override
+            public void popupMenuWillBecomeVisible(javax.swing.event.PopupMenuEvent e) {
+                javax.accessibility.Accessible child = combo.getUI().getAccessibleChild(combo, 0);
+                if (!(child instanceof javax.swing.plaf.basic.ComboPopup)) {
+                    return;
+                }
+                JList<?> list = ((javax.swing.plaf.basic.ComboPopup) child).getList();
+                Container scroll = SwingUtilities.getAncestorOfClass(JScrollPane.class, list);
+                if (scroll instanceof JScrollPane) {
+                    int want = list.getPreferredSize().width + 24; // content + scrollbar/padding
+                    int w = Math.max(want, combo.getWidth());
+                    scroll.setPreferredSize(new Dimension(w, ((JScrollPane) scroll).getPreferredSize().height));
+                }
+            }
+            @Override public void popupMenuWillBecomeInvisible(javax.swing.event.PopupMenuEvent e) {}
+            @Override public void popupMenuCanceled(javax.swing.event.PopupMenuEvent e) {}
+        });
+    }
+
+    /**
      * Init all GUI components
      */
     private void initComponents(){
         JMenuBar menuBar = new JMenuBar();
-        JSplitPane allJSplitPane = new JSplitPane();
+        allJSplitPane = new JSplitPane();
         JScrollPane psmsScrollPane = new JScrollPane();
         JPopupMenu.Separator jSeparator1 = new JPopupMenu.Separator();
         JPopupMenu.Separator jSeparator2 = new JPopupMenu.Separator();
@@ -1078,6 +1301,12 @@ public class PDVMainClass extends JFrame {
         settingColorJButton.setToolTipText("Set PTM colors");
         settingColorJButton.addActionListener(this::settingColorJButtonActionPerform);
 
+        showPsmTableJCheckBox = new JCheckBox("PSM table", true);
+        showPsmTableJCheckBox.setOpaque(false);
+        showPsmTableJCheckBox.setFont(PDVFonts.of(Font.PLAIN, 12f));
+        showPsmTableJCheckBox.setToolTipText("Show or hide the PSM table (hide for a spectrum-only view)");
+        showPsmTableJCheckBox.addActionListener(e -> setPsmTableVisible(showPsmTableJCheckBox.isSelected()));
+
         settingJPanel.setBackground(new Color(255, 255, 255));
         settingJPanel.setMinimumSize(new Dimension(20, 0));
         settingJPanel.setOpaque(false);
@@ -1101,6 +1330,8 @@ public class PDVMainClass extends JFrame {
         settingJPanel.add(downSortJButton);
         settingJPanel.add(splitJLabel4);
         settingJPanel.add(settingColorJButton);
+        settingJPanel.add(new JLabel(" | "));
+        settingJPanel.add(showPsmTableJCheckBox);
 
         settingJPanel.add(blankJPanel);
         settingJPanel.add(searchJPanel);
@@ -1132,9 +1363,15 @@ public class PDVMainClass extends JFrame {
         loadingJButton.setBorderPainted(false);
         loadingJButton.setContentAreaFilled(false);
         loadingJButton.setEnabled(false);
-        loadingJButton.setFont(PDVFonts.of(Font.BOLD, 13f));
+        loadingJButton.setFont(PDVFonts.of(Font.PLAIN, 12f));
         loadingJButton.setText("Result importing");
 
+        movingStatusJLabel = new JLabel();
+        movingStatusJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
+        movingStatusJLabel.setIcon(new ImageIcon(getClass().getResource("/icons/loading.gif")));
+        movingStatusJLabel.setVisible(false);
+
+        loadingJPanel.add(movingStatusJLabel); // bottom-left page-move status
         loadingJPanel.add(blankJPanel2);
         loadingJPanel.add(loadingJButton);
 
@@ -1147,7 +1384,7 @@ public class PDVMainClass extends JFrame {
         allJSplitPane.setContinuousLayout(true);
 
         allJSplitPane.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
-                evt -> spectrumMainPanel.updateSpectrum());
+                evt -> { if (!adjustingPsmTable) { spectrumMainPanel.updateSpectrum(); } });
 
         spectrumJTable.setModel(new DatabaseTableModel());
         spectrumJTable.setOpaque(false);
@@ -1294,7 +1531,9 @@ public class PDVMainClass extends JFrame {
         spectrumShowJPanel.setLayout(spectrumMainPanelLayout);
         spectrumMainPanelLayout.setHorizontalGroup(
                 spectrumMainPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(spectrumMainPanel,GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        // min 0 (not DEFAULT_SIZE) so the spectrum panel can shrink to a narrow window
+                        // rather than overflowing it and clipping the de novo strip/track on the right.
+                        .addComponent(spectrumMainPanel, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         spectrumMainPanelLayout.setVerticalGroup(
                 spectrumMainPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
@@ -1367,10 +1606,18 @@ public class PDVMainClass extends JFrame {
         matchRowControlHeight(pageNumJTextField, rowControlHeight);
         // Top settings / search toolbar row
         matchRowControlHeight(fragmentIonAccuracyTxt, rowControlHeight);
-        matchRowControlHeight(precursorIonUnit, rowControlHeight);
-        // Sort combo: width auto-fits the longest sort option (Swing default), capped at the
-        // original 100px; only the height is updated to the shared row height.
-        sortColumnJCombox.setMaximumSize(new Dimension(100, rowControlHeight));
+        // Tolerance unit: snug fixed width. Its auto-computed minimum left the box much wider than the
+        // short "Da"/"ppm" options need (a large empty gap before the arrow); matchRowControlHeight
+        // would have preserved that width, so pin a compact size instead.
+        Dimension unitSize = new Dimension(72, rowControlHeight);
+        precursorIonUnit.setPreferredSize(unitSize);
+        precursorIonUnit.setMinimumSize(unitSize);
+        precursorIonUnit.setMaximumSize(unitSize);
+        // Sort combo: pin it to a fixed compact width. Its auto-computed minimum width (from the
+        // longest score-name option) was overriding the 100px maximum, so BoxLayout stretched it
+        // across the toolbar and pushed the PSM-table checkbox off the right edge. The drop-down
+        // popup is widened to the full option text so longer options stay readable when it is open.
+        fixComboWidthWidePopup(sortColumnJCombox, 110, rowControlHeight);
         matchRowControlHeight(searchTypeComboBox, rowControlHeight);
         matchRowControlHeight(searchItemTextField, rowControlHeight);
 
@@ -1576,6 +1823,55 @@ public class PDVMainClass extends JFrame {
      */
     private void settingColorJButtonActionPerform(ActionEvent evt){
         new PTMColorDialog(this, ptmFactory, allModifications);
+    }
+
+    /**
+     * Show or hide the PSM-table region (the top half of the main split). Hiding it collapses the
+     * top so the spectrum fills the window (a spectrum-only view); showing it restores the previous
+     * height. Default is shown, so startup behaviour is unchanged.
+     *
+     * @param visible whether the PSM table should be shown
+     */
+    private void setPsmTableVisible(boolean visible){
+        if (allJSplitPane == null || msAndTableJSplitPane == null) {
+            return;
+        }
+        // Suppress the divider-location listener (which re-renders the whole spectrum) while we move
+        // the divider. Otherwise each move fires an expensive updateSpectrum() that re-lays-out the
+        // split and nudges the divider again — a non-settling feedback loop that freezes the window,
+        // most visibly after a manual window resize. Lay out synchronously here, then render once.
+        adjustingPsmTable = true;
+        try {
+            if (visible) {
+                msAndTableJSplitPane.setMinimumSize(null); // restore the computed minimum
+                allJSplitPane.setResizeWeight(0.5);
+                allJSplitPane.setDividerSize(5);
+                // Show as a 40/60 split: the PSM table gets the top 40%, the spectrum the bottom 60%.
+                // Keeping the spectrum at ~60% of the window (~310px at the 1000x600 de novo window)
+                // also keeps it above the height where compomics' GraphicsPanel.findOptimalTagDistance
+                // spins forever trying to fit Y-axis tags into a near-zero-height plot -- that spin
+                // wedged the EDT and froze the window when the table was shown over a thin spectrum.
+                int paneH = allJSplitPane.getHeight();
+                if (paneH > 0) {
+                    allJSplitPane.setDividerLocation((int) ((paneH - allJSplitPane.getDividerSize()) * 0.4));
+                } else {
+                    allJSplitPane.setDividerLocation(0.4);
+                }
+            } else {
+                // Force the top region's minimum height to 0 so the divider can fully collapse AND stay
+                // collapsed across window resizes. Without this, the next layout (e.g. a maximize /
+                // restore) honours the table header's minimum size and snaps the header row back into view.
+                msAndTableJSplitPane.setMinimumSize(new Dimension(0, 0));
+                allJSplitPane.setResizeWeight(0.0);
+                allJSplitPane.setDividerSize(0);
+                allJSplitPane.setDividerLocation(0);
+            }
+            allJSplitPane.validate();
+        } finally {
+            adjustingPsmTable = false;
+        }
+        spectrumMainPanel.updateSpectrum();
+        allJSplitPane.repaint();
     }
 
     /**
@@ -1820,6 +2116,11 @@ public class PDVMainClass extends JFrame {
 
         this.isNewSoft = false;
         this.isMztab = true;
+
+        // Fresh import: drop any state from a previous result so the control server can't serve
+        // stale spectra_ref -> row mappings or report ready before this import finishes.
+        this.loadComplete = false;
+        this.spectraRefToSpectrumIndex.clear();
 
         this.spectrumsFileFactory = spectrumsFileFactory;
         this.spectrumFileType = spectrumFileType;
@@ -2995,23 +3296,38 @@ public class PDVMainClass extends JFrame {
     }
 
     /**
+     * Show or hide the inline "Loading. Please Wait..." status in the bottom-left of the status row
+     * (the same row as the import-result indicator), used while a table page is being (re)loaded
+     * instead of a floating modal dialog. Safe to call from any thread.
+     * @param show true to show the status, false to clear it
+     */
+    private void showMovingStatus(boolean show){
+        SwingUtilities.invokeLater(() -> {
+            if (movingStatusJLabel != null) {
+                movingStatusJLabel.setText(show ? "Loading. Please Wait..." : "");
+                movingStatusJLabel.setVisible(show);
+            }
+        });
+    }
+
+    /**
      * Update table
      */
     public void updateTable(){
+        updateTable((Runnable) null);
+    }
 
-        ProgressDialogX progressDialogX = new ProgressDialogX(this,
-                Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMass.png")),
-                Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMassWait.png")),
-                true);
-        progressDialogX.setPrimaryProgressCounterIndeterminate(true);
-        progressDialogX.setTitle("Moving. Please Wait...");
+    /**
+     * Update table, then run {@code onComplete} on the EDT once the new page's rows are in the
+     * model. Used to select a specific row after switching pages; {@code onComplete} may be null,
+     * in which case this behaves exactly as the no-arg {@link #updateTable()}.
+     */
+    public void updateTable(Runnable onComplete){
 
-        new Thread(() -> {
-            try {
-                progressDialogX.setVisible(true);
-            } catch (IndexOutOfBoundsException ignored) {
-            }
-        }, "MovingPro").start();
+        // Show the "Moving" status inline at the bottom-left status row (the same row as the
+        // import-result indicator) instead of a floating modal dialog, so a quick page reload is far
+        // less intrusive.
+        showMovingStatus(true);
 
         new Thread("Moving") {
             @Override
@@ -3029,7 +3345,7 @@ public class PDVMainClass extends JFrame {
                             try {
                                 selectedItem.add(sqliteConnection.getOneSpectrumItem(spectrumIndex));
                             } catch (Exception e) {
-                                progressDialogX.setRunFinished();
+                                showMovingStatus(false);
                                 e.printStackTrace();
                                 break;
                             }
@@ -3044,7 +3360,7 @@ public class PDVMainClass extends JFrame {
                             try {
                                 selectedItem.add(sqliteConnection.getOneFrageSpectrumItem(spectrumIndex));
                             } catch (Exception e) {
-                                progressDialogX.setRunFinished();
+                                showMovingStatus(false);
                                 e.printStackTrace();
                                 break;
                             }
@@ -3056,7 +3372,7 @@ public class PDVMainClass extends JFrame {
                             try {
                                 selectedItem.add(sqliteConnection.getOneSpectrumItem(spectrumIndex));
                             } catch (Exception e) {
-                                progressDialogX.setRunFinished();
+                                showMovingStatus(false);
                                 e.printStackTrace();
                                 break;
                             }
@@ -3065,17 +3381,21 @@ public class PDVMainClass extends JFrame {
                         databaseTableModel.updateTable(selectedItem, selectPageSpectrumIndex, spectrumKeyToSelected);
                     }
                 }catch (Exception e){
-                    progressDialogX.setRunFinished();
+                    showMovingStatus(false);
                     e.printStackTrace();
                 }
 
-                progressDialogX.setRunFinished();
+                showMovingStatus(false);
 
                 setTableProperties();
 
-                spectrumJTable.setRowSelectionInterval(0, 0);
-
-                spectrumJTableMouseReleased(null);
+                // When a completion hook will select a specific row (e.g. a spectra_ref select), skip
+                // the default row-0 selection + render to avoid flashing the wrong spectrum and doing a
+                // redundant DB load. The no-arg updateTable() path (onComplete == null) is unchanged.
+                if (onComplete == null) {
+                    spectrumJTable.setRowSelectionInterval(0, 0);
+                    spectrumJTableMouseReleased(null);
+                }
 
                 buttonCheck();
 
@@ -3093,6 +3413,12 @@ public class PDVMainClass extends JFrame {
                         spectrumJTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
                         fitColumnsToContent();
                     });
+                }
+
+                // Run the optional completion hook last, on the EDT, so callers (e.g. a
+                // spectra_ref select) act on the fully-loaded page.
+                if (onComplete != null) {
+                    SwingUtilities.invokeLater(onComplete);
                 }
 
             }

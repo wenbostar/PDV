@@ -900,7 +900,10 @@ public class SpectrumMainPanel extends JPanel {
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 
                         .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addComponent(spectrumShowPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
+                                // min 0 (not DEFAULT_SIZE) so the spectrum area can shrink to a narrow
+                                // window instead of overflowing it (which clipped the right-aligned de
+                                // novo sequence strip / confidence track off the right edge).
+                                .addComponent(spectrumShowPanel, 0, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
@@ -2083,6 +2086,18 @@ public class SpectrumMainPanel extends JPanel {
     }
 
     /**
+     * Re-anchors a top sequence-fragmentation overlay so its drawn content sits just below the
+     * spectrum container's top edge -- the mirror image of {@link #reanchorBottomOverlay}. Keeps x.
+     * @param overlay the top overlay strip
+     */
+    private void reanchorTopOverlay(SequenceFragmentationPanel overlay) {
+        if (overlay == null) {
+            return;
+        }
+        overlay.setBounds(overlay.getX(), topOverlayY(overlay), overlay.getWidth(), overlay.getHeight());
+    }
+
+    /**
      * Y coordinate for a bottom sequence-fragmentation overlay so its drawn content sits just above
      * the spectrum container's bottom edge. The strip's bounding box is much taller than its content
      * and the content (residues plus the b-ion labels drawn below them) occupies only the top part,
@@ -2101,6 +2116,20 @@ public class SpectrumMainPanel extends JPanel {
         Container pane = strip.getParent();
         int paneBottom = (pane != null && pane.getHeight() > 0) ? pane.getHeight() : spectrumShowPanel.getHeight() - 25;
         return paneBottom - 4 - stripContentBottom(strip);
+    }
+
+    /**
+     * Y coordinate for a top sequence-fragmentation overlay so its drawn content sits just below the
+     * spectrum container's top edge -- the mirror of {@link #bottomOverlayY}. The strip's bounding box
+     * is much taller than its content, and the content (the forward-ion labels above the residues)
+     * starts some rows below the box top, so placing the box top at 0 leaves a visible gap. Instead we
+     * measure where the content actually begins and pull that up to a small top margin -- self-
+     * adjusting to font size and label depth, with no empty gap. The strip must already be sized.
+     * @param strip the top overlay strip
+     * @return the strip's top y so its content top rests a few pixels below the container top
+     */
+    private int topOverlayY(SequenceFragmentationPanel strip) {
+        return 4 - stripContentTop(strip);
     }
 
     /**
@@ -2123,7 +2152,9 @@ public class SpectrumMainPanel extends JPanel {
             if (hints != null) {
                 g.addRenderingHints(hints);
             }
-            strip.paint(g);
+            // print() (not paint()) so the render is isolated from the opaque spectrum panel behind a
+            // showing strip; otherwise the spectrum fills the box and the content scan is wrong.
+            strip.print(g);
             g.dispose();
             int[] px = img.getRGB(0, 0, w, h, null, 0, w);
             for (int y = h - 1; y >= 0; y--) {
@@ -2137,6 +2168,45 @@ public class SpectrumMainPanel extends JPanel {
             e.printStackTrace();
         }
         return h;
+    }
+
+    /**
+     * The topmost painted pixel offset within a strip's box (its content's top edge). Mirror of
+     * {@link #stripContentBottom}; measured by rendering the strip offscreen with the desktop's font
+     * hints. Returns 0 as a fallback if nothing is painted.
+     * @param strip the sequence strip (already sized)
+     * @return the content's top edge offset from the strip's box top
+     */
+    private int stripContentTop(SequenceFragmentationPanel strip) {
+        int w = strip.getWidth();
+        int h = strip.getHeight();
+        if (w <= 0 || h <= 0) {
+            return 0;
+        }
+        try {
+            java.awt.image.BufferedImage img = new java.awt.image.BufferedImage(w, h, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = img.createGraphics();
+            java.util.Map<?, ?> hints = (java.util.Map<?, ?>) Toolkit.getDefaultToolkit().getDesktopProperty("awt.font.desktophints");
+            if (hints != null) {
+                g.addRenderingHints(hints);
+            }
+            // print() (not paint()) so the offscreen render is isolated: paint() on a showing,
+            // non-opaque strip pulls in the opaque spectrum panel behind it, which fills the top rows
+            // and makes the topmost-content scan return 0. print() renders only the strip's own content.
+            strip.print(g);
+            g.dispose();
+            int[] px = img.getRGB(0, 0, w, h, null, 0, w);
+            for (int y = 0; y < h; y++) {
+                for (int x = 0; x < w; x++) {
+                    if ((px[y * w + x] >>> 24) != 0) { // non-transparent pixel
+                        return y;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     /**
@@ -2416,6 +2486,9 @@ public class SpectrumMainPanel extends JPanel {
                 mainPanel.doLayout();
             }
             pane.doLayout();
+            // Re-anchor the top strip's y to the pane top with realized metrics (before the track is
+            // placed below it), so the strip lands flush at the top and the track follows it up.
+            reanchorTopOverlay(topStrip);
             if (confidenceTrackApplicable()) {
                 if (track == null) {
                     // Built lazily here (the view is now showing -> realized metrics).
@@ -2508,7 +2581,11 @@ public class SpectrumMainPanel extends JPanel {
         final int peptideLength = length;
 
         if (!isDown){
-            sequenceFragmentationPanel.setBounds(40,10, peptideLength*fontHeight*2 ,fontHeight * 8);
+            // Size first so topOverlayY can measure the content's top, then anchor that content top to
+            // the pane's top edge (mirrors the bottom overlay) -- the strip sits flush at the top with
+            // no gap, instead of hanging below a fixed box offset.
+            sequenceFragmentationPanel.setSize(peptideLength*fontHeight*2, fontHeight * 8);
+            sequenceFragmentationPanel.setBounds(40, topOverlayY(sequenceFragmentationPanel), peptideLength*fontHeight*2 ,fontHeight * 8);
         } else {
             // Size the strip first so bottomOverlayY can measure its content extent, then anchor it.
             sequenceFragmentationPanel.setSize(peptideLength*fontHeight*2, fontHeight * 8);

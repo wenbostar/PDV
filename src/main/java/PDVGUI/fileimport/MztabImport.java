@@ -360,6 +360,14 @@ public class MztabImport {
 
                 spectrumList.add(String.valueOf(lineCount));
 
+                // Map the verbatim mzTab spectra_ref to this PSM's row key so an external caller
+                // (e.g. CasanovoGUI) can locate the row by the exact spectra_ref it read from the
+                // same file. Stored verbatim (no parsing/normalization) to stay robust across mzTab
+                // dialects, and guarded so a short/odd row can never break the import.
+                if (spectrumTitleIndex < values.length) {
+                    pdvMainClass.spectraRefToSpectrumIndex.putIfAbsent(values[spectrumTitleIndex], String.valueOf(lineCount));
+                }
+
                 bos = new ByteArrayOutputStream();
                 try {
                     ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -447,6 +455,10 @@ public class MztabImport {
         pdvMainClass.loadingJButton.setText("Import done");
         pdvMainClass.searchButton.setToolTipText("Find items");
         pdvMainClass.searchItemTextField.setToolTipText("Find items");
+
+        // Whole mzTab is now imported: allSpectrumIndex and spectraRefToSpectrumIndex are
+        // fully populated, so the optional control server may now serve /select requests.
+        pdvMainClass.setLoadComplete(true);
     }
 
     /**
