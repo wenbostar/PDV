@@ -204,7 +204,79 @@ public class SpectrumMainPanel extends JPanel {
     /**
      * Synthetic peptide spectra file map
      */
-    public HashMap<String, MSnSpectrum> checkSpectrumFileMaps = new HashMap<>();
+    // ConcurrentHashMap: written from background prediction threads (auto-fetch / Import dialog) while
+    // the EDT reads and removes from it, so a plain HashMap could corrupt or lose entries.
+    public java.util.concurrent.ConcurrentHashMap<String, MSnSpectrum> checkSpectrumFileMaps = new java.util.concurrent.ConcurrentHashMap<>();
+    /**
+     * Auto-predict mode: when enabled, a predicted mirror spectrum is fetched on demand for every
+     * peptide PSM that is opened, reusing the settings last chosen in the Import predicted dialog.
+     */
+    private boolean autoPredictEnabled = false;
+    private String autoPredictModel;
+    private String autoPredictInstrument;
+    private String autoPredictFragmentMethod;
+    private int autoPredictCollisionEnergy;
+    /**
+     * Keys currently being fetched, to avoid firing duplicate predictions for the same PSM.
+     */
+    private final java.util.Set<String> autoPredictInFlight = java.util.Collections.synchronizedSet(new java.util.HashSet<>());
+    /**
+     * PSM keys whose cached spectrum came from prediction (auto-fetch, or a dialog Submit while
+     * auto mode was on), as opposed to a manually file-imported mirror spectrum. When the prediction
+     * settings change these entries are invalidated so they re-predict, while file imports are kept.
+     */
+    private final java.util.Set<String> autoPredictedKeys = java.util.Collections.synchronizedSet(new java.util.HashSet<>());
+    /**
+     * Minimum spectrum-area height (px) below which the spectrum is not drawn. The compomics
+     * GraphicsPanel hangs (an unbounded Y-tag draw loop) when its Y axis gets too little vertical
+     * room; below this we show a message instead. Derived from the library's drawYTags math with
+     * worst-case padding (maxPadding 70): single view needs Y-axis >= ~30px, i.e. area >=
+     * 85(bottom) + 30 + 1.5*70 + 20 ~= 240. The mirror/check views halve the Y axis (two stacked
+     * spectra), so they need about twice that vertical budget.
+     */
+    private static final int MIN_PLOT_AREA_HEIGHT = 240;
+    private static final int MIN_PLOT_AREA_HEIGHT_MIRROR = 400;
+
+    /** @return the minimum spectrum-area height required for the currently active view. */
+    private int minPlotAreaHeight() {
+        return (mirrorSelected || peptideCheckSelected) ? MIN_PLOT_AREA_HEIGHT_MIRROR : MIN_PLOT_AREA_HEIGHT;
+    }
+
+    private enum PlotAreaState { TOO_SMALL, REBUILT, OK }
+
+    /**
+     * Single plot-area size gate shared by the resize handler and view switches. If the area is too
+     * short for the active view, show the "increase the panel size" message and return TOO_SMALL. If
+     * the area is fine but the message was showing, rebuild the whole spectrum (updateSpectrum builds
+     * all panes, so any view is then safe to show) and return REBUILT. Otherwise OK. The render path
+     * (updateSpectrum) does its own check inline since it cannot recurse through the REBUILT branch.
+     */
+    private PlotAreaState gatePlotArea() {
+        if (spectrumShowPanel.getHeight() < minPlotAreaHeight()) {
+            plotTooSmall = true;
+            showPlotTooSmallMessage();
+            return PlotAreaState.TOO_SMALL;
+        }
+        if (plotTooSmall) {
+            plotTooSmall = false;
+            updateSpectrum();
+            return PlotAreaState.REBUILT;
+        }
+        return PlotAreaState.OK;
+    }
+
+    /**
+     * Guard for a view switch: the switch swaps in a pre-built pane without re-checking the size.
+     * @return true when the area is too small for this view (message shown; caller skips realignment)
+     */
+    private boolean guardActiveView() {
+        return gatePlotArea() == PlotAreaState.TOO_SMALL;
+    }
+    /**
+     * True while the plot area is too short to draw the spectrum and the "increase the panel size"
+     * message is shown instead. Used to rebuild the spectrum once the area grows back.
+     */
+    private boolean plotTooSmall = false;
     /**
      * Current assumptions
      */
@@ -1241,7 +1313,9 @@ public class SpectrumMainPanel extends JPanel {
         checkFileMenu.setVisible(false);
         peptideCheckMenu.setVisible(false);
 
-        realignViewStrips(sequenceFragmentationPanel, null, spectrumJLayeredPane, normalTrack, t -> normalTrack = t);
+        if (!guardActiveView()) {
+            realignViewStrips(sequenceFragmentationPanel, null, spectrumJLayeredPane, normalTrack, t -> normalTrack = t);
+        }
     }
 
     /**
@@ -1300,7 +1374,9 @@ public class SpectrumMainPanel extends JPanel {
         checkFileMenu.setVisible(true);
         peptideCheckMenu.setVisible(false);
 
-        realignViewStrips(sequenceFragmentationPanelMirror, mirrorFragmentPanel, mirrorJLayeredPane, mirrorTrack, t -> mirrorTrack = t);
+        if (!guardActiveView()) {
+            realignViewStrips(sequenceFragmentationPanelMirror, mirrorFragmentPanel, mirrorJLayeredPane, mirrorTrack, t -> mirrorTrack = t);
+        }
     }
 
     /**
@@ -1332,7 +1408,9 @@ public class SpectrumMainPanel extends JPanel {
         checkFileMenu.setVisible(false);
         peptideCheckMenu.setVisible(true);
 
-        realignViewStrips(sequenceFragmentationPanelCheck, checkFragmentPanel, checkPeptideJLayeredPane, checkTrack, t -> checkTrack = t);
+        if (!guardActiveView()) {
+            realignViewStrips(sequenceFragmentationPanelCheck, checkFragmentPanel, checkPeptideJLayeredPane, checkTrack, t -> checkTrack = t);
+        }
     }
 
     /**
@@ -1373,7 +1451,11 @@ public class SpectrumMainPanel extends JPanel {
                 SpectrumFactory spectrumFactory1 = SpectrumFactory.getInstance();
                 spectrumFactory1.addSpectra(checkSpectrumFile);
                 MSnSpectrum mirrorSpectrum = (MSnSpectrum) spectrumFactory1.getSpectrum(checkSpectrumFile.getName(), spectrumFactory1.getSpectrumTitle(checkSpectrumFile.getName(),1));
-                checkSpectrumFileMaps.put(selectedPsmKey,mirrorSpectrum);
+                if (mirrorSpectrum != null) {
+                    checkSpectrumFileMaps.put(selectedPsmKey,mirrorSpectrum);
+                    // This entry is now a manual file import, not a prediction: keep it across setting changes.
+                    autoPredictedKeys.remove(selectedPsmKey);
+                }
             } catch (IOException | MzMLUnmarshallerException | ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
@@ -1473,12 +1555,161 @@ public class SpectrumMainPanel extends JPanel {
     }
 
     /**
-     * Update spectrum
+     * Enable or disable auto-predict mode and remember the prediction settings to reuse for every PSM.
+     *
+     * @param enabled         whether to auto-generate a predicted mirror spectrum for each PSM
+     * @param model           prediction model name
+     * @param instrument      instrument identifier
+     * @param fragmentMethod  fragmentation method
+     * @param collisionEnergy collision energy
      */
-    public void updateSpectrum(){
+    public void setAutoPredict(boolean enabled, String model, String instrument, String fragmentMethod, int collisionEnergy) {
+        // If the prediction settings actually changed, drop the predicted (not file-imported) cache
+        // entries so every PSM re-predicts with the new settings; manual file imports are preserved.
+        boolean settingsChanged = !java.util.Objects.equals(model, autoPredictModel)
+                || !java.util.Objects.equals(instrument, autoPredictInstrument)
+                || !java.util.Objects.equals(fragmentMethod, autoPredictFragmentMethod)
+                || collisionEnergy != autoPredictCollisionEnergy;
+        if (settingsChanged) {
+            synchronized (autoPredictedKeys) {
+                for (String key : autoPredictedKeys) {
+                    checkSpectrumFileMaps.remove(key);
+                }
+                autoPredictedKeys.clear();
+            }
+        }
+
+        this.autoPredictEnabled = enabled;
+        this.autoPredictModel = model;
+        this.autoPredictInstrument = instrument;
+        this.autoPredictFragmentMethod = fragmentMethod;
+        this.autoPredictCollisionEnergy = collisionEnergy;
+    }
+
+    /**
+     * Mark a PSM's cached spectrum as prediction-sourced, so it is invalidated when the prediction
+     * settings change. Called by the Import dialog when it predicts with auto mode on.
+     * @param key the PSM key
+     */
+    public void markAutoPredicted(String key) {
+        if (key != null) {
+            autoPredictedKeys.add(key);
+        }
+    }
+
+    /** @return whether auto-predict mode is currently on (so the dialog can reflect it). */
+    public boolean isAutoPredictEnabled() { return autoPredictEnabled; }
+
+    /** @return the remembered prediction model, or null if auto-predict was never enabled. */
+    public String getAutoPredictModel() { return autoPredictModel; }
+
+    /** @return the remembered instrument identifier (the suffix used by the prediction service). */
+    public String getAutoPredictInstrument() { return autoPredictInstrument; }
+
+    /** @return the remembered fragmentation method. */
+    public String getAutoPredictFragmentMethod() { return autoPredictFragmentMethod; }
+
+    /** @return the remembered collision energy. */
+    public int getAutoPredictCollisionEnergy() { return autoPredictCollisionEnergy; }
+
+    /**
+     * If auto-predict is on and the current peptide PSM has no predicted spectrum yet, fetch one in the
+     * background using the remembered settings and re-render once it arrives. De novo (tag) PSMs are skipped.
+     */
+    private void autoFetchPredictedIfNeeded() {
+        if (!autoPredictEnabled || autoPredictModel == null) {
+            return;
+        }
+        if (!(spectrumIdentificationAssumption instanceof PeptideAssumption)) {
+            return;
+        }
+        final String key = selectedPsmKey;
+        if (key == null || key.isEmpty() || checkSpectrumFileMaps.containsKey(key)) {
+            return;
+        }
+        if (!autoPredictInFlight.add(key)) {
+            return;
+        }
+
+        final PeptideAssumption peptideAssumption = (PeptideAssumption) spectrumIdentificationAssumption;
+        final String model = autoPredictModel;
+        final String instrument = autoPredictInstrument;
+        final String fragmentMethod = autoPredictFragmentMethod;
+        final int collisionEnergy = autoPredictCollisionEnergy;
+        final int precursorCharge = peptideAssumption.getIdentificationCharge().value;
+
+        new Thread("AutoPredict") {
+            @Override
+            public void run() {
+                try {
+                    HashMap<Integer, String> newMods = ImportPredictedDialog.buildModMap(model, peptideAssumption);
+                    GetPredictedOnline getPredictedOnline = new GetPredictedOnline(model, peptideAssumption.getPeptide().getSequence(),
+                            newMods, fragmentMethod, precursorCharge, collisionEnergy, instrument, peptideAssumption.getTheoreticMz());
+                    MSnSpectrum predictedSpectrum = getPredictedOnline.getSpectra();
+                    if (predictedSpectrum != null) {
+                        checkSpectrumFileMaps.put(key, predictedSpectrum);
+                        autoPredictedKeys.add(key);
+                        if (key.equals(selectedPsmKey)) {
+                            SwingUtilities.invokeLater(() -> updateSpectrum());
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    autoPredictInFlight.remove(key);
+                }
+            }
+        }.start();
+    }
+
+    /**
+     * Clear the spectrum panes and show a centered message asking the user to enlarge the panel,
+     * used when the plot area is too short to render the spectrum safely. The message is placed in
+     * the currently visible pane (normal, mirror or peptide-check). The match-stat labels are also
+     * cleared so they don't keep showing the previously rendered PSM's numbers next to the message.
+     */
+    private void showPlotTooSmallMessage() {
+        contentJLabel.setText("");
+        bIonNumJLabel.setText("");
+        yIonNumJLabel.setText("");
+        matchNumJLabel.setText("");
+
         spectrumJLayeredPane.removeAll();
         mirrorJLayeredPane.removeAll();
         checkPeptideJLayeredPane.removeAll();
+
+        JLayeredPane activePane = mirrorSelected ? mirrorJLayeredPane
+                : peptideCheckSelected ? checkPeptideJLayeredPane : spectrumJLayeredPane;
+
+        JLabel message = new JLabel("Increase the panel size to show the plot", SwingConstants.CENTER);
+        message.setFont(new Font("Arial", Font.PLAIN, 13));
+        message.setForeground(Color.GRAY);
+        int w = activePane.getWidth() > 0 ? activePane.getWidth() : spectrumShowPanel.getWidth();
+        int h = activePane.getHeight() > 0 ? activePane.getHeight() : spectrumShowPanel.getHeight();
+        message.setBounds(0, 0, Math.max(w, 1), Math.max(h, 1));
+        activePane.add(message);
+        activePane.revalidate();
+        activePane.repaint();
+    }
+
+    /**
+     * Update spectrum
+     */
+    public void updateSpectrum(){
+        autoFetchPredictedIfNeeded();
+        spectrumJLayeredPane.removeAll();
+        mirrorJLayeredPane.removeAll();
+        checkPeptideJLayeredPane.removeAll();
+
+        // Guard against the GraphicsPanel hang: when the plot area is too short the compomics
+        // spectrum widget spins forever in its Y-tag draw loop. Show a message instead of rendering.
+        // Mirror/check views halve the Y axis, so they need a larger minimum.
+        if (spectrumShowPanel.getHeight() < minPlotAreaHeight()) {
+            plotTooSmall = true;
+            showPlotTooSmallMessage();
+            return;
+        }
+        plotTooSmall = false;
 
         int maxCharge = 1;
         ArrayList<ModificationMatch> allModifications = new ArrayList<>();
@@ -2036,6 +2267,11 @@ public class SpectrumMainPanel extends JPanel {
     private void relayoutActiveSpectrum() {
         int width = spectrumShowPanel.getWidth();
         int height = spectrumShowPanel.getHeight();
+
+        // Too short to draw, or just grew back (gate rebuilds): in both cases skip the manual re-fit.
+        if (gatePlotArea() != PlotAreaState.OK) {
+            return;
+        }
 
         if (mirrorSelected) {
             if (mirrorSpectrumPanel != null) {

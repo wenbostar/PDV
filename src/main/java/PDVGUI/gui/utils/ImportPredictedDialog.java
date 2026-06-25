@@ -25,9 +25,9 @@ public class ImportPredictedDialog extends JDialog {
     private JSpinner collisionEnergyJSpinner;
     private JLabel instrumentListLabel;
     private JLabel fragmentMethodLabel;
+    private JCheckBox autoPredictCheckBox;
     private JTable modificationJTable;
     private PeptideAssumption peptideAssumption;
-    private PTMFactory ptmFactory = PTMFactory.getInstance();
     private MSnSpectrum predictedSpectrum;
     private String selectedPsmKey;
 
@@ -45,7 +45,7 @@ public class ImportPredictedDialog extends JDialog {
             "QEHF: QE",
             "QEHFX: QE",
             "Exploris: QE",
-            "Exploris480:QE"};
+            "Exploris480: QE"};
 
     private String[] modelList = new String[]{"AlphaPept_ms2_generic",
             "ms2pip_2021_HCD",
@@ -71,9 +71,42 @@ public class ImportPredictedDialog extends JDialog {
         initComponents();
         fragmentMethodLabel.setVisible(false);
         fragmentMethodComboBox.setVisible(false);
+        restoreAutoPredictState();
 
         setLocationRelativeTo(spectrumMainPanel);
         setVisible(true);
+    }
+
+    /**
+     * When auto-predict mode is already on, reflect it in the dialog: tick the checkbox and restore
+     * the remembered model / collision energy / fragment method / instrument so reopening the dialog
+     * shows the active settings instead of the defaults.
+     */
+    private void restoreAutoPredictState() {
+        if (!spectrumMainPanel.isAutoPredictEnabled()) {
+            return;
+        }
+        autoPredictCheckBox.setSelected(true);
+
+        if (spectrumMainPanel.getAutoPredictModel() != null) {
+            // Setting the model fires its item listener, which sets the correct instrument/fragment visibility.
+            modelListComboBox.setSelectedItem(spectrumMainPanel.getAutoPredictModel());
+        }
+        collisionEnergyJSpinner.setValue(spectrumMainPanel.getAutoPredictCollisionEnergy());
+        if (spectrumMainPanel.getAutoPredictFragmentMethod() != null) {
+            fragmentMethodComboBox.setSelectedItem(spectrumMainPanel.getAutoPredictFragmentMethod());
+        }
+        // Instrument was stored as the suffix after ": "; match it back to a full combo entry.
+        String instrument = spectrumMainPanel.getAutoPredictInstrument();
+        if (instrument != null) {
+            for (int i = 0; i < instrumentListComboBox.getItemCount(); i++) {
+                String item = instrumentListComboBox.getItemAt(i).toString();
+                if (item.contains(": ") && item.split(": ")[1].equals(instrument)) {
+                    instrumentListComboBox.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
     }
 
     private void initComponents() {
@@ -89,6 +122,10 @@ public class ImportPredictedDialog extends JDialog {
         JLabel precursorChargeLabel = new JLabel("Precursor Charge: ");
         JLabel collisionEnergyLabel = new JLabel("Collision Energy: ");
         JButton submissionButton = new JButton();
+        autoPredictCheckBox = new JCheckBox("Auto-generate for all PSMs");
+        autoPredictCheckBox.setToolTipText("Keep these settings and automatically predict a mirror spectrum for every PSM you open, "
+                + "without re-opening this dialog. Predictions are fetched on demand as you navigate.");
+        autoPredictCheckBox.setOpaque(false);
         JPanel modificationJPanel = new JPanel();
         JPanel backgroundPanel = new JPanel();
         JScrollPane modificationJScrollPane = new JScrollPane();
@@ -170,7 +207,10 @@ public class ImportPredictedDialog extends JDialog {
                                                 .addComponent(fragmentMethodComboBox, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.PREFERRED_SIZE)
                                                 .addGap(0, 0, Short.MAX_VALUE))
                                         .addComponent(modificationJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(submissionButton, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(backgroundPanelLayout.createSequentialGroup()
+                                                .addComponent(submissionButton, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(autoPredictCheckBox)))
                                 .addContainerGap()));
 
         backgroundPanelLayout.setVerticalGroup(
@@ -193,7 +233,9 @@ public class ImportPredictedDialog extends JDialog {
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(modificationJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(submissionButton)
+                                .addGroup(backgroundPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(submissionButton)
+                                        .addComponent(autoPredictCheckBox))
                                 .addContainerGap())
         );
 
@@ -214,9 +256,19 @@ public class ImportPredictedDialog extends JDialog {
     }
 
     private String getModificationString(String originalMod) {
-        String modificationString = "";
+        return getModificationString(modelListComboBox.getSelectedItem().toString(), originalMod);
+    }
 
-        if (modelListComboBox.getSelectedIndex() == 0 || modelListComboBox.getSelectedIndex() == 7) {
+    /**
+     * Map a PDV modification name to the UNIMOD string expected by the given prediction model.
+     * Returns "" when the modification is not supported by the model.
+     */
+    static String getModificationString(String model, String originalMod) {
+        PTMFactory ptmFactory = PTMFactory.getInstance();
+        String modificationString = "";
+        boolean isTMT = model.equals("Prosit_2020_intensity_TMT");
+
+        if (model.equals("AlphaPept_ms2_generic")) {
             // AlphaPept_ms2_generic model
             if (originalMod.contains("of C")){
                 if (Math.abs(ptmFactory.getPTM(originalMod).getMass() -57.021464) < 0.01) {
@@ -263,13 +315,8 @@ public class ImportPredictedDialog extends JDialog {
             } else{
                 System.out.println("This modification is not supported:"+originalMod);
             }
-        } else if (modelListComboBox.getSelectedIndex() == 1 ||
-                modelListComboBox.getSelectedIndex() == 2 ||
-                modelListComboBox.getSelectedIndex() == 3 ||
-                modelListComboBox.getSelectedIndex() == 4 ||
-                modelListComboBox.getSelectedIndex() == 5 ||
-                modelListComboBox.getSelectedIndex() == 6) {
-            // Prosit model
+        } else {
+            // Prosit / ms2pip models
             if (originalMod.contains("of C")){
                 if (Math.abs(ptmFactory.getPTM(originalMod).getMass() -57.021464) < 0.01) {
                     modificationString = "[UNIMOD:4]";
@@ -278,11 +325,11 @@ public class ImportPredictedDialog extends JDialog {
                 if (Math.abs(ptmFactory.getPTM(originalMod).getMass() - 15.994915) < 0.01) {
                     modificationString = "[UNIMOD:35]";
                 }
-            } else if(originalMod.contains("of K") && modelListComboBox.getSelectedIndex() == 6){
+            } else if(originalMod.contains("of K") && isTMT){
                 if (Math.abs(ptmFactory.getPTM(originalMod).getMass() - 229.162932) < 0.01) {
                     modificationString = "[UNIMOD:737]";
                 }
-            } else if((originalMod.contains("of N-term") || originalMod.contains("of peptide N-term")) && modelListComboBox.getSelectedIndex() == 6){
+            } else if((originalMod.contains("of N-term") || originalMod.contains("of peptide N-term")) && isTMT){
                 if (Math.abs(ptmFactory.getPTM(originalMod).getMass() - 229.162932) < 0.01) {
                     modificationString = "[UNIMOD:737]";
                 }
@@ -295,6 +342,33 @@ public class ImportPredictedDialog extends JDialog {
         return modificationString;
     }
 
+    /**
+     * Build the site→UNIMOD modification map for a peptide assumption under the given model.
+     * Mirrors the per-site logic of the modification table so it can be reused outside the dialog
+     * (e.g. by the auto-predict mode). Unsupported modifications are dropped.
+     */
+    static HashMap<Integer, String> buildModMap(String model, PeptideAssumption peptideAssumption) {
+        HashMap<Integer, String> newMods = new HashMap<>();
+        ArrayList<ModificationMatch> modificationMatches = peptideAssumption.getPeptide().getModificationMatches();
+        if (modificationMatches == null) {
+            return newMods;
+        }
+        for (ModificationMatch modificationMatch : modificationMatches) {
+            String assigned = getModificationString(model, modificationMatch.getTheoreticPtm());
+            if (Objects.equals(assigned, "")) {
+                continue;
+            }
+            int site;
+            if (modificationMatch.getTheoreticPtm().contains("of N-term") || modificationMatch.getTheoreticPtm().contains("of peptide N-term")) {
+                site = 0;
+            } else {
+                site = modificationMatch.getModificationSite();
+            }
+            newMods.put(site, assigned);
+        }
+        return newMods;
+    }
+
     private void submissionButtonActionPerformed(java.awt.event.ActionEvent evt) {
 
         String model = modelListComboBox.getSelectedItem().toString();
@@ -303,6 +377,10 @@ public class ImportPredictedDialog extends JDialog {
         int collisionEnergy = (int) collisionEnergyJSpinner.getValue();
         String instrument = instrumentListComboBox.getSelectedItem().toString().split(": ")[1];
         String fragmentMethod = fragmentMethodComboBox.getSelectedItem().toString();
+
+        // Remember the chosen settings and turn on auto-predict for every PSM, or clear it when unchecked.
+        final boolean autoEnabled = autoPredictCheckBox.isSelected();
+        spectrumMainPanel.setAutoPredict(autoEnabled, model, instrument, fragmentMethod, collisionEnergy);
 
         HashMap<Integer, String> newMods = new HashMap<>();
         for (int i = 0; i<modificationJTable.getRowCount(); i ++){
@@ -348,6 +426,11 @@ public class ImportPredictedDialog extends JDialog {
                                 "Prediction error", JOptionPane.ERROR_MESSAGE);
                     } else {
                         spectrumMainPanel.checkSpectrumFileMaps.put(selectedPsmKey, predictedSpectrum);
+                        // With auto mode on, this prediction shares the global settings, so track it for
+                        // invalidation when those settings change (a plain manual import is left untracked).
+                        if (autoEnabled) {
+                            spectrumMainPanel.markAutoPredicted(selectedPsmKey);
+                        }
                         spectrumMainPanel.updateSpectrum();
                     }
 
