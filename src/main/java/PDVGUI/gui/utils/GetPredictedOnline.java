@@ -12,7 +12,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -33,6 +32,61 @@ public class GetPredictedOnline {
     private String inputString;
     private double precursorMZ;
     private String fragmentMethod;
+
+    /** Public Koina inference server. Models are reached at KOINA_BASE + "<model>/infer". */
+    private static final String KOINA_BASE = "https://koina.wilhelmlab.org/v2/models/";
+
+    // Which extra inputs each model's request needs (every model also takes peptide + charge). A new
+    // model is added by categorising it here; the request body and the dialog's combo visibility both
+    // derive from these, so there is no per-model copy of the request to keep in sync.
+    private static final java.util.Set<String> INSTRUMENT_MODELS =
+            new java.util.HashSet<>(java.util.Arrays.asList("AlphaPept_ms2_generic", "UniSpec"));
+    private static final java.util.Set<String> FRAGMENTATION_MODELS =
+            new java.util.HashSet<>(java.util.Arrays.asList("Prosit_2020_intensity_TMT"));
+    private static final java.util.Set<String> CHARGE_ONLY_MODELS =
+            new java.util.HashSet<>(java.util.Arrays.asList(
+                    "ms2pip_2021_HCD", "Prosit_2020_intensity_CID", "ms2pip_Immuno_HCD", "ms2pip_timsTOF2024"));
+
+    /** @return true if the model's request needs the collision_energies input. */
+    static boolean needsCollisionEnergy(String model) { return !CHARGE_ONLY_MODELS.contains(model); }
+
+    /** @return true if the model's request needs the instrument_types input. */
+    static boolean needsInstrument(String model) { return INSTRUMENT_MODELS.contains(model); }
+
+    /** @return true if the model's request needs the fragmentation_types input. */
+    static boolean needsFragmentation(String model) { return FRAGMENTATION_MODELS.contains(model); }
+
+    // Instrument tokens each instrument-using model accepts. A model absent here accepts every
+    // instrument in the dialog's list (e.g. the generic AlphaPept model); UniSpec is an Orbitrap-HCD
+    // model whose NCE->eV step only knows QE and LUMOS (timsTOF / SciexTOF are rejected by the server).
+    private static final java.util.Map<String, java.util.Set<String>> SUPPORTED_INSTRUMENTS = buildSupportedInstruments();
+
+    private static java.util.Map<String, java.util.Set<String>> buildSupportedInstruments() {
+        java.util.Map<String, java.util.Set<String>> m = new java.util.HashMap<>();
+        m.put("UniSpec", new java.util.HashSet<>(java.util.Arrays.asList("QE", "LUMOS")));
+        return m;
+    }
+
+    /**
+     * The instrument tokens a model accepts, or null when the model is unrestricted (accepts every
+     * instrument in the dialog's list). Used to filter the dialog's instrument dropdown.
+     * @param model the model name
+     * @return the set of accepted instrument tokens, or null for no restriction
+     */
+    static java.util.Set<String> supportedInstruments(String model) {
+        return SUPPORTED_INSTRUMENTS.get(model);
+    }
+
+    /**
+     * Whether a model accepts a given instrument token (models not otherwise restricted accept all).
+     * @param model the model name
+     * @param instrumentSuffix the instrument token (the part after ": " in the dialog's instrument list)
+     * @return true if the model accepts that instrument
+     */
+    static boolean supportsInstrument(String model, String instrumentSuffix) {
+        java.util.Set<String> allowed = SUPPORTED_INSTRUMENTS.get(model);
+        return allowed == null || allowed.contains(instrumentSuffix);
+    }
 
     public static void main(String[] args) throws IOException {
 
@@ -59,111 +113,144 @@ public class GetPredictedOnline {
         generateInputString();
     }
 
+    /** @return the JSON request body generated for this model (package-visible for testing). */
+    String getInputString() {
+        return inputString;
+    }
+
     private void setURL() throws MalformedURLException {
-        if (model.equals("AlphaPept_ms2_generic")) {
-            String url = "https://koina.proteomicsdb.org/v2/models/AlphaPept_ms2_generic/infer";
-            usedURL = new URL(url);
-        } else if (model.equals("ms2pip_2021_HCD")){
-            String url = "https://koina.proteomicsdb.org/v2/models/ms2pip_2021_HCD/infer";
-            usedURL = new URL(url);
-        } else if (model.equals("Prosit_2019_intensity")){
-            String url = "https://koina.proteomicsdb.org/v2/models/Prosit_2019_intensity/infer";
-            usedURL = new URL(url);
-        } else if (model.equals("Prosit_2023_intensity_timsTOF")){
-            String url = "https://koina.proteomicsdb.org/v2/models/Prosit_2023_intensity_timsTOF/infer";
-            usedURL = new URL(url);
-        } else if (model.equals("Prosit_2020_intensity_CID")){
-            String url = "https://koina.proteomicsdb.org/v2/models/Prosit_2020_intensity_CID/infer";
-            usedURL = new URL(url);
-        } else if (model.equals("Prosit_2020_intensity_HCD")){
-            String url = "https://koina.proteomicsdb.org/v2/models/Prosit_2020_intensity_HCD/infer";
-            usedURL = new URL(url);
-        }
-//        else if (model.equals("Prosit_2023_intensity_XL_CMS2")){
-//            String url = "https://koina.proteomicsdb.org/v2/models/Prosit_2023_intensity_XL_CMS2/infer";
-//            usedURL = new URL(url);
-//        }
-        else if (model.equals("Prosit_2020_intensity_TMT")){
-            String url = "https://koina.proteomicsdb.org/v2/models/Prosit_2020_intensity_TMT/infer";
-            usedURL = new URL(url);
-        }
+        usedURL = new URL(buildInferUrl(model));
+    }
+
+    /**
+     * Build the Koina inference endpoint URL for a model. All models share the same endpoint shape,
+     * so this is derived from the model name instead of branching per model; adding a model only
+     * needs an entry in the dialog's list. Package-visible for testing.
+     * @param model the Koina model name
+     * @return the full /infer URL on the public Koina server
+     */
+    static String buildInferUrl(String model) {
+        return KOINA_BASE + model + "/infer";
     }
 
     private void generateInputString(){
-        String modPep = "";
-        if (newMods.isEmpty()){
-            modPep = pepSeq;
-        } else {
-            // Add the modifications to the peptide sequence
-            // (the modifications are added in the order of their position in the peptide sequence)
-            // pos: 1 - the first amino acid
-            String []aa_list = pepSeq.split("");
-            for (int index : newMods.keySet()){
-                // TODO: C-term modification
-                if(index == 0){
-                    // N-term modification
-                    aa_list[0] = newMods.get(index) + "-"+ aa_list[0];
-                }else{
-                    aa_list[index-1] = aa_list[index-1]+newMods.get(index);
-                }
+        String modPep = buildModifiedPeptide();
+
+        // Assemble the request from named input fragments based on what the model needs (see the
+        // *_MODELS sets). Every model takes peptide + charge; collision energy / instrument /
+        // fragmentation are appended per category, so adding a model needs no new request body.
+        StringBuilder inputs = new StringBuilder();
+        inputs.append(bytesInput("peptide_sequences", modPep));
+        inputs.append(", ").append(intInput("precursor_charges", precursorCharge));
+        if (needsCollisionEnergy(model)) {
+            inputs.append(", ").append(floatInput("collision_energies", collisionEnergy));
+        }
+        if (needsInstrument(model)) {
+            inputs.append(", ").append(bytesInput("instrument_types", instrument));
+        }
+        if (needsFragmentation(model)) {
+            inputs.append(", ").append(bytesInput("fragmentation_types", fragmentMethod));
+        }
+        inputString = "{ \"id\": \"0\", \"inputs\": [ " + inputs + " ] }";
+    }
+
+    /**
+     * Apply the site-&gt;UNIMOD modifications to the bare sequence: an N-term modification (site 0)
+     * prefixes the peptide, an internal modification follows its residue.
+     * @return the ProForma-style modified peptide string
+     */
+    private String buildModifiedPeptide() {
+        if (newMods.isEmpty()) {
+            return pepSeq;
+        }
+        // pos 0 = N-term; pos n = the n-th residue (1-based).
+        String[] aa_list = pepSeq.split("");
+        for (int index : newMods.keySet()) {
+            // TODO: C-term modification
+            if (index == 0) {
+                aa_list[0] = newMods.get(index) + "-" + aa_list[0];
+            } else {
+                aa_list[index - 1] = aa_list[index - 1] + newMods.get(index);
             }
-            modPep = StringUtils.join(aa_list, "");
-            // System.out.println(modPep);
+        }
+        return StringUtils.join(aa_list, "");
+    }
+
+    private static String bytesInput(String name, String value) {
+        return "{ \"name\": \"" + name + "\", \"shape\": [ 1, 1 ], \"datatype\": \"BYTES\", \"data\": [ \"" + value + "\" ] }";
+    }
+
+    private static String intInput(String name, int value) {
+        return "{ \"name\": \"" + name + "\", \"shape\": [ 1, 1 ], \"datatype\": \"INT32\", \"data\": [ " + value + " ] }";
+    }
+
+    private static String floatInput(String name, int value) {
+        return "{ \"name\": \"" + name + "\", \"shape\": [ 1, 1 ], \"datatype\": \"FP32\", \"data\": [ " + value + " ] }";
+    }
+
+    /**
+     * Find a Koina inference output by its "name" field (e.g. "mz", "intensities", "annotation").
+     * @param outputs the "outputs" JSON array from the response
+     * @param name the output name to look for
+     * @return the matching output object, or null if none has that name
+     */
+    private static JSONObject getOutputByName(JSONArray outputs, String name) {
+        for (int i = 0; i < outputs.length(); i++) {
+            JSONObject o = outputs.getJSONObject(i);
+            if (name.equals(o.optString("name"))) {
+                return o;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Parse a Koina KServe-v2 inference response body into an {@link MSnSpectrum}. The "mz" and
+     * "intensities" outputs are read by name (so the result is independent of output ordering), and
+     * only peaks with intensity &gt; 0 are kept. Returns null when either expected output is absent.
+     * Package-visible so it can be unit tested without a network call.
+     *
+     * @param responseString the raw response body from the /infer endpoint
+     * @param precursorCharge the precursor charge to attach to the spectrum
+     * @param precursorMZ the precursor m/z to attach to the spectrum
+     * @return the parsed spectrum, or null if the response lacks the mz/intensities outputs
+     */
+    static MSnSpectrum parseSpectrum(String responseString, int precursorCharge, double precursorMZ) {
+        String collapsed = responseString;
+        if (responseString.contains("parameters")) {
+            collapsed = responseString.substring(0, responseString.indexOf("\"parameters\":")) + responseString.substring(responseString.indexOf("},") + 2);
         }
 
-        if (model.equals("AlphaPept_ms2_generic")){
-
-            inputString = "{ \"id\": \"0\", \"inputs\": [ { \"name\": \"peptide_sequences\", \"shape\": [ 1, 1 ], " +
-                    "\"datatype\": \"BYTES\", \"data\": [ \"" + modPep + "\" ] }, { \"name\": \"precursor_charges\", " +
-                    "\"shape\": [ 1, 1 ], \"datatype\": \"INT32\", \"data\": [ "+ precursorCharge + " ] }, { \"name\": " +
-                    "\"collision_energies\", \"shape\": [ 1, 1 ], \"datatype\": \"FP32\", \"data\": [ "+ collisionEnergy +
-                    " ] }, { \"name\": \"instrument_types\", \"shape\": [ 1, 1 ], \"datatype\": \"BYTES\", \"data\": [ \"" +
-                    instrument + "\" ] } ] }";
-        } else if (model.equals("ms2pip_2021_HCD")){
-            inputString = "{ \"id\": \"0\", \"inputs\": [ { \"name\": \"peptide_sequences\", \"shape\": [ 1, 1 ], " +
-                    "\"datatype\": \"BYTES\", \"data\": [ \"" + modPep + "\" ] }, { \"name\": \"precursor_charges\", " +
-                    "\"shape\": [ 1, 1 ], \"datatype\": \"INT32\", \"data\": [ "+ precursorCharge + " ] }] }";
-        } else if (model.equals("Prosit_2019_intensity")){
-            inputString = "{ \"id\": \"0\", \"inputs\": [ { \"name\": \"peptide_sequences\", \"shape\": [ 1, 1 ], " +
-                    "\"datatype\": \"BYTES\", \"data\": [ \"" + modPep + "\" ] }, { \"name\": \"precursor_charges\", " +
-                    "\"shape\": [ 1, 1 ], \"datatype\": \"INT32\", \"data\": [ "+ precursorCharge + " ] }, { \"name\": " +
-                    "\"collision_energies\", \"shape\": [ 1, 1 ], \"datatype\": \"FP32\", \"data\": [ "+ collisionEnergy +
-                    " ] }] }";
-        } else if (model.equals("Prosit_2023_intensity_timsTOF")){
-            inputString = "{ \"id\": \"0\", \"inputs\": [ { \"name\": \"peptide_sequences\", \"shape\": [ 1, 1 ], " +
-                    "\"datatype\": \"BYTES\", \"data\": [ \"" + modPep + "\" ] }, { \"name\": \"precursor_charges\", " +
-                    "\"shape\": [ 1, 1 ], \"datatype\": \"INT32\", \"data\": [ "+ precursorCharge + " ] }, { \"name\": " +
-                    "\"collision_energies\", \"shape\": [ 1, 1 ], \"datatype\": \"FP32\", \"data\": [ "+ collisionEnergy +
-                    " ] }] }";
-        } else if (model.equals("Prosit_2020_intensity_CID")){
-            inputString = "{ \"id\": \"0\", \"inputs\": [ { \"name\": \"peptide_sequences\", \"shape\": [ 1, 1 ], " +
-                    "\"datatype\": \"BYTES\", \"data\": [ \"" + modPep + "\" ] }, { \"name\": \"precursor_charges\", " +
-                    "\"shape\": [ 1, 1 ], \"datatype\": \"INT32\", \"data\": [ "+ precursorCharge + " ] }] }";
-        } else if (model.equals("Prosit_2020_intensity_HCD")){
-            inputString = "{ \"id\": \"0\", \"inputs\": [ { \"name\": \"peptide_sequences\", \"shape\": [ 1, 1 ], " +
-                    "\"datatype\": \"BYTES\", \"data\": [ \"" + modPep + "\" ] }, { \"name\": \"precursor_charges\", " +
-                    "\"shape\": [ 1, 1 ], \"datatype\": \"INT32\", \"data\": [ "+ precursorCharge + " ] }, { \"name\": " +
-                    "\"collision_energies\", \"shape\": [ 1, 1 ], \"datatype\": \"FP32\", \"data\": [ "+ collisionEnergy +
-                    " ] }] }";
+        JSONObject jsonObject = new JSONObject(collapsed);
+        JSONArray output = jsonObject.getJSONArray("outputs");
+        // Look the outputs up by name rather than by a per-model fixed index: every Koina intensity
+        // model returns named "mz" and "intensities" arrays, so this works for all models and does
+        // not break if the server changes the output order.
+        JSONObject intObject = getOutputByName(output, "intensities");
+        JSONObject mzObject = getOutputByName(output, "mz");
+        if (intObject == null || mzObject == null) {
+            System.out.println("Unexpected Koina response: missing 'intensities' or 'mz' output.");
+            return null;
         }
-//        else if (model.equals("Prosit_2023_intensity_XL_CMS2")){
-//            inputString = "{ \"id\": \"0\", \"inputs\": [ { \"name\": \"peptide_sequences\", \"shape\": [ 1, 1 ], " +
-//                    "\"datatype\": \"BYTES\", \"data\": [ \"" + modPep + "\" ] }, { \"name\": \"precursor_charges\", " +
-//                    "\"shape\": [ 1, 1 ], \"datatype\": \"INT32\", \"data\": [ "+ precursorCharge + " ] }, { \"name\": " +
-//                    "\"collision_energies\", \"shape\": [ 1, 1 ], \"datatype\": \"FP32\", \"data\": [ "+ collisionEnergy +
-//                    " ] }] }";
-//        }
-        else if (model.equals("Prosit_2020_intensity_TMT")){
-            // modPep = "[UNIMOD:737]-" + modPep;
-            // System.out.println(modPep);
-            inputString = "{ \"id\": \"0\", \"inputs\": [ { \"name\": \"peptide_sequences\", \"shape\": [ 1, 1 ], " +
-                    "\"datatype\": \"BYTES\", \"data\": [ \"" + modPep + "\" ] }, { \"name\": \"precursor_charges\", " +
-                    "\"shape\": [ 1, 1 ], \"datatype\": \"INT32\", \"data\": [ "+ precursorCharge + " ] }, { \"name\": " +
-                    "\"collision_energies\", \"shape\": [ 1, 1 ], \"datatype\": \"FP32\", \"data\": [ "+ collisionEnergy +
-                    " ] }, { \"name\": \"fragmentation_types\", \"shape\": [ 1, 1 ], \"datatype\": \"BYTES\", \"data\": [ \"" +
-                    fragmentMethod + "\" ] } ] }";
-        }
+        List<Object> intensity = intObject.getJSONArray("data").toList();
+        List<Object> mzs = mzObject.getJSONArray("data").toList();
 
+        HashMap<Double, Peak> peakHashMap = new HashMap<>();
+        for (int i = 0; i < intensity.size(); i++) {
+            // Cast to Number, not BigDecimal: org.json yields Integer/Long for numbers without a
+            // decimal point, so a BigDecimal cast would ClassCastException on integer-formatted values.
+            double intensityValue = ((Number) intensity.get(i)).doubleValue();
+            if (intensityValue > 0) {
+                double mzValue = ((Number) mzs.get(i)).doubleValue();
+                peakHashMap.put(mzValue, new Peak(mzValue, intensityValue));
+            }
+        }
+        Charge charge = new Charge(1, precursorCharge);
+        ArrayList<Charge> charges = new ArrayList<>();
+        charges.add(charge);
+
+        Precursor precursor = new Precursor(0, precursorMZ, 0, charges);
+        return new MSnSpectrum(2, precursor, "", peakHashMap, "");
     }
 
     public MSnSpectrum getSpectra() throws IOException {
@@ -193,37 +280,7 @@ public class GetPredictedOnline {
                 while ((responseLine = br.readLine()) != null) {
                     response.append(responseLine.trim());
                 }
-                String responseString = response.toString();
-                String collapsed = responseString;
-                if (responseString.contains("parameters")){
-                    collapsed = responseString.substring(0, responseString.indexOf("\"parameters\":")) + responseString.substring(responseString.indexOf("},") + 2);
-                }
-
-                JSONObject jsonObject = new JSONObject(collapsed);
-                JSONArray output = jsonObject.getJSONArray("outputs");
-                JSONObject intObject;
-                if (model.equals("AlphaPept_ms2_generic")){
-                    intObject = (JSONObject) output.get(0);
-                } else {
-                    intObject = (JSONObject) output.get(2);
-                }
-                JSONObject mzObject = (JSONObject) output.get(1);
-                List<Object> intensity = intObject.getJSONArray("data").toList();
-                List<Object> mzs = mzObject.getJSONArray("data").toList();
-
-                HashMap<Double, Peak> peakHashMap = new HashMap<>();
-                for (int i = 0; i < intensity.size(); i++) {
-                    if (((BigDecimal) intensity.get(i)).doubleValue() > 0) {
-                        Peak peak = new Peak(((BigDecimal) mzs.get(i)).doubleValue(), ((BigDecimal) intensity.get(i)).doubleValue());
-                        peakHashMap.put(((BigDecimal) mzs.get(i)).doubleValue(), peak);
-                    }
-                }
-                Charge charge = new Charge(1, precursorCharge);
-                ArrayList<Charge> charges = new ArrayList<>();
-                charges.add(charge);
-
-                Precursor precursor = new Precursor(0, precursorMZ, 0, charges);
-                spectrum = new MSnSpectrum(2, precursor, "", peakHashMap, "");
+                spectrum = parseSpectrum(response.toString(), precursorCharge, precursorMZ);
 
             }
         } else {
@@ -234,7 +291,7 @@ public class GetPredictedOnline {
     }
 
     private void getSpectra(String test) throws IOException {
-        String url = "https://koina.proteomicsdb.org/v2/models/AlphaPept_ms2_generic/infer";
+        String url = KOINA_BASE + "AlphaPept_ms2_generic/infer";
         usedURL = new URL(url);
 
         HttpURLConnection conn = (HttpURLConnection) usedURL.openConnection();

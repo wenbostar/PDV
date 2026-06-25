@@ -48,7 +48,10 @@ public class ImportPredictedDialog extends JDialog {
             "Exploris480: QE"};
 
     private String[] modelList = new String[]{"AlphaPept_ms2_generic",
+            "UniSpec",
             "ms2pip_2021_HCD",
+            "ms2pip_Immuno_HCD",
+            "ms2pip_timsTOF2024",
             "Prosit_2019_intensity",
             "Prosit_2023_intensity_timsTOF",
             "Prosit_2020_intensity_CID",
@@ -268,8 +271,8 @@ public class ImportPredictedDialog extends JDialog {
         String modificationString = "";
         boolean isTMT = model.equals("Prosit_2020_intensity_TMT");
 
-        if (model.equals("AlphaPept_ms2_generic")) {
-            // AlphaPept_ms2_generic model
+        if (model.equals("AlphaPept_ms2_generic") || model.equals("UniSpec")) {
+            // Generic ProForma models (AlphaPept, UniSpec) support the broader modification set
             if (originalMod.contains("of C")){
                 if (Math.abs(ptmFactory.getPTM(originalMod).getMass() -57.021464) < 0.01) {
                     modificationString = "[UNIMOD:4]";
@@ -452,21 +455,43 @@ public class ImportPredictedDialog extends JDialog {
     }
 
     private void modelListComboBoxMouseClicked(java.awt.event.ItemEvent evt) {
-        if (modelListComboBox.getSelectedIndex() == 0) {
-            instrumentListLabel.setVisible(true);
-            instrumentListComboBox.setVisible(true);
-            fragmentMethodLabel.setVisible(false);
-            fragmentMethodComboBox.setVisible(false);
-        } else {
-            if (modelListComboBox.getSelectedIndex() == 6) {
-                fragmentMethodLabel.setVisible(true);
-                fragmentMethodComboBox.setVisible(true);
-            } else {
-                fragmentMethodLabel.setVisible(false);
-                fragmentMethodComboBox.setVisible(false);
+        // Show only the inputs the selected model actually needs (by name, not list position).
+        String selectedModel = (String) modelListComboBox.getSelectedItem();
+        boolean instrument = GetPredictedOnline.needsInstrument(selectedModel);
+        boolean fragmentation = GetPredictedOnline.needsFragmentation(selectedModel);
+        if (instrument) {
+            updateInstrumentList(selectedModel);
+        }
+        instrumentListLabel.setVisible(instrument);
+        instrumentListComboBox.setVisible(instrument);
+        fragmentMethodLabel.setVisible(fragmentation);
+        fragmentMethodComboBox.setVisible(fragmentation);
+    }
+
+    /**
+     * Repopulate the instrument dropdown for the given model. An unrestricted model (e.g. the generic
+     * AlphaPept) offers the full instrument list; a restricted model offers exactly one entry per
+     * supported instrument token (e.g. UniSpec shows just QE and LUMOS, not every QE/LUMOS alias).
+     */
+    private void updateInstrumentList(String model) {
+        java.util.Set<String> allowed = GetPredictedOnline.supportedInstruments(model);
+        java.util.List<String> items = new ArrayList<>();
+        if (allowed == null) {
+            for (String entry : instrumentList) {
+                items.add(entry);
             }
-            instrumentListLabel.setVisible(false);
-            instrumentListComboBox.setVisible(false);
+        } else {
+            java.util.Set<String> seen = new java.util.LinkedHashSet<>();
+            for (String entry : instrumentList) {
+                String suffix = entry.contains(": ") ? entry.split(": ")[1] : entry;
+                if (allowed.contains(suffix) && seen.add(suffix)) {
+                    items.add(entry);
+                }
+            }
+        }
+        instrumentListComboBox.setModel(new DefaultComboBoxModel(items.toArray()));
+        if (!items.isEmpty()) {
+            instrumentListComboBox.setSelectedIndex(0);
         }
     }
 
