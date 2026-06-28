@@ -12,6 +12,7 @@ import PDVGUI.gui.utils.FileImport.DeNovoImportDialog;
 import PDVGUI.gui.utils.TableModel.DatabaseTableModel;
 import PDVGUI.gui.utils.TableModel.DeNovoTableModel;
 import PDVGUI.gui.utils.TableModel.FrageTableModel;
+import PDVGUI.utils.Export;
 import com.compomics.util.enumeration.ImageType;
 import com.compomics.util.exceptions.exception_handlers.FrameExceptionHandler;
 import com.compomics.util.experiment.biology.*;
@@ -39,6 +40,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.*;
 import javax.swing.text.DefaultEditorKit;
 import java.awt.*;
@@ -971,6 +973,7 @@ public class PDVMainClass extends JFrame {
         JMenuItem homeJMenuItem = new JMenuItem();
         JMenuItem newJMenuItem = new JMenuItem();
         JMenuItem columnSelectionJMenuItem = new JMenuItem();
+        JMenuItem exportScreenshotJMenuItem = new JMenuItem();
         JMenuItem openDenovoJMenuItem = new JMenuItem();
         JMenuItem exportAllMenuItem = new JMenuItem();
         JMenuItem exportSelectedJMenuItem = new JMenuItem();
@@ -1153,6 +1156,12 @@ public class PDVMainClass extends JFrame {
         columnSelectionJMenuItem.setText("Column Selection");
         columnSelectionJMenuItem.addActionListener(this::columnSelectionJMenuItemActionPerformed);
         viewMenu.add(columnSelectionJMenuItem);
+
+        exportScreenshotJMenuItem.setMnemonic('E');
+        exportScreenshotJMenuItem.setText("Export Window Screenshot");
+        exportScreenshotJMenuItem.setToolTipText("Save an image of the main window.");
+        exportScreenshotJMenuItem.addActionListener(this::exportScreenshotJMenuItemActionPerformed);
+        viewMenu.add(exportScreenshotJMenuItem);
 
         menuBar.add(viewMenu);
 
@@ -4235,6 +4244,158 @@ public class PDVMainClass extends JFrame {
         }
 
         new ColumnSelectionDialog(this, spectrumJTable, columnName);
+    }
+
+    /**
+     * Export an image of the main window
+     * @param evt Mouse click event
+     */
+    private void exportScreenshotJMenuItemActionPerformed(ActionEvent evt){
+
+        JComponent windowContent = getRootPane();
+
+        JFileChooser fileChooser = new JFileChooser(lastSelectedFolder.getLastSelectedFolder());
+        fileChooser.setDialogTitle("Export Window Screenshot");
+        fileChooser.setMultiSelectionEnabled(false);
+        fileChooser.setAcceptAllFileFilterUsed(false);
+
+        FileNameExtensionFilter pngFilter = new FileNameExtensionFilter("PNG image (*.png)", "png");
+        FileNameExtensionFilter tiffFilter = new FileNameExtensionFilter("TIFF image (*.tiff)", "tiff");
+        FileNameExtensionFilter pdfFilter = new FileNameExtensionFilter("PDF document (*.pdf)", "pdf");
+        FileNameExtensionFilter svgFilter = new FileNameExtensionFilter("SVG image (*.svg)", "svg");
+        fileChooser.addChoosableFileFilter(pngFilter);
+        fileChooser.addChoosableFileFilter(tiffFilter);
+        fileChooser.addChoosableFileFilter(pdfFilter);
+        fileChooser.addChoosableFileFilter(svgFilter);
+        fileChooser.setFileFilter(pngFilter);
+        fileChooser.setSelectedFile(new File("PDV.png"));
+
+        java.util.function.Function<javax.swing.filechooser.FileFilter, String> extensionOf = filter -> {
+            if (filter == tiffFilter) {
+                return ".tiff";
+            } else if (filter == pdfFilter) {
+                return ".pdf";
+            } else if (filter == svgFilter) {
+                return ".svg";
+            }
+            return ".png";
+        };
+
+        // Track the latest base file name (without a known image extension). The chooser reports a
+        // null selection while the format dropdown changes, so getSelectedFile() cannot be relied on
+        // inside the filter-change handler.
+        final String[] baseName = { "PDV" };
+        fileChooser.addPropertyChangeListener(JFileChooser.SELECTED_FILE_CHANGED_PROPERTY, e -> {
+            File selected = fileChooser.getSelectedFile();
+            if (selected == null) {
+                return;
+            }
+            String name = selected.getName();
+            int dot = name.lastIndexOf('.');
+            if (dot > 0) {
+                String ext = name.substring(dot).toLowerCase();
+                if (ext.equals(".png") || ext.equals(".tiff") || ext.equals(".tif")
+                        || ext.equals(".pdf") || ext.equals(".svg")) {
+                    name = name.substring(0, dot);
+                }
+            }
+            baseName[0] = name;
+        });
+
+        // When the format changes, re-apply the remembered base name with the new extension. Deferred
+        // so the chooser UI finishes its own filter-change handling first; a synchronous setSelectedFile
+        // is otherwise overwritten and the file-name field is not refreshed.
+        fileChooser.addPropertyChangeListener(JFileChooser.FILE_FILTER_CHANGED_PROPERTY, e -> {
+            String newName = baseName[0] + extensionOf.apply(fileChooser.getFileFilter());
+            SwingUtilities.invokeLater(() -> {
+                File dir = fileChooser.getCurrentDirectory();
+                fileChooser.setSelectedFile(dir != null ? new File(dir, newName) : new File(newName));
+            });
+        });
+
+        JSpinner dpiSpinner = new JSpinner(new SpinnerNumberModel(300, 72, 1200, 50));
+        dpiSpinner.setMaximumSize(new Dimension(80, 24));
+        dpiSpinner.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JLabel dpiLabel = new JLabel("Resolution (DPI):");
+        dpiLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JCheckBox borderCheckBox = new JCheckBox("Border line", true);
+        borderCheckBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JCheckBox shadowCheckBox = new JCheckBox("Drop shadow", false);
+        shadowCheckBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JLabel dpiNote = new JLabel("<html><span style='color:gray;'>DPI: PNG / TIFF.<br>Border / shadow: PNG only.</span></html>");
+        dpiNote.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JPanel dpiPanel = new JPanel();
+        dpiPanel.setLayout(new BoxLayout(dpiPanel, BoxLayout.Y_AXIS));
+        dpiPanel.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 8));
+        dpiPanel.add(dpiLabel);
+        dpiPanel.add(dpiSpinner);
+        dpiPanel.add(borderCheckBox);
+        dpiPanel.add(shadowCheckBox);
+        dpiPanel.add(dpiNote);
+        fileChooser.setAccessory(dpiPanel);
+
+        if (fileChooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        int dpi = (Integer) dpiSpinner.getValue();
+        boolean shadow = shadowCheckBox.isSelected();
+        boolean border = borderCheckBox.isSelected() || shadow;
+
+        File selectedFile = fileChooser.getSelectedFile();
+        lastSelectedFolder.setLastSelectedFolder(selectedFile.getParent());
+
+        ImageType imageType;
+        if (fileChooser.getFileFilter() == tiffFilter) {
+            imageType = ImageType.TIFF;
+        } else if (fileChooser.getFileFilter() == pdfFilter) {
+            imageType = ImageType.PDF;
+        } else if (fileChooser.getFileFilter() == svgFilter) {
+            imageType = ImageType.SVG;
+        } else {
+            imageType = ImageType.PNG;
+        }
+        String extension = extensionOf.apply(fileChooser.getFileFilter());
+
+        String fileName = selectedFile.getName();
+        String lowerName = fileName.toLowerCase();
+        if (!lowerName.endsWith(extension)) {
+            for (String knownExt : new String[]{".png", ".tiff", ".tif", ".pdf", ".svg"}) {
+                if (lowerName.endsWith(knownExt)) {
+                    fileName = fileName.substring(0, fileName.length() - knownExt.length());
+                    break;
+                }
+            }
+            selectedFile = new File(selectedFile.getParentFile(), fileName + extension);
+        }
+
+        if (selectedFile.exists()) {
+            int overwrite = JOptionPane.showConfirmDialog(this,
+                    selectedFile.getName() + " already exists. Overwrite?",
+                    "Overwrite File", JOptionPane.YES_NO_OPTION);
+            if (overwrite != JOptionPane.YES_OPTION) {
+                return;
+            }
+        }
+
+        boolean raster = imageType == ImageType.PNG || imageType == ImageType.TIFF;
+
+        try {
+            if (imageType == ImageType.PNG && border) {
+                Export.exportFramedPNG(windowContent, windowContent.getBounds(), selectedFile, dpi, shadow);
+            } else {
+                Export.exportPic(windowContent, windowContent.getBounds(), selectedFile, imageType, dpi);
+            }
+            JOptionPane.showMessageDialog(this,
+                    "Window screenshot saved to:\n" + selectedFile.getAbsolutePath()
+                            + (raster ? "\n(" + dpi + " DPI)" : ""),
+                    "Screenshot Saved", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "Failed to save screenshot:\n" + e.getMessage(),
+                    "Export Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /**
