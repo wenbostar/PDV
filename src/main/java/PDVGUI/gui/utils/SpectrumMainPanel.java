@@ -2532,6 +2532,14 @@ public class SpectrumMainPanel extends JPanel {
         int prefixWidth = 0;
         if (components != null && components.length > 0) {
             String first = components[0];
+            // Strip any modification tag (e.g. "<Oxidation of M>") the same way the strip does when
+            // it paints, so we measure the real N-terminal prefix ("NH2-") rather than the residue's
+            // mod-annotation text. Without this, an N-terminally modified residue (common for
+            // Casanovo, e.g. NH2-M<Oxidation of M>...) inflates the prefix by the whole tag width and
+            // pushes the whole track far to the right of the sequence.
+            if (first.contains("<")) {
+                first = first.substring(0, first.indexOf("<")) + first.substring(first.lastIndexOf(">") + 1);
+            }
             if (first.length() > 1) {
                 prefixWidth = fm.stringWidth(first) - fm.stringWidth(first.substring(first.length() - 1));
             }
