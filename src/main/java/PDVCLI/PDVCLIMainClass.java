@@ -1,6 +1,7 @@
 package PDVCLI;
 
 import PDVCLI.utils.AddInformationPanel;
+import PDVGUI.utils.DecimalFormats;
 import PDVGUI.fileimport.MSOneImport;
 import PDVGUI.fileimport.MzXMLScanImport;
 import PDVGUI.gui.PDVMainClass;
@@ -960,7 +961,7 @@ public class PDVCLIMainClass extends JFrame {
 
             annotations = spectrumAnnotator.getSpectrumAnnotationFiter(annotationPreferences, specificAnnotationSettings, mSnSpectrum, peptideAssumption.getPeptide(), null, ptmFactory, true);
 
-            DecimalFormat df = new DecimalFormat("#.00");
+            DecimalFormat df = DecimalFormats.create("#.00");
 
             Double allMatchInt = 0.0;
             Double allPeakInt = 0.0;

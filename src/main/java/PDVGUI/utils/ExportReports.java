@@ -243,7 +243,7 @@ public class ExportReports {
                 throw new UnsupportedOperationException("Operation not supported for spectrumIdentificationAssumption of type " + spectrumIdentificationAssumption.getClass() + ".");
             }
 
-            DecimalFormat df = new DecimalFormat("#.00");
+            DecimalFormat df = DecimalFormats.create("#.00");
 
             Double allMatchInt = 0.0;
             Double allPeakInt = 0.0;

@@ -5,6 +5,7 @@ import com.compomics.util.experiment.identification.matches.SpectrumMatch;
 import com.compomics.util.experiment.identification.spectrum_assumptions.PeptideAssumption;
 import com.compomics.util.experiment.massspectrometry.MSnSpectrum;
 import com.compomics.util.experiment.massspectrometry.Precursor;
+import PDVGUI.utils.DecimalFormats;
 
 import javax.swing.table.DefaultTableModel;
 import java.text.DecimalFormat;
@@ -28,7 +29,7 @@ public class FrageTableModel extends DefaultTableModel {
     /**
      * Decimal format
      */
-    private DecimalFormat df = new DecimalFormat("#.0000");
+    private DecimalFormat df = DecimalFormats.create("#.0000");
     /**
      * Spectrum key to selected
      */
