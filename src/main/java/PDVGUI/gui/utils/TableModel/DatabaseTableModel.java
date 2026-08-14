@@ -317,14 +317,25 @@ public class DatabaseTableModel extends DefaultTableModel {
                     }
 
                 } else if (spectrumFileType.toLowerCase().equals("mzml") || spectrumFileType.toLowerCase().equals("mzxml")) {
-                    HashMap<String, ScanCollectionDefault> scansMap = (HashMap<String, ScanCollectionDefault>) spectrumsFileFactory;
-                    String spectrumFileName = matchKey.split("_cus_")[0];
-                    ScanCollectionDefault scanCollectionDefault = scansMap.get(spectrumFileName);
-                    int spectrumNumber = spectrumMatch.getSpectrumNumber();
+                    // The dialogs hand over either one scan collection per spectrum file (mzML from the
+                    // database dialog) or a single collection (mzXML, and mzML from the proBAM/proBed
+                    // dialog), so the shape of the object decides, not the format name.
+                    ScanCollectionDefault scanCollectionDefault;
+                    if (spectrumsFileFactory instanceof ScanCollectionDefault) {
+                        scanCollectionDefault = (ScanCollectionDefault) spectrumsFileFactory;
+                    } else {
+                        String spectrumFileName = matchKey.split("_cus_")[0];
+                        scanCollectionDefault = ((HashMap<String, ScanCollectionDefault>) spectrumsFileFactory).get(spectrumFileName);
+                    }
 
-                    IScan iScan = scanCollectionDefault.getScanByNum(spectrumNumber);
+                    Integer spectrumNumber = spectrumMatch.getSpectrumNumber();
 
-                    PrecursorInfo precursor = iScan.getPrecursor();
+                    // A match whose scan cannot be located still shows its identification; the cells that
+                    // need the scan stay empty instead of failing every cell of the table.
+                    IScan iScan = (scanCollectionDefault == null || spectrumNumber == null)
+                            ? null : scanCollectionDefault.getScanByNum(spectrumNumber);
+
+                    PrecursorInfo precursor = (iScan == null) ? null : iScan.getPrecursor();
 
                     if(column == 0){
                         return spectrumKeyToSelected.getOrDefault(spectrumIndex, false);
@@ -336,7 +347,7 @@ public class DatabaseTableModel extends DefaultTableModel {
                         return spectrumIndex;
                     }
                     if(column == 3) {
-                        if (precursor != null) {
+                        if (iScan != null && precursor != null) {
                             double rt = iScan.getRt();
                             if (rt < 0) {
                                 rt = -1;

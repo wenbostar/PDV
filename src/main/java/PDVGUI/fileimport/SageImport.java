@@ -543,12 +543,17 @@ public class SageImport {
 
         if (psmIndex == 0) {
             // nothing was paged in, leaving the window on "Import done" would let the user page or
-            // search into an empty allSpectrumIndex
+            // search into an empty allSpectrumIndex. The window is put in its final state before the
+            // message, so it is consistent while the dialog is up.
             progressDialog.setRunFinished();
+            pdvMainClass.loadingJButton.setIcon(new ImageIcon(getClass().getResource("/icons/done.png")));
+            pdvMainClass.loadingJButton.setText("No PSM imported");
+            pdvMainClass.pageNumJTextField.setText("0/0");
+            pdvMainClass.searchButton.setEnabled(false);
+            pdvMainClass.buttonCheck();
             JOptionPane.showMessageDialog(pdvMainClass, JOptionEditorPane.getJOptionEditorPane(
                     "No PSM left after filtering, please check the import settings."),
                     "File Error", JOptionPane.ERROR_MESSAGE);
-            pdvMainClass.loadingJButton.setText("No PSM imported");
             return;
         }
 
