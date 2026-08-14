@@ -4685,6 +4685,24 @@ public class PDVMainClass extends JFrame {
     }
 
     /**
+     * Get the scan collection holding one spectrum. The database dialog loads mzML as one collection per
+     * spectrum file, while mzXML and the proBAM/proBed dialog load a single collection, so fall back to
+     * that one whenever there is no per-file entry.
+     * @param spectrumFileName Spectrum file name taken from the match key
+     * @return Scan collection
+     */
+    private ScanCollectionDefault getScanCollection(String spectrumFileName) {
+
+        if (scansMap != null) {
+            ScanCollectionDefault currentScans = scansMap.get(spectrumFileName);
+            if (currentScans != null) {
+                return currentScans;
+            }
+        }
+        return scans;
+    }
+
+    /**
      * Get spectrum
      * @param spectrumKey
      * @param spectrumFileName
@@ -4712,7 +4730,7 @@ public class PDVMainClass extends JFrame {
             }
         }else if(spectrumFileType.equals("mzml")){
 
-            ScanCollectionDefault currentScans = scansMap.get(spectrumFileName);
+            ScanCollectionDefault currentScans = getScanCollection(spectrumFileName);
             int scanKey = spectrumMatch.getSpectrumNumber();
 
             IScan iScan = currentScans.getScanByNum(scanKey);
@@ -4745,7 +4763,7 @@ public class PDVMainClass extends JFrame {
         } else if (spectrumFileType.equals("mzxml")){
             int scanKey = spectrumMatch.getSpectrumNumber();
 
-            IScan iScan = scans.getScanByNum(scanKey);
+            IScan iScan = getScanCollection(spectrumFileName).getScanByNum(scanKey);
 
             ISpectrum spectrum = iScan.getSpectrum();
 
