@@ -108,6 +108,12 @@ public class MzXMLScanImport {
                 @Override
                 public PrecursorInfo getPrecursor() {
 
+                    // an MS1 scan isolates nothing; IScan.getPrecursor() is null for it rather than
+                    // failing on an empty list
+                    if (msScan.getIsolations() == null || msScan.getIsolations().isEmpty()) {
+                        return null;
+                    }
+
                     PrecursorInfo precursorInfo = new PrecursorInfo();
 
                     IsolationInfo isolationInfo = msScan.getIsolations().get(0);

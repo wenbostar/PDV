@@ -159,6 +159,7 @@ public class ExportReports {
                             // the identification can point at a spectrum the file does not hold
                             if (mSnSpectrum == null) {
                                 System.err.println("No spectrum found for PSM " + eachKey + ", skipped.");
+                                progressDialog.increasePrimaryProgressCounter();
                                 continue;
                             }
 

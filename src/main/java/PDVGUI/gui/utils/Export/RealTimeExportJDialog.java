@@ -370,6 +370,7 @@ public class RealTimeExportJDialog extends JDialog {
                                     // the identification can point at a spectrum the file does not hold
                                     if (mSnSpectrum == null) {
                                         System.err.println("No spectrum found for PSM " + spectrumKey + ", skipped.");
+                                        progressDialog.increasePrimaryProgressCounter();
                                         continue;
                                     }
 
@@ -447,6 +448,8 @@ public class RealTimeExportJDialog extends JDialog {
                         spectrumSplitPane.setBounds(0, 0, resizeJPanelWidth, resizeJPanelHeight);
                         spectrumSplitPane.setPreferredSize(new Dimension(resizeJPanelWidth, resizeJPanelHeight));
 
+                        boolean firstExportedFigure = true;
+
                         for (String eachKey : allSelections) {
                             if (!progressDialog.isRunCanceled()) {
                                 MSnSpectrum mSnSpectrum;
@@ -463,12 +466,17 @@ public class RealTimeExportJDialog extends JDialog {
                                 // the identification can point at a spectrum the file does not hold
                                 if (mSnSpectrum == null) {
                                     System.err.println("No spectrum found for PSM " + eachKey + ", skipped.");
+                                    progressDialog.increasePrimaryProgressCounter();
                                     continue;
                                 }
 
                                 updateSpectrum(eachKey, mSnSpectrum, spectrumIdentificationAssumption);
 
-                                if (allSelections.indexOf(eachKey) == 0){
+                                // let the resized panel settle before the first figure is captured; keyed
+                                // off the first one actually drawn, as the selection may start with PSMs
+                                // that have no spectrum
+                                if (firstExportedFigure){
+                                    firstExportedFigure = false;
                                     Thread.sleep(200);
                                 }
                                 Thread.sleep(100);

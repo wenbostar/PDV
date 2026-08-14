@@ -1668,11 +1668,19 @@ public class SpectrumMainPanel extends JPanel {
      * the currently visible pane (normal, mirror or peptide-check). The match-stat labels are also
      * cleared so they don't keep showing the previously rendered PSM's numbers next to the message.
      */
-    private void showPlotTooSmallMessage() {
+    /**
+     * Clear the match statistics shown beside the plot, so they are not left describing the previously
+     * displayed PSM when nothing is drawn.
+     */
+    public void clearSpectrumStats() {
         contentJLabel.setText("");
         bIonNumJLabel.setText("");
         yIonNumJLabel.setText("");
         matchNumJLabel.setText("");
+    }
+
+    private void showPlotTooSmallMessage() {
+        clearSpectrumStats();
 
         spectrumJLayeredPane.removeAll();
         mirrorJLayeredPane.removeAll();

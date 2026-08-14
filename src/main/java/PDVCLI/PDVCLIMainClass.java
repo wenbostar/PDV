@@ -761,65 +761,80 @@ public class PDVCLIMainClass extends JFrame {
             } catch (Exception e) {
                 return null;
             }
-        } else if(spectrumFileType == 2){
+        } else if(spectrumFileType == 2 || spectrumFileType == 3){
             System.out.println("The spectrum key is "+spectrumKey);
 
-            IScan iScan = scans.getScanByNum(Integer.parseInt(spectrumKey));
-            ISpectrum spectrum = iScan.getSpectrum();
+            return buildScanSpectrum(spectrumKey);
+        }
+        return null;
+    }
 
-            Charge charge = new Charge(iScan.getPolarity().getSign(), iScan.getPrecursor().getCharge());
-            ArrayList<Charge> charges = new ArrayList<>();
-            charges.add(charge);
-            PrecursorInfo precursor1 = iScan.getPrecursor();
-            Double intensity;
-            if (precursor1.getIntensity() != null){
-                intensity = precursor1.getIntensity();
-            } else {
-                intensity = 0.0;
-            }
-            // IScan.getRt() is in minutes, Precursor expects seconds
-            Precursor precursor = new Precursor(scans.getScanByNum(iScan.getPrecursor().getParentScanNum()).getRt() * 60, iScan.getPrecursor().getMzTarget(),
-                    intensity, charges);
+    /**
+     * Build the spectrum of one scan of an mzML/mzXML file, or null when the file does not hold
+     * everything needed to draw it: the scan itself, its peaks, or a precursor with a target m/z. The
+     * identification can name a scan the file does not contain, or one that is not an MS2 - an MS1
+     * isolates nothing, and importers load peaks for MS2 scans only. Every caller checks for null.
+     * @param spectrumKey Scan number of the spectrum
+     * @return MSnSpectrum, or null when the spectrum cannot be built
+     */
+    private MSnSpectrum buildScanSpectrum(String spectrumKey){
 
-            double[] mzs = spectrum.getMZs();
-            double[] ins = spectrum.getIntensities();
-            HashMap<Double, Peak> peakMap = new HashMap<>();
-            for(int i = 0; i<mzs.length; i++){
-                Peak peak = new Peak(mzs[i], ins[i]);
-                peakMap.put(mzs[i], peak);
-            }
-
-            return new MSnSpectrum(2, precursor, spectrumKey, peakMap, spectrumFile.getName());
-
-        } else if (spectrumFileType == 3){
-            System.out.println("The spectrum key is "+spectrumKey);
-
-            IScan iScan = scans.getScanByNum(Integer.parseInt(spectrumKey));
-
-            ISpectrum spectrum = iScan.getSpectrum();
-
-            Charge charge = new Charge(1, iScan.getPrecursor().getCharge());
-            ArrayList<Charge> charges = new ArrayList<>();
-            charges.add(charge);
-            // IScan.getRt() is in minutes, Precursor expects seconds
-            Precursor precursor = new Precursor(iScan.getRt() * 60, iScan.getPrecursor().getMzTarget(),
-                    iScan.getPrecursor().getIntensity(), charges);
-
-            double[] mzs = spectrum.getMZs();
-            double[] ins = spectrum.getIntensities();
-            HashMap<Double, Peak> peakMap = new HashMap<>();
-            for (int i = 0; i < mzs.length; i++) {
-                Peak peak = new Peak(mzs[i], ins[i]);
-                peakMap.put(mzs[i], peak);
-            }
-
-            MSnSpectrum mSnSpectrum = new MSnSpectrum(2, precursor, spectrumKey, peakMap, spectrumFile.getName());
-
-            return mSnSpectrum;
-
-        } else {
+        Integer scanNumber;
+        try {
+            scanNumber = Integer.valueOf(spectrumKey);
+        } catch (NumberFormatException e) {
             return null;
         }
+
+        IScan iScan = scans == null ? null : scans.getScanByNum(scanNumber);
+        if (iScan == null) {
+            return null;
+        }
+
+        PrecursorInfo precursorInfo = iScan.getPrecursor();
+        ISpectrum spectrum = iScan.getSpectrum();
+        if (precursorInfo == null || precursorInfo.getMzTarget() == null || spectrum == null
+                || spectrum.getMZs() == null || spectrum.getIntensities() == null) {
+            return null;
+        }
+
+        ArrayList<Charge> charges = new ArrayList<>();
+        charges.add(new Charge(iScan.getPolarity() == null ? 1 : iScan.getPolarity().getSign(),
+                precursorInfo.getCharge() == null ? 1 : precursorInfo.getCharge()));
+
+        // the precursor is measured in the parent MS1 scan; fall back to the MS2 itself when the file
+        // does not hold that scan, which is always the case for mzXML as it records no parent
+        IScan precursorScan = precursorInfo.getParentScanNum() == null
+                ? null : scans.getScanByNum(precursorInfo.getParentScanNum());
+
+        Double intensity = precursorInfo.getIntensity();
+        Double rt = iScan.getRt();
+
+        if (precursorScan != null) {
+            if (precursorScan.getRt() != null) {
+                rt = precursorScan.getRt();
+            }
+            if (intensity == null) {
+                intensity = precursorScan.getBasePeakIntensity();
+            }
+        }
+        if (intensity == null) {
+            intensity = 0.0;
+        }
+
+        // IScan.getRt() is in minutes, Precursor expects seconds
+        Precursor precursor = new Precursor((rt == null ? -1.0 : rt) * 60, precursorInfo.getMzTarget(),
+                intensity, charges);
+
+        double[] mzs = spectrum.getMZs();
+        double[] ins = spectrum.getIntensities();
+        HashMap<Double, Peak> peakMap = new HashMap<>();
+        for (int i = 0; i < mzs.length; i++) {
+            Peak peak = new Peak(mzs[i], ins[i]);
+            peakMap.put(mzs[i], peak);
+        }
+
+        return new MSnSpectrum(2, precursor, spectrumKey, peakMap, spectrumFile.getName());
     }
 
     private void outputReport() throws IOException {
