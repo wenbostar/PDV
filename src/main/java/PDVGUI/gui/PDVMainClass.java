@@ -30,6 +30,7 @@ import com.compomics.util.gui.waiting.waitinghandlers.ProgressDialogX;
 import com.compomics.util.preferences.*;
 import org.apache.commons.cli.ParseException;
 import umich.ms.datatypes.scan.IScan;
+import umich.ms.datatypes.scan.props.PrecursorInfo;
 import umich.ms.datatypes.scancollection.impl.ScanCollectionDefault;
 import umich.ms.datatypes.LCMSDataSubset;
 import umich.ms.datatypes.scan.StorageStrategy;
@@ -4733,21 +4734,40 @@ public class PDVMainClass extends JFrame {
             ScanCollectionDefault currentScans = getScanCollection(spectrumFileName);
             int scanKey = spectrumMatch.getSpectrumNumber();
 
-            IScan iScan = currentScans.getScanByNum(scanKey);
+            IScan iScan = currentScans == null ? null : currentScans.getScanByNum(scanKey);
+
+            // The identification can point at a scan the spectrum file does not hold, or at one that is
+            // not an MS2 and so carries no precursor. Neither can be drawn, so say so instead of failing.
+            if (iScan == null || iScan.getPrecursor() == null) {
+                return null;
+            }
+
             ISpectrum spectrum = iScan.getSpectrum();
 
             Charge charge = spectrumMatch.getBestPeptideAssumption().getIdentificationCharge();
             ArrayList<Charge> charges = new ArrayList<>();
             charges.add(charge);
-            IScan precursorScan = currentScans.getScanByNum(iScan.getPrecursor().getParentScanNum());
-            Double precursorInt = iScan.getPrecursor().getIntensity();
 
-            if (precursorInt == null){
-                precursorInt = precursorScan.getBasePeakIntensity();
+            PrecursorInfo precursorInfo = iScan.getPrecursor();
+            IScan precursorScan = precursorInfo.getParentScanNum() == null
+                    ? null : currentScans.getScanByNum(precursorInfo.getParentScanNum());
+            Double precursorInt = precursorInfo.getIntensity();
+
+            // the precursor is measured in the parent MS1 scan, fall back to the MS2 itself when the
+            // file does not hold that scan
+            Double precursorRt = iScan.getRt();
+            if (precursorScan != null) {
+                precursorRt = precursorScan.getRt();
+                if (precursorInt == null) {
+                    precursorInt = precursorScan.getBasePeakIntensity();
+                }
+            }
+            if (precursorInt == null) {
+                precursorInt = 0.0;
             }
 
             // IScan.getRt() is in minutes, Precursor expects seconds
-            Precursor precursor = new Precursor(precursorScan.getRt() * 60, iScan.getPrecursor().getMzTarget(),
+            Precursor precursor = new Precursor(precursorRt * 60, precursorInfo.getMzTarget(),
                     precursorInt, charges);
 
             double[] mzs = spectrum.getMZs();
@@ -4763,16 +4783,27 @@ public class PDVMainClass extends JFrame {
         } else if (spectrumFileType.equals("mzxml")){
             int scanKey = spectrumMatch.getSpectrumNumber();
 
-            IScan iScan = getScanCollection(spectrumFileName).getScanByNum(scanKey);
+            ScanCollectionDefault currentScans = getScanCollection(spectrumFileName);
+            IScan iScan = currentScans == null ? null : currentScans.getScanByNum(scanKey);
+
+            if (iScan == null || iScan.getPrecursor() == null) {
+                return null;
+            }
 
             ISpectrum spectrum = iScan.getSpectrum();
 
             Charge charge = spectrumMatch.getBestPeptideAssumption().getIdentificationCharge();
             ArrayList<Charge> charges = new ArrayList<>();
             charges.add(charge);
+
+            Double precursorInt = iScan.getPrecursor().getIntensity();
+            if (precursorInt == null) {
+                precursorInt = 0.0;
+            }
+
             // IScan.getRt() is in minutes, Precursor expects seconds
             Precursor precursor = new Precursor(iScan.getRt() * 60, iScan.getPrecursor().getMzTarget(),
-                    iScan.getPrecursor().getIntensity(), charges);
+                    precursorInt, charges);
 
             double[] mzs = spectrum.getMZs();
             double[] ins = spectrum.getIntensities();
@@ -4832,6 +4863,21 @@ public class PDVMainClass extends JFrame {
 
         String matchKey = spectrumMatch.getKey();
         String spectrumFileName = matchKey.split("_cus_")[0];
+
+        // getSpectrum returns null when the identification points at a spectrum the file does not hold;
+        // say so in the panel border rather than drawing the previously selected spectrum or failing
+        if (mSnSpectrum == null) {
+            TitledBorder missingBorder = BorderFactory.createTitledBorder(
+                    "Spectrum not found in " + spectrumFileName + " for " + matchKey + " \t ");
+            missingBorder.setTitleFont(PDVFonts.of(Font.PLAIN, 12f));
+            spectrumShowJPanel.setBorder(missingBorder);
+            // hand the panel no spectrum: it clears its own plot and skips drawing, so the previously
+            // selected PSM is not left on screen under the new title
+            spectrumMainPanel.updateSpectrum(null, null, String.valueOf(selectedPsmKey));
+            spectrumShowJPanel.revalidate();
+            spectrumShowJPanel.repaint();
+            return;
+        }
 
         String spectrumTitle = "";
         if(spectrumFileType.toLowerCase().equals("mgf")) {

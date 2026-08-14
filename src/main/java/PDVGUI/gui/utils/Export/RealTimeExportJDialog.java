@@ -366,6 +366,13 @@ public class RealTimeExportJDialog extends JDialog {
                                         mSnSpectrum = spectrumLibDisplay.getSpectrum(Integer.valueOf(spectrumKey));
                                         spectrumIdentificationAssumption = spectrumLibDisplay.getSpectrumIdentificationAssumption();
                                     }
+
+                                    // the identification can point at a spectrum the file does not hold
+                                    if (mSnSpectrum == null) {
+                                        System.err.println("No spectrum found for PSM " + spectrumKey + ", skipped.");
+                                        continue;
+                                    }
+
                                     Thread.sleep(100);
                                     updateSpectrum(spectrumKey, mSnSpectrum, spectrumIdentificationAssumption);
 
@@ -452,6 +459,13 @@ public class RealTimeExportJDialog extends JDialog {
                                     mSnSpectrum = spectrumLibDisplay.getSpectrum(Integer.valueOf(eachKey));
                                     spectrumIdentificationAssumption = spectrumLibDisplay.getSpectrumIdentificationAssumption();
                                 }
+
+                                // the identification can point at a spectrum the file does not hold
+                                if (mSnSpectrum == null) {
+                                    System.err.println("No spectrum found for PSM " + eachKey + ", skipped.");
+                                    continue;
+                                }
+
                                 updateSpectrum(eachKey, mSnSpectrum, spectrumIdentificationAssumption);
 
                                 if (allSelections.indexOf(eachKey) == 0){
