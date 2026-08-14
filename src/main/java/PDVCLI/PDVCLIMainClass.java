@@ -777,7 +777,8 @@ public class PDVCLIMainClass extends JFrame {
             } else {
                 intensity = 0.0;
             }
-            Precursor precursor = new Precursor(scans.getScanByNum(iScan.getPrecursor().getParentScanNum()).getRt(), iScan.getPrecursor().getMzTarget(),
+            // IScan.getRt() is in minutes, Precursor expects seconds
+            Precursor precursor = new Precursor(scans.getScanByNum(iScan.getPrecursor().getParentScanNum()).getRt() * 60, iScan.getPrecursor().getMzTarget(),
                     intensity, charges);
 
             double[] mzs = spectrum.getMZs();
@@ -800,7 +801,8 @@ public class PDVCLIMainClass extends JFrame {
             Charge charge = new Charge(1, iScan.getPrecursor().getCharge());
             ArrayList<Charge> charges = new ArrayList<>();
             charges.add(charge);
-            Precursor precursor = new Precursor(iScan.getRt(), iScan.getPrecursor().getMzTarget(),
+            // IScan.getRt() is in minutes, Precursor expects seconds
+            Precursor precursor = new Precursor(iScan.getRt() * 60, iScan.getPrecursor().getMzTarget(),
                     iScan.getPrecursor().getIntensity(), charges);
 
             double[] mzs = spectrum.getMZs();

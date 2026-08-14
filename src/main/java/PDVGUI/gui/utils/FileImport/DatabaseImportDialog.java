@@ -30,7 +30,10 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Selecting mzIdentML or pepXML file and spectrum files, then putting into DB 
@@ -51,6 +54,10 @@ public class DatabaseImportDialog extends JDialog {
     private JComboBox fileTypeCombox;
     private JTextField fragmentIonAccuracyTxt;
     private JLabel msAmandaJLable;
+    private JCheckBox targetsOnlyJCheckBox;
+    private JCheckBox filterQValueJCheckBox;
+    private JLabel sageOptionJLabel;
+    private JLabel sageBlankJLabel;
     private JPanel inputFilesPanel;
     private JPanel annotationSettingJPanel;
     private JPanel mainJPanel;
@@ -190,6 +197,10 @@ public class DatabaseImportDialog extends JDialog {
         idFilesLabel = new JLabel();
         idFilesTxt = new JTextField();
         msAmandaJLable = new JLabel("Is MS Amanda? ");
+        targetsOnlyJCheckBox = new JCheckBox("Targets only", true);
+        filterQValueJCheckBox = new JCheckBox("q <= 0.01 only", false);
+        sageOptionJLabel = new JLabel("Sage Filter");
+        sageBlankJLabel = new JLabel("");
         annotationSettingJPanel = new JPanel();
         inputFilesPanel = new JPanel();
         mainJPanel = new JPanel();
@@ -280,9 +291,20 @@ public class DatabaseImportDialog extends JDialog {
         browseIdJButton.setContentAreaFilled(false);
         browseIdJButton.addActionListener(this::browseIdJButtonActionPerformed);
 
-        fileTypeCombox.setModel(new DefaultComboBoxModel(new String[]{"PDV format", "MSAmanda", "Philosopher (FragPipe)"}));
+        fileTypeCombox.setModel(new DefaultComboBoxModel(new String[]{"PDV format", "MSAmanda", "Philosopher (FragPipe)", "Sage"}));
         fileTypeCombox.setOpaque(true);
         fileTypeCombox.setBackground(Color.WHITE);
+        fileTypeCombox.addActionListener(evt -> updateSageOptions());
+
+        targetsOnlyJCheckBox.setFont(PDVFonts.of(Font.PLAIN, 12f));
+        targetsOnlyJCheckBox.setOpaque(false);
+        targetsOnlyJCheckBox.setToolTipText("Skip the Sage decoy hits (label = -1)");
+        filterQValueJCheckBox.setFont(PDVFonts.of(Font.PLAIN, 12f));
+        filterQValueJCheckBox.setOpaque(false);
+        filterQValueJCheckBox.setToolTipText("Skip the hits with spectrum_q > 0.01");
+        sageOptionJLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
+        sageOptionJLabel.setToolTipText("Which Sage PSMs to import!");
+        updateSageOptions();
 
         spectrumFilesLabel.setForeground(new Color(255, 0, 0));
         spectrumFilesLabel.setFont(PDVFonts.of(Font.PLAIN, 12f));
@@ -457,6 +479,15 @@ public class DatabaseImportDialog extends JDialog {
                 }
                 pdvMainClass.setFragmentAccuracyType(fragmentAccuracyType);
 
+                try {
+                    decompressSpectrumFiles(progressDialog);
+                } catch (IOException e) {
+                    JOptionPane.showMessageDialog(DatabaseImportDialog.this, "Failed to decompress the spectrum file. Please check your spectrum file!", "File Error", JOptionPane.WARNING_MESSAGE);
+                    progressDialog.setRunFinished();
+                    e.printStackTrace();
+                    return;
+                }
+
                 if (idFile != null && isText && fileTypeCombox.getSelectedIndex() == 2){
 
                     if (fileToType != null){
@@ -588,15 +619,12 @@ public class DatabaseImportDialog extends JDialog {
         FileFilter filter = new FileFilter() {
             @Override
             public boolean accept(File myFile) {
-                return myFile.getName().toLowerCase().endsWith(".mgf")
-                        ||myFile.getName().toLowerCase().endsWith(".mzml")
-                        ||myFile.getName().toLowerCase().endsWith(".mzxml")
-                        || myFile.isDirectory();
+                return getSpectrumFileType(myFile) != null || myFile.isDirectory();
             }
 
             @Override
             public String getDescription() {
-                return "Mascot Generic Format (.mgf), .mzML, .mzXML";
+                return "Mascot Generic Format (.mgf), .mzML, .mzXML, optionally gzipped (.gz)";
             }
         };
 
@@ -612,36 +640,22 @@ public class DatabaseImportDialog extends JDialog {
                     if (selectedFiles != null) {
 
                         for (File singleFile : selectedFiles){
-                            if (singleFile.getName().toLowerCase().endsWith(".mgf")){
-                                spectrumFileType = "mgf";
+                            String singleFileType = getSpectrumFileType(singleFile);
+                            if (singleFileType != null){
+                                spectrumFileType = singleFileType;
                                 spectrumFiles.add(singleFile);
-                                fileToType.put(newFile, "mgf");
-                            } else if (singleFile.getName().toLowerCase().endsWith(".mzml")){
-                                spectrumFileType = "mzml";
-                                fileToType.put(singleFile, "mzml");
-                                spectrumFiles.add(singleFile);
-                            } else if (singleFile.getName().toLowerCase().endsWith(".mzxml")){
-                                spectrumFileType = "mzxml";
-                                fileToType.put(singleFile, "mzxml");
-                                spectrumFiles.add(singleFile);
+                                fileToType.put(singleFile, singleFileType);
                             }
                         }
                     } else {
                         System.err.println("No spectrum files in your directory!");
                     }
                 } else {
-                    if(newFile.getName().toLowerCase().endsWith(".mgf")){
-                        spectrumFileType = "mgf";
+                    String newFileType = getSpectrumFileType(newFile);
+                    if (newFileType != null){
+                        spectrumFileType = newFileType;
                         spectrumFiles.add(newFile);
-                        fileToType.put(newFile, "mgf");
-                    }else if(newFile.getName().toLowerCase().endsWith(".mzml")){
-                        spectrumFileType = "mzml";
-                        spectrumFiles.add(newFile);
-                        fileToType.put(newFile, "mzml");
-                    }else if(newFile.getName().toLowerCase().endsWith(".mzxml")){
-                        spectrumFileType = "mzxml";
-                        spectrumFiles.add(newFile);
-                        fileToType.put(newFile, "mzxml");
+                        fileToType.put(newFile, newFileType);
                     }
                 }
             }
@@ -678,7 +692,7 @@ public class DatabaseImportDialog extends JDialog {
 
             @Override
             public String getDescription() {
-                return "mzIdentML (.mzid), PepXML (.pepxml), Text File (.txt), MS Amanda (.csv, .txt), MSfrage (.tsv), Mascot (.dat), pFind (.tsk)";
+                return "mzIdentML (.mzid), PepXML (.pepxml), Text File (.txt), MS Amanda (.csv, .txt), MSfrage (.tsv), Sage (.tsv), Mascot (.dat), pFind (.tsk)";
             }
         };
 
@@ -837,6 +851,12 @@ public class DatabaseImportDialog extends JDialog {
                                                             .addComponent(fileTypeCombox,GroupLayout.PREFERRED_SIZE, 260, GroupLayout.PREFERRED_SIZE)
                                                             .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                                                             .addComponent(blankJLabel))
+                                                    .addGroup(GroupLayout.Alignment.TRAILING, inputFilesPanelLayout.createSequentialGroup()
+                                                            .addComponent(sageOptionJLabel, GroupLayout.PREFERRED_SIZE, 160, Short.MAX_VALUE)
+                                                            .addComponent(targetsOnlyJCheckBox, GroupLayout.PREFERRED_SIZE, 125, GroupLayout.PREFERRED_SIZE)
+                                                            .addComponent(filterQValueJCheckBox, GroupLayout.PREFERRED_SIZE, 135, GroupLayout.PREFERRED_SIZE)
+                                                            .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                                            .addComponent(sageBlankJLabel))
                                                     .addGroup(inputFilesPanelLayout.createSequentialGroup()
                                                             .addComponent(spectrumFilesLabel, GroupLayout.PREFERRED_SIZE, 160, GroupLayout.PREFERRED_SIZE)
                                                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
@@ -846,7 +866,7 @@ public class DatabaseImportDialog extends JDialog {
                                             .addContainerGap())
                     );
 
-                    inputFilesPanelLayout.linkSize(SwingConstants.HORIZONTAL, new Component[] {browseIdJButton, browseSpectraJButton, blankJLabel});
+                    inputFilesPanelLayout.linkSize(SwingConstants.HORIZONTAL, new Component[] {browseIdJButton, browseSpectraJButton, blankJLabel, sageBlankJLabel});
 
                     //inputFilesPanelLayout.linkSize(SwingConstants.HORIZONTAL, new Component[] {browseSpectraJButton});
 
@@ -863,6 +883,12 @@ public class DatabaseImportDialog extends JDialog {
                                                     .addComponent(fileTypeCombox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                     .addComponent(fileTypeJLabel)
                                                     .addComponent(blankJLabel))
+                                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                            .addGroup(inputFilesPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                                    .addComponent(sageOptionJLabel)
+                                                    .addComponent(targetsOnlyJCheckBox)
+                                                    .addComponent(filterQValueJCheckBox)
+                                                    .addComponent(sageBlankJLabel))
                                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                             .addGroup(inputFilesPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                                     .addComponent(spectrumFilesLabel)
@@ -966,6 +992,132 @@ public class DatabaseImportDialog extends JDialog {
     }
 
     /**
+     * Get the type of one spectrum file, gzipped files are named after the format they hold
+     * @param spectrumFile Spectrum file
+     * @return "mgf", "mzml", "mzxml" or null when the file is not a supported spectrum file
+     */
+    private String getSpectrumFileType(File spectrumFile) {
+
+        String fileName = spectrumFile.getName().toLowerCase();
+
+        if (fileName.endsWith(".gz")) {
+            fileName = fileName.substring(0, fileName.length() - 3);
+        }
+
+        if (fileName.endsWith(".mgf")) {
+            return "mgf";
+        } else if (fileName.endsWith(".mzml")) {
+            return "mzml";
+        } else if (fileName.endsWith(".mzxml")) {
+            return "mzxml";
+        }
+        return null;
+    }
+
+    /**
+     * Decompress the gzipped spectrum files into the temporary folder, none of the spectrum readers can
+     * read a gzipped file directly. An already decompressed file is reused
+     * @param progressDialog Progress dialog
+     * @throws IOException
+     */
+    private void decompressSpectrumFiles(ProgressDialogX progressDialog) throws IOException {
+
+        File tempFolder = new File(System.getProperty("java.io.tmpdir"), "PDV_spectra");
+
+        for (int i = 0; i < spectrumFiles.size(); i++) {
+
+            File spectrumFile = spectrumFiles.get(i);
+
+            if (!spectrumFile.getName().toLowerCase().endsWith(".gz")) {
+                continue;
+            }
+
+            // Two runs can hold identically named files, so the decompressed copy goes into a folder
+            // named after the source itself. Reusing a leftover by name alone would silently show the
+            // spectra of a different run.
+            File sourceFolder = new File(tempFolder, sourceKey(spectrumFile));
+
+            if (!sourceFolder.exists() && !sourceFolder.mkdirs()) {
+                throw new IOException("Failed to create " + sourceFolder.getAbsolutePath());
+            }
+
+            String name = spectrumFile.getName();
+            File decompressedFile = new File(sourceFolder, name.substring(0, name.length() - 3));
+
+            if (!decompressedFile.exists() || decompressedFile.length() == 0) {
+
+                progressDialog.setTitle("Decompressing " + name + ". Please Wait...");
+
+                // Decompress to a partial file and rename it once complete, so an interrupted run
+                // never leaves behind a truncated file that the next run would take for a good one.
+                File partialFile = new File(sourceFolder, decompressedFile.getName() + ".part");
+
+                try (GZIPInputStream gzipInputStream = new GZIPInputStream(new FileInputStream(spectrumFile));
+                     FileOutputStream fileOutputStream = new FileOutputStream(partialFile)) {
+
+                    byte[] buffer = new byte[1024 * 64];
+                    int length;
+                    while ((length = gzipInputStream.read(buffer)) > 0) {
+                        fileOutputStream.write(buffer, 0, length);
+                    }
+                } catch (IOException e) {
+                    partialFile.delete();
+                    throw e;
+                }
+
+                if (!partialFile.renameTo(decompressedFile)) {
+                    partialFile.delete();
+                    throw new IOException("Failed to write " + decompressedFile.getAbsolutePath());
+                }
+
+                decompressedFile.deleteOnExit();
+
+                progressDialog.setTitle("Loading Results. Please Wait...");
+            }
+
+            spectrumFiles.set(i, decompressedFile);
+            fileToType.put(decompressedFile, fileToType.remove(spectrumFile));
+        }
+    }
+
+    /**
+     * Identify one spectrum file by its location and its content, so that two runs holding files of the
+     * same name never share a decompressed copy
+     * @param spectrumFile Spectrum file
+     * @return Key usable as a folder name
+     */
+    private String sourceKey(File spectrumFile) throws IOException {
+
+        String source = spectrumFile.getAbsolutePath() + "|" + spectrumFile.length() + "|" + spectrumFile.lastModified();
+
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-1").digest(source.getBytes("UTF-8"));
+            StringBuilder key = new StringBuilder();
+            for (int i = 0; i < 8; i++) {
+                key.append(String.format("%02x", digest[i]));
+            }
+            return key.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new IOException(e);
+        }
+    }
+
+    /**
+     * The import filters only apply to Sage results, for the other formats the whole row is hidden
+     * (GroupLayout honours visibility, so the row collapses)
+     */
+    private void updateSageOptions() {
+        boolean isSage = fileTypeCombox.getSelectedIndex() == 3;
+        targetsOnlyJCheckBox.setVisible(isSage);
+        filterQValueJCheckBox.setVisible(isSage);
+        sageOptionJLabel.setVisible(isSage);
+        sageBlankJLabel.setVisible(isSage);
+        if (isDisplayable()) {
+            pack();
+        }
+    }
+
+    /**
      * Validates input information and enable start button
      */
     private void validateInput() {
@@ -1040,6 +1192,9 @@ public class DatabaseImportDialog extends JDialog {
                 pdvMainClass.importTextResults(spectrumFiles.get(0), spectrumsFileFactory, idFile, spectrumFileType);
             } else if (selectedIndex == 2){
                 pdvMainClass.importFragPipe(fileToType, idFile, spectrumFileType);
+            } else if (selectedIndex == 3){
+                pdvMainClass.importSageResults(spectrumsFileFactory, idFile, spectrumFileType, spectrumIdAndNumber,
+                        targetsOnlyJCheckBox.isSelected(), filterQValueJCheckBox.isSelected());
             }
             idFile = null;
         } else if (idFile.getName().toLowerCase().endsWith(".dat")){

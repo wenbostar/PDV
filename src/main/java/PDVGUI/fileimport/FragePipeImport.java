@@ -769,7 +769,8 @@ public class FragePipeImport {
             precursorMz = iScan.getPrecursor().getMzTarget();
         }
 
-        Precursor precursor = new Precursor(iScan.getRt(), precursorMz, precursorInt, charges);
+        // IScan.getRt() is in minutes, Precursor expects seconds
+        Precursor precursor = new Precursor(iScan.getRt() * 60, precursorMz, precursorInt, charges);
 
         double[] mzs = spectrum.getMZs();
         double[] ins = spectrum.getIntensities();

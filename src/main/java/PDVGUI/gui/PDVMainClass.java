@@ -257,6 +257,16 @@ public class PDVMainClass extends JFrame {
      */
     private Boolean isMSAmanda = false;
     /**
+     * Boolean indicate if Sage or not
+     */
+    private Boolean isSage = false;
+    /**
+     * Sage columns shown by default. Sage reports 40 columns, showing them all leaves the table
+     * unreadable, the remaining ones can be switched on through the column selection dialog
+     */
+    private static final String[] SAGE_SHOWN_COLUMNS = {"proteins", "filename", "charge", "rank", "label", "rt",
+            "hyperscore", "deltanext", "sagediscriminantscore", "posteriorerror", "spectrumq", "peptideq", "proteinq"};
+    /**
      * Original information hash
      */
     private HashMap<String, Object> originalInfor = new HashMap<>();
@@ -331,6 +341,12 @@ public class PDVMainClass extends JFrame {
      * @param args the arguments
      */
     public static void main(String[] args) {
+
+        // The mzML reader parses the run header with JAXB, whose optimized accessor generation calls
+        // ClassLoader.defineClass reflectively. On Java 9+ that throws InaccessibleObjectException from
+        // a static initializer, which kills every mzML import. Falling back to plain reflection avoids
+        // it without asking the user to pass --add-opens.
+        System.setProperty("com.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize", "true");
 
         if (args.length == 0){
             LookAndFeel lookAndFeel = UIManager.getLookAndFeel();
@@ -2117,6 +2133,106 @@ public class PDVMainClass extends JFrame {
     }
 
     /**
+     * Import Sage results
+     * @param spectrumsFileFactory Spectrum factory
+     * @param sageFile Sage result file (results.sage.tsv)
+     * @param spectrumFileType Spectrum file type
+     * @param spectrumIdAndNumber Spectrum file name to nativeID to scan number
+     * @param targetsOnly Exclude the decoy hits
+     * @param filterQValue Exclude the hits with spectrum_q > 0.01
+     */
+    public void importSageResults(Object spectrumsFileFactory, File sageFile, String spectrumFileType,
+                                  HashMap<String, HashMap<String, Integer>> spectrumIdAndNumber,
+                                  Boolean targetsOnly, Boolean filterQValue) {
+
+        this.isNewSoft = true;
+        this.isSage = true;
+        this.isMztab = false;
+        this.isDenovo = false;
+        this.isMaxQuant = false;
+        this.isPepXML = false;
+        this.isFrage = false;
+        this.isMSAmanda = false;
+
+        this.spectrumsFileFactory = spectrumsFileFactory;
+        this.spectrumFileType = spectrumFileType;
+
+        if ("mzml".equals(spectrumFileType)) {
+            scansMap = (HashMap<String, ScanCollectionDefault>) spectrumsFileFactory;
+        } else if ("mgf".equals(spectrumFileType)) {
+            spectrumFactory = (SpectrumFactory) spectrumsFileFactory;
+        }
+
+        databasePath = sageFile.getAbsolutePath() + ".db";
+
+        ProgressDialogX progressDialog = new ProgressDialogX(this,
+                Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMass.png")),
+                Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMassWait.png")),
+                true);
+        progressDialog.setPrimaryProgressCounterIndeterminate(true);
+        progressDialog.setTitle("Loading Results. Please Wait...");
+
+        new Thread(() -> {
+            try {
+                progressDialog.setVisible(true);
+            } catch (IndexOutOfBoundsException ignored) {
+            }
+        }, "ProgressDialog").start();
+        new Thread("DisplayThread") {
+            @Override
+            public void run() {
+
+                SageImport sageImport;
+
+                try {
+                    sageImport = new SageImport(PDVMainClass.this, sageFile, spectrumsFileFactory, spectrumFileType,
+                            spectrumIdAndNumber, targetsOnly, filterQValue, progressDialog);
+
+                    sqliteConnection = sageImport.getSqLiteConnection();
+                    allModifications = sageImport.getAllModifications();
+                    originalInfor = new HashMap<>();
+                    detailsList = new ArrayList<>();
+
+                    scoreName = sageImport.getScoreName();
+
+                    // Sage has no per-residue scores, a column name left over from an mzTab import in the
+                    // same session would be queried against the Sage database on every row selection
+                    aaScoreColumn = null;
+
+                    ArrayList<String> orderName = new ArrayList<>();
+                    orderName.add("PSMIndex");
+                    orderName.add("MZ");
+                    orderName.add("Sequence");
+                    orderName.addAll(scoreName);
+                    setUpTableHeaderToolTips();
+
+                    columnToSelected = new HashMap<>();
+                    for (String eachColumn : scoreName) {
+                        columnToSelected.put(eachColumn, false);
+                    }
+                    columnToSelected.put("Other Assumption", false);
+
+                    for (String eachColumn : SAGE_SHOWN_COLUMNS) {
+                        if (scoreName.contains(eachColumn)) {
+                            columnToSelected.put(eachColumn, true);
+                        }
+                    }
+
+                    buttonCheck();
+
+                    sortColumnJCombox.setModel(new DefaultComboBoxModel(orderName.toArray()));
+
+                    sageImport.importResults();
+
+                } catch (SQLException | ClassNotFoundException | IOException e) {
+                    progressDialog.setRunFinished();
+                    e.printStackTrace();
+                }
+            }
+        }.start();
+    }
+
+    /**
      * Import mztab results
      * @param spectrumsFileFactory Spectrum factory
      * @param textFile Text Id file
@@ -3171,7 +3287,11 @@ public class PDVMainClass extends JFrame {
             spectrumJTable.getColumn(key).setMinWidth(40);
             spectrumJTable.getColumn(key).setMaxWidth(100);
             fitColumnWidthToHeader("Charge");
+        }
 
+        // mzTab and Sage both report far more columns than fit on screen, so only the ones their
+        // importer selected are shown to start with; the rest are switched on from the column dialog
+        if ((isMztab || isSage) && columnToSelected != null) {
             for (String newKey : columnToSelected.keySet()) {
                 if (!columnToSelected.get(newKey)) {
                     spectrumJTable.getColumn(newKey).setMinWidth(0);
@@ -3510,6 +3630,10 @@ public class PDVMainClass extends JFrame {
         }
 
         selectedPageNum = 1;
+        isSage = false;
+        // the map is keyed by the previous format's column names, displayFrage/displayResult would look
+        // them up on the next format's table and fail
+        columnToSelected = null;
 
         scoreName.clear();
 
@@ -4544,7 +4668,7 @@ public class PDVMainClass extends JFrame {
 
         String spectrumKey = matchKey.split("_cus_")[1];
 
-        return getSpectrum(spectrumKey, spectrumFileName);
+        return getSpectrum(spectrumKey, spectrumFileName, spectrumMatch);
     }
 
     public MSnSpectrum getFragSpectrum(String selectedPsmKey){
@@ -4564,9 +4688,10 @@ public class PDVMainClass extends JFrame {
      * Get spectrum
      * @param spectrumKey
      * @param spectrumFileName
+     * @param spectrumMatch the match the spectrum belongs to, its scan number locates the mzML/mzXML scan
      * @return
      */
-    private MSnSpectrum getSpectrum(String spectrumKey, String spectrumFileName){
+    private MSnSpectrum getSpectrum(String spectrumKey, String spectrumFileName, SpectrumMatch spectrumMatch){
 
         if(spectrumFileType.equals("mgf")){
 
@@ -4603,7 +4728,8 @@ public class PDVMainClass extends JFrame {
                 precursorInt = precursorScan.getBasePeakIntensity();
             }
 
-            Precursor precursor = new Precursor(precursorScan.getRt(), iScan.getPrecursor().getMzTarget(),
+            // IScan.getRt() is in minutes, Precursor expects seconds
+            Precursor precursor = new Precursor(precursorScan.getRt() * 60, iScan.getPrecursor().getMzTarget(),
                     precursorInt, charges);
 
             double[] mzs = spectrum.getMZs();
@@ -4626,7 +4752,8 @@ public class PDVMainClass extends JFrame {
             Charge charge = spectrumMatch.getBestPeptideAssumption().getIdentificationCharge();
             ArrayList<Charge> charges = new ArrayList<>();
             charges.add(charge);
-            Precursor precursor = new Precursor(iScan.getRt(), iScan.getPrecursor().getMzTarget(),
+            // IScan.getRt() is in minutes, Precursor expects seconds
+            Precursor precursor = new Precursor(iScan.getRt() * 60, iScan.getPrecursor().getMzTarget(),
                     iScan.getPrecursor().getIntensity(), charges);
 
             double[] mzs = spectrum.getMZs();
@@ -4890,7 +5017,7 @@ public class PDVMainClass extends JFrame {
             if (isFrage){
                 return getFragSpectrum(selectedSpectrumKey);
             } else {
-                return getSpectrum(spectrumKey, spectrumFileName);
+                return getSpectrum(spectrumKey, spectrumFileName, selectedMatch);
             }
 
         } catch (SQLException e) {

@@ -81,7 +81,8 @@ public class MzXMLScanImport {
 
                 @Override
                 public Double getRt() {
-                    return Double.valueOf(msScan.getRetentionTime());
+                    // MSDK reports the retention time in seconds, IScan.getRt() is in minutes
+                    return Double.valueOf(msScan.getRetentionTime()) / 60;
                 }
 
                 @Override
