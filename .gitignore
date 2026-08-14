@@ -23,5 +23,11 @@
 hs_err_pid*
 replay_pid*
 
-.idea
+# IntelliJ: keep the shared project settings, ignore the per-machine ones
+.idea/*
+!.idea/compiler.xml
+!.idea/encodings.xml
+!.idea/vcs.xml
+!.idea/uiDesigner.xml
+
 target
