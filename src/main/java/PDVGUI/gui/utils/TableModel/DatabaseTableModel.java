@@ -10,6 +10,7 @@ import com.compomics.util.experiment.identification.spectrum_assumptions.Peptide
 import com.compomics.util.experiment.massspectrometry.MSnSpectrum;
 import com.compomics.util.experiment.massspectrometry.Precursor;
 import com.compomics.util.experiment.massspectrometry.SpectrumFactory;
+import PDVGUI.utils.DecimalFormats;
 import umich.ms.datatypes.scan.IScan;
 import umich.ms.datatypes.scan.props.PrecursorInfo;
 import umich.ms.datatypes.scancollection.impl.ScanCollectionDefault;
@@ -52,7 +53,7 @@ public class DatabaseTableModel extends DefaultTableModel {
     /**
      * Decimal format
      */
-    private DecimalFormat df = new DecimalFormat("#.0000");
+    private DecimalFormat df = DecimalFormats.create("#.0000");
     /**
      * Is new soft or not
      */

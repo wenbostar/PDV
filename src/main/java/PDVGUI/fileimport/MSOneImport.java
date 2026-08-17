@@ -121,7 +121,7 @@ public class MSOneImport {
 
                     rtRange = chromatogram.getRtRange();
 
-                    detailsList.add("LC gradient length/t/"+String.format("%.0f",rtRange.lowerEndpoint())+" - "+String.format("%.0f",rtRange.upperEndpoint())+" min");
+                    detailsList.add(String.format(Locale.US, "LC gradient length/t/%.0f - %.0f min", rtRange.lowerEndpoint(), rtRange.upperEndpoint()));
                 }
 
                 for (MsScan msScan : msScans) {
@@ -165,7 +165,7 @@ public class MSOneImport {
                 }
 
                 keyToRtAndInt.put("TIC", rtToItem);
-                detailsList.add("LC gradient length/t/"+String.format("%.0f",startRT)+" - "+String.format("%.0f",endRT)+" min");
+                detailsList.add(String.format(Locale.US, "LC gradient length/t/%.0f - %.0f min", startRT, endRT));
 
                 //detailsList.add("RT (min)/t/Start:" + startRT +" End:" + endRT);
             }
