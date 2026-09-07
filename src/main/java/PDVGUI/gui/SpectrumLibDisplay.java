@@ -590,7 +590,7 @@ public class SpectrumLibDisplay extends JFrame {
         }
 
         int value = JOptionPane.showConfirmDialog(this,
-                "Do you want to close PDV" + "?",
+                "Do you want to close PDV?",
                 "Close PDV",
                 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 

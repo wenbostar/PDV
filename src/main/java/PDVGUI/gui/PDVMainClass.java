@@ -3714,7 +3714,7 @@ public class PDVMainClass extends JFrame {
         }
 
         int value = JOptionPane.showConfirmDialog(this,
-                "Do you want to give up "  + " and close PDV"+"?",
+                "Do you want to close PDV?",
                 "Close PDV",
                 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 
@@ -4186,7 +4186,7 @@ public class PDVMainClass extends JFrame {
      */
     private void homeJMenuItemActionPerformed(ActionEvent evt){
         int value = JOptionPane.showConfirmDialog(this,
-                "Do you want to open new one ?",
+                "Do you want to open a new one?",
                 "Give up current",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE);
@@ -4210,7 +4210,7 @@ public class PDVMainClass extends JFrame {
     private void newJMenuItemActionPerformed(ActionEvent evt){
 
         int value = JOptionPane.showConfirmDialog(this,
-                "Do you want to open new one ?",
+                "Do you want to open a new one?",
                 "Give up current",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE);
@@ -4233,7 +4233,7 @@ public class PDVMainClass extends JFrame {
      */
     private void openDenovoJMenuItemActionPerformed(ActionEvent evt){
         int value = JOptionPane.showConfirmDialog(this,
-                "Do you want to open De novo  result ?",
+                "Do you want to open a De novo result?",
                 "Give up current",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE);
@@ -4256,7 +4256,7 @@ public class PDVMainClass extends JFrame {
      */
     private void openSingleMenuItemActionPerformed(ActionEvent evt){
         int value = JOptionPane.showConfirmDialog(this,
-                "Do you want to open De novo  result ?",
+                "Do you want to open a single spectrum?",
                 "Give up current",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE);

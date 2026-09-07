@@ -601,7 +601,7 @@ public class PrideXMLDisplay extends JFrame {
         }
 
         int value = JOptionPane.showConfirmDialog(this,
-                "Do you want to give up " + " and close PDV" + "?",
+                "Do you want to close PDV?",
                 "Close PDV",
                 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 

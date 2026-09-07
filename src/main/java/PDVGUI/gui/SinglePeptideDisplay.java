@@ -620,7 +620,7 @@ public class SinglePeptideDisplay extends JFrame {
      */
     private void newJMenuItemActionPerformed(ActionEvent evt){
         int value = JOptionPane.showConfirmDialog(this,
-                "Do you want to display database results ?",
+                "Do you want to display database results?",
                 "Give up current",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE);
@@ -641,7 +641,7 @@ public class SinglePeptideDisplay extends JFrame {
      */
     private void openDenovoJMenuItemActionPerformed(ActionEvent evt){
         int value = JOptionPane.showConfirmDialog(this,
-                "Do you want to display De novo  results ?",
+                "Do you want to display De novo results?",
                 "Give up current",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE);
@@ -1070,7 +1070,7 @@ public class SinglePeptideDisplay extends JFrame {
         }
 
         int value = JOptionPane.showConfirmDialog(this,
-                "Do you want to give up it and close PDV? ",
+                "Do you want to close PDV?",
                 "Close PDV",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE);
