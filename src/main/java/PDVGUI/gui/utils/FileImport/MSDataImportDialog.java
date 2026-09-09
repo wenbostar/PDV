@@ -8,9 +8,13 @@ import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Import MS spectrum file
@@ -30,6 +34,10 @@ public class MSDataImportDialog extends JDialog {
      * Last selected folder
      */
     private String lastSelectedFolder;
+    /**
+     * Names of the files that could not be read
+     */
+    private final List<String> failedFiles = Collections.synchronizedList(new ArrayList<>());
 
     /**
      * Constructor
@@ -135,18 +143,74 @@ public class MSDataImportDialog extends JDialog {
 
                     for (File spectrumFile : spectrumFileToType.keySet() ){
 
-                        ReadJob readJob = new ReadJob(spectrumFile, spectrumFileToType.get(spectrumFile), progressDialog);
+                        ReadJob readJob = new ReadJob(spectrumFile, spectrumFileToType.get(spectrumFile));
 
                         threadPool.submit(readJob);
                     }
 
+                    // Wait for every file, otherwise the progress dialog is dismissed as soon as
+                    // the first of several files is done. Shutting the pool down also releases its
+                    // threads, which are not daemons.
+                    threadPool.shutdown();
+                    threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+
                 } catch (Exception e){
                     e.printStackTrace();
-                    threadPool.shutdown();
-                    progressDialog.setRunFinished();
+                    threadPool.shutdownNow();
+
+                } finally {
+                    dismissProgressDialog(progressDialog);
+                    reportFailedFiles();
                 }
             }
         }.start();
+    }
+
+    /**
+     * Dismiss the progress dialog. It is made visible from another thread, and disposing it before
+     * it gets there does nothing at all, which would leave a modal dialog on screen that nothing
+     * can ever close, so wait for it to come up first.
+     * @param progressDialog Progress dialog
+     */
+    private void dismissProgressDialog(ProgressDialogX progressDialog){
+
+        long deadline = System.currentTimeMillis() + 5000;
+
+        while (!progressDialog.isVisible() && System.currentTimeMillis() < deadline){
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException e){
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+
+        progressDialog.setRunFinished();
+    }
+
+    /**
+     * Tell the user which files could not be read. Called only once the progress dialog is gone:
+     * it is modal, so a message dialog raised while it is still up cannot be dismissed.
+     */
+    private void reportFailedFiles(){
+
+        List<String> failed;
+        synchronized (failedFiles){
+            failed = new ArrayList<>(failedFiles);
+        }
+
+        if (failed.isEmpty()){
+            return;
+        }
+
+        StringBuilder message = new StringBuilder("Failed to parse:");
+        for (String failedFile : failed){
+            message.append("\n").append(failedFile);
+        }
+        message.append("\nPlease check your spectrum file(s)!");
+
+        SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(msDataDisplay, message.toString(),
+                "File Error", JOptionPane.WARNING_MESSAGE));
     }
 
     /**
@@ -162,30 +226,34 @@ public class MSDataImportDialog extends JDialog {
          * Spectrum file type
          */
         private String fileType;
-        /**
-         * Progress dialog
-         */
-        private ProgressDialogX progressDialog;
 
         /**
          * Read job
          * @param spectrumFile Spectrum file
          * @param fileType File type
-         * @param progressDialog Progress dialog
          */
-        public ReadJob(File spectrumFile, String fileType, ProgressDialogX progressDialog){
+        public ReadJob(File spectrumFile, String fileType){
             this.spectrumFile = spectrumFile;
             this.fileType = fileType;
-            this.progressDialog = progressDialog;
         }
 
         @Override
         public void run() {
-            MSOneImport msOneImport = new MSOneImport(spectrumFile.getAbsolutePath(), fileType);
-            msDataDisplay.updateTree(spectrumFile.getName(), msOneImport.getKeyToRtAndInt(), msOneImport.getDetailsList(), msOneImport.getBiggestNum());
+            try {
+                MSOneImport msOneImport = new MSOneImport(spectrumFile.getAbsolutePath(), fileType);
 
-            if (!progressDialog.isRunFinished()){
-                progressDialog.setRunFinished();
+                // updateTree() builds and swaps Swing components, so it has to run on the event
+                // dispatch thread. Waiting for it also keeps the file counted as still loading
+                // until its tree node is actually there.
+                SwingUtilities.invokeAndWait(() -> msDataDisplay.updateTree(spectrumFile.getName(),
+                        msOneImport.getKeyToRtAndInt(), msOneImport.getDetailsList(), msOneImport.getBiggestNum()));
+
+            } catch (Exception | Error e){
+                // The thread pool swallows anything thrown here, so a failed file would otherwise
+                // disappear with no indication of what went wrong. Error is caught too because
+                // running out of memory is the likeliest way a large file fails.
+                e.printStackTrace();
+                failedFiles.add(spectrumFile.getName());
             }
         }
     }

@@ -102,7 +102,8 @@ public class InfoPanel extends JPanel {
             if (fileName != null && !fileName.isEmpty()) {
                 JLabel fileJLabel = new JLabel(fileName);
                 fileJLabel.setOpaque(false);
-                fileJLabel.setFont(PDVFonts.of(Font.ITALIC, 15f));
+                // Caption of the table right below it, so it uses the shared table header font.
+                fileJLabel.setFont(PDVFonts.of(Font.BOLD, 13f));
                 tableJPanel.add(fileJLabel, CENTER_ALIGNMENT);
             }
 
