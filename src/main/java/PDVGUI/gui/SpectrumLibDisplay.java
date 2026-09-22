@@ -5,6 +5,7 @@ import PDVGUI.DB.SQLiteConnection;
 import PDVGUI.fileimport.FragePipeImport;
 import PDVGUI.fileimport.SpectrumLibraryMspImport;
 import PDVGUI.fileimport.SpectrumLibrarySplibImport;
+import PDVGUI.fileimport.SpectrumLibraryTsvImport;
 import PDVGUI.gui.utils.Export.ExportBatchDialog;
 import PDVGUI.gui.utils.Export.RealTimeExportJDialog;
 import PDVGUI.gui.utils.PDVLookAndFeel;
@@ -137,8 +138,9 @@ public class SpectrumLibDisplay extends JFrame {
      * Constructor
      * @param spectrumLibFilePath Spectrum library file path
      * @param searchParameters Search parameters
+     * @param libFormat Spectrum library format, "sptxt", "msp" or "tsv"
      */
-    public SpectrumLibDisplay(String spectrumLibFilePath, SearchParameters searchParameters, AnnotationSettings annotationSettings, Boolean isSplib){
+    public SpectrumLibDisplay(String spectrumLibFilePath, SearchParameters searchParameters, AnnotationSettings annotationSettings, String libFormat){
 
         this.searchParameters = searchParameters;
         this.annotationSettings = annotationSettings;
@@ -151,7 +153,9 @@ public class SpectrumLibDisplay extends JFrame {
 
         setVisible(true);
 
-        if (isSplib) {
+        if (libFormat.equals("tsv")) {
+            importTsv(spectrumLibFilePath);
+        } else if (libFormat.equals("sptxt")) {
             importSpectrumLib(spectrumLibFilePath);
         } else {
             importMsp(spectrumLibFilePath);
@@ -986,6 +990,48 @@ public class SpectrumLibDisplay extends JFrame {
 
                     dbName = spectrumLibraryMspImport.getDbName();
                     buttonCheck();
+
+                } catch ( SQLException | ClassNotFoundException e) {
+                    progressDialog.setRunFinished();
+                    e.printStackTrace();
+                }
+            }
+        }.start();
+    }
+
+    /**
+     * Import spectral library in tsv format
+     */
+    private void importTsv(String spectrumLibFilePath){
+
+        ProgressDialogX progressDialog = new ProgressDialogX(this,
+                Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMass.png")),
+                Toolkit.getDefaultToolkit().getImage(getClass().getResource("/icons/SeaGullMassWait.png")),
+                true);
+        progressDialog.setPrimaryProgressCounterIndeterminate(true);
+        progressDialog.setTitle("Loading Results. Please Wait...");
+
+        new Thread(() -> {
+            try {
+                progressDialog.setVisible(true);
+            } catch (IndexOutOfBoundsException ignored) {
+            }
+        }, "ProgressDialog").start();
+        new Thread("DisplayThread") {
+            @Override
+            public void run() {
+
+                SpectrumLibraryTsvImport spectrumLibraryTsvImport;
+                try {
+                    spectrumLibraryTsvImport = new SpectrumLibraryTsvImport(new File(spectrumLibFilePath), SpectrumLibDisplay.this, progressDialog);
+
+                    sqLiteConnection = spectrumLibraryTsvImport.getSqLiteConnection();
+
+                    dbName = spectrumLibraryTsvImport.getDbName();
+                    buttonCheck();
+
+                    // only now that the connection is here can the reader call displayResults back
+                    spectrumLibraryTsvImport.start();
 
                 } catch ( SQLException | ClassNotFoundException e) {
                     progressDialog.setRunFinished();

@@ -89,6 +89,9 @@ Top panel: experimental spectrum, bottom panel: predicted spectrum using deep le
 
 #### Spectrum library:
 
+Accepted formats: `.sptxt`, `.msp` and the tsv spectral library written by
+[Carafe](https://github.com/Noble-Lab/Carafe) (DIA-NN layout, one row per fragment ion).
+
 [Spectrum Library Central at PeptideAtlas](http://www.peptideatlas.org/speclib/)
 
 #### MS data:

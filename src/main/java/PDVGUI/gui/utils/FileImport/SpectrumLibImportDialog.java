@@ -58,9 +58,9 @@ public class SpectrumLibImportDialog extends JDialog {
      */
     private String lastSelectedFolder;
     /**
-     * Is sptxt or msp file
+     * Format of the selected library file, "sptxt", "msp" or "tsv"
      */
-    private Boolean isSplib = true;
+    private String libFormat = "sptxt";
 
     /**
      * Constructor
@@ -321,7 +321,7 @@ public class SpectrumLibImportDialog extends JDialog {
             pdvStart.setVisible(false);
         }
 
-        new SpectrumLibDisplay(spectrumLibResultFilePath, searchParameters, annotationPreferences, isSplib);
+        new SpectrumLibDisplay(spectrumLibResultFilePath, searchParameters, annotationPreferences, libFormat);
     }
 
     /**
@@ -353,12 +353,13 @@ public class SpectrumLibImportDialog extends JDialog {
             public boolean accept(File myFile) {
                 return myFile.getName().toLowerCase().endsWith(".sptxt")
                         || myFile.getName().toLowerCase().endsWith(".msp")
+                        || myFile.getName().toLowerCase().endsWith(".tsv")
                         || myFile.isDirectory();
             }
 
             @Override
             public String getDescription() {
-                return "spectrum library txt file .sptxt, .msp";
+                return "spectrum library txt file .sptxt, .msp, .tsv (Carafe)";
             }
         };
 
@@ -370,10 +371,12 @@ public class SpectrumLibImportDialog extends JDialog {
 
             File selectedFile = fileChooser.getSelectedFile();
 
-            if (selectedFile.getName().toLowerCase().endsWith(".sptxt")){
-                isSplib = true;
+            if (selectedFile.getName().toLowerCase().endsWith(".tsv")){
+                libFormat = "tsv";
+            } else if (selectedFile.getName().toLowerCase().endsWith(".sptxt")){
+                libFormat = "sptxt";
             } else {
-                isSplib = false;
+                libFormat = "msp";
             }
 
             spectrumLibResultFilePath = selectedFile.getAbsolutePath();
